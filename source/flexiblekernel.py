@@ -49,6 +49,7 @@ class BaseKernel(object):
         return '{@covMask, {%s, %s}}' % (self.active_dimensions, self.gpml_name())
     
     def gpml_param_expression(self):
+        print self.params
         return '; '.join(str(f) for f in self.params)
     
     def clone(self):
@@ -66,7 +67,7 @@ class BaseKernel(object):
         if len(params) != self.n_params():
             if len(self.params) > 0:
                 # Maybe a default value was passed in
-                self.params = self.params[0] * self.n_params()
+                self.params = [self.params[0]] * self.n_params()
             else:
                 # Otherwise use the generic default of log(1)
                 self.params = [0] * self.n_params()

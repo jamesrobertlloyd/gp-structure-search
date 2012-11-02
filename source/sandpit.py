@@ -5,6 +5,7 @@ Created on Nov 2012
 '''
 
 import flexiblekernel
+import subprocess, os, sys, time
 
 def kernel_test():
     k = flexiblekernel.BaseKernel(active_dimensions=[0,0,1,1,1])
@@ -40,11 +41,23 @@ def expand_test():
     print e.polish_expression()
     print ''
     for f in e.expand(4):
-        print f.gpml_kernel_expression()
+        print f.gpml_param_expression()
     print 'expand_test complete'
-
+    
+def call_gpml_test():
+    k = flexiblekernel.CompoundKernel(flexiblekernel.BaseKernel(name=flexiblekernel.KernelNames.SqExpPeriodic, active_dimensions=[1], params=[2,2,2]))
+    gpml_kernel_string = k.gpml_kernel_expression()
+    gpml_param_string = k.gpml_param_expression()
+    print gpml_kernel_string
+    print gpml_param_string
+    matlab_location = "/misc/apps/matlab/matlabR2011b/bin/matlab"
+    call = [matlab_location, "-nosplash", "-nojvm", "-nodisplay", "-r", "fprintf('Hello from MATLAB\n'); exit()"];
+    subprocess.call(call);  # Call in a blocking way.
+    print "done"
+     
 if __name__ == '__main__':
     kernel_test()
     expression_test()
     base_kernel_test()
     expand_test()
+    #call_gpml_test()
