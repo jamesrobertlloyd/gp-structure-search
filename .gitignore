@@ -25,3 +25,34 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+*.aux
+*.swp
+*.bbl
+*.blg
+*.dvi
+*.fdb_latexmk
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.nav
+*.nlo
+*.out
+*.pdfsync
+*.ps
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+*.maf
+*.mtc
+*.mtc0
+
+*~
