@@ -11,7 +11,7 @@ class KernelNames:
     SqExp = 1
     SqExpPeriodic = 2
 
-class Kernel(object):
+class BaseKernel(object):
     '''
     A kernel object that knows what it is and how to write itself down etc.
     '''
@@ -22,7 +22,7 @@ class Kernel(object):
         elif self.name == KernelNames.SqExpPeriodic:
             return 2 + sum(self.active_dimensions)
         else:
-            raise Exception('Unrecognised kernel name in Kernel.n_params : %d' % self.name)
+            raise Exception('Unrecognised kernel name in BaseKernel.n_params : %d' % self.name)
     
     def gpml_name(self):
         if self.name == KernelNames.SqExp:
@@ -30,7 +30,7 @@ class Kernel(object):
         elif self.name == KernelNames.SqExpPeriodic:
             return '@covPeriodic'
         else:
-            raise Exception('Unrecognised kernel name in Kernel.gpml_name : %d' % self.name)
+            raise Exception('Unrecognised kernel name in BaseKernel.gpml_name : %d' % self.name)
     
     def english_name(self):
         if self.name == KernelNames.SqExp:
@@ -38,7 +38,7 @@ class Kernel(object):
         elif self.name == KernelNames.SqExpPeriodic:
             return 'SqExpPer'
         else:
-            raise Exception('Unrecognised kernel name in Kernel.english_name : %d' % self.name)
+            raise Exception('Unrecognised kernel name in BaseKernel.english_name : %d' % self.name)
         
     #### HACK - fixme
     def polish_expression(self):
@@ -52,7 +52,7 @@ class Kernel(object):
     
     def clone(self):
         # I think this will be useful for generating new expressions
-        return Kernel(self.name, self.active_dimensions, self.params)
+        return BaseKernel(self.name, self.active_dimensions, self.params)
 
     def __init__(self, name=KernelNames.SqExp, active_dimensions=[1], params=[]):
         '''
@@ -77,10 +77,10 @@ def base_kernels(d=1):
     for dim in range(d):
         active_dimensions = [0] * d
         active_dimensions[dim] = 1
-        yield Kernel(KernelNames.SqExp, active_dimensions, [0])
-        yield Kernel(KernelNames.SqExpPeriodic, active_dimensions, [0])
+        yield BaseKernel(KernelNames.SqExp, active_dimensions, [0])
+        yield BaseKernel(KernelNames.SqExpPeriodic, active_dimensions, [0])
             
-class KernelGrammarExpression(object):
+class CompoundKernel(object):
     '''
     Either a kernel or an operator with a list of expressions
     '''
@@ -97,7 +97,7 @@ class KernelGrammarExpression(object):
         elif self.operator == 'x':
             return '@covProd'
         else:
-            raise Exception('Unrecognised operator in KernelGrammarExpression.gpml_operator')
+            raise Exception('Unrecognised operator in CompoundKernel.gpml_operator')
         
     def infix_expression(self):
         # This will be able to call kernel.polish_expression but will need to shunt around operators
@@ -132,9 +132,9 @@ class KernelGrammarExpression(object):
         # I think this will be useful for generating new expressions
         if len(self.operands) == 0:
             kernel_copy = self.kernel.clone()
-            return KernelGrammarExpression(kernel=kernel_copy)
+            return CompoundKernel(kernel=kernel_copy)
         else:
-            return KernelGrammarExpression(operator=self.operator, operands=[e.clone() for e in self.operands])
+            return CompoundKernel(operator=self.operator, operands=[e.clone() for e in self.operands])
         
     #### FIXME d=1 is a hack
     def expand(self, d=1, operator=''):
@@ -148,7 +148,7 @@ class KernelGrammarExpression(object):
             else:
                 for k in base_kernels(d):
                     if not ((operator == 'x') and (self.kernel.name == k.name) and (self.kernel.active_dimensions == k.active_dimensions)):   
-                        yield KernelGrammarExpression(operator=operator, operands=[self.clone(), KernelGrammarExpression(k)])
+                        yield CompoundKernel(operator=operator, operands=[self.clone(), CompoundKernel(k)])
             
         elif self.operator == '+':
             for (i, e) in enumerate(self.operands):
@@ -158,7 +158,7 @@ class KernelGrammarExpression(object):
                     yield copy      
             for k in base_kernels(d):
                 copy = self.clone()
-                copy.operands.append(KernelGrammarExpression(k))
+                copy.operands.append(CompoundKernel(k))
                 yield copy
             
         elif self.operator == 'x':
@@ -174,7 +174,7 @@ class KernelGrammarExpression(object):
                         redundant = True
                 if not redundant:
                     copy = self.clone()
-                    copy.operands.append(KernelGrammarExpression(k))
+                    copy.operands.append(CompoundKernel(k))
                     yield copy
 
     def __init__(self, kernel=[], operator='', operands=[]):

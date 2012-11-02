@@ -56,3 +56,6 @@ pip-log.txt
 *.mtc0
 
 *~
+
+.project
+.pydevproject
