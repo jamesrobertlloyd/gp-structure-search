@@ -1,0 +1,13 @@
+ Turn this into a Google Doc
+ 
+ Reduce products of kernels - only at the end for output (otherwise some expansion rules get tricky)
+ Rename Kernel -> BaseKernel, KernelGrammarExpression -> CompoundKernel
+ Compound Kernel should know how many dimensions it operates in
+ Think about heteroskedasticity
+ Write Laplace-ish evidence approx in MATLAB
+ Write GPML-caller
+ write gpml-parameter parser
+ write some sort of search controller
+ Think about number of iterations for optimization
+ Think about multiple restarts / initialization
+ Allow number of operators to be expanded (enumeration?)
