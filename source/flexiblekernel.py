@@ -1,7 +1,8 @@
 '''
 Created Nov 2012
 
-@author: James Robert Lloyd
+@author: James Robert Lloyd (jrl44@cam.ac.uk)
+         David Duvenaud (dkd23@cam.ac.uk)
 '''
 
 class KernelNames:
@@ -52,7 +53,7 @@ class BaseKernel(object):
     
     def clone(self):
         # I think this will be useful for generating new expressions
-        return BaseKernel(self.name, self.active_dimensions, self.params)
+        return BaseKernel(self.name, self.active_dimensions[:], self.params[:])
 
     def __init__(self, name=KernelNames.SqExp, active_dimensions=[1], params=[]):
         '''
@@ -84,6 +85,16 @@ class CompoundKernel(object):
     '''
     Either a kernel or an operator with a list of expressions
     '''
+    
+    def __init__(self, kernel=[], operator='', operands=[]):
+        '''
+        Constructor
+        '''
+        self.kernel = kernel
+        self.operator = operator
+        self.operands = operands
+        # Check that we are either a kernel or a higher level expression
+        self.__param_check()    
     
     def __param_check(self):
         if (self.kernel != []) and ((len(self.operator) > 0) or (len(self.operands) > 0)):
@@ -176,13 +187,3 @@ class CompoundKernel(object):
                     copy = self.clone()
                     copy.operands.append(CompoundKernel(k))
                     yield copy
-
-    def __init__(self, kernel=[], operator='', operands=[]):
-        '''
-        Constructor
-        '''
-        self.kernel = kernel
-        self.operator = operator
-        self.operands = operands
-        # Check that we are either a kernel or a higher level expression
-        self.__param_check()
