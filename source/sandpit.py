@@ -10,20 +10,20 @@ import flexiblekernel as fk
 import subprocess, os, sys, time
 
 def kernel_test():
-    k = fk.SqExpKernel(4, 3, 0, 0)
+    k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
     print k.gpml_kernel_expression()
-    print k.polish_expression()
-    print '[%s]' % k.gpml_param_expression()
+    print k.pretty_print()
+    #print '[%s]' % k.gpml_param_expression()
     print 'kernel_test complete'
     
 def expression_test():
-    k1 = fk.CompoundKernel(fk.SqExpKernel(4, 0, 0, 0))
-    k2 = fk.CompoundKernel(fk.SqExpPeriodicKernel(4, 1, 1, 1, 1))
-    k3 = fk.CompoundKernel(fk.SqExpKernel(4, 2, 3, 4))
-    k4 = fk.CompoundKernel(fk.SqExpPeriodicKernel(4, 3, 2, 2, 2))
-    f = fk.CompoundKernel(operator = 'x', operands = [k3, k4])
-    e = fk.CompoundKernel(operator = '+', operands = [k1, k2, f])
-    print e.polish_expression()
+    k1 = fk.MaskKernel(4, 0, fk.SqExpKernel(0, 0))
+    k2 = fk.MaskKernel(4, 1, fk.SqExpPeriodicKernel(1, 1, 1))
+    k3 = fk.MaskKernel(4, 2, fk.SqExpKernel(3, 4))
+    k4 = fk.MaskKernel(4, 3, fk.SqExpPeriodicKernel(2, 2, 2))
+    f = fk.ProductKernel(operands = [k3, k4])
+    e = fk.SumKernel(operands = [k1, k2, f])
+    print e.pretty_print()
     print e.gpml_kernel_expression()
     print '[%s]' % e.gpml_param_expression()
     print 'expression_test complete'
@@ -33,14 +33,14 @@ def base_kernel_test():
     print 'base_kernel_test complete'
     
 def expand_test():
-    k1 = fk.CompoundKernel(fk.SqExpKernel(4, 0, 0, 0))
-    k2 = fk.CompoundKernel(fk.SqExpPeriodicKernel(4, 1, 1, 1, 1))
-    k3 = fk.CompoundKernel(fk.SqExpKernel(4, 2, 3, 4))
-    k4 = fk.CompoundKernel(fk.SqExpPeriodicKernel(4, 3, 2, 2, 2))
+    k1 = fk.CompoundKernel(fk.MaskKernel(4, 0, fk.SqExpKernel(0, 0)))
+    k2 = fk.CompoundKernel(fk.MaskKernel(4, 1, fk.SqExpPeriodicKernel(1, 1, 1)))
+    k3 = fk.CompoundKernel(fk.MaskKernel(4, 2, fk.SqExpKernel(3, 4)))
+    k4 = fk.CompoundKernel(fk.MaskKernel(4, 3, fk.SqExpPeriodicKernel(2, 2, 2)))
     f = fk.CompoundKernel(operator = 'x', operands = [k3, k4])
     e = fk.CompoundKernel(operator = '+', operands = [k1, k2, f])
     #e = fk.CompoundKernel(operator = '+', operands = [k1, k2])
-    print e.polish_expression()
+    #print e.polish_expression()
     print ''
     for f in e.expand(4):
         print f.gpml_param_expression()
