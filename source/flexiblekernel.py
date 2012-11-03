@@ -43,6 +43,7 @@ class SqExpKernel:
     def pretty_print(self):
         return 'SqExp(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance)
 
+
 class SqExpPeriodicKernelFamily:
     def from_param_vector(self, params):
         output_variance, period, lengthscale = params
@@ -50,6 +51,7 @@ class SqExpPeriodicKernelFamily:
     
     def num_params(self):
         return 3
+    
     
 class SqExpPeriodicKernel:
     def __init__(self, lengthscale, period, output_variance):
@@ -77,6 +79,7 @@ class SqExpPeriodicKernel:
     def pretty_print(self):
         return 'Periodic(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance)
     
+    
 class MaskKernelFamily:
     def __init__(self, ndim, active_dimension, base_kernel_family):
         assert 0 <= active_dimension < ndim
@@ -89,6 +92,7 @@ class MaskKernelFamily:
     
     def num_params(self):
         return self.base_kernel_family.num_params()
+    
     
 class MaskKernel:
     def __init__(self, ndim, active_dimension, base_kernel):
@@ -108,6 +112,9 @@ class MaskKernel:
     
     def pretty_print(self):
         return 'Mask(%d, %s)' % (self.active_dimension, self.base_kernel.pretty_print())
+    
+    def param_vector(self):
+        return self.base_kernel.param_vector()
     
 
 class SumKernelFamily:
