@@ -1,90 +1,130 @@
 '''
 Created Nov 2012
 
-@author: James Robert Lloyd (jrl44@cam.ac.uk)
-         David Duvenaud (dkd23@cam.ac.uk)
+@authors: James Robert Lloyd (jrl44@cam.ac.uk)
+          David Duvenaud (dkd23@cam.ac.uk)
+          Roger Grosse (rgrosse@mit.edu)
 '''
 
-class KernelNames:
-    '''
-    A kernel name enumeration
-    '''
-    SqExp = 1
-    SqExpPeriodic = 2
+import numpy as np
+
+#class KernelNames:
+#    '''
+#    A kernel name enumeration
+#    '''
+#    SqExp = 1
+#    SqExpPeriodic = 2
+#    Matern = 3
+#    MaternPeriodic = 4
 
 class BaseKernel(object):
     '''
     A kernel object that knows what it is and how to write itself down etc.
+    
+    Base kernels don't have any operators.
     '''
-    
-    def n_params(self):
-        if self.name == KernelNames.SqExp:
-            return 1 + sum(self.active_dimensions)
-        elif self.name == KernelNames.SqExpPeriodic:
-            return 2 + sum(self.active_dimensions)
-        else:
-            raise Exception('Unrecognised kernel name in BaseKernel.n_params : %d' % self.name)
-    
-    def gpml_name(self):
-        if self.name == KernelNames.SqExp:
-            return '@covSEiso'
-        elif self.name == KernelNames.SqExpPeriodic:
-            return '@covPeriodic'
-        else:
-            raise Exception('Unrecognised kernel name in BaseKernel.gpml_name : %d' % self.name)
-    
-    def english_name(self):
-        if self.name == KernelNames.SqExp:
-            return 'SqExp'
-        elif self.name == KernelNames.SqExpPeriodic:
-            return 'SqExpPer'
-        else:
-            raise Exception('Unrecognised kernel name in BaseKernel.english_name : %d' % self.name)
-        
-    #### HACK - fixme
+    #### HACK - fixmeEither a kernel or an operator with a list of expressions
     def polish_expression(self):
-        return '%s_%s' % (self.english_name(), ','.join(str(i+1) for (i, d) in enumerate(self.active_dimensions) if d))
+        return '%s_%s' % (self.english_name(), ','.join(str(i+1) for (i, d) in enumerate(self.gpml_dimension_vector()) if d))
         
     def gpml_kernel_expression(self):
-        return '{@covMask, {%s, %s}}' % (self.active_dimensions, self.gpml_name())
+        # todo: check if active_dimensions exists
+        return '{@covMask, {%s, %s}}' % (self.gpml_dimension_vector(), self.gpml_name())
     
     def gpml_param_expression(self):
-        print self.params
-        return '; '.join(str(f) for f in self.params)
+        return '; '.join(str(f) for f in self.param_vector())
     
-    def clone(self):
-        # I think this will be useful for generating new expressions
-        return BaseKernel(self.name, self.active_dimensions[:], self.params[:])
 
-    def __init__(self, name=KernelNames.SqExp, active_dimensions=[1], params=[]):
-        '''
-        Constructor
-        '''
-        self.name = name
-        self.active_dimensions = active_dimensions
-        self.params = params
-        # Now make sure we have the correct number of parameters
-        if len(params) != self.n_params():
-            if len(self.params) > 0:
-                # Maybe a default value was passed in
-                self.params = [self.params[0]] * self.n_params()
-            else:
-                # Otherwise use the generic default of log(1)
-                self.params = [0] * self.n_params()
+
+class SqExpKernel(BaseKernel):
+    def __init__(self, ndim, active_dimension, lengthscale, output_variance):
+        assert 0 <= active_dimension < ndim
+        self.ndim = ndim
+        self.active_dimension = active_dimension    # first dimension is 0
+        self.output_variance = output_variance
+        self.lengthscale = lengthscale
+        
+    def gpml_name(self):
+        return '@covSEiso'
+    
+    def english_name(self):
+        return 'SqExp'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+    
+    def gpml_dimension_vector(self):
+        result = np.zeros(self.ndim, dtype=int)
+        result[self.active_dimension] = 1
+        return result
+    
+    def copy(self):
+        return SqExpKernel(self.ndim, self.active_dimension, self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'SqExpKernel(ndim=%d, active_dimension=%d, lengthscale=%f, output_variance=%f)' % \
+            (self.ndim, self.active_dimension, self.lengthscale, self.output_variance)
+    
+    @staticmethod
+    def from_param_vector(self, ndim, active_dimension, params):
+        output_variance, lengthscale = params
+        return SqExpKernel(ndim, active_dimension, output_variance, lengthscale)
+        
+    
+class SqExpPeriodicKernel(BaseKernel):
+    def __init__(self, ndim, active_dimension, lengthscale, period, output_variance):
+        assert 0 <= active_dimension < ndim
+        self.ndim = ndim
+        self.active_dimension = active_dimension    # first dimension is 0
+        self.lengthscale = lengthscale
+        self.period = period
+        self.output_variance = output_variance
+        
+    def gpml_name(self):
+        return '@covPeriodic'
+    
+    def english_name(self):
+        return 'Periodic'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.period, self.output_variance])
+    
+    def gpml_dimension_vector(self):
+        result = np.zeros(self.ndim, dtype=int)
+        result[self.active_dimension] = 1
+        return result
+    
+    def copy(self):
+        return SqExpKernel(self.ndim, self.active_dimension, self.lengthscale, self.period, self.output_variance)
+    
+    def __repr__(self):
+        return 'SqExpPeriodicKernel(ndim=%d, active_dimension=%d, lengthscale=%f, period=%f, output_variance=%f)' % \
+            (self.ndim, self.active_dimension, self.lengthscale, self.period, self.output_variance)
+    
+    @staticmethod
+    def from_param_vector(self, ndim, active_dimension, params):
+        output_variance, period, lengthscale = params
+        return SqExpPeriodicKernel(ndim, active_dimension, output_variance, period, lengthscale)
+    
+    
+    
+    
+    
             
-def base_kernels(d=1):
+def base_kernels(ndim=1):
     '''
     Generator of all base kernels for a certain dimensionality of data
     '''
-    for dim in range(d):
-        active_dimensions = [0] * d
-        active_dimensions[dim] = 1
-        yield BaseKernel(KernelNames.SqExp, active_dimensions, [0])
-        yield BaseKernel(KernelNames.SqExpPeriodic, active_dimensions, [0])
+    for dim in range(ndim):
+        # Make up default arguments.
+        yield SqExpKernel(ndim, dim, 0, 0)
+        yield SqExpPeriodicKernel(ndim, dim, 0, 0, 0)
             
 class CompoundKernel(object):
     '''
-    Either a kernel or an operator with a list of expressions
+    Defines a tree of operators and base kernels, as well as their parameters.
     '''
     
     def __init__(self, kernel=[], operator='', operands=[]):
@@ -140,13 +180,13 @@ class CompoundKernel(object):
             # We are an operator/non-terminal, recurse
             return '; '.join(e.gpml_param_expression() for e in self.operands)
         
-    def clone(self):
+    def copy(self):
         # I think this will be useful for generating new expressions
         if len(self.operands) == 0:
-            kernel_copy = self.kernel.clone()
+            kernel_copy = self.kernel.copy()
             return CompoundKernel(kernel=kernel_copy)
         else:
-            return CompoundKernel(operator=self.operator, operands=[e.clone() for e in self.operands])
+            return CompoundKernel(operator=self.operator, operands=[e.copy() for e in self.operands])
         
     #### FIXME d=1 is a hack
     def expand(self, d=1, operator=''):
@@ -160,23 +200,23 @@ class CompoundKernel(object):
             else:
                 for k in base_kernels(d):
                     if not ((operator == 'x') and (self.kernel.name == k.name) and (self.kernel.active_dimensions == k.active_dimensions)):   
-                        yield CompoundKernel(operator=operator, operands=[self.clone(), CompoundKernel(k)])
+                        yield CompoundKernel(operator=operator, operands=[self.copy(), CompoundKernel(k)])
             
         elif self.operator == '+':
             for (i, e) in enumerate(self.operands):
                 for f in e.expand(d, 'x'):
-                    copy = self.clone()
+                    copy = self.copy()
                     copy.operands[i] = f
                     yield copy      
             for k in base_kernels(d):
-                copy = self.clone()
+                copy = self.copy()
                 copy.operands.append(CompoundKernel(k))
                 yield copy
             
         elif self.operator == 'x':
             for (i, e) in enumerate(self.operands):
                 for f in e.expand(d, '+'):
-                    copy = self.clone()
+                    copy = self.copy()
                     copy.operands[i] = f
                     yield copy    
             for k in base_kernels(d):
@@ -185,6 +225,6 @@ class CompoundKernel(object):
                     if (len(e.operands) == 0) and (e.kernel.name == k.name) and (e.kernel.active_dimensions == k.active_dimensions):
                         redundant = True
                 if not redundant:
-                    copy = self.clone()
+                    copy = self.copy()
                     copy.operands.append(CompoundKernel(k))
                     yield copy
