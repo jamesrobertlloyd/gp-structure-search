@@ -9,6 +9,8 @@ Created on Nov 2012
 import flexiblekernel as fk
 import gpml
 
+import numpy as np
+import pylab
 import scipy.io
 
 
@@ -56,26 +58,56 @@ def load_mauna():
     return data['X'], data['y']
 
 def call_gpml_test():
-    k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpPeriodicKernel( 0, 0, 0)])
+    #k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpPeriodicKernel( 0, 0, 0)])
+    #k = fk.SqExpKernel(0, 0)
+    k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpKernel(0, 0)])
     print k.gpml_kernel_expression()
     print k.pretty_print()
     print '[%s]' % k.param_vector()
 
     X, y = load_mauna()
-
-    kernel_hypers, nll = gpml.optimize_params(k.gpml_kernel_expression(), k.param_vector(), X, y)
-
-    print "kernel_hypers =", kernel_hypers
-    print "nll =", nll
     
-    k_opt = k.family().from_param_vector(kernel_hypers)
-    print k_opt.gpml_kernel_expression()
-    print k_opt.pretty_print()
-    print '[%s]' % k_opt.param_vector()
+    #X *= np.exp(1)
+    #y *= np.exp(1)
     
+    #X = X[::2, :]
+    #y = y[::2, :]
+    
+    N_orig = X.shape[0]
+    X = X[:N_orig//3, :]
+    y = y[:N_orig//3, :]
+
+    results = []
+
+    pylab.figure()
+    for i in range(15):
+        init_params = np.random.normal(size=k.param_vector().size)
+        #kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), k.param_vector(), X, y, return_all=True)
+        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
+    
+        print "kernel_hypers =", kernel_hypers
+        print "nll =", nll
+        
+        k_opt = k.family().from_param_vector(kernel_hypers)
+        print k_opt.gpml_kernel_expression()
+        print k_opt.pretty_print()
+        print '[%s]' % k_opt.param_vector()
+        
+        pylab.semilogx(range(1, nlls.size+1), nlls)
+        
+        results.append((kernel_hypers, nll))
+        
+        pylab.draw()
+    
+    print
+    print
+    results = sorted(results, key=lambda p: p[1])
+    for kernel_hypers, nll in results:
+        print nll, kernel_hypers
+        
     print "done"
-    
-    
+        
+        
     
     
 

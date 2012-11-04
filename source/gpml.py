@@ -22,12 +22,12 @@ covfunc = %(kernel_family)s
 hyp.cov = %(kernel_params)s
 
 likfunc = @likGauss
-hyp.lik = log(std(y)/10)
+hyp.lik = log(var(y)/10)
 
 [hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
-save( '%(writefile)s', 'hyp_opt', 'best_nll' );
+save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls' );
 exit();
 """
 
@@ -54,7 +54,7 @@ def run_matlab_code(code):
     
     
 
-def optimize_params(kernel_expression, kernel_init_params, X, y):
+def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
@@ -74,10 +74,14 @@ def optimize_params(kernel_expression, kernel_init_params, X, y):
 
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
+    nlls = gpml_result['nlls'].ravel()
 
     # Strip out only kernel hyperparameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
 
-    return kernel_hypers, nll
+    if return_all:
+        return kernel_hypers, nll, nlls
+    else:
+        return kernel_hypers, nll
 
 
