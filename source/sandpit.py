@@ -56,7 +56,7 @@ def load_mauna():
     return data['X'], data['y']
 
 def call_gpml_test():
-    k = fk.SqExpKernel(0, 0)
+    k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpPeriodicKernel( 0, 0, 0)])
     print k.gpml_kernel_expression()
     print k.pretty_print()
     print '[%s]' % k.param_vector()
@@ -67,7 +67,16 @@ def call_gpml_test():
 
     print "kernel_hypers =", kernel_hypers
     print "nll =", nll
+    
+    k_opt = k.family().from_param_vector(kernel_hypers)
+    print k_opt.gpml_kernel_expression()
+    print k_opt.pretty_print()
+    print '[%s]' % k_opt.param_vector()
+    
     print "done"
+    
+    
+    
     
 
 if __name__ == '__main__':

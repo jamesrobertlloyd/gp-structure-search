@@ -59,6 +59,9 @@ class SqExpPeriodicKernel:
         self.period = period
         self.output_variance = output_variance
         
+    def family(self):
+        return SqExpPeriodicKernelFamily()
+        
     def gpml_kernel_expression(self):
         return '@covPeriodic'
     
@@ -127,6 +130,7 @@ class SumKernelFamily:
         for e in self.operands:
             end = start + e.num_params()
             ops.append(e.from_param_vector(params[start:end]))
+            start = end
         return SumKernel(ops)
     
     def num_params(self):
@@ -161,6 +165,7 @@ class ProductKernelFamily:
         for e in self.operands:
             end = start + e.num_params()
             ops.append(e.from_param_vector(params[start:end]))
+            start = end
         return ProductKernel(ops)
     
     def num_params(self):

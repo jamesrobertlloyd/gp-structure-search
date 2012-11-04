@@ -24,7 +24,7 @@ hyp.cov = %(kernel_params)s
 likfunc = @likGauss
 hyp.lik = log(std(y)/10)
 
-[hyp_opt, nlls] = minimize(hyp, @gp, -100, @infExact, meanfunc, covfunc, likfunc, X, y);
+[hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll' );
