@@ -15,6 +15,9 @@ class SqExpKernelFamily:
     
     def num_params(self):
         return 2
+    
+    def pretty_print(self):
+        return 'SqExp'
 
 class SqExpKernel:
     def __init__(self, lengthscale, output_variance):
@@ -51,6 +54,9 @@ class SqExpPeriodicKernelFamily:
     
     def num_params(self):
         return 3
+    
+    def pretty_print(self):
+        return 'Periodic'
     
     
 class SqExpPeriodicKernel:
@@ -96,6 +102,9 @@ class MaskKernelFamily:
     def num_params(self):
         return self.base_kernel_family.num_params()
     
+    def pretty_print(self):
+        return 'Mask(%d, %s)' % (self.active_dimension, self.base_kernel_family.pretty_print())
+    
     
 class MaskKernel:
     def __init__(self, ndim, active_dimension, base_kernel):
@@ -135,6 +144,9 @@ class SumKernelFamily:
     
     def num_params(self):
         return sum([e.num_params() for e in self.operands])
+    
+    def pretty_print(self):
+        return '( ' + ' + '.join([e.pretty_print() for e in self.operands]) + ' ) '
 
 class SumKernel:
     def __init__(self, operands):
@@ -170,6 +182,9 @@ class ProductKernelFamily:
     
     def num_params(self):
         return sum([e.num_params() for e in self.operands])
+    
+    def pretty_print(self):
+        return '( ' + ' * '.join([e.pretty_print() for e in self.operands]) + ' ) '
     
 class ProductKernel:
     def __init__(self, operands):
