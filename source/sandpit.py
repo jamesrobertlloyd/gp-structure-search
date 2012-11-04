@@ -65,6 +65,8 @@ def call_gpml_test():
 
     kernel_hypers, nll = gpml.optimize_params(k.gpml_kernel_expression(), k.param_vector(), X, y)
 
+    print "kernel_hypers =", kernel_hypers
+    print "nll =", nll
     print "done"
     
 

@@ -1,7 +1,8 @@
 import numpy as np
 nax = np.newaxis
 import scipy.io
-from subprocess import Popen, PIPE, STDOUT
+import tempfile, os
+import subprocess
 
 import config
 
@@ -32,11 +33,26 @@ exit();
 
 
 def run_matlab_code(code):
+    # Write to a temp script
+    script_file = tempfile.mkstemp(suffix='.m')[1]
+    stdout_file = tempfile.mkstemp(suffix='.txt')[1]
+    stderr_file = tempfile.mkstemp(suffix='.txt')[1]
+    
+    open(script_file, 'w').write(code)
+    
     call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
-    p = Popen(call, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    grep_stdout = p.communicate(input=code)[0]
-    print(grep_stdout)
-    #subprocess.call(call)
+    subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
+    
+    err_txt = open(stderr_file).read()
+    
+    os.remove(script_file)
+    os.remove(stdout_file)
+    os.remove(stderr_file)
+    
+    if err_txt != '':
+        raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
+    
+    
 
 def optimize_params(kernel_expression, kernel_init_params, X, y):
     if X.ndim == 1:
