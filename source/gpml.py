@@ -1,19 +1,19 @@
 import numpy as np
 nax = np.newaxis
 import scipy.io
-import subprocess, os
+from subprocess import Popen, PIPE, STDOUT
 
 import config
 
 # Matlab code to optimize hyperparams on one file, given one kernel.
 OPTIMIZE_KERNEL_CODE = r"""
-% Load the data, it should contain X and y.
-load %(datafile)s
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
 
-% Load GPML
-addpath(genpath(%(gpml_path)s));
+a='Load GPML'
+addpath(genpath('%(gpml_path)s'));
 
-% Set up model.
+a='Set up model.'
 meanfunc = {@meanConst}
 hyp.mean = mean(y)
 
@@ -23,25 +23,22 @@ hyp.cov = %(kernel_params)s
 likfunc = @likGauss
 hyp.lik = log(std(y)/10)
 
-% Optimize hyperparameters.
-[hyp_opt, nlls] = minimize(hyp2, @gp, -100, @infExact, meanfunc, covfunc, likfunc, x, y);
+[hyp_opt, nlls] = minimize(hyp, @gp, -100, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
-% Save results to a file.
 save( '%(writefile)s', 'hyp_opt', 'best_nll' );
+exit();
 """
-
-data_file = 'mauna.txt'
-
-#code = OPTIMIZE_KERNEL_CODE % {'dir': os.curdir(),
-#                               'datafile': data_file}
 
 
 def run_matlab_code(code):
-    call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay', '-r', code]
-    subprocess.call(call)
+    call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
+    p = Popen(call, stdout=PIPE, stdin=PIPE, stderr=STDOUT)
+    grep_stdout = p.communicate(input=code)[0]
+    print(grep_stdout)
+    #subprocess.call(call)
 
-def optimize_params(kernel_family, kernel_init_params, X, y):
+def optimize_params(kernel_expression, kernel_init_params, X, y):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
@@ -51,8 +48,20 @@ def optimize_params(kernel_family, kernel_init_params, X, y):
 
     code = OPTIMIZE_KERNEL_CODE % {'datafile': config.TEMP_DATA_FILE,
                                    'writefile': config.TEMP_WRITE_FILE,
-                                   'kernel_family': kernel_family,
+                                   'gpml_path': config.GPML_PATH,
+                                   'kernel_family': kernel_expression,
                                    'kernel_params': kernel_init_params}
     run_matlab_code(code)
+
+    # Load in the file that GPML saved things to.
+    gpml_result = scipy.io.loadmat(config.TEMP_WRITE_FILE)
+
+    optimized_hypers = gpml_result['hyp_opt']
+    nll = gpml_result['best_nll'][0, 0]
+
+    # Strip out only kernel hyperparameters.
+    kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
+
+    return kernel_hypers, nll
 
 

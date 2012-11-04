@@ -7,7 +7,10 @@ Created on Nov 2012
 '''
 
 import flexiblekernel as fk
-import subprocess, os, sys, time
+import gpml
+
+import scipy.io
+
 
 def kernel_test():
     k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
@@ -46,20 +49,28 @@ def expand_test():
         print f.gpml_param_expression()
     print 'expand_test complete'
     
+
+def load_mauna():
+    data_file = '../data/mauna.mat'
+    data = scipy.io.loadmat(data_file)
+    return data['X'], data['y']
+
 def call_gpml_test():
-    k = fk.CompoundKernel(fk.SqExpPeriodicKernel(1, 0, 2, 2, 2))
-    gpml_kernel_string = k.gpml_kernel_expression()
-    gpml_param_string = k.gpml_param_expression()
-    print gpml_kernel_string
-    print gpml_param_string
-    matlab_location = "/misc/apps/matlab/matlabR2011b/bin/matlab"
-    call = [matlab_location, "-nosplash", "-nojvm", "-nodisplay", "-r", "fprintf('Hello from MATLAB\n'); exit()"];
-    subprocess.call(call);  # Call in a blocking way.
+    k = fk.SqExpKernel(0, 0)
+    print k.gpml_kernel_expression()
+    print k.pretty_print()
+    print '[%s]' % k.param_vector()
+
+    X, y = load_mauna()
+
+    kernel_hypers, nll = gpml.optimize_params(k.gpml_kernel_expression(), k.param_vector(), X, y)
+
     print "done"
-     
+    
+
 if __name__ == '__main__':
-    kernel_test()
-    expression_test()
-    base_kernel_test()
-    expand_test()
-    #call_gpml_test()
+    #kernel_test()
+    #expression_test()
+    #base_kernel_test()
+    #expand_test()
+    call_gpml_test()
