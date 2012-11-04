@@ -1,3 +1,12 @@
+'''
+Some routines to interface with GPML.
+
+@authors: 
+          James Robert Lloyd (jrl44@cam.ac.uk)
+          Roger Grosse (rgrosse@mit.edu)
+          David Duvenaud (dkd23@cam.ac.uk)
+'''
+
 import numpy as np
 nax = np.newaxis
 import scipy.io
@@ -6,7 +15,7 @@ import subprocess
 
 import config
 
-# Matlab code to optimize hyperparams on one file, given one kernel.
+# Matlab code to optimise hyper-parameters on one file, given one kernel.
 OPTIMIZE_KERNEL_CODE = r"""
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
@@ -60,23 +69,27 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     if y.ndim == 1:
         y = y[:, nax]
     data = {'X': X, 'y': y}
-    scipy.io.savemat(config.TEMP_DATA_FILE, data)
+    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
+    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    scipy.io.savemat(temp_data_file, data)
 
-    code = OPTIMIZE_KERNEL_CODE % {'datafile': config.TEMP_DATA_FILE,
-                                   'writefile': config.TEMP_WRITE_FILE,
+    code = OPTIMIZE_KERNEL_CODE % {'datafile': temp_data_file,
+                                   'writefile': temp_write_file,
                                    'gpml_path': config.GPML_PATH,
                                    'kernel_family': kernel_expression,
                                    'kernel_params': kernel_init_params}
     run_matlab_code(code)
 
     # Load in the file that GPML saved things to.
-    gpml_result = scipy.io.loadmat(config.TEMP_WRITE_FILE)
+    gpml_result = scipy.io.loadmat(temp_write_file)
+    os.remove(temp_data_file)
+    os.remove(temp_write_file)
 
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
     nlls = gpml_result['nlls'].ravel()
 
-    # Strip out only kernel hyperparameters.
+    # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
 
     if return_all:
