@@ -7,6 +7,24 @@ Created Nov 2012
 '''
 
 import numpy as np
+import termcolor
+
+import config
+
+PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
+
+def paren_colors():
+    if config.COLOR_SCHEME == 'dark':
+        return ['red', 'green', 'cyan', 'magenta', 'yellow']
+    elif config.COLOR_SCHEME == 'light':
+        return ['red', 'green', 'blue', 'cyan', 'magenta']
+    else:
+        raise RuntimeError('Unknown color scheme: %s' % config.COLOR_SCHEME)
+
+def colored(text, depth):
+    colors = paren_colors()
+    color = colors[depth % len(colors)]
+    return termcolor.colored(text, color, attrs=['bold'])
 
 class KernelFamily:
     pass
@@ -29,7 +47,7 @@ class SqExpKernelFamily(BaseKernelFamily):
         return 2
     
     def pretty_print(self):
-        return 'SqExp'
+        return colored('SqExp', self.depth())
     
     def default(self):
         return SqExpKernel(0., 0.)
@@ -38,6 +56,9 @@ class SqExpKernelFamily(BaseKernelFamily):
         assert isinstance(other, KernelFamily)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
         return 0
 
 class SqExpKernel(BaseKernel):
@@ -65,13 +86,16 @@ class SqExpKernel(BaseKernel):
         return 'SqExpKernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
     
     def pretty_print(self):
-        return 'SqExp(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance)
+        return colored('SqExp(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
         return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0
 
 
 class SqExpPeriodicKernelFamily(BaseKernelFamily):
@@ -83,7 +107,7 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
         return 3
     
     def pretty_print(self):
-        return 'Periodic'
+        return colored('Periodic', self.depth())
     
     def default(self):
         return SqExpPeriodicKernel(0., 0., 0.)
@@ -92,6 +116,9 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
         assert isinstance(other, KernelFamily)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
         return 0
     
     
@@ -122,7 +149,8 @@ class SqExpPeriodicKernel(BaseKernel):
             (self.lengthscale, self.period, self.output_variance)
     
     def pretty_print(self):
-        return 'Periodic(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance)
+        return colored('Periodic(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance),
+                       self.depth())
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -130,6 +158,9 @@ class SqExpPeriodicKernel(BaseKernel):
             return cmp(self.__class__, other.__class__)
         return cmp((self.lengthscale, self.period, self.output_variance), 
                    (other.lengthscale, other.period, other.output_variance))
+        
+    def depth(self):
+        return 0
     
     
 class MaskKernelFamily(KernelFamily):
@@ -146,7 +177,9 @@ class MaskKernelFamily(KernelFamily):
         return self.base_kernel_family.num_params()
     
     def pretty_print(self):
-        return 'Mask(%d, %s)' % (self.active_dimension, self.base_kernel_family.pretty_print())
+        return colored('Mask(%d, ' % self.active_dimension, self.depth()) + \
+            self.base_kernel_family.pretty_print() + \
+            colored(')', self.depth())
     
     def default(self):
         return MaskKernel(self.ndim, self.active_dimension, self.base_kernel_family.default())
@@ -157,6 +190,9 @@ class MaskKernelFamily(KernelFamily):
             return cmp(self.__class__, other.__class__)
         return cmp((self.ndim, self.active_dimension, self.base_kernel_family),
                    (other.ndim, other.active_dimension, other.base_kernel_family))
+        
+    def depth(self):
+        return self.base_kernel_family.depth() + 1
     
     
 class MaskKernel(Kernel):
@@ -179,7 +215,9 @@ class MaskKernel(Kernel):
         return '{@covMask, {%s, %s}}' % (dim_vec_str, self.base_kernel.gpml_kernel_expression())
     
     def pretty_print(self):
-        return 'Mask(%d, %s)' % (self.active_dimension, self.base_kernel.pretty_print())
+        return colored('Mask(%d, ' % self.active_dimension, self.depth()) + \
+            self.base_kernel.pretty_print() + \
+            colored(')', self.depth())
     
     def param_vector(self):
         return self.base_kernel.param_vector()
@@ -190,6 +228,9 @@ class MaskKernel(Kernel):
             return cmp(self.__class__, other.__class__)
         return cmp((self.ndim, self.active_dimension, self.base_kernel),
                    (other.ndim, other.active_dimension, other.base_kernel))
+        
+    def depth(self):
+        return self.base_kernel.depth() + 1
     
 
 class SumKernelFamily(KernelFamily):
@@ -209,7 +250,10 @@ class SumKernelFamily(KernelFamily):
         return sum([e.num_params() for e in self.operands])
     
     def pretty_print(self):
-        return '( ' + ' + '.join([e.pretty_print() for e in self.operands]) + ' ) '
+        op = colored(' + ', self.depth())
+        return colored('( ', self.depth()) + \
+            op.join([e.pretty_print() for e in self.operands]) + \
+            colored(' ) ', self.depth())
     
     def default(self):
         return SumKernel([op.default() for op in self.operands])
@@ -219,6 +263,9 @@ class SumKernelFamily(KernelFamily):
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
         return cmp(self.operands, other.operands)
+    
+    def depth(self):
+        return max([op.depth() for op in self.operands]) + 1
 
 class SumKernel(Kernel):
     def __init__(self, operands):
@@ -228,7 +275,10 @@ class SumKernel(Kernel):
         return SumKernelFamily([e.family() for e in self.operands])
         
     def pretty_print(self):
-        return '( ' + ' + '.join([e.pretty_print() for e in self.operands]) + ' ) '
+        op = colored(' + ', self.depth())
+        return colored('( ', self.depth()) + \
+            op.join([e.pretty_print() for e in self.operands]) + \
+            colored(' ) ', self.depth())
     
     def gpml_kernel_expression(self):
         return '{@covSum, {%s}}' % ', '.join(e.gpml_kernel_expression() for e in self.operands)
@@ -244,6 +294,9 @@ class SumKernel(Kernel):
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
         return cmp(self.operands, other.operands)
+    
+    def depth(self):
+        return max([op.depth() for op in self.operands]) + 1
     
 class ProductKernelFamily(KernelFamily):
     def __init__(self, operands):
@@ -262,7 +315,10 @@ class ProductKernelFamily(KernelFamily):
         return sum([e.num_params() for e in self.operands])
     
     def pretty_print(self):
-        return '( ' + ' * '.join([o.pretty_print() for o in self.operands]) + ' ) '
+        op = colored(' + ', self.depth())
+        return colored('( ', self.depth()) + \
+            op.join([e.pretty_print() for e in self.operands]) + \
+            colored(' ) ', self.depth())
     
     def default(self):
         return ProductKernel([op.default() for op in self.operands])
@@ -273,6 +329,9 @@ class ProductKernelFamily(KernelFamily):
             return cmp(self.__class__, other.__class__)
         return cmp(self.operands, other.operands)
     
+    def depth(self):
+        return max([op.depth() for op in self.operands]) + 1
+    
 class ProductKernel(Kernel):
     def __init__(self, operands):
         self.operands = operands
@@ -281,7 +340,10 @@ class ProductKernel(Kernel):
         return ProductKernelFamily([e.family() for e in self.operands])
         
     def pretty_print(self):
-        return '( ' + ' * '.join([e.pretty_print() for e in self.operands]) + ' ) '
+        op = colored(' + ', self.depth())
+        return colored('( ', self.depth()) + \
+            op.join([e.pretty_print() for e in self.operands]) + \
+            colored(' ) ', self.depth())
     
     def gpml_kernel_expression(self):
         return '{@covProd, {%s}}' % ', '.join(e.gpml_kernel_expression() for e in self.operands)
@@ -297,6 +359,9 @@ class ProductKernel(Kernel):
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
         return cmp(self.operands, other.operands)
+    
+    def depth(self):
+        return max([op.depth() for op in self.operands]) + 1
 
             
 def base_kernels(ndim=1):
