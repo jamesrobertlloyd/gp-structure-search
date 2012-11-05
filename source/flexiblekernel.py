@@ -8,7 +8,19 @@ Created Nov 2012
 
 import numpy as np
 
-class SqExpKernelFamily:
+class KernelFamily:
+    pass
+
+class Kernel:
+    pass
+
+class BaseKernelFamily(KernelFamily):
+    pass
+
+class BaseKernel(Kernel):#
+    pass
+
+class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
         output_variance, lengthscale = params
         return SqExpKernel(output_variance, lengthscale)
@@ -18,8 +30,17 @@ class SqExpKernelFamily:
     
     def pretty_print(self):
         return 'SqExp'
+    
+    def default(self):
+        return SqExpKernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
 
-class SqExpKernel:
+class SqExpKernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
         self.output_variance = output_variance
         self.lengthscale = lengthscale
@@ -45,9 +66,15 @@ class SqExpKernel:
     
     def pretty_print(self):
         return 'SqExp(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
 
 
-class SqExpPeriodicKernelFamily:
+class SqExpPeriodicKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
         output_variance, period, lengthscale = params
         return SqExpPeriodicKernel(output_variance, period, lengthscale)
@@ -58,8 +85,17 @@ class SqExpPeriodicKernelFamily:
     def pretty_print(self):
         return 'Periodic'
     
+    def default(self):
+        return SqExpPeriodicKernel(0., 0., 0.)
     
-class SqExpPeriodicKernel:
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    
+class SqExpPeriodicKernel(BaseKernel):
     def __init__(self, lengthscale, period, output_variance):
         self.lengthscale = lengthscale
         self.period = period
@@ -79,7 +115,7 @@ class SqExpPeriodicKernel:
         return np.array([self.lengthscale, self.period, self.output_variance])
 
     def copy(self):
-        return SqExpKernel(self.lengthscale, self.period, self.output_variance)
+        return SqExpPeriodicKernel(self.lengthscale, self.period, self.output_variance)
     
     def __repr__(self):
         return 'SqExpPeriodicKernel(lengthscale=%f, period=%f, output_variance=%f)' % \
@@ -88,8 +124,15 @@ class SqExpPeriodicKernel:
     def pretty_print(self):
         return 'Periodic(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance)
     
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp((self.lengthscale, self.period, self.output_variance), 
+                   (other.lengthscale, other.period, other.output_variance))
     
-class MaskKernelFamily:
+    
+class MaskKernelFamily(KernelFamily):
     def __init__(self, ndim, active_dimension, base_kernel_family):
         assert 0 <= active_dimension < ndim
         self.ndim = ndim
@@ -105,13 +148,26 @@ class MaskKernelFamily:
     def pretty_print(self):
         return 'Mask(%d, %s)' % (self.active_dimension, self.base_kernel_family.pretty_print())
     
+    def default(self):
+        return MaskKernel(self.ndim, self.active_dimension, self.base_kernel_family.default())
     
-class MaskKernel:
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp((self.ndim, self.active_dimension, self.base_kernel_family),
+                   (other.ndim, other.active_dimension, other.base_kernel_family))
+    
+    
+class MaskKernel(Kernel):
     def __init__(self, ndim, active_dimension, base_kernel):
         assert 0 <= active_dimension < ndim
         self.ndim = ndim
         self.active_dimension = active_dimension    # first dimension is 0
         self.base_kernel = base_kernel
+        
+    def copy(self):
+        return MaskKernel(self.ndim, self.active_dimension, self.base_kernel.copy())
         
     def family(self):
         return MaskKernelFamily(self.ndim, self.active_dimension, self.base_kernel.family())
@@ -128,8 +184,15 @@ class MaskKernel:
     def param_vector(self):
         return self.base_kernel.param_vector()
     
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp((self.ndim, self.active_dimension, self.base_kernel),
+                   (other.ndim, other.active_dimension, other.base_kernel))
+    
 
-class SumKernelFamily:
+class SumKernelFamily(KernelFamily):
     def __init__(self, operands):
         self.operands = operands
         
@@ -147,8 +210,17 @@ class SumKernelFamily:
     
     def pretty_print(self):
         return '( ' + ' + '.join([e.pretty_print() for e in self.operands]) + ' ) '
+    
+    def default(self):
+        return SumKernel([op.default() for op in self.operands])
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp(self.operands, other.operands)
 
-class SumKernel:
+class SumKernel(Kernel):
     def __init__(self, operands):
         self.operands = operands
         
@@ -167,16 +239,22 @@ class SumKernel:
     def param_vector(self):
         return np.concatenate([e.param_vector() for e in self.operands])
     
-class ProductKernelFamily:
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp(self.operands, other.operands)
+    
+class ProductKernelFamily(KernelFamily):
     def __init__(self, operands):
         self.operands = operands
         
     def from_param_vector(self, params):
         start = 0
         ops = []
-        for e in self.operands:
-            end = start + e.num_params()
-            ops.append(e.from_param_vector(params[start:end]))
+        for o in self.operands:
+            end = start + o.num_params()
+            ops.append(o.from_param_vector(params[start:end]))
             start = end
         return ProductKernel(ops)
     
@@ -184,9 +262,18 @@ class ProductKernelFamily:
         return sum([e.num_params() for e in self.operands])
     
     def pretty_print(self):
-        return '( ' + ' * '.join([e.pretty_print() for e in self.operands]) + ' ) '
+        return '( ' + ' * '.join([o.pretty_print() for o in self.operands]) + ' ) '
     
-class ProductKernel:
+    def default(self):
+        return ProductKernel([op.default() for op in self.operands])
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp(self.operands, other.operands)
+    
+class ProductKernel(Kernel):
     def __init__(self, operands):
         self.operands = operands
         
@@ -204,6 +291,12 @@ class ProductKernel:
 
     def param_vector(self):
         return np.concatenate([e.param_vector() for e in self.operands])
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp(self.operands, other.operands)
 
             
 def base_kernels(ndim=1):

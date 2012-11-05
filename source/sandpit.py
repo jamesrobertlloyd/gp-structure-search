@@ -7,6 +7,7 @@ Created on Nov 2012
 '''
 
 import flexiblekernel as fk
+import grammar
 import gpml
 
 import numpy as np
@@ -34,21 +35,75 @@ def expression_test():
     print 'expression_test complete'
 
 def base_kernel_test():
-    print [k.pretty_print() for k in fk.base_kernels(5)]
+    print [k.pretty_print() for k in fk.base_kernels(1)]
     print 'base_kernel_test complete'
     
 def expand_test():
-    k1 = fk.MaskKernel(4, 0, fk.SqExpKernel(0, 0))
-    k2 = fk.MaskKernel(4, 1, fk.SqExpPeriodicKernel(1, 1, 1))
-    k3 = fk.MaskKernel(4, 2, fk.SqExpKernel(3, 4))
-    k4 = fk.MaskKernel(4, 3, fk.SqExpPeriodicKernel(2, 2, 2))
-    f = fk.ProductKernel(operands = [k3, k4])
-    e = fk.SumKernel(operands = [k1, k2, f])
+    #k1 = fk.MaskKernel(4, 0, fk.SqExpKernel(0, 0))
+    #k2 = fk.MaskKernel(4, 1, fk.SqExpPeriodicKernel(1, 1, 1))
+    #k3 = fk.MaskKernel(4, 2, fk.SqExpKernel(3, 4))
+    #k4 = fk.MaskKernel(4, 3, fk.SqExpPeriodicKernel(2, 2, 2))
+    #f = fk.ProductKernel(operands = [k3, k4])
+    #e = fk.SumKernel(operands = [k1, k2, f])
     #e = fk.CompoundKernel(operator = '+', operands = [k1, k2])
     #print e.polish_expression()
+    
+    #k1 = fk.SqExpKernel(0, 0)
+    #k2 = fk.SqExpPeriodicKernel(1, 1, 1)
+    #k3 = fk.SqExpKernel(3, 4)
+    #k4 = fk.SqExpPeriodicKernel(2, 2, 2)
+    #f = fk.ProductKernel(operands=[k3, k4])
+    #e = fk.SumKernel(operands=[k1, k2, f])
+    
+    k1 = fk.SqExpKernel(1, 1)
+    k2 = fk.SqExpPeriodicKernel(2, 2, 2)
+    e = fk.SumKernel([k1, k2])
+    
+    g = grammar.OneDGrammar()
+    
     print ''
-    for f in e.expand(4):
-        print f.gpml_param_expression()
+    for f in grammar.expand(e, g):
+        #print f
+        print f.pretty_print()
+        print grammar.canonical(f).pretty_print()
+        print
+        
+    print '   ***** duplicates removed  *****'
+    print
+    
+    kernels = grammar.expand(e, g)
+    for f in grammar.remove_duplicates(kernels):
+        print f.pretty_print()
+        print
+        
+    print '%d originally, %d without duplicates' % (len(kernels), len(grammar.remove_duplicates(kernels)))
+        
+    print 'expand_test complete'
+    
+def expand_test2():    
+    k1 = fk.MaskKernel(2, 0, fk.SqExpKernel(1, 1))
+    k2 = fk.MaskKernel(2, 1, fk.SqExpPeriodicKernel(2, 2, 2))
+    e = fk.SumKernel([k1, k2])
+    
+    g = grammar.MultiDGrammar(2)
+    
+    print ''
+    for f in grammar.expand(e, g):
+        #print f
+        print f.pretty_print()
+        print grammar.canonical(f).pretty_print()
+        print
+        
+    print '   ***** duplicates removed  *****'
+    print
+    
+    kernels = grammar.expand(e, g)
+    for f in grammar.remove_duplicates(kernels):
+        print f.pretty_print()
+        print
+        
+    print '%d originally, %d without duplicates' % (len(kernels), len(grammar.remove_duplicates(kernels)))
+        
     print 'expand_test complete'
     
 
@@ -58,6 +113,9 @@ def load_mauna():
     return data['X'], data['y']
 
 def call_gpml_test():
+    
+    np.random.seed(0)
+    
     #k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpPeriodicKernel( 0, 0, 0)])
     #k = fk.SqExpKernel(0, 0)
     k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpKernel(0, 0)])
@@ -115,5 +173,5 @@ if __name__ == '__main__':
     #kernel_test()
     #expression_test()
     #base_kernel_test()
-    #expand_test()
-    call_gpml_test()
+    expand_test()
+    #call_gpml_test()
