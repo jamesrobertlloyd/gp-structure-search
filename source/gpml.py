@@ -54,12 +54,20 @@ def run_matlab_code(code):
     
     err_txt = open(stderr_file).read()
     
-    os.remove(script_file)
-    os.remove(stdout_file)
-    os.remove(stderr_file)
-    
     if err_txt != '':
-        raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
+        pass
+#        print 'Matlab produced the following errors:\n\n%s' % err_txt
+#        print
+#        print 'Script file (%s) contents : ==========================================' % script_file
+#        print open(script_file, 'r').read()
+#        print
+#        print 'Std out : =========================================='        
+#        print open(stdout_file, 'r').read()        
+        #raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
+    else:         
+        os.remove(script_file)
+        os.remove(stdout_file)
+        os.remove(stderr_file)
     
     
 
@@ -72,12 +80,14 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
     temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
     scipy.io.savemat(temp_data_file, data)
-
+    
+    print kernel_init_params
+    
     code = OPTIMIZE_KERNEL_CODE % {'datafile': temp_data_file,
                                    'writefile': temp_write_file,
                                    'gpml_path': config.GPML_PATH,
                                    'kernel_family': kernel_expression,
-                                   'kernel_params': kernel_init_params}
+                                   'kernel_params': '[%s]' % ' '.join(str(p) for p in kernel_init_params)}
     run_matlab_code(code)
 
     # Load in the file that GPML saved things to.

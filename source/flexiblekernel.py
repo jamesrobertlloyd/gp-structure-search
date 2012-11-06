@@ -315,7 +315,7 @@ class ProductKernelFamily(KernelFamily):
         return sum([e.num_params() for e in self.operands])
     
     def pretty_print(self):
-        op = colored(' + ', self.depth())
+        op = colored(' * ', self.depth())
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())

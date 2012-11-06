@@ -213,7 +213,7 @@ def sample_from_gp_prior():
     
     pylab.figure()
     pylab.plot(X, sample)
-        
+
 
         
 EVAL_LIKELIHOODS_CODE = r"""
@@ -239,6 +239,117 @@ save( '%(writefile)s', 'nll' );
 exit();
 """        
     
+
+def simple_mauna_experiment():
+    '''A first version of an experiment learning kernels'''
+    
+    seed_kernel = fk.SqExpKernel(0, 0)
+    
+    X, y = load_mauna()
+    N_orig = X.shape[0]  # subsample data.
+    X = X[:N_orig//3, :]
+    y = y[:N_orig//3, :]    
+    
+    g = grammar.MultiDGrammar(2)
+    kernels = grammar.remove_duplicates(grammar.expand(seed_kernel, g))
+    for f in kernels:
+        print f.pretty_print()
+            
+    results = []
+
+    # Call GPML with each of the expanded kernels
+    pylab.figure()
+    for k in kernels:
+        #init_params = np.random.normal(size=k.param_vector().size)
+        init_params = k.param_vector()
+        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
+    
+        print "kernel_hypers =", kernel_hypers
+        print "nll =", nll
+        
+        k_opt = k.family().from_param_vector(kernel_hypers)
+        print k_opt.gpml_kernel_expression()
+        print k_opt.pretty_print()
+        print '[%s]' % k_opt.param_vector()
+        
+        pylab.semilogx(range(1, nlls.size+1), nlls)
+        
+        results.append((k_opt, nll))
+        
+        pylab.draw()    
+    
+    print
+    results = sorted(results, key=lambda p: p[1])
+    for kernel, nll in results:
+        print nll, kernel.pretty_print()
+        
+    best_kernel = results[0][0]    
+    kernels = grammar.remove_duplicates(grammar.expand(best_kernel, g)) # Next set of kernels
+    
+    for f in kernels:
+        print f.pretty_print()
+            
+    results = []
+
+    # Call GPML with each of the expanded kernels
+    pylab.figure()
+    for k in kernels:
+        #init_params = np.random.normal(size=k.param_vector().size)
+        init_params = k.param_vector()
+        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
+    
+        print "kernel_hypers =", kernel_hypers
+        print "nll =", nll
+        
+        k_opt = k.family().from_param_vector(kernel_hypers)
+        print k_opt.gpml_kernel_expression()
+        print k_opt.pretty_print()
+        print '[%s]' % k_opt.param_vector()
+        
+        pylab.semilogx(range(1, nlls.size+1), nlls)
+        
+        results.append((k_opt, nll))
+        
+        pylab.draw()    
+    
+    print
+    results = sorted(results, key=lambda p: p[1])
+    for kernel, nll in results:
+        print nll, kernel
+        
+    best_kernel = results[0][0]    
+    kernels = grammar.remove_duplicates(grammar.expand(best_kernel, g)) # Next set of kernels
+    
+    for f in kernels:
+        print f.pretty_print()
+            
+    results = []
+
+    # Call GPML with each of the expanded kernels
+    pylab.figure()
+    for k in kernels:
+        #init_params = np.random.normal(size=k.param_vector().size)
+        init_params = k.param_vector()
+        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
+    
+        print "kernel_hypers =", kernel_hypers
+        print "nll =", nll
+        
+        k_opt = k.family().from_param_vector(kernel_hypers)
+        print k_opt.gpml_kernel_expression()
+        print k_opt.pretty_print()
+        print '[%s]' % k_opt.param_vector()
+        
+        pylab.semilogx(range(1, nlls.size+1), nlls)
+        
+        results.append((k_opt.pretty_print(), nll))
+        
+        pylab.draw()    
+    
+    print
+    results = sorted(results, key=lambda p: p[1])
+    for kernel, nll in results:
+        print nll, kernel
     
 
 if __name__ == '__main__':
