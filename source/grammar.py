@@ -154,6 +154,7 @@ def expand(kernel, grammar):
     return result
 
 def canonical(kernel):
+    '''Sorts a kernel tree into a canonical form.'''
     if isinstance(kernel, fk.BaseKernel):
         return kernel.copy()
     elif isinstance(kernel, fk.MaskKernel):

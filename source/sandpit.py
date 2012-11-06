@@ -9,11 +9,12 @@ Created on Nov 2012
 import flexiblekernel as fk
 import grammar
 import gpml
+import config
 
 import numpy as np
 import pylab
 import scipy.io
-
+import tempfile, os
 
 def kernel_test():
     k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
@@ -165,7 +166,78 @@ def call_gpml_test():
         
     print "done"
         
+
+# Some Matlab code to sample from a GP prior, in a spectral way.
+GENERATE_NOISELESS_DATA_CODE = r"""
+a='Load the data, it should contain X'
+load '%(datafile)s'
+
+addpath(genpath('%(gpml_path)s'));
+
+covfunc = %(kernel_family)s
+hypers = %(kernel_params)s
+
+sigma = covfunc( hypers, X );
+sigma = 0.5.*(sigma + sigma');
+[vectors, values] = eig(sigma);
+values(values < 0) = 0;
+sample = vectors*(randn(length(values), 1).*sqrt(diag(values)));
+
+save( '%(writefile)s', 'sample' );
+exit();
+"""
+
+def sample_from_gp_prior():
+    
+    k = fk.SqExpPeriodicKernel(np.log(0.1), np.log(2), np.log(1))
+    
+    X = np.linspace(-2,2,200)
+    data = {'X': X}
+    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
+    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    scipy.io.savemat(temp_data_file, data)
+
+    code = GENERATE_NOISELESS_DATA_CODE % {'datafile': temp_data_file,
+                                   'writefile': temp_write_file,
+                                   'gpml_path': config.GPML_PATH,
+                                   'kernel_family': k.gpml_kernel_expression(),
+                                   'kernel_params': k.param_vector()}
+    gpml.run_matlab_code(code)
+
+    # Load in the file that GPML saved things to.
+    gpml_result = scipy.io.loadmat(temp_write_file)
+    os.remove(temp_data_file)
+    os.remove(temp_write_file)
+
+    sample = gpml_result['sample'].ravel()
+    
+    pylab.figure()
+    pylab.plot(X, sample)
         
+
+        
+EVAL_LIKELIHOODS_CODE = r"""
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
+
+a='Load GPML'
+addpath(genpath('%(gpml_path)s'));
+
+a='Set up model.'
+meanfunc = {@meanConst}
+hyp.mean = mean(y)
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = log(var(y)/10)
+
+nll = gp(hyp, @infExact, meanfunc, covfunc, likfunc, X, y);
+
+save( '%(writefile)s', 'nll' );
+exit();
+"""        
     
     
 
@@ -173,5 +245,6 @@ if __name__ == '__main__':
     #kernel_test()
     #expression_test()
     #base_kernel_test()
-    expand_test()
+    #expand_test()
     #call_gpml_test()
+    sample_from_gp_prior()
