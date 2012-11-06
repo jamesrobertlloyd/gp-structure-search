@@ -112,20 +112,12 @@ def call_gpml_test():
     
     np.random.seed(0)
     
-    #k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpPeriodicKernel( 0, 0, 0)])
-    #k = fk.SqExpKernel(0, 0)
     k = fk.SumKernel([fk.SqExpKernel(0, 0), fk.SqExpKernel(0, 0)])
     print k.gpml_kernel_expression()
     print k.pretty_print()
     print '[%s]' % k.param_vector()
 
     X, y = load_mauna()
-    
-    #X *= np.exp(1)
-    #y *= np.exp(1)
-    
-    #X = X[::2, :]
-    #y = y[::2, :]
     
     N_orig = X.shape[0]
     X = X[:N_orig//3, :]
@@ -294,6 +286,29 @@ def simple_mauna_experiment():
             print nll, BIC, kernel.pretty_print()
             
         seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[BIC_key])[0:k]]
+
+    
+def plot_Carls_kernel():
+    kernel = fk.Carls_Mauna_kernel()
+        
+    X = np.linspace(0,10,1000)
+    sigma = gpml.plot_kernel(kernel, X)
+    
+    pylab.figure()
+    pylab.plot(X, sigma)    
+    pylab.title('Carl''s kernel');
+    
+    
+def plot_our_kernel():
+    kernel  = ( fk.SqExpKernel(-0.7, -1.3) + fk.SqExpKernel(4.8, 2.3) ) * \
+              ( fk.SqExpKernel(3.0, 0.5) + fk.SqExpPeriodicKernel(0.4, -0.0, -0.9) ) 
+        
+    X = np.linspace(0,10,1000)
+    sigma = gpml.plot_kernel(kernel, X)
+    
+    pylab.figure()
+    pylab.plot(X, sigma)    
+    pylab.title('Our kernel');    
     
 
 if __name__ == '__main__':

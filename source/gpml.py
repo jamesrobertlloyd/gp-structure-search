@@ -164,3 +164,47 @@ def sample_from_gp_prior(kernel, X):
     sample = gpml_result['sample'].ravel()
     return sample
 
+
+# Matlab code to evaluate a covariance function at a bunch of locations.
+EVAL_KERNEL_CODE = r"""
+a='Load the data, it should contain X and x0.'
+load '%(datafile)s'
+
+a='Load GPML'
+addpath(genpath('%(gpml_path)s'));
+
+covfunc = %(kernel_family)s
+hypers = %(kernel_params)s
+
+sigma = feval(covfunc{:}, hypers, X, x0);
+
+save( '%(writefile)s', 'sigma' );
+exit();
+"""
+
+
+def plot_kernel(kernel, X):
+
+    data = {'X': X, 'x0': 0.0}
+    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
+    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    scipy.io.savemat(temp_data_file, data)
+    
+    kernel_params = kernel.param_vector()
+
+    code = EVAL_KERNEL_CODE % {'datafile': temp_data_file,
+                               'writefile': temp_write_file,
+                               'gpml_path': config.GPML_PATH,
+                               'kernel_family': kernel.gpml_kernel_expression(),
+                               'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_params)}
+    run_matlab_code(code, verbose=True)
+
+    # Load in the file that GPML saved things to.
+    gpml_result = scipy.io.loadmat(temp_write_file)
+    os.remove(temp_data_file)
+    os.remove(temp_write_file)
+
+    return gpml_result['sigma'].ravel()
+
+
+
