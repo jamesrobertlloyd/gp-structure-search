@@ -265,12 +265,12 @@ def simple_mauna_experiment():
     seed_kernels = [fk.SqExpKernel(0, 0)]
     
     X, y = load_mauna_original()
-    N_orig = X.shape[0]  # subsample data.
-    X = X[:N_orig//3, :]
-    y = y[:N_orig//3, :] 
+    #N_orig = X.shape[0]  # subsample data.
+    #X = X[:N_orig//3, :]
+    #y = y[:N_orig//3, :] 
     
     max_depth = 4
-    k = 2    # Expand k best
+    k = 4    # Expand k best
     nll_key = 1
     BIC_key = 2
     
