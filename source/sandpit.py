@@ -180,6 +180,19 @@ def sample_mauna_best():
     
     pylab.figure()
     pylab.plot(X, sample)
+    
+    
+def sample_RQ():
+    kernel = ( fk.RQKernel(-0.7, 1.3, 1) + fk.SqExpKernel(4.8, 2.3) ) * \
+             ( fk.RQKernel(3.0, 0.5, 0) + fk.SqExpPeriodicKernel(0.4, -0.0, -0.9) ) 
+        
+    X = np.linspace(-4,4,200)
+    
+    # Todo: set random seed.
+    sample = gpml.sample_from_gp_prior(kernel, X)
+    
+    pylab.figure()
+    pylab.plot(X, sample)    
 
 
         

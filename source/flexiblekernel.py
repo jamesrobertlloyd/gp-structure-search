@@ -174,6 +174,72 @@ class SqExpPeriodicKernel(BaseKernel):
     def depth(self):
         return 0
     
+
+class RQKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance, alpha = params
+        return RQKernel(lengthscale, output_variance, alpha)
+    
+    def num_params(self):
+        return 3
+    
+    def pretty_print(self):
+        return colored('RQ', self.depth())
+    
+    def default(self):
+        return RQKernel(0., 0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+    
+class RQKernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance, alpha):
+        self.lengthscale = lengthscale
+        self.output_variance = output_variance
+        self.alpha = alpha
+        
+    def family(self):
+        return RQKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '@covRQiso'
+    
+    def english_name(self):
+        return 'RQ'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance, self.alpha])
+
+    def copy(self):
+        return RQKernel(self.lengthscale, self.output_variance, self.alpha)
+    
+    def __repr__(self):
+        return 'RQKernel(lengthscale=%f, output_variance=%f, alpha=%f)' % \
+            (self.lengthscale, self.output_variance, self.alpha)
+    
+    def pretty_print(self):
+        return colored('Periodic(ell=%1.1f, sf=%1.1f, a=%1.1f)' % (self.lengthscale, self.output_variance, self.alpha),
+                       self.depth())
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+                   (other.lengthscale, other.output_variance, other.alpha))
+        
+    def depth(self):
+        return 0    
+    
+    
     
 class MaskKernelFamily(KernelFamily):
     def __init__(self, ndim, active_dimension, base_kernel_family):
