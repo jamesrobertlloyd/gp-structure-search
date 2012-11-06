@@ -30,7 +30,19 @@ class KernelFamily:
     pass
 
 class Kernel:
-    pass
+    def __add__(self, other):
+        assert isinstance(other, Kernel)
+        if isinstance(other, SumKernel):
+            return SumKernel([self] + other.operands).copy()
+        else:
+            return SumKernel([self, other]).copy()
+    
+    def __mul__(self, other):
+        assert isinstance(other, Kernel)
+        if isinstance(other, ProductKernel):
+            return ProductKernel([self] + other.operands).copy()
+        else:
+            return ProductKernel([self, other])
 
 class BaseKernelFamily(KernelFamily):
     pass
@@ -299,6 +311,13 @@ class SumKernel(Kernel):
     def depth(self):
         return max([op.depth() for op in self.operands]) + 1
     
+    def __add__(self, other):
+        assert isinstance(other, Kernel)
+        if isinstance(other, SumKernel):
+            return SumKernel(self.operands + other.operands).copy()
+        else:
+            return SumKernel(self.operands + [other]).copy()
+    
 class ProductKernelFamily(KernelFamily):
     def __init__(self, operands):
         self.operands = operands
@@ -364,6 +383,13 @@ class ProductKernel(Kernel):
     
     def depth(self):
         return max([op.depth() for op in self.operands]) + 1
+    
+    def __mul__(self, other):
+        assert isinstance(other, Kernel)
+        if isinstance(other, ProductKernel):
+            return ProductKernel(self.operands + other.operands).copy()
+        else:
+            return ProductKernel(self.operands + [other]).copy()
 
             
 def base_kernels(ndim=1):

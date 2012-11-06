@@ -9,12 +9,10 @@ Created on Nov 2012
 import flexiblekernel as fk
 import grammar
 import gpml
-import config
 
 import numpy as np
 import pylab
 import scipy.io
-import tempfile, os
 import sys
 
 def kernel_test():
@@ -168,49 +166,17 @@ def call_gpml_test():
     print "done"
         
 
-# Some Matlab code to sample from a GP prior, in a spectral way.
-GENERATE_NOISELESS_DATA_CODE = r"""
-a='Load the data, it should contain X'
-load '%(datafile)s'
 
-addpath(genpath('%(gpml_path)s'));
 
-covfunc = %(kernel_family)s
-hypers = %(kernel_params)s
-
-sigma = covfunc( hypers, X );
-sigma = 0.5.*(sigma + sigma');
-[vectors, values] = eig(sigma);
-values(values < 0) = 0;
-sample = vectors*(randn(length(values), 1).*sqrt(diag(values)));
-
-save( '%(writefile)s', 'sample' );
-exit();
-"""
-
-def sample_from_gp_prior():
+def sample_mauna_best():
+    # This kernel was chosen from a run of Mauna datapoints.
+    kernel = ( fk.SqExpKernel(-0.7, -1.3) + fk.SqExpKernel(4.8, 2.3) ) * \
+             ( fk.SqExpKernel(3.0, 0.5) + fk.SqExpPeriodicKernel(0.4, -0.0, -0.9) ) 
+        
+    X = np.linspace(-4,4,200)
     
-    k = fk.SqExpPeriodicKernel(np.log(0.1), np.log(2), np.log(1))
-    
-    X = np.linspace(-2,2,200)
-    data = {'X': X}
-    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
-    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
-    scipy.io.savemat(temp_data_file, data)
-
-    code = GENERATE_NOISELESS_DATA_CODE % {'datafile': temp_data_file,
-                                   'writefile': temp_write_file,
-                                   'gpml_path': config.GPML_PATH,
-                                   'kernel_family': k.gpml_kernel_expression(),
-                                   'kernel_params': k.param_vector()}
-    gpml.run_matlab_code(code)
-
-    # Load in the file that GPML saved things to.
-    gpml_result = scipy.io.loadmat(temp_write_file)
-    os.remove(temp_data_file)
-    os.remove(temp_write_file)
-
-    sample = gpml_result['sample'].ravel()
+    # Todo: set random seed.
+    sample = gpml.sample_from_gp_prior(kernel, X)
     
     pylab.figure()
     pylab.plot(X, sample)

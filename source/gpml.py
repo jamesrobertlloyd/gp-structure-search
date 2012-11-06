@@ -15,32 +15,6 @@ import subprocess
 
 import config
 
-# Matlab code to optimise hyper-parameters on one file, given one kernel.
-OPTIMIZE_KERNEL_CODE = r"""
-a='Load the data, it should contain X and y.'
-load '%(datafile)s'
-
-a='Load GPML'
-addpath(genpath('%(gpml_path)s'));
-
-a='Set up model.'
-meanfunc = {@meanConst}
-hyp.mean = mean(y)
-
-covfunc = %(kernel_family)s
-hyp.cov = %(kernel_params)s
-
-likfunc = @likGauss
-hyp.lik = log(var(y)/10)
-
-[hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
-best_nll = nlls(end)
-
-save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls' );
-exit();
-"""
-
-
 def run_matlab_code(code, verbose=False):
     # Write to a temp script
     script_file = tempfile.mkstemp(suffix='.m')[1]
@@ -68,14 +42,39 @@ def run_matlab_code(code, verbose=False):
             print
             print 'Std out : =========================================='        
             print open(stdout_file, 'r').read()        
-        #raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
+        raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
     else:     
         # Only remove temporary files if run was successful    
         os.remove(script_file)
         os.remove(stdout_file)
         os.remove(stderr_file)
     
-    
+
+
+# Matlab code to optimise hyper-parameters on one file, given one kernel.
+OPTIMIZE_KERNEL_CODE = r"""
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
+
+a='Load GPML'
+addpath(genpath('%(gpml_path)s'));
+
+a='Set up model.'
+meanfunc = {@meanConst}
+hyp.mean = mean(y)
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = log(var(y)/10)
+
+[hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
+best_nll = nlls(end)
+
+save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls' );
+exit();
+"""
 
 def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False):
     if X.ndim == 1:
@@ -94,7 +93,7 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
                                    'writefile': temp_write_file,
                                    'gpml_path': config.GPML_PATH,
                                    'kernel_family': kernel_expression,
-                                   'kernel_params': '[%s]' % ' '.join(str(p) for p in kernel_init_params)}
+                                   'kernel_params': '[%5.5f]' % ' '.join(str(p) for p in kernel_init_params)}
     run_matlab_code(code)
 
     # Load in the file that GPML saved things to.
@@ -114,4 +113,46 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     else:
         return kernel_hypers, nll
 
+
+# Some Matlab code to sample from a GP prior, in a spectral way.
+GENERATE_NOISELESS_DATA_CODE = r"""
+a='Load the data, it should contain X'
+load '%(datafile)s'
+
+addpath(genpath('%(gpml_path)s'));
+
+covfunc = %(kernel_family)s
+hypers = %(kernel_params)s
+
+sigma = feval(covfunc{:}, hypers, X);  
+sigma = 0.5.*(sigma + sigma');
+[vectors, values] = eig(sigma);
+values(values < 0) = 0;
+sample = vectors*(randn(length(values), 1).*sqrt(diag(values)));
+
+save( '%(writefile)s', 'sample' );
+exit();
+"""
+
+def sample_from_gp_prior(kernel, X):
+
+    data = {'X': X}
+    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
+    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    scipy.io.savemat(temp_data_file, data)
+
+    code = GENERATE_NOISELESS_DATA_CODE % {'datafile': temp_data_file,
+                                   'writefile': temp_write_file,
+                                   'gpml_path': config.GPML_PATH,
+                                   'kernel_family': kernel.gpml_kernel_expression(),
+                                   'kernel_params': kernel.param_vector()}
+    run_matlab_code(code, verbose=True)
+
+    # Load in the file that GPML saved things to.
+    gpml_result = scipy.io.loadmat(temp_write_file)
+    os.remove(temp_data_file)
+    os.remove(temp_write_file)
+
+    sample = gpml_result['sample'].ravel()
+    return sample
 
