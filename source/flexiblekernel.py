@@ -226,7 +226,7 @@ class RQKernel(BaseKernel):
             (self.lengthscale, self.output_variance, self.alpha)
     
     def pretty_print(self):
-        return colored('Periodic(ell=%1.1f, sf=%1.1f, a=%1.1f)' % (self.lengthscale, self.output_variance, self.alpha),
+        return colored('RQ(ell=%1.1f, sf=%1.1f, a=%1.1f)' % (self.lengthscale, self.output_variance, self.alpha),
                        self.depth())
     
     def __cmp__(self, other):

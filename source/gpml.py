@@ -140,12 +140,14 @@ def sample_from_gp_prior(kernel, X):
     temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
     temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
     scipy.io.savemat(temp_data_file, data)
+    
+    kernel_params = kernel.param_vector()
 
     code = GENERATE_NOISELESS_DATA_CODE % {'datafile': temp_data_file,
                                    'writefile': temp_write_file,
                                    'gpml_path': config.GPML_PATH,
                                    'kernel_family': kernel.gpml_kernel_expression(),
-                                   'kernel_params': kernel.param_vector()}
+                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_params)}
     run_matlab_code(code, verbose=True)
 
     # Load in the file that GPML saved things to.
