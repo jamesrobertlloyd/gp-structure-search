@@ -67,20 +67,24 @@ covfunc = %(kernel_family)s
 hyp.cov = %(kernel_params)s
 
 likfunc = @likGauss
-hyp.lik = log(var(y)/10)
+hyp.lik = %(noise)s
 
-[hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
+[hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls' );
 exit();
 """
 
-def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False):
+def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
         y = y[:, nax]
+        
+    if noise is None:
+        noise = np.log(np.var(y, 1)/10)
+        
     data = {'X': X, 'y': y}
     temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
     temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
@@ -93,7 +97,9 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
                                    'writefile': temp_write_file,
                                    'gpml_path': config.GPML_PATH,
                                    'kernel_family': kernel_expression,
-                                   'kernel_params': '[%5.5f]' % ' '.join(str(p) for p in kernel_init_params)}
+                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
+                                   'noise': str(noise),
+                                   'iters': str(iters)}
     run_matlab_code(code)
 
     # Load in the file that GPML saved things to.

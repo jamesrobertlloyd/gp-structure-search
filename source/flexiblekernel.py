@@ -467,3 +467,29 @@ def base_kernels(ndim=1):
         yield MaskKernel(ndim, dim, SqExpKernel(0, 0))
         yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
             
+
+def Carls_Mauna_kernel():
+    '''
+    This kernel described in pages 120-122 of "Gaussian Processes for Machine Learning.
+    This model was learnt on the mauna dataset up to 2003.
+    
+    The reported nll in the book for this dataset is 108.5
+    '''
+    theta_1 = np.log(66.)  # ppm, sf of SE1 = magnitude of long term trend
+    theta_2 = np.log(67.)  # years, ell of SE1 = lengthscale of long term trend
+    theta_6 = np.log(0.66)  # ppm, sf of RQ = magnitude of med term trend
+    theta_7 = np.log(1.2)  # years, ell of RQ = lengthscale of med term trend
+    theta_8 = np.log(0.78) # alpha of RQ
+    theta_3 = np.log(2.4) # ppm, sf of periodic * SE
+    theta_4 = np.log(90.) # years, lengthscale of SE of periodic*SE
+    theta_5 = np.log(1.3) # smoothness of periodic
+    theta_9 = np.log(0.18) # ppm, amplitude of SE_noise
+    theta_10 = np.log(1.6/12.0) # years (originally months), lengthscale of SE_noise
+    theta_11 = np.log(0.19) # ppm, amplitude of independent noise
+    
+    kernel = SqExpKernel(output_variance=theta_1, lengthscale=theta_2) \
+           + SqExpKernel(output_variance=theta_3, lengthscale=theta_4) * SqExpPeriodicKernel(output_variance=0, period=0, lengthscale=theta_5) \
+           + RQKernel(lengthscale=theta_7, output_variance=theta_6, alpha=theta_8) \
+           + SqExpKernel(output_variance=theta_9, lengthscale=theta_10)
+    
+    return kernel

@@ -25,7 +25,9 @@ class OneDGrammar:
         if tp == 'any':
             raise RuntimeError("Can't expand the 'any' type")
         elif tp == 'base':
-            return [fk.SqExpKernelFamily().default(), fk.SqExpPeriodicKernelFamily().default()]
+            return [fk.SqExpKernelFamily().default(),
+                    fk.RQKernelFamily().default(),
+                    fk.SqExpPeriodicKernelFamily().default()]
         else:
             raise RuntimeError('Unknown type: %s' % tp)
         
@@ -80,6 +82,7 @@ class MultiDGrammar:
             result = []
             for d in range(self.ndim):
                 result += [fk.MaskKernel(self.ndim, d, fk.SqExpKernelFamily().default()),
+                           fk.MaskKernel(self.ndim, d, fk.RQKernelFamily().default()),
                            fk.MaskKernel(self.ndim, d, fk.SqExpPeriodicKernelFamily().default()),
                            ]
             return result
