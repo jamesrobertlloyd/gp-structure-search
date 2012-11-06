@@ -83,7 +83,7 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
         y = y[:, nax]
         
     if noise is None:
-        noise = np.log(np.var(y, 1)/10)
+        noise = np.log(np.var(y)/10)   # Just a heuristic.
         
     data = {'X': X, 'y': y}
     temp_data_file = tempfile.mkstemp(suffix='.mat')[1]

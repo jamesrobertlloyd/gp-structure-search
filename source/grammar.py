@@ -17,7 +17,8 @@ class OneDGrammar:
             return True
         elif tp == 'base':
             return isinstance(tp, fk.SqExpKernel) or \
-                isinstance(tp, fk.SqExpPeriodicKernel)
+                isinstance(tp, fk.SqExpPeriodicKernel) or \
+                isinstance(tp, fk.RQKernel)
         else:
             raise RuntimeError('Unknown type: %s' % tp)
     
@@ -77,7 +78,9 @@ class MultiDGrammar:
         if tp in ['1d', 'multi']:
             raise RuntimeError("Can't expand the '%s' type" % tp)
         elif tp == 'base':
-            return [fk.SqExpKernelFamily().default(), fk.SqExpPeriodicKernelFamily().default()]
+            return [fk.SqExpKernelFamily().default(), 
+                    fk.SqExpPeriodicKernelFamily().default(),
+                    fk.RQKernelFamily().default()]
         elif tp == 'mask':
             result = []
             for d in range(self.ndim):

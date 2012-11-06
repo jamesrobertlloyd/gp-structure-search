@@ -264,7 +264,7 @@ def simple_mauna_experiment():
     
     seed_kernels = [fk.SqExpKernel(0, 0)]
     
-    X, y = load_mauna()
+    X, y = load_mauna_original()
     N_orig = X.shape[0]  # subsample data.
     X = X[:N_orig//3, :]
     y = y[:N_orig//3, :] 
@@ -281,11 +281,11 @@ def simple_mauna_experiment():
         results = results + new_results
         
         print
-        results = sorted(results, key=lambda p: p[BIC_key], reverse=True)
+        results = sorted(results, key=lambda p: p[nll_key], reverse=True)
         for kernel, nll, BIC in results:
             print nll, BIC, kernel.pretty_print()
             
-        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[BIC_key])[0:k]]
+        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[nll_key])[0:k]]
 
     
 def plot_Carls_kernel():
