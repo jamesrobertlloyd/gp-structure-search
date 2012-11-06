@@ -15,6 +15,7 @@ import numpy as np
 import pylab
 import scipy.io
 import tempfile, os
+import sys
 
 def kernel_test():
     k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
@@ -238,118 +239,80 @@ nll = gp(hyp, @infExact, meanfunc, covfunc, likfunc, X, y);
 save( '%(writefile)s', 'nll' );
 exit();
 """        
+
+def try_expanded_kernels(X, y, D, seed_kernels, verbose=False):    
+    g = grammar.MultiDGrammar(D)
+    print 'Seed kernels :'
+    for k in seed_kernels:
+        print k.pretty_print()
+    kernels = []
+    for k in seed_kernels:
+        kernels = kernels + grammar.expand(k, g)
+    kernels = grammar.remove_duplicates(kernels)
+    print 'Trying the following kernels :'
+    for k in kernels:
+        print k.pretty_print()
+            
+    results = []
+
+    # Call GPML with each of the expanded kernels
+    pylab.figure()
+    for k in kernels:
+        #### TODO - think about initialisation
+        #init_params = np.random.normal(size=k.param_vector().size)
+        init_params = k.param_vector()
+        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True, verbose=verbose)
     
+        if verbose:
+            print "kernel_hypers =", kernel_hypers
+        print
+        print "nll =", nll
+        
+        BIC = 2 * nll + len(k.param_vector()) * np.log(len(y))
+        print "BIC =", BIC
+        
+        k_opt = k.family().from_param_vector(kernel_hypers)
+        if verbose:
+            print k_opt.gpml_kernel_expression()
+        print k_opt.pretty_print()
+        if verbose:
+            print '[%s]' % k_opt.param_vector()
+        
+        pylab.semilogx(range(1, nlls.size+1), nlls)
+        
+        results.append((k_opt, nll, BIC))
+        
+        pylab.draw()  
+        
+    return results
 
 def simple_mauna_experiment():
     '''A first version of an experiment learning kernels'''
     
-    seed_kernel = fk.SqExpKernel(0, 0)
+    seed_kernels = [fk.SqExpKernel(0, 0)]
     
     X, y = load_mauna()
     N_orig = X.shape[0]  # subsample data.
     X = X[:N_orig//3, :]
-    y = y[:N_orig//3, :]    
+    y = y[:N_orig//3, :] 
     
-    g = grammar.MultiDGrammar(2)
-    kernels = grammar.remove_duplicates(grammar.expand(seed_kernel, g))
-    for f in kernels:
-        print f.pretty_print()
-            
+    max_depth = 4
+    k = 2    # Expand k best
+    nll_key = 1
+    BIC_key = 2
+    
+    
     results = []
-
-    # Call GPML with each of the expanded kernels
-    pylab.figure()
-    for k in kernels:
-        #init_params = np.random.normal(size=k.param_vector().size)
-        init_params = k.param_vector()
-        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
-    
-        print "kernel_hypers =", kernel_hypers
-        print "nll =", nll
+    for dummy in range(max_depth):     
+        new_results = try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=False)
+        results = results + new_results
         
-        k_opt = k.family().from_param_vector(kernel_hypers)
-        print k_opt.gpml_kernel_expression()
-        print k_opt.pretty_print()
-        print '[%s]' % k_opt.param_vector()
-        
-        pylab.semilogx(range(1, nlls.size+1), nlls)
-        
-        results.append((k_opt, nll))
-        
-        pylab.draw()    
-    
-    print
-    results = sorted(results, key=lambda p: p[1])
-    for kernel, nll in results:
-        print nll, kernel.pretty_print()
-        
-    best_kernel = results[0][0]    
-    kernels = grammar.remove_duplicates(grammar.expand(best_kernel, g)) # Next set of kernels
-    
-    for f in kernels:
-        print f.pretty_print()
+        print
+        results = sorted(results, key=lambda p: p[BIC_key], reverse=True)
+        for kernel, nll, BIC in results:
+            print nll, BIC, kernel.pretty_print()
             
-    results = []
-
-    # Call GPML with each of the expanded kernels
-    pylab.figure()
-    for k in kernels:
-        #init_params = np.random.normal(size=k.param_vector().size)
-        init_params = k.param_vector()
-        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
-    
-        print "kernel_hypers =", kernel_hypers
-        print "nll =", nll
-        
-        k_opt = k.family().from_param_vector(kernel_hypers)
-        print k_opt.gpml_kernel_expression()
-        print k_opt.pretty_print()
-        print '[%s]' % k_opt.param_vector()
-        
-        pylab.semilogx(range(1, nlls.size+1), nlls)
-        
-        results.append((k_opt, nll))
-        
-        pylab.draw()    
-    
-    print
-    results = sorted(results, key=lambda p: p[1])
-    for kernel, nll in results:
-        print nll, kernel
-        
-    best_kernel = results[0][0]    
-    kernels = grammar.remove_duplicates(grammar.expand(best_kernel, g)) # Next set of kernels
-    
-    for f in kernels:
-        print f.pretty_print()
-            
-    results = []
-
-    # Call GPML with each of the expanded kernels
-    pylab.figure()
-    for k in kernels:
-        #init_params = np.random.normal(size=k.param_vector().size)
-        init_params = k.param_vector()
-        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True)
-    
-        print "kernel_hypers =", kernel_hypers
-        print "nll =", nll
-        
-        k_opt = k.family().from_param_vector(kernel_hypers)
-        print k_opt.gpml_kernel_expression()
-        print k_opt.pretty_print()
-        print '[%s]' % k_opt.param_vector()
-        
-        pylab.semilogx(range(1, nlls.size+1), nlls)
-        
-        results.append((k_opt.pretty_print(), nll))
-        
-        pylab.draw()    
-    
-    print
-    results = sorted(results, key=lambda p: p[1])
-    for kernel, nll in results:
-        print nll, kernel
+        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[BIC_key])[0:k]]
     
 
 if __name__ == '__main__':
@@ -358,4 +321,6 @@ if __name__ == '__main__':
     #base_kernel_test()
     #expand_test()
     #call_gpml_test()
-    sample_from_gp_prior()
+    #sample_from_gp_prior()
+    if sys.flags.debug or __debug__:
+        print 'Debug mode'

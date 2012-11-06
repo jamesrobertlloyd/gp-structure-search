@@ -275,6 +275,7 @@ class SumKernel(Kernel):
         return SumKernelFamily([e.family() for e in self.operands])
         
     def pretty_print(self):
+        #### Should this call the family method?
         op = colored(' + ', self.depth())
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
@@ -315,7 +316,7 @@ class ProductKernelFamily(KernelFamily):
         return sum([e.num_params() for e in self.operands])
     
     def pretty_print(self):
-        op = colored(' * ', self.depth())
+        op = colored(' x ', self.depth())
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())
@@ -340,7 +341,8 @@ class ProductKernel(Kernel):
         return ProductKernelFamily([e.family() for e in self.operands])
         
     def pretty_print(self):
-        op = colored(' + ', self.depth())
+        #### Should this call the family method?
+        op = colored(' x ', self.depth())
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())

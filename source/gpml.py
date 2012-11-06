@@ -41,37 +41,43 @@ exit();
 """
 
 
-def run_matlab_code(code):
+def run_matlab_code(code, verbose=False):
     # Write to a temp script
     script_file = tempfile.mkstemp(suffix='.m')[1]
     stdout_file = tempfile.mkstemp(suffix='.txt')[1]
     stderr_file = tempfile.mkstemp(suffix='.txt')[1]
     
-    open(script_file, 'w').write(code)
+    f = open(script_file, 'w')
+    f.write(code)
+    f.close()
     
     call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
     subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
     
-    err_txt = open(stderr_file).read()
+    f = open(stderr_file)
+    err_txt = f.read()
+    f.close()
     
     if err_txt != '':
-        pass
+        #### TODO - need to catch error local to new MLG machines
 #        print 'Matlab produced the following errors:\n\n%s' % err_txt
-#        print
-#        print 'Script file (%s) contents : ==========================================' % script_file
-#        print open(script_file, 'r').read()
-#        print
-#        print 'Std out : =========================================='        
-#        print open(stdout_file, 'r').read()        
+        if verbose:
+            print
+            print 'Script file (%s) contents : ==========================================' % script_file
+            print open(script_file, 'r').read()
+            print
+            print 'Std out : =========================================='        
+            print open(stdout_file, 'r').read()        
         #raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
-    else:         
+    else:     
+        # Only remove temporary files if run was successful    
         os.remove(script_file)
         os.remove(stdout_file)
         os.remove(stderr_file)
     
     
 
-def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False):
+def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
@@ -81,7 +87,8 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
     scipy.io.savemat(temp_data_file, data)
     
-    print kernel_init_params
+    if verbose:
+        print kernel_init_params
     
     code = OPTIMIZE_KERNEL_CODE % {'datafile': temp_data_file,
                                    'writefile': temp_write_file,
