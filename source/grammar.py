@@ -32,8 +32,8 @@ class OneDGrammar:
         else:
             raise RuntimeError('Unknown type: %s' % tp)
         
-MULTI_D_RULES = [('A', ('+', 'A', 'B'), {'A': '1d', 'B': 'base'}),
-                 ('A', ('*', 'A', 'B'), {'A': '1d', 'B': 'base'}),
+MULTI_D_RULES = [#('A', ('+', 'A', 'B'), {'A': '1d', 'B': 'base'}),
+                 #('A', ('*', 'A', 'B'), {'A': '1d', 'B': 'base'}),
                  ('A', ('+', 'A', 'B'), {'A': 'multi', 'B': 'mask'}),
                  ('A', ('*', 'A', 'B'), {'A': 'multi', 'B': 'mask'}),
                  ('A', 'B', {'A': 'base', 'B': 'base'}),
