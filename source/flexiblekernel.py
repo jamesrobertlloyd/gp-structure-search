@@ -98,7 +98,7 @@ class SqExpKernel(BaseKernel):
         return 'SqExpKernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
     
     def pretty_print(self):
-        return colored('SqExp(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+        return colored('SE(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -119,7 +119,7 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
         return 3
     
     def pretty_print(self):
-        return colored('Periodic', self.depth())
+        return colored('PE', self.depth())
     
     def default(self):
         return SqExpPeriodicKernel(0., 0., 0.)
@@ -161,7 +161,7 @@ class SqExpPeriodicKernel(BaseKernel):
             (self.lengthscale, self.period, self.output_variance)
     
     def pretty_print(self):
-        return colored('Periodic(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance),
+        return colored('PE(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance),
                        self.depth())
     
     def __cmp__(self, other):
@@ -255,7 +255,8 @@ class MaskKernelFamily(KernelFamily):
         return self.base_kernel_family.num_params()
     
     def pretty_print(self):
-        return colored('Mask(%d, ' % self.active_dimension, self.depth()) + \
+        #return colored('Mask(%d, ' % self.active_dimension, self.depth()) + \
+        return colored('M(%d, ' % self.active_dimension, self.depth()) + \
             self.base_kernel_family.pretty_print() + \
             colored(')', self.depth())
     
@@ -293,7 +294,7 @@ class MaskKernel(Kernel):
         return '{@covMask, {%s, %s}}' % (dim_vec_str, self.base_kernel.gpml_kernel_expression())
     
     def pretty_print(self):
-        return colored('Mask(%d, ' % self.active_dimension, self.depth()) + \
+        return colored('M(%d, ' % self.active_dimension, self.depth()) + \
             self.base_kernel.pretty_print() + \
             colored(')', self.depth())
     
