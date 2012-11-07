@@ -97,7 +97,12 @@ for d = 1:num_hypers
     hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
-logdet = 2 * sum(log(diag(chol(hessian))));
+%%logdet = 2 * sum(log(diag(chol(hessian))));
+
+%% This way of computing logdet is robust to negative eigenvalues (which do happen, unfortunately) --David
+[vectors, values] = eig(hessian);
+values(values < eps) = eps;  %% HACK
+logdet = sum(log(diag(values)));
 laplace_nle = -(-nll_orig + (num_hypers/2)*log(2*pi) - logdet);
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'laplace_nle' );
