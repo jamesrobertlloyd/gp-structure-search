@@ -190,9 +190,13 @@ def sample_Carls_kernel():
 def compare_kernels_experiment():
     kernel1 = fk.Carls_Mauna_kernel()
     kernel2  = ( fk.SqExpKernel(-0.7, -1.3) + fk.SqExpKernel(4.8, 2.3) ) * \
-               ( fk.SqExpKernel(3.0, 0.5) + fk.SqExpPeriodicKernel(0.4, -0.0, -0.9) ) 
+               ( fk.SqExpKernel(3.0, 0.5) + fk.SqExpPeriodicKernel(0.4, -0.0, -0.9) )
+    #kernel2 = ( SqExp(ell=-0.8, sf=-1.4) + Periodic(ell=0.5, p=-0.3, sf=-1.1) + RQ(ell=1.9, sf=1.6, a=0.2) + ( SqExp(ell=4.5, sf=1.0) x Periodic(ell=0.6, p=-0.0, sf=0.1) )  )  
              
     X, y = load_mauna_original()
+    N_orig = X.shape[0]  # subsample data.
+    X = X[:N_orig//5, :]
+    y = y[:N_orig//5, :]     
      
     print "Carl's kernel"
     print kernel1.pretty_print()
@@ -203,7 +207,7 @@ def compare_kernels_experiment():
     print "Carl's NLL =", nll1 
     
     print "Our kernel"
-    print kernel1.pretty_print()
+    print kernel2.pretty_print()
     kernel_hypers2, nll2 = gpml.optimize_params(kernel2.gpml_kernel_expression(), kernel2.param_vector(), \
                                                 X, y, noise=np.log(0.19), iters=100)
     k2_opt = kernel2.family().from_param_vector(kernel_hypers2)
@@ -234,12 +238,13 @@ def try_expanded_kernels(X, y, D, seed_kernels, verbose=False):
         #### TODO - think about initialisation
         #init_params = np.random.normal(size=k.param_vector().size)
         init_params = k.param_vector()
-        kernel_hypers, nll, nlls = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True, verbose=verbose)
+        kernel_hypers, nll, nlls, laplace_nle = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True, verbose=verbose)
     
         if verbose:
             print "kernel_hypers =", kernel_hypers
         print
         print "nll =", nll
+        print "laplace =", laplace_nle
         
         BIC = 2 * nll + len(k.param_vector()) * np.log(len(y))
         print "BIC =", BIC
@@ -265,9 +270,9 @@ def simple_mauna_experiment():
     seed_kernels = [fk.SqExpKernel(0, 0)]
     
     X, y = load_mauna_original()
-    #N_orig = X.shape[0]  # subsample data.
-    #X = X[:N_orig//3, :]
-    #y = y[:N_orig//3, :] 
+    N_orig = X.shape[0]  # subsample data.
+    X = X[:N_orig//3, :]
+    y = y[:N_orig//3, :] 
     
     max_depth = 4
     k = 4    # Expand k best

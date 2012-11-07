@@ -84,7 +84,23 @@ hyp.lik = %(noise)s
 [hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
-save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls' );
+%% 'Compute Hessian numerically for laplace approx'
+num_hypers = length(hyp.cov);
+hessian = NaN(num_hypers, num_hypers);
+delta = 1e-6;
+a='Get original gradients';
+[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
+for d = 1:num_hypers
+    dhyp_opt = hyp_opt;
+    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
+    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+end
+hessian = 0.5 * (hessian + hessian');
+logdet = 2 * sum(log(diag(chol(hessian))));
+laplace_nle = -(-nll_orig + (num_hypers/2)*log(2*pi) - logdet);
+
+save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'laplace_nle' );
 exit();
 """
 
@@ -122,12 +138,13 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
     nlls = gpml_result['nlls'].ravel()
+    laplace_nle = gpml_result['laplace_nle'][0, 0]
 
     # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
 
     if return_all:
-        return kernel_hypers, nll, nlls
+        return kernel_hypers, nll, nlls, laplace_nle
     else:
         return kernel_hypers, nll
 
