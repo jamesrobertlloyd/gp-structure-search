@@ -62,20 +62,27 @@ Gaussian process (GP) models are used widely and successfully.  However, their e
 
 \section{INTRODUCTION}
 
-Expand on what was said in the abstract.  Cite \cite{rasmussen38gaussian}
+Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].  In general, learning the model class from data seems superior proposing the model beforehand.  In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.  Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
-\section{RELATED WORK}
+\section{GP STRUCTURE}
 
+[Standard GP intro \cite{rasmussen38gaussian}]
 
-Model search \cite{grosse2012exploiting}
+\section{MODEL-BASED SEARCH OVER MODELS}
 
-Additive Gaussian Processes \cite{duvenaud2011additive11}
+Bayesian optimization for hyper-parameter search: \cite{snoek2012practical}
 
-Genetic Programming work
+\subsection{Bayesian Optimization}
 
-Equation Learning
+\subsection{A Kernel between kernels}
 
-Hyperkernels
+Hyperkernels \cite{ong2002hyperkernels}
+
+\section{EXPERIMENTS}
+
+\subsection{Maunal Loa Atmoshperic Carbon Dioxide}
+
+As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/carls_kernel}
@@ -106,6 +113,41 @@ Hyperkernels
 \includegraphics[width=\columnwidth]{../figures/mauna_prior_draw_best_cov_v3}
 \caption{Another draw from our kernel.}
 \end{figure}
+
+\subsection{Load forecasting}
+
+\subsection{Synthetic experiments}
+
+\subsection{Real datasets}
+
+\section{RELATED WORK}
+
+Compositional Model search for unsupervsied learning: \cite{grosse2012exploiting}
+
+Additive Gaussian Processes \cite{duvenaud2011additive11}
+
+Hyperkernels \cite{ong2002hyperkernels}
+
+\subsection{Genetic Searches}
+
+Evolving kernel functions for SVMs by genetic programming: \cite{diosan2007evolving}
+
+A Genetic Programming based kernel construction and optimization method for Relevance Vector Machines: \cite{bing2010gp}
+
+\subsection{Equation Learning}
+
+Equation discovery with ecological applications \cite{dzeroski1999equation}
+
+%Discovering admissible model equations from observed data based on scale-types and identity constraints \cite{washio1999discovering}
+
+
+
+\section{DISCUSSION}
+
+Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
+
+
+\section{CONCLUSION}
 
 
 \subsubsection*{Acknowledgements}
