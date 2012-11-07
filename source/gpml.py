@@ -26,23 +26,35 @@ def run_matlab_code(code, verbose=False):
     f.close()
     
     call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
-    subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
+    
+    stdin = open(script_file)
+    stdout = open(stdout_file, 'w')
+    stderr = open(stderr_file, 'w')
+    
+#    subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
+    subprocess.call(call, stdin=stdin, stdout=stdout, stderr=stderr)
+    
+    stdin.close()
+    stdout.close()
+    stderr.close()
     
     f = open(stderr_file)
     err_txt = f.read()
     f.close()
     
+    if verbose:
+        print
+        print 'Script file (%s) contents : ==========================================' % script_file
+        print open(script_file, 'r').read()
+        print
+        print 'Std out : =========================================='        
+        print open(stdout_file, 'r').read()   
+    
     if err_txt != '':
         #### TODO - need to catch error local to new MLG machines
-#        print 'Matlab produced the following errors:\n\n%s' % err_txt
-        if verbose:
-            print
-            print 'Script file (%s) contents : ==========================================' % script_file
-            print open(script_file, 'r').read()
-            print
-            print 'Std out : =========================================='        
-            print open(stdout_file, 'r').read()        
-        raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
+#        print 'Matlab produced the following errors:\n\n%s' % err_txt    
+        pass 
+#        raise RuntimeError('Matlab produced the following errors:\n\n%s' % err_txt)
     else:     
         # Only remove temporary files if run was successful    
         os.remove(script_file)
@@ -100,7 +112,7 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
                                    'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
                                    'noise': str(noise),
                                    'iters': str(iters)}
-    run_matlab_code(code)
+    run_matlab_code(code, verbose)
 
     # Load in the file that GPML saved things to.
     gpml_result = scipy.io.loadmat(temp_write_file)

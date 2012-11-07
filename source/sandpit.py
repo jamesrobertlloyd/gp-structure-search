@@ -308,8 +308,44 @@ def plot_our_kernel():
     
     pylab.figure()
     pylab.plot(X, sigma)    
-    pylab.title('Our kernel');    
+    pylab.title('Our kernel');  
     
+def load_simple_gef_load():
+    '''Zone 1 and temperature station 2'''
+    
+    data_file = '../data/gef_load_simple.mat'
+    data = scipy.io.loadmat(data_file)
+    return data['X'], data['y']  
+    
+def simple_gef_load_experiment(verbose=True):
+    '''A first version of an experiment learning kernels'''
+    
+    seed_kernels = [fk.MaskKernel(2, 0, fk.SqExpKernel(0, 0)),
+                    fk.MaskKernel(2, 1, fk.SqExpKernel(0, 0))]
+    
+    X, y = load_simple_gef_load()
+    # subsample data.
+    X = X[0:99, :]
+    y = y[0:99, :] 
+    
+    max_depth = 5
+    k = 2    # Expand k best
+    nll_key = 1
+    BIC_key = 2
+    active_key = BIC_key
+    
+    
+    results = []
+    for dummy in range(max_depth):     
+        new_results = try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=verbose)
+        results = results + new_results
+        
+        print
+        results = sorted(results, key=lambda p: p[active_key], reverse=True)
+        for kernel, nll, BIC in results:
+            print nll, BIC, kernel.pretty_print()
+            
+        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
 
 if __name__ == '__main__':
     #kernel_test()
