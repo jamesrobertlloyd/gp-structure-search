@@ -98,10 +98,10 @@ def load_mauna():
     return data['X'], data['y']
 
 def load_mauna_original():
-    '''
+    """
     Original Mauna dataset made to match the experiments from Carl's book.
     For details, see data/preprocess_mauna_2004.m
-    '''
+    """
     
     data_file = '../data/mauna2003.mat'
     data = scipy.io.loadmat(data_file)
