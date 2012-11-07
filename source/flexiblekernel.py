@@ -17,7 +17,7 @@ def paren_colors():
     if config.COLOR_SCHEME == 'dark':
         return ['red', 'green', 'cyan', 'magenta', 'yellow']
     elif config.COLOR_SCHEME == 'light':
-        return ['red', 'green', 'blue', 'cyan', 'magenta']
+        return ['blue', 'red', 'magenta', 'green', 'cyan']
     else:
         raise RuntimeError('Unknown color scheme: %s' % config.COLOR_SCHEME)
 
