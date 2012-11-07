@@ -68,10 +68,10 @@ OPTIMIZE_KERNEL_CODE = r"""
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
 
-a='Load GPML'
+%% Load GPML
 addpath(genpath('%(gpml_path)s'));
 
-a='Set up model.'
+%% Set up model.
 meanfunc = {@meanConst}
 hyp.mean = mean(y)
 
@@ -84,7 +84,7 @@ hyp.lik = %(noise)s
 [hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end)
 
-%% 'Compute Hessian numerically for laplace approx'
+%% Compute Hessian numerically for laplace approx
 num_hypers = length(hyp.cov);
 hessian = NaN(num_hypers, num_hypers);
 delta = 1e-6;
@@ -151,7 +151,7 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
 
 # Some Matlab code to sample from a GP prior, in a spectral way.
 GENERATE_NOISELESS_DATA_CODE = r"""
-a='Load the data, it should contain X'
+%% Load the data, it should contain X
 load '%(datafile)s'
 
 addpath(genpath('%(gpml_path)s'));
@@ -196,7 +196,7 @@ def sample_from_gp_prior(kernel, X):
 
 # Matlab code to evaluate a covariance function at a bunch of locations.
 EVAL_KERNEL_CODE = r"""
-a='Load the data, it should contain X and x0.'
+%% Load the data, it should contain X and x0.
 load '%(datafile)s'
 
 a='Load GPML'
