@@ -98,7 +98,7 @@ def experiment(data_file, results_filename, max_depth=2, k=2, verbose=True):
     with open(results_filename, 'w') as outfile:
         outfile.write('Experiment results for\n datafile = %s\n max_depth = %f\n k = %f\n\n' % (data_file, max_depth, k)) 
         for kernel, nll, laplace in results:
-            outfile.write( 'nll=%f, laplace=%f, kernel=%s' % (nll, laplace, kernel.pretty_print()))
+            outfile.write( 'nll=%f, laplace=%f, kernel=%s\n' % (nll, laplace, kernel.__repr__()))
 
 
 if __name__ == '__main__':

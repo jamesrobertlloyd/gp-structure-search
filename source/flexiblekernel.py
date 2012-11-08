@@ -297,6 +297,10 @@ class MaskKernel(Kernel):
         return colored('M(%d, ' % self.active_dimension, self.depth()) + \
             self.base_kernel.pretty_print() + \
             colored(')', self.depth())
+            
+    def __repr__(self):
+        return 'covMask(ndim=%d, active_dimension=%d, base_kernel=%f)' % \
+            (self.lengthscale, self.period, self.base_kernel.__repr__())            
     
     def param_vector(self):
         return self.base_kernel.param_vector()
@@ -359,6 +363,10 @@ class SumKernel(Kernel):
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())
+            
+    def __repr__(self):
+        return 'SumKernel(%s)' % \
+            ('[ ' + ', '.join([o.__repr__() for o in self.operands]) + ' ]')                
     
     def gpml_kernel_expression(self):
         return '{@covSum, {%s}}' % ', '.join(e.gpml_kernel_expression() for e in self.operands)
@@ -432,6 +440,10 @@ class ProductKernel(Kernel):
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())
+            
+    def __repr__(self):
+        return 'ProductKernel(%s)' % \
+            ('[ ' + ', '.join([o.__repr__() for o in self.operands]) + ' ]')              
     
     def gpml_kernel_expression(self):
         return '{@covProd, {%s}}' % ', '.join(e.gpml_kernel_expression() for e in self.operands)
