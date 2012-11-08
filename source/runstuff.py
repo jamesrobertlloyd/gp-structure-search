@@ -20,7 +20,8 @@ def call_cluster(k=3, max_depth=2):
     fear_string = '''. /usr/local/grid/divf2/common/settings.sh; qsub -l lr=0 /home/mlg/dkd23/git/gpss_stable/source/run_python.sh /home/mlg/dkd23/git/gpss_stable/%(dataset)s /home/mlg/dkd23/git/gpss_stable/%(results_filename)s %(depth)s %(k)s'''
     
     for data_file in datasets:
-        results_filename = 'experiment_output_%s_depth=%d_k=%d' % ( data_file, max_depth, k )
+        filename_good_part = os.path.split(data_file)[-1].split('.')[0]
+        results_filename = 'experiment_output_%s_depth=%d_k=%d' % ( filename_good_part, max_depth, k )
         command_str = fear_string % {'dataset' : data_file, 'results_filename' : results_filename, 'depth' : max_depth, 'k' : k }
         os.system(command_str)
         
