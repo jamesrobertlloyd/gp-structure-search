@@ -7,7 +7,7 @@ Created Nov 2012
 '''
 
 import numpy as np
-import termcolor
+#import termcolor
 
 import config
 
@@ -24,7 +24,7 @@ def paren_colors():
 def colored(text, depth):
     colors = paren_colors()
     color = colors[depth % len(colors)]
-    return termcolor.colored(text, color, attrs=['bold'])
+    return text #termcolor.colored(text, color, attrs=['bold'])
 
 class KernelFamily:
     pass

@@ -15,6 +15,7 @@ import numpy as np
 import pylab
 import scipy.io
 import sys
+import os
 
 def kernel_test():
     k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
@@ -23,18 +24,6 @@ def kernel_test():
     print '[%s]' % k.param_vector()
     print 'kernel_test complete'
     
-def expression_test():
-    k1 = fk.MaskKernel(4, 0, fk.SqExpKernel(0, 0))
-    k2 = fk.MaskKernel(4, 1, fk.SqExpPeriodicKernel(1, 1, 1))
-    k3 = fk.MaskKernel(4, 2, fk.SqExpKernel(3, 4))
-    k4 = fk.MaskKernel(4, 3, fk.SqExpPeriodicKernel(2, 2, 2))
-    f = fk.ProductKernel(operands = [k3, k4])
-    e = fk.SumKernel(operands = [k1, k2, f])
-    print e.pretty_print()
-    print e.gpml_kernel_expression()
-    print '[%s]' % e.param_vector()
-    print 'expression_test complete'
-
 def base_kernel_test():
     print [k.pretty_print() for k in fk.base_kernels(1)]
     print 'base_kernel_test complete'
@@ -349,6 +338,24 @@ def full_gef_load_experiment(zone=1, max_depth=5, verbose=True):
             print nll, BIC, kernel.pretty_print()
             
         seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
+        
+        
+def call_cluster(k=3, max_depth=2):
+    '''Run experiments on all data sets on the cluster'''
+    datasets = ['data/mauna2003.mat', \
+                'data/abalone_500.mat', \
+                'data/bach_synth_r_200.mat', \
+                'data/r_concrete_500.mat', \
+                'data/housing.mat' \
+               ]
+    
+    fear_string = '''. /usr/local/grid/divf2/common/settings.sh; qsub -l lr=0 -o "/home/mlg/dkd23/large_results/fear_logs_gpss/gpss_run_log_%(dataset)s.txt" -e "/home/mlg/dkd23/large_results/fear_logs_gpss/gpss_error_log_%(dataset)s.txt" /home/mlg/dkd23/git/gp-structure-search/python structure_seach.py %(dataset)s %(results_filename)s %(depth)s %(k)s'''
+    
+    for data_file in datasets:
+        results_filename = 'experiment_output_%s_depth=%d_k=%d' % ( data_file, max_depth, k )
+        command_str = fear_string % {'dataset' : data_file, 'results_filename' : results_filename, 'depth' : max_depth, 'k' : k }
+        print command_str
+        #os.system(command_str)
 
 if __name__ == '__main__':
     #kernel_test()
@@ -357,5 +364,6 @@ if __name__ == '__main__':
     #expand_test()
     #call_gpml_test()
     #sample_from_gp_prior()
-    if sys.flags.debug or __debug__:
-        print 'Debug mode'
+    #if sys.flags.debug or __debug__:
+    #    print 'Debug mode'
+    call_cluster()

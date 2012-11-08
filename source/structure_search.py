@@ -115,4 +115,11 @@ if __name__ == '__main__':
     data_file = sys.argv[1];
     results_filename = sys.argv[2];
     max_depth = int(sys.argv[3]);
-    experiment(data_file, results_filename, max_depth=max_depth)
+    k = int(sys.argv[4]);
+    
+    print 'Datafile=%s' % data_file
+    print 'results_filename=%s' % results_filename
+    print 'max_depth=%d' % max_depth
+    print 'k=%d' % k
+    
+    experiment(data_file, results_filename, max_depth=max_depth, k=k)
