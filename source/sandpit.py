@@ -351,4 +351,5 @@ if __name__ == '__main__':
     #sample_from_gp_prior()
     #if sys.flags.debug or __debug__:
     #    print 'Debug mode'
-    call_cluster()
+    #call_cluster()
+    pass
