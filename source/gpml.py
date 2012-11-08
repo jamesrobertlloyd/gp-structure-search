@@ -17,9 +17,9 @@ import config
 
 def run_matlab_code(code, verbose=False):
     # Write to a temp script
-    script_file = tempfile.mkstemp(suffix='.m')[1]
-    stdout_file = tempfile.mkstemp(suffix='.txt')[1]
-    stderr_file = tempfile.mkstemp(suffix='.txt')[1]
+    (fd1, script_file) = tempfile.mkstemp(suffix='.m')
+    (fd2, stdout_file) = tempfile.mkstemp(suffix='.txt')
+    (fd3, stderr_file) = tempfile.mkstemp(suffix='.txt')
     
     f = open(script_file, 'w')
     f.write(code)
@@ -41,6 +41,10 @@ def run_matlab_code(code, verbose=False):
     f = open(stderr_file)
     err_txt = f.read()
     f.close()
+    
+    os.close(fd1)
+    os.close(fd2)
+    os.close(fd3)    
     
     if verbose:
         print
