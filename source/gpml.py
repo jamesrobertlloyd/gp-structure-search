@@ -101,6 +101,7 @@ hessian = 0.5 * (hessian + hessian');
 
 %% This way of computing logdet is robust to negative eigenvalues (which do happen, unfortunately) --David
 [vectors, values] = eig(hessian);
+num_negative_eigenvalues = sum(values < eps) 
 values(values < eps) = eps;  %% HACK
 logdet = sum(log(diag(values)));
 laplace_nle = -(-nll_orig + (num_hypers/2)*log(2*pi) - logdet);

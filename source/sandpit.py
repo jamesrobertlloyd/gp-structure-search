@@ -9,6 +9,7 @@ Created on Nov 2012
 import flexiblekernel as fk
 import grammar
 import gpml
+import structure_search
 
 import numpy as np
 import pylab
@@ -217,53 +218,6 @@ def compare_kernels_experiment():
     
          
 
-def try_expanded_kernels(X, y, D, seed_kernels, verbose=False):    
-    g = grammar.MultiDGrammar(D)
-    print 'Seed kernels :'
-    for k in seed_kernels:
-        print k.pretty_print()
-    kernels = []
-    for k in seed_kernels:
-        kernels = kernels + grammar.expand(k, g)
-    kernels = grammar.remove_duplicates(kernels)
-    print 'Trying the following kernels :'
-    for k in kernels:
-        print k.pretty_print()
-            
-    results = []
-
-    # Call GPML with each of the expanded kernels
-    pylab.figure()
-    for k in kernels:
-        #### TODO - think about initialisation
-        #init_params = np.random.normal(size=k.param_vector().size)
-        init_params = k.param_vector()
-        kernel_hypers, nll, nlls, laplace_nle = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True, verbose=verbose)
-    
-        if verbose:
-            print "kernel_hypers =", kernel_hypers
-        print
-        print "nll =", nll
-        print "laplace =", laplace_nle
-        
-        BIC = 2 * nll + len(k.param_vector()) * np.log(len(y))
-        print "BIC =", BIC
-        
-        k_opt = k.family().from_param_vector(kernel_hypers)
-        if verbose:
-            print k_opt.gpml_kernel_expression()
-        print k_opt.pretty_print()
-        if verbose:
-            print '[%s]' % k_opt.param_vector()
-        
-        pylab.semilogx(range(1, nlls.size+1), nlls)
-        
-        results.append((k_opt, nll, BIC))
-        
-        pylab.draw()  
-        
-    return results
-
 def simple_mauna_experiment():
     '''A first version of an experiment learning kernels'''
     
@@ -277,18 +231,17 @@ def simple_mauna_experiment():
     max_depth = 4
     k = 4    # Expand k best
     nll_key = 1
-    BIC_key = 2
-    
+    laplace_key = 2
     
     results = []
     for dummy in range(max_depth):     
-        new_results = try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=False)
+        new_results = structure_search.try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=False)
         results = results + new_results
         
         print
         results = sorted(results, key=lambda p: p[nll_key], reverse=True)
-        for kernel, nll, BIC in results:
-            print nll, BIC, kernel.pretty_print()
+        for kernel, nll, laplace in results:
+            print nll, laplace, kernel.pretty_print()
             
         seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[nll_key])[0:k]]
 
@@ -342,7 +295,7 @@ def simple_gef_load_experiment(verbose=True):
     
     results = []
     for dummy in range(max_depth):     
-        new_results = try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=verbose)
+        new_results = structure_search.try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=verbose)
         results = results + new_results
         
         print
