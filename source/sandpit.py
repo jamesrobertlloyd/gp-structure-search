@@ -273,6 +273,13 @@ def load_simple_gef_load():
     
     data_file = '../data/gef_load_simple.mat'
     data = scipy.io.loadmat(data_file)
+    return data['X'], data['y'] 
+    
+def load_full_gef_load():
+    '''20 Zones in y, time and 11 temp stations in X'''
+    
+    data_file = '../data/gef_load_full_Xy.mat'
+    data = scipy.io.loadmat(data_file)
     return data['X'], data['y']  
     
 def simple_gef_load_experiment(verbose=True):
@@ -296,6 +303,44 @@ def simple_gef_load_experiment(verbose=True):
     results = []
     for dummy in range(max_depth):     
         new_results = structure_search.try_expanded_kernels(X, y, D=2, seed_kernels=seed_kernels, verbose=verbose)
+        results = results + new_results
+        
+        print
+        results = sorted(results, key=lambda p: p[active_key], reverse=True)
+        for kernel, nll, BIC in results:
+            print nll, BIC, kernel.pretty_print()
+            
+        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]] 
+    
+def full_gef_load_experiment(zone=1, max_depth=5, verbose=True):
+    '''Round 2'''
+    
+#    seed_kernels = [fk.MaskKernel(2, 0, fk.SqExpKernel(0, 0)),
+#                    fk.MaskKernel(2, 1, fk.SqExpKernel(0, 0))]
+
+    seed_kernels = [fk.MaskKernel(12, i, fk.SqExpKernel(0., 0.))  for i in range(12)] + \
+                   [fk.MaskKernel(12, i, fk.SqExpPeriodicKernel(0., 0., 0.))  for i in range(12)] + \
+                   [fk.MaskKernel(12, i, fk.RQKernel(0., 0., 0.))  for i in range(12)]
+    
+    X, y = load_full_gef_load()
+    # subsample data.
+    X = X[0:299, :]
+    y = y[0:299, zone-1] 
+    
+#    max_depth = 5
+    k = 2    # Expand k best
+    nll_key = 1
+    BIC_key = 2
+    active_key = BIC_key
+    
+    
+    results = []
+    for i in range(max_depth):     
+        if i:
+            expand = True
+        else:
+            expand = False
+        new_results = structure_search.try_expanded_kernels(X, y, D=12, seed_kernels=seed_kernels, expand=expand, verbose=verbose)
         results = results + new_results
         
         print

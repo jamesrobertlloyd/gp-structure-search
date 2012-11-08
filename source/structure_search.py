@@ -25,14 +25,24 @@ def load_mat(data_file):
     return data['X'], data['y'], np.shape(data['X'])[1]
 
 
-def try_expanded_kernels(X, y, D, seed_kernels, verbose=False):    
+def try_expanded_kernels(X, y, D, seed_kernels, expand=True, verbose=False):    
+    '''
+    expand: if false, just tries kernels that were passed in.
+    TODO: separate expansion and trying
+    '''
+
+            
     g = grammar.MultiDGrammar(D)
     print 'Seed kernels :'
     for k in seed_kernels:
         print k.pretty_print()
-    kernels = []
-    for k in seed_kernels:
-        kernels = kernels + grammar.expand(k, g)
+    if expand:
+        kernels = []
+        for k in seed_kernels:
+            kernels = kernels + grammar.expand(k, g)
+        kernels = grammar.remove_duplicates(kernels)
+    else:
+        kernels = seed_kernels
     kernels = grammar.remove_duplicates(kernels)
     print 'Trying the following kernels :'
     for k in kernels:
