@@ -708,17 +708,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
             for kernel, nll, laplace, BIC in results:
                 outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))
 
-if __name__ == '__main__':
-    #kernel_test()
-    #expression_test()
-    #base_kernel_test()
-    #expand_test()
-    #call_gpml_test()
-    #sample_from_gp_prior()
-    #if sys.flags.debug or __debug__:
-    #    print 'Debug mode'
-    #call_cluster()
-    #pass
+def main():
     # Run everything
     fear_experiment('../data/abalone_500.mat', '..results/abalone_500_01.txt', max_depth=4, k=3)
     fear_experiment('../data/bach_synth_r_200.mat', '..results/bach_synth_r_200_01.txt', max_depth=4, k=3)
@@ -736,4 +726,17 @@ if __name__ == '__main__':
     fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '..results/unicycle_pitch_ang_vel_400_01.txt', max_depth=4, k=3)
     fear_experiment('../data/gef_load_full_Xy.mat', '..results/gef_load_500_Z01_01.txt', max_depth=4, k=3, subset=range(500), y_dim=1)
     fear_experiment('../data/gef_load_full_Xy.mat', '..results/gef_load_500_Z09_01.txt', max_depth=4, k=3, subset=range(500), y_dim=9)
+
+if __name__ == '__main__':
+    #kernel_test()
+    #expression_test()
+    #base_kernel_test()
+    #expand_test()
+    #call_gpml_test()
+    #sample_from_gp_prior()
+    #if sys.flags.debug or __debug__:
+    #    print 'Debug mode'
+    #call_cluster()
+    #pass
+    main()
 
