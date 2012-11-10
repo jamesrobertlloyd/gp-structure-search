@@ -422,6 +422,7 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
     f.write(code)
     f.close()
     
+    #### Local file reference without extension - MATLAB fails silently otherwise
     f = open(shell_file, 'w')
     f.write('/usr/local/apps/matlab/matlabR2011b/bin/matlab -nosplash -nojvm -nodisplay -r ' + script_file.split('/')[-1].split('.')[0] + '\n')
     f.close()
