@@ -658,7 +658,7 @@ def fear_expand_kernels(D, seed_kernels, verbose=False):
     return (kernels)
 
 
-def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=10, n_sleep_timeout=6, re_submit_wait=60):
+def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=60, n_sleep_timeout=5, re_submit_wait=300):
     '''Recursively search for the best kernel'''
 
     X, y, D = fear_load_mat(data_file, y_dim)
@@ -718,4 +718,22 @@ if __name__ == '__main__':
     #if sys.flags.debug or __debug__:
     #    print 'Debug mode'
     #call_cluster()
-    pass
+    #pass
+    # Run everything
+    fear_experiment('../data/abalone_500.mat', '..results/abalone_500_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/bach_synth_r_200.mat', '..results/bach_synth_r_200_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/housing.mat', '..results/housing_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/mauna2003.mat', '..results/mauna2003_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/mauna2011.mat', '..results/mauna2011_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/maunaloa2004.mat', '..results/maunaloa2004_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/preprocess_mauna_2004.mat', '..results/preprocess_mauna_2004_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/prostate.mat', '..results/prostate_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/pumadyn256.mat', '..results/pumadyn256_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/r_concrete_100.mat', '..results/r_concrete_100_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/r_concrete_500.mat', '..results/r_concrete_500_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/r_solar_500.mat', '..results/r_solar_500_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/unicycle_pitch_angle_400.mat', '..results/unicycle_pitch_angle_400_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '..results/unicycle_pitch_ang_vel_400_01.txt', max_depth=4, k=3)
+    fear_experiment('../data/gef_load_full_Xy.mat', '..results/gef_load_500_Z01_01.txt', max_depth=4, k=3, subset=range(500), y_dim=1)
+    fear_experiment('../data/gef_load_full_Xy.mat', '..results/gef_load_500_Z09_01.txt', max_depth=4, k=3, subset=range(500), y_dim=9)
+
