@@ -7,7 +7,7 @@ Created Nov 2012
 '''
 
 import numpy as np
-#import termcolor
+import termcolor
 
 import config
 
@@ -24,7 +24,8 @@ def paren_colors():
 def colored(text, depth):
     colors = paren_colors()
     color = colors[depth % len(colors)]
-    return text #termcolor.colored(text, color, attrs=['bold'])
+    #return text
+    return termcolor.colored(text, color, attrs=['bold'])
 
 class KernelFamily:
     pass
@@ -299,8 +300,8 @@ class MaskKernel(Kernel):
             colored(')', self.depth())
             
     def __repr__(self):
-        return 'covMask(ndim=%d, active_dimension=%d, base_kernel=%f)' % \
-            (self.lengthscale, self.period, self.base_kernel.__repr__())            
+        return 'covMask(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
+            (self.ndim, self.active_dimension, self.base_kernel.__repr__())            
     
     def param_vector(self):
         return self.base_kernel.param_vector()
