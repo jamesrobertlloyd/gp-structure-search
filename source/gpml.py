@@ -125,8 +125,8 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
         noise = np.log(np.var(y)/10)   # Just a heuristic.
         
     data = {'X': X, 'y': y}
-    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
-    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
+    (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
     
     if verbose:
@@ -143,6 +143,9 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
 
     # Load in the file that GPML saved things to.
     gpml_result = scipy.io.loadmat(temp_write_file)
+    
+    os.close(fd1)
+    os.close(fd2)
     os.remove(temp_data_file)
     os.remove(temp_write_file)
 
@@ -183,8 +186,8 @@ exit();
 def sample_from_gp_prior(kernel, X):
 
     data = {'X': X}
-    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
-    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
+    (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
     
     kernel_params = kernel.param_vector()
@@ -198,6 +201,9 @@ def sample_from_gp_prior(kernel, X):
 
     # Load in the file that GPML saved things to.
     gpml_result = scipy.io.loadmat(temp_write_file)
+    
+    os.close(fd1)
+    os.close(fd2)
     os.remove(temp_data_file)
     os.remove(temp_write_file)
 
@@ -226,8 +232,8 @@ exit();
 def plot_kernel(kernel, X):
 
     data = {'X': X, 'x0': 0.0}
-    temp_data_file = tempfile.mkstemp(suffix='.mat')[1]
-    temp_write_file = tempfile.mkstemp(suffix='.mat')[1]
+    (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
+    (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
     
     kernel_params = kernel.param_vector()
@@ -241,6 +247,9 @@ def plot_kernel(kernel, X):
 
     # Load in the file that GPML saved things to.
     gpml_result = scipy.io.loadmat(temp_write_file)
+    
+    os.close(fd1)
+    os.close(fd2)
     os.remove(temp_data_file)
     os.remove(temp_write_file)
 
