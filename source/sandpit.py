@@ -424,7 +424,7 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
     
     #### Local file reference without extension - MATLAB fails silently otherwise
     f = open(shell_file, 'w')
-    f.write('/usr/local/apps/matlab/matlabR2011b/bin/matlab -nosplash -nojvm -nodisplay -r ' + script_file.split('/')[-1].split('.')[0] + '\n')
+    f.write('/usr/local/apps/matlab/matlabR2011b/bin/matlab -nosplash -nojvm -nodisplay -singleCompThread -r ' + script_file.split('/')[-1].split('.')[0] + '\n')
     f.close()
     
     # Copy this to fear
@@ -567,9 +567,9 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
         
     # Let the scripts run
     
-    if verbose:
-        print 'Giving the jobs some time to run'
-    time.sleep(re_submit_wait)
+#    if verbose:
+#        print 'Giving the jobs some time to run'
+#    time.sleep(re_submit_wait)
         
     # Wait for and read in results
     
@@ -629,6 +629,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                 if verbose:
                     print 'Giving the jobs some time to run'
                 time.sleep(re_submit_wait)
+                sleep_count = 0
             
     fear.close()
     
@@ -659,7 +660,7 @@ def fear_expand_kernels(D, seed_kernels, verbose=False):
     return (kernels)
 
 
-def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=60, n_sleep_timeout=5, re_submit_wait=300):
+def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60):
     '''Recursively search for the best kernel'''
 
     X, y, D = fear_load_mat(data_file, y_dim)
@@ -712,8 +713,8 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
 def main():
     # Run everything
 #    fear_experiment('../data/abalone_500.mat', '../results/abalone_500_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/housing.mat', '../results/housing_01.txt', max_depth=4, k=3)
+#    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_01.txt', max_depth=4, k=3)
+#    fear_experiment('../data/housing.mat', '../results/housing_01.txt', max_depth=4, k=3)
     fear_experiment('../data/mauna2003.mat', '../results/mauna2003_01.txt', max_depth=4, k=3)
     fear_experiment('../data/mauna2011.mat', '../results/mauna2011_01.txt', max_depth=4, k=3)
     fear_experiment('../data/maunaloa2004.mat', '../results/maunaloa2004_01.txt', max_depth=4, k=3)
