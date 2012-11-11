@@ -54,6 +54,7 @@ pip-log.txt
 *.maf
 *.mtc
 *.mtc0
+*.pdf
 
 *~
 
