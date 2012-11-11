@@ -26,6 +26,7 @@ def run_matlab_code(code, verbose=False):
     f.close()
     
     call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
+    print call
     
     stdin = open(script_file)
     stdout = open(stdout_file, 'w')

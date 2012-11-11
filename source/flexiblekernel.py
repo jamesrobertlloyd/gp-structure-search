@@ -7,7 +7,11 @@ Created Nov 2012
 '''
 
 import numpy as np
-#import termcolor
+try:
+    import termcolor
+    has_termcolor = True
+except:
+    has_termcolor = False
 
 import config
 
@@ -22,9 +26,12 @@ def paren_colors():
         raise RuntimeError('Unknown color scheme: %s' % config.COLOR_SCHEME)
 
 def colored(text, depth):
-    colors = paren_colors()
-    color = colors[depth % len(colors)]
-    return text #termcolor.colored(text, color, attrs=['bold'])
+    if has_termcolor:
+        colors = paren_colors()
+        color = colors[depth % len(colors)]
+        return termcolor.colored(text, color, attrs=['bold'])
+    else:
+        return text
 
 class KernelFamily:
     pass
