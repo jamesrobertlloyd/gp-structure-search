@@ -6,6 +6,7 @@
 \usepackage{natbib}
 \usepackage{hyperref}
 \usepackage{color}
+\usepackage{wasysym}
 \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
 \hypersetup{ %
     pdftitle={},
@@ -20,6 +21,17 @@
     filecolor=mydarkblue,
     urlcolor=mydarkblue,
     pdfview=FitH}
+    
+\input{include/commenting.tex}
+
+%% For submission, make all render blank.
+%\renewcommand{\LATER}[1]{}
+%\renewcommand{\fLATER}[1]{}
+%\renewcommand{\TBD}[1]{}
+%\renewcommand{\fTBD}[1]{}
+%\renewcommand{\PROBLEM}[1]{}
+%\renewcommand{\fPROBLEM}[1]{}
+%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
     
     
 % If your paper is accepted, change the options for the package
@@ -173,6 +185,14 @@ As an example of a GP modeling problem where choosing an appropriate structure i
 \end{figure}
 
 \subsubsection{Load forecasting}
+
+Cite Tao Hong.
+Reference that this is similar to Mauna Loa but we also have a temperature variable selection problem.
+Mention recent Kaggle competition.
+Discuss zones 1 and 9 as contrasting problems.
+
+Additive interpretation does not work for plotting since we might be additive in the same dimension \frownie.
+\TBD{Any thoughts on how to get around this?}
 
 \subsection{Synthetic experiments}
 
