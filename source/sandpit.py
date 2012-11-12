@@ -660,7 +660,8 @@ def fear_expand_kernels(D, seed_kernels, verbose=False):
     return (kernels)
 
 
-def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60):
+def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
+                    description=''):
     '''Recursively search for the best kernel'''
 
     X, y, D = fear_load_mat(data_file, y_dim)
@@ -704,28 +705,74 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
     # Write results to a file
     results = sorted(results, key=lambda p: p[active_key], reverse=True)
     with open(results_filename, 'w') as outfile:
-        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n\n' % (data_file, y_dim, subset, max_depth, k)) 
+        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' % (data_file, y_dim, subset, max_depth, k, description)) 
         for (i, results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for kernel, nll, laplace, BIC in results:
                 outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))
+                
+def plot_gef_load_Z01():
+    # This kernel was chosen from a run of gef_load datapoints.
+#    kernel = eval(ProductKernel([ covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=0.268353, output_variance=-0.104149, alpha=-2.105742)), covMask(ndim=12, active_dimension=9, base_kernel=SqExpKernel(lengthscale=1.160242, output_variance=0.004344)), SumKernel([ covMask(ndim=12, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.823413, period=0.000198, output_variance=-0.917064)), covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=-0.459219, output_variance=-0.077250, alpha=-2.212718)) ]) ]))
+
+    X, y, D = fear_load_mat('../data/gef_load_full_Xy.mat', 1)
+    
+    kernel = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+             (fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064)) + fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718)))
+    
+    # Todo: set random seed.
+    sample = gpml.sample_from_gp_prior(kernel, X[0:499,:])
+    
+    pylab.figure()
+    pylab.plot(X[0:499,0], y[0:499])
+    pylab.title('GEF load Z01 - first 500 data points')
+    pylab.xlabel('Time')
+    pylab.ylabel('Load')
+    
+    pylab.figure()
+    pylab.plot(X[0:499,0], sample)
+    pylab.title('GEF load Z01 - a sample from the learnt kernel')
+    pylab.xlabel('Time')
+    pylab.ylabel('Load')
+    
+    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
+               
+    posterior_mean_1 = gpml.posterior_mean(kernel, kernel_1, X[0:499,:], y[0:499])
+    
+    pylab.figure()
+    pylab.plot(X[0:499,0], posterior_mean_1)
+    pylab.title('GEF load Z01 - periodic posterior mean component')
+    pylab.xlabel('Time')
+    pylab.ylabel('Load')
+    
+    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
+               
+    posterior_mean_2 = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499])
+    
+    pylab.figure()
+    pylab.plot(X[0:499,0], posterior_mean_2)
+    pylab.title('GEF load Z01 - smooth posterior mean component')
+    pylab.xlabel('Time')
+    pylab.ylabel('Load')
 
 def main():
     # Run everything
 #    fear_experiment('../data/abalone_500.mat', '../results/abalone_500_01.txt', max_depth=4, k=3)
-#    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_01.txt', max_depth=4, k=3)
-#    fear_experiment('../data/housing.mat', '../results/housing_01.txt', max_depth=4, k=3)
-#    fear_experiment('../data/mauna2003.mat', '../results/mauna2003_01.txt', max_depth=4, k=3)
-#    fear_experiment('../data/mauna2011.mat', '../results/mauna2011_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/prostate.mat', '../results/prostate_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/pumadyn256.mat', '../results/pumadyn256_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/r_concrete_100.mat', '../results/r_concrete_100_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/r_concrete_500.mat', '../results/r_concrete_500_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/r_solar_500.mat', '../results/r_solar_500_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/unicycle_pitch_angle_400.mat', '../results/unicycle_pitch_angle_400_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z01_01.txt', max_depth=4, k=3, subset=range(500), y_dim=1)
-    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z09_01.txt', max_depth=4, k=3, subset=range(500), y_dim=9)
+    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z01_02.txt', max_depth=6, k=5, subset=range(500), y_dim=1, description = 'BIC, 0 init')
+    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z09_02.txt', max_depth=6, k=5, subset=range(500), y_dim=9, description = 'BIC, 0 init')
+    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/housing.mat', '../results/housing_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/mauna2003.mat', '../results/mauna2003_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/mauna2011.mat', '../results/mauna2011_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/prostate.mat', '../results/prostate_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/pumadyn256.mat', '../results/pumadyn256_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/r_concrete_100.mat', '../results/r_concrete_100_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/r_concrete_500.mat', '../results/r_concrete_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/r_solar_500.mat', '../results/r_solar_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/unicycle_pitch_angle_400.mat', '../results/unicycle_pitch_angle_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
 
 if __name__ == '__main__':
     #kernel_test()

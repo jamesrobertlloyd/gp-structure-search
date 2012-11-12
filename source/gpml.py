@@ -255,5 +255,82 @@ def plot_kernel(kernel, X):
 
     return gpml_result['sigma'].ravel()
 
+# Matlab code to compute mean fit
+MEAN_FUNCTION_CODE = r"""
+%% Load the data, it should contain X, y
+load '%(datafile)s'
+
+addpath(genpath('%(gpml_path)s'));
+
+%% Set up model.
+meanfunc = {@meanConst}
+hyp.mean = mean(y)
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = %(noise)s
+
+[hyp, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
+
+%%HACK
+
+hyp.cov = %(kernel_params)s
+K = feval(covfunc{:}, hyp.cov, X);
+K = K + exp(hyp.lik * 2) * eye(size(K));
+
+%% We have now found appropriate mean and noise parameters
+
+component_covfunc = %(component_kernel_family)s
+hyp.cov = %(component_kernel_params)s
+
+component_K = feval(component_covfunc{:}, hyp.cov, X);
+
+posterior_mean = component_K * (K \ y);
+
+save( '%(writefile)s', 'posterior_mean' );
+exit();
+"""
+
+
+def posterior_mean (kernel, component_kernel, X, y, noise=None, iters=300):
+    #### Problem - we are not storing the learnt mean and noise - will need to re-learn - might not be especially correct!
+    #### This is therefore just a placeholder
+    if X.ndim == 1:
+        X = X[:, nax]
+    if y.ndim == 1:
+        y = y[:, nax]
+        
+    if noise is None:
+        noise = np.log(np.var(y)/10)   # Just a heuristic.
+        
+    data = {'X': X, 'y': y}
+    (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
+    (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
+    scipy.io.savemat(temp_data_file, data)
+    
+    code = MEAN_FUNCTION_CODE % {'datafile': temp_data_file,
+                                 'writefile': temp_write_file,
+                                 'gpml_path': config.GPML_PATH,
+                                 'kernel_family': kernel.gpml_kernel_expression(),
+                                 'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+                                 'component_kernel_family': component_kernel.gpml_kernel_expression(),
+                                 'component_kernel_params': '[ %s ]' % ' '.join(str(p) for p in component_kernel.param_vector()),
+                                 'noise': str(noise),
+                                 'iters': str(iters)}
+    
+    run_matlab_code(code)
+
+    # Load in the file that GPML saved things to.
+    gpml_result = scipy.io.loadmat(temp_write_file)
+    
+    os.close(fd1)
+    os.close(fd2)
+    os.remove(temp_data_file)
+    os.remove(temp_write_file)
+
+    return gpml_result['posterior_mean'].ravel()
+
 
 
