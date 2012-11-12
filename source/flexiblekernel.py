@@ -306,7 +306,7 @@ class MaskKernel(Kernel):
             colored(')', self.depth())
             
     def __repr__(self):
-        return 'covMask(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
+        return 'MaskKernel(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
             (self.ndim, self.active_dimension, self.base_kernel.__repr__())            
     
     def param_vector(self):
