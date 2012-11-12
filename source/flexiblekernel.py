@@ -107,6 +107,9 @@ class SqExpKernel(BaseKernel):
     def pretty_print(self):
         return colored('SE(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
     
+    def latex_print(self):
+        return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+    
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
@@ -170,6 +173,9 @@ class SqExpPeriodicKernel(BaseKernel):
     def pretty_print(self):
         return colored('PE(ell=%1.1f, p=%1.1f, sf=%1.1f)' % (self.lengthscale, self.period, self.output_variance),
                        self.depth())
+        
+    def latex_print(self):
+        return 'PE(\\ell=%1.1f, p=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.period, self.output_variance)          
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -235,6 +241,10 @@ class RQKernel(BaseKernel):
     def pretty_print(self):
         return colored('RQ(ell=%1.1f, sf=%1.1f, a=%1.1f)' % (self.lengthscale, self.output_variance, self.alpha),
                        self.depth())
+        
+    def latex_print(self):
+        return 'RQ(\\ell=%1.1f, \\alpha=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.alpha, self.output_variance)          
+           
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -305,6 +315,9 @@ class MaskKernel(Kernel):
             self.base_kernel.pretty_print() + \
             colored(')', self.depth())
             
+    def latex_print(self):
+        return 'M_%d \\left(' % self.active_dimension + self.base_kernel.latex_print() + '\\right)'                 
+            
     def __repr__(self):
         return 'MaskKernel(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
             (self.ndim, self.active_dimension, self.base_kernel.__repr__())            
@@ -370,6 +383,9 @@ class SumKernel(Kernel):
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())
+            
+    def latex_print(self):
+        return '\\left( ' + ' + '.join([e.latex_print() for e in self.operands]) + ' \\right)'            
             
     def __repr__(self):
         return 'SumKernel(%s)' % \
@@ -447,6 +463,9 @@ class ProductKernel(Kernel):
         return colored('( ', self.depth()) + \
             op.join([e.pretty_print() for e in self.operands]) + \
             colored(' ) ', self.depth())
+
+    def latex_print(self):
+        return '\\left( ' + ' \\times '.join([e.latex_print() for e in self.operands]) + ' \\right)'
             
     def __repr__(self):
         return 'ProductKernel(%s)' % \
@@ -513,3 +532,10 @@ def Carls_Mauna_kernel():
            + SqExpKernel(output_variance=theta_9, lengthscale=theta_10)
     
     return kernel
+
+def repr_string_to_kernel(string):
+    '''This is defined in this module so that all the kernel class names
+    don't have to have the module name in front of them.'''
+    return eval(string)
+
+ 

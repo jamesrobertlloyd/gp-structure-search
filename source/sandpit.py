@@ -10,6 +10,7 @@ import flexiblekernel as fk
 import grammar
 import gpml
 import structure_search
+import utils.latex
 
 import numpy as np
 import pylab
@@ -709,6 +710,42 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for kernel, nll, laplace, BIC in results:
                 outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))
+
+def parse_all_results():
+    entries = [];
+    rownames = [];
+    
+    colnames = ['Dataset', 'NLL', 'Kernel']
+    for rt in gen_all_results():
+        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
+        entries.append([rt[-1].latex_print(), '%4.1f' % rt[1]])
+        rownames.append(rt[0])
+    
+    utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
+
+def gen_all_results():
+    '''Look through all the files in the results directory'''
+    for r,d,f in os.walk("../results/"):
+        for files in f:
+            if files.endswith(".txt"):
+                results_filename = os.path.join(r,files)
+                best_tuple = parse_results( results_filename )
+                yield files.split('.')[-2], best_tuple[0], best_tuple[-1]
+                
+
+def parse_results( results_filename ):
+    result_tuples = [results_string_to_tuple(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
+    best_tuple = sorted(result_tuples, key=lambda p: p[2])[0]
+    return best_tuple
+    
+    # Put into a 
+def results_string_to_tuple(line):
+    nll = float(line.split("=")[1].split(", ")[0])
+    laplace = float(line.split("=")[2].split(", ")[0])
+    bic = float(line.split("=")[3].split(", ")[0])
+    line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
+    kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
+    return (nll, bic, laplace, kernel)   
 
 def main():
     # Run everything
