@@ -102,16 +102,8 @@ for d = 1:num_hypers
     hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
-%%logdet = 2 * sum(log(diag(chol(hessian))));
 
-%% This way of computing logdet is robust to negative eigenvalues (which do happen, unfortunately) --David
-[vectors, values] = eig(hessian);
-num_negative_eigenvalues = sum(values < eps) 
-values(values < eps) = eps;  %% HACK
-logdet = sum(log(diag(values)));
-laplace_nle = -(-nll_orig + (num_hypers/2)*log(2*pi) - logdet);
-
-save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'laplace_nle' );
+save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 exit();
 """
 
@@ -152,7 +144,9 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
     nlls = gpml_result['nlls'].ravel()
-    laplace_nle = gpml_result['laplace_nle'][0, 0]
+    #hessian = gpml_result['hessian'].ravel()
+    
+    laplace_nle = 9999.0 #utils.laplace_nle(nll, hessian)
 
     # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
