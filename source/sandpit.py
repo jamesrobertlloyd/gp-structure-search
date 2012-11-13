@@ -587,9 +587,9 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                     job_finished[i] = True
                     sleep_count = 0
                     # Copy files
-                    os.remove(write_file)
+                    os.remove(write_file) # Not sure if necessary
                     copy_from_fear(remote_dir + write_file.split('/')[-1], write_file, fear)
-                    # Read results
+                    # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
                     gpml_result = scipy.io.loadmat(write_file)
                     optimized_hypers = gpml_result['hyp_opt']
                     nll = gpml_result['best_nll'][0, 0]
@@ -951,17 +951,17 @@ def main():
 #    fear_experiment('../data/abalone_500.mat', '../results/abalone_500_01.txt', max_depth=4, k=3)
 #    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z01_02.txt', max_depth=6, k=5, subset=range(500), y_dim=1, description = 'BIC, 0 init')
 #    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z09_02.txt', max_depth=6, k=5, subset=range(500), y_dim=9, description = 'BIC, 0 init')
-#    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/housing.mat', '../results/housing_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/mauna2003.mat', '../results/mauna2003_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/mauna2011.mat', '../results/mauna2011_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/prostate.mat', '../results/prostate_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/pumadyn256.mat', '../results/pumadyn256_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/r_concrete_100.mat', '../results/r_concrete_100_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/r_concrete_500.mat', '../results/r_concrete_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/r_solar_500.mat', '../results/r_solar_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/unicycle_pitch_angle_400.mat', '../results/unicycle_pitch_angle_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
-    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_test.txt', max_depth=2, k=1, description = 'Dave test')
+#    fear_experiment('../data/housing.mat', '../results/housing_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/mauna2003.mat', '../results/mauna2003_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/mauna2011.mat', '../results/mauna2011_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/prostate.mat', '../results/prostate_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/pumadyn256.mat', '../results/pumadyn256_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/r_concrete_100.mat', '../results/r_concrete_100_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/r_concrete_500.mat', '../results/r_concrete_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/r_solar_500.mat', '../results/r_solar_500_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/unicycle_pitch_angle_400.mat', '../results/unicycle_pitch_angle_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
 
 if __name__ == '__main__':
     #kernel_test()
