@@ -786,7 +786,83 @@ def plot_gef_load_Z01_split_mean():
 
     plt.draw()
     plt.show()
-                
+    
+def plot_gef_load_Z01_split_mean_temp():     
+    
+    X, y, D = fear_load_mat('../data/gef_load_full_Xy.mat', 1)
+    
+    kernel = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+             (fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064)) + fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718)))
+    
+    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
+               
+    posterior_mean_1 = gpml.posterior_mean(kernel, kernel_1, X[0:499,:], y[0:499], iters=10)
+    
+    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
+               
+    posterior_mean_2 = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499], iters=10)
+    
+    plt.figure()
+    host = host_subplot(111, axes_class=AA.Axes)
+    plt.subplots_adjust(right=0.85)
+
+    par1 = host.twinx()
+
+#    host.set_xlim(0, 2)
+#    host.set_ylim(0, 2)
+
+    host.set_xlabel("Temperature (T09)")
+#    par1.set_ylabel("Periodic component")
+    plt.title('Posterior mean function')
+    host.set_ylabel("Load posterior mean")
+
+    p2, = host.plot(X[0:499,9], y[0:499], 'o', alpha=0.5)
+    p1, = host.plot(X[0:499,9], posterior_mean_2, 'o')
+
+#    par1.set_ylim(0, 4)
+
+    host.legend()
+
+    host.axis["left"].label.set_color(p1.get_color())
+#    par1.axis["right"].label.set_color(p2.get_color())
+
+    plt.draw()
+    plt.show()
+    
+def plot_gef_load_Z01_smooth_2d_mean():     
+    
+    X, y, D = fear_load_mat('../data/gef_load_full_Xy.mat', 1)
+    
+    kernel = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+             (fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064)) + fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718)))
+    
+    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
+               
+    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
+               
+    min_T = -3.0
+    max_T = 1.0
+    N_T = 10
+    
+    temps = np.repeat(np.linspace(min_T, max_T, N_T), 499)
+               
+    input = np.tile(X[0:499,:], (N_T, 1))
+    input[:,9] = temps
+               
+    posterior_mean = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499], input, iters=300)
+    
+    X_plt = X[0:499,0]
+    Y_plt = np.linspace(min_T, max_T, N_T)
+    Z_plt = np.reshape(posterior_mean, (N_T, 499), 'A')
+    
+    data = {'X': X_plt, 'Y': Y_plt, 'Z': Z_plt, 'post_mean': posterior_mean}
+    scipy.io.savemat('temp_data.mat', data)
+        
+
 def plot_gef_load_Z01():
     # This kernel was chosen from a run of gef_load datapoints.
 #    kernel = eval(ProductKernel([ covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=0.268353, output_variance=-0.104149, alpha=-2.105742)), covMask(ndim=12, active_dimension=9, base_kernel=SqExpKernel(lengthscale=1.160242, output_variance=0.004344)), SumKernel([ covMask(ndim=12, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.823413, period=0.000198, output_variance=-0.917064)), covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=-0.459219, output_variance=-0.077250, alpha=-2.212718)) ]) ]))

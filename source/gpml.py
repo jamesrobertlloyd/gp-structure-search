@@ -257,7 +257,7 @@ def plot_kernel(kernel, X):
 
 # Matlab code to compute mean fit
 MEAN_FUNCTION_CODE = r"""
-%% Load the data, it should contain X, y
+%% Load the data, it should contain X, y, X_test
 load '%(datafile)s'
 
 addpath(genpath('%(gpml_path)s'));
@@ -285,7 +285,7 @@ K = K + exp(hyp.lik * 2) * eye(size(K));
 component_covfunc = %(component_kernel_family)s
 hyp.cov = %(component_kernel_params)s
 
-component_K = feval(component_covfunc{:}, hyp.cov, X);
+component_K = feval(component_covfunc{:}, hyp.cov, X, X_test)';
 
 posterior_mean = component_K * (K \ y);
 
@@ -294,7 +294,7 @@ exit();
 """
 
 
-def posterior_mean (kernel, component_kernel, X, y, noise=None, iters=300):
+def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, iters=300):
     #### Problem - we are not storing the learnt mean and noise - will need to re-learn - might not be especially correct!
     #### This is therefore just a placeholder
     if X.ndim == 1:
@@ -305,7 +305,10 @@ def posterior_mean (kernel, component_kernel, X, y, noise=None, iters=300):
     if noise is None:
         noise = np.log(np.var(y)/10)   # Just a heuristic.
         
-    data = {'X': X, 'y': y}
+    if X_test is None:
+        X_test = np.copy(X)
+        
+    data = {'X': X, 'y': y, 'X_test' : X_test}
     (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
     (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
