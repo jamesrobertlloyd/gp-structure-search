@@ -16,6 +16,7 @@ except:
 import config
 
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
+CMP_TOLERANCE = np.log(1.01) # i.e. 1%
 
 def paren_colors():
     if config.COLOR_SCHEME == 'dark':
@@ -114,7 +115,9 @@ class SqExpKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
         return 0
@@ -181,8 +184,10 @@ class SqExpPeriodicKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        return cmp((self.lengthscale, self.period, self.output_variance), 
-                   (other.lengthscale, other.period, other.output_variance))
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.period - other.period, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.period, self.output_variance), 
+#                   (other.lengthscale, other.period, other.output_variance))
         
     def depth(self):
         return 0
@@ -250,8 +255,10 @@ class RQKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        return cmp((self.lengthscale, self.output_variance, self.alpha), 
-                   (other.lengthscale, other.output_variance, other.alpha))
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance, self.alpha - other.alpha]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+#                   (other.lengthscale, other.output_variance, other.alpha))
         
     def depth(self):
         return 0    

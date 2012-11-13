@@ -76,6 +76,14 @@ Gaussian process (GP) models are used widely and successfully.  However, their e
 
 Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].  In general, learning the model class from data seems superior proposing the model beforehand.  In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.  Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
+\subsection{How to use commenting}
+
+\NA{Needs attention.}
+\TBD{To be done.}
+\PROBLEM{Problem.}
+\fTBD{Margin to be done.}
+\fPROBLEM{Margin problem.}
+
 \section{GP STRUCTURE}
 
 [Standard GP intro \cite{rasmussen38gaussian}]
@@ -150,7 +158,7 @@ Christoudias et al.\cite{christoudias2009bayesian} previously showed how mixture
 
 \subsection{Real datasets}
 
-\subsubsection{Maunal Loa Atmoshperic Carbon Dioxide}
+\subsubsection{Mauna Loa Atmoshperic Carbon Dioxide}
 
 As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
@@ -186,13 +194,51 @@ As an example of a GP modeling problem where choosing an appropriate structure i
 
 \subsubsection{Load forecasting}
 
-Cite Tao Hong.
-Reference that this is similar to Mauna Loa but we also have a temperature variable selection problem.
-Mention recent Kaggle competition.
-Discuss zones 1 and 9 as contrasting problems.
+Similar to the above, we apply the methodology to another highly structured time series, but with additional input data.
+We analyse hourly load data for a US utility; this data was recently the focus of a data mining competition; the load forecasting track of GEFCom2012\footnotemark.
+The data consists of hourly load measurements of a US utility over several years, split into 20 geographical zones and 11 temperature time series.
+The relationships (geographical or otherwise) between the zones and the temperature stations were unknown for the purposes of the competition.
 
-Additive interpretation does not work for plotting since we might be additive in the same dimension \frownie.
-\TBD{Any thoughts on how to get around this?}
+\footnotetext{\texttt{http://www.gefcom.org/}}
+\begin{figure}
+\includegraphics[width=\columnwidth]{../figures/gef_load_z01_t09_500}
+\caption{Zone 1 and temperature station 9 from GEFCom2012 load forecasting data.}
+\label{fig:gef_z01_t09}
+\end{figure}
+
+Figure~\ref{fig:gef_z01_t09} shows the first 500 data points (approx.~20 days) of zone 1 together with temperature station 9 (all data has been standardised to have zero mean and unit standard deviation).
+The plot shows that the load data follows a smooth trend with near periodic deviations.
+The overall trend is somehow related to the temperature and some of the spikes in the load data appear to be related to spikes in temperature.
+
+We applied our kernel selection methodology to this data set (using all temperature stations).
+The kernels discovered at subsequent levels of the search were:
+\begin{enumerate}
+\item \texttt{RQ\_t(-1.8,  0.0, -1.0)}
+\item \texttt{RQ\_t(-1.4,  0.0, -2.1) + PE\_t(-0.7,  0.0, -0.8)}
+\item \texttt{RQ\_t( 0.3, -0.1, -1.9) * ( PE\_t(-0.9,  0.0, -1.0) + RQ\_t(-0.6,  0.0, -2.2) )}
+\item \texttt{RQ\_t( 0.3, -0.1, -2.1) * SE\_T9( 1.2,  0.0) * ( PE\_t(-0.8,  0.0, -0.9) + RQ\_t(-0.5, -0.1, -2.2) )}
+\end{enumerate}
+The learnt kernels can be interpreted as follows.
+The simplest model explains the data as a smooth function of time, with a short lengthscale to account for all of the variation.
+The next model explains the data as a sum of a smooth component and periodic component with a period of one day; the lengthscale of the smooth component has increased since some of the fine detail can be explained by the periodic component.
+The next model also splits the function into smooth and periodic components, but the periodic component is multiplied by a rational quadratic kernel which allows it to vary smoothly through time; again the lengthscale of the smooth component has increased since the fine detail has been better explained by the periodic component.
+Finally, the model introduces a temperature variable to further explain the observed data.
+
+One can visualise how the different components of the kernel capture the structure of the data.
+Figure~\ref{fig:gef_z01_two_means} shows the components of the Gaussian process posterior mean corresponding to the additive components of the kernel function (after expanding brackets and grouping product terms).
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{../figures/gef_load_z01_500_posteriors}
+\caption{Zone 1 from GEFCom 2012 separated into smooth and periodic component}
+\label{fig:gef_z01_two_means}
+\end{figure}
+
+\TBD{Not sure the below is going to work.}
+These posterior means have been evaluated at a particular 1 dimensional trace through time and temperature.
+We can however examine the posterior mean of the Gaussian process at other points in time and temperature space to better understand the interaction.
+\TBD{If we plot the smooth component, it would be super awesome if we could see the weekend or other interpretable blips in time, whilst most of the variation in the trend might be explained by temperature. Kernel might not be complicated enough to really show this though \frownie.}
+
+\TBD{What else can we say about this data? Numerical results might take a while to produce.}
 
 \subsection{Synthetic experiments}
 
@@ -201,7 +247,7 @@ In addition to standard UCI repository datasets, we generated a synthetic datase
 
 This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
 
- If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
+If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
 
 \subsection{Methods}
 
