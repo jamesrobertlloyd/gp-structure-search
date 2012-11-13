@@ -23,19 +23,20 @@ def table(filename, rownames, colnames, entries):
         file.write( '%% Exported at %s\n' % str(datetime.now()))
         file.write( '\\begin{table*}[h!]\n')
         file.write( '\\begin{center}\n')
-        file.write( '\\begin{tabular}{l |%s}\n' % (' r' * len(colnames)))
+        file.write( '\\begin{tabular}{l |%s}\n' % (' l' * len(colnames)))
 
         # Write first row.
         file.write( ' %s ' % colnames[0] )
         for c in range(1, len(colnames)):
             file.write( ' & \\rotatebox{0}{ %s } ' % colnames[c] )
-            file.write( ' \\\\ \\hline\n' )
+        
+        file.write( ' \\\\ \\hline\n' )
 
         # Write first column and table entries.
         for r in range(len(rownames)):
             file.write( rownames[r])
-            for c in range(len(colnames)):
-                file.write( ' & $ %s $' % entries[r][c - 1] )
+            for c in range(0, len(colnames) - 1):
+                file.write( ' & $ %s $' % entries[r][c] )
             file.write( ' \\\\\n' )
 
         file.write( '\\end{tabular}\n');

@@ -914,10 +914,10 @@ def parse_all_results():
     entries = [];
     rownames = [];
     
-    colnames = ['Dataset', 'NLL', 'Kernel']
+    colnames = ['Dataset', 'NLL', 'Kernel' ]
     for rt in gen_all_results():
         print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append([rt[-1].latex_print(), '%4.1f' % rt[1]])
+        entries.append(['%4.1f' % rt[1], rt[-1].latex_print()])
         rownames.append(rt[0])
     
     utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
@@ -964,15 +964,5 @@ def main():
 #    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
 
 if __name__ == '__main__':
-    #kernel_test()
-    #expression_test()
-    #base_kernel_test()
-    #expand_test()
-    #call_gpml_test()
-    #sample_from_gp_prior()
-    #if sys.flags.debug or __debug__:
-    #    print 'Debug mode'
-    #call_cluster()
-    #pass
     main()
 

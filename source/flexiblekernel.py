@@ -109,8 +109,10 @@ class SqExpKernel(BaseKernel):
         return colored('SE(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
     
     def latex_print(self):
-        return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
-    
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'SE'
+        
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
@@ -178,7 +180,9 @@ class SqExpPeriodicKernel(BaseKernel):
                        self.depth())
         
     def latex_print(self):
-        return 'PE(\\ell=%1.1f, p=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.period, self.output_variance)          
+        # return 'PE(\\ell=%1.1f, p=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.period, self.output_variance)
+        #return 'PE(p=%1.1f)' % self.period          
+        return 'PE'
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -248,8 +252,9 @@ class RQKernel(BaseKernel):
                        self.depth())
         
     def latex_print(self):
-        return 'RQ(\\ell=%1.1f, \\alpha=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.alpha, self.output_variance)          
-           
+        #return 'RQ(\\ell=%1.1f, \\alpha=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.alpha, self.output_variance)
+        #return 'RQ(\\ell=%1.1f)' % self.lengthscale
+        return 'RQ'           
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -323,7 +328,8 @@ class MaskKernel(Kernel):
             colored(')', self.depth())
             
     def latex_print(self):
-        return 'M_%d \\left(' % self.active_dimension + self.base_kernel.latex_print() + '\\right)'                 
+        #return 'M_%d \\left(' % self.active_dimension + self.base_kernel.latex_print() + '\\right)'                 
+        return self.base_kernel.latex_print() + '_%d' % self.active_dimension
             
     def __repr__(self):
         return 'MaskKernel(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
@@ -472,7 +478,9 @@ class ProductKernel(Kernel):
             colored(' ) ', self.depth())
 
     def latex_print(self):
-        return '\\left( ' + ' \\times '.join([e.latex_print() for e in self.operands]) + ' \\right)'
+        #return '\\left( ' + ' \\times '.join([e.latex_print() for e in self.operands]) + ' \\right)'
+        # Don't need brackets for product, order of operations is unambiguous, I think.
+        return ' \\times '.join([e.latex_print() for e in self.operands])
             
     def __repr__(self):
         return 'ProductKernel(%s)' % \
