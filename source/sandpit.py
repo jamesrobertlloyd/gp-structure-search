@@ -711,6 +711,82 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
             for kernel, nll, laplace, BIC in results:
                 outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))
                 
+from mpl_toolkits.axes_grid1 import host_subplot
+import mpl_toolkits.axisartist as AA
+import matplotlib.pyplot as plt
+
+def plot_gef_load_Z01_raw():    
+    
+    X, y, D = fear_load_mat('../data/gef_load_full_Xy.mat', 1)
+    
+    host = host_subplot(111, axes_class=AA.Axes)
+    plt.subplots_adjust(right=0.85)
+
+    par1 = host.twinx()
+
+#    host.set_xlim(0, 2)
+#    host.set_ylim(0, 2)
+
+    host.set_xlabel("Time")
+    host.set_ylabel("Load (Z01)")
+    par1.set_ylabel("Temperature (T09)")
+
+    p1, = host.plot(X[0:499,0], y[0:499])
+    p2, = par1.plot(X[0:499,0], X[0:499,9])
+
+#    par1.set_ylim(0, 4)
+
+    host.legend()
+
+    host.axis["left"].label.set_color(p1.get_color())
+    par1.axis["right"].label.set_color(p2.get_color())
+
+    plt.draw()
+    plt.show()
+    
+def plot_gef_load_Z01_split_mean():     
+    
+    X, y, D = fear_load_mat('../data/gef_load_full_Xy.mat', 1)
+    
+    kernel = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+             (fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064)) + fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718)))
+    
+    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
+               
+    posterior_mean_1 = gpml.posterior_mean(kernel, kernel_1, X[0:499,:], y[0:499])
+    
+    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
+               
+    posterior_mean_2 = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499])
+    
+    host = host_subplot(111, axes_class=AA.Axes)
+    plt.subplots_adjust(right=0.85)
+
+    par1 = host.twinx()
+
+#    host.set_xlim(0, 2)
+#    host.set_ylim(0, 2)
+
+    host.set_xlabel("Time")
+    host.set_ylabel("Periodic component")
+    plt.title('Posterior mean functions')
+    par1.set_ylabel("Smooth component")
+
+    p1, = host.plot(X[0:499,0], posterior_mean_1)
+    p2, = par1.plot(X[0:499,0], posterior_mean_2)
+
+#    par1.set_ylim(0, 4)
+
+    host.legend()
+
+    host.axis["left"].label.set_color(p1.get_color())
+    par1.axis["right"].label.set_color(p2.get_color())
+
+    plt.draw()
+    plt.show()
+                
 def plot_gef_load_Z01():
     # This kernel was chosen from a run of gef_load datapoints.
 #    kernel = eval(ProductKernel([ covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=0.268353, output_variance=-0.104149, alpha=-2.105742)), covMask(ndim=12, active_dimension=9, base_kernel=SqExpKernel(lengthscale=1.160242, output_variance=0.004344)), SumKernel([ covMask(ndim=12, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.823413, period=0.000198, output_variance=-0.917064)), covMask(ndim=12, active_dimension=0, base_kernel=RQKernel(lengthscale=-0.459219, output_variance=-0.077250, alpha=-2.212718)) ]) ]))
@@ -725,44 +801,44 @@ def plot_gef_load_Z01():
     
     pylab.figure()
     pylab.plot(X[0:499,0], y[0:499])
-    pylab.title('GEF load Z01 - first 500 data points')
+    pylab.title('GEFCom2012 Z01 and T09 - first 500 data points')
     pylab.xlabel('Time')
     pylab.ylabel('Load')
     
-    pylab.figure()
-    pylab.plot(X[0:499,0], sample)
-    pylab.title('GEF load Z01 - a sample from the learnt kernel')
-    pylab.xlabel('Time')
-    pylab.ylabel('Load')
-    
-    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
-               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
-               
-    posterior_mean_1 = gpml.posterior_mean(kernel, kernel_1, X[0:499,:], y[0:499])
-    
-    pylab.figure()
-    pylab.plot(X[0:499,0], posterior_mean_1)
-    pylab.title('GEF load Z01 - periodic posterior mean component')
-    pylab.xlabel('Time')
-    pylab.ylabel('Load')
-    
-    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
-               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
-               
-    posterior_mean_2 = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499])
-    
-    pylab.figure()
-    pylab.plot(X[0:499,0], posterior_mean_2)
-    pylab.title('GEF load Z01 - smooth posterior mean component')
-    pylab.xlabel('Time')
-    pylab.ylabel('Load')
+#    pylab.figure()
+#    pylab.plot(X[0:499,0], sample)
+#    pylab.title('GEF load Z01 - a sample from the learnt kernel')
+#    pylab.xlabel('Time')
+#    pylab.ylabel('Load')
+#    
+#    kernel_1 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+#               fk.MaskKernel(D, 0, fk.SqExpPeriodicKernel(-0.823413, 0.000198, -0.917064))
+#               
+#    posterior_mean_1 = gpml.posterior_mean(kernel, kernel_1, X[0:499,:], y[0:499])
+#    
+#    pylab.figure()
+#    pylab.plot(X[0:499,0], posterior_mean_1)
+#    pylab.title('GEF load Z01 - periodic posterior mean component')
+#    pylab.xlabel('Time')
+#    pylab.ylabel('Load')
+#    
+#    kernel_2 = fk.MaskKernel(D, 0, fk.RQKernel(0.268353, -0.104149, -2.105742)) * fk.MaskKernel(D, 9, fk.SqExpKernel(1.160242, 0.004344)) * \
+#               fk.MaskKernel(D, 0, fk.RQKernel(-0.459219, -0.077250, -2.212718))
+#               
+#    posterior_mean_2 = gpml.posterior_mean(kernel, kernel_2, X[0:499,:], y[0:499])
+#    
+#    pylab.figure()
+#    pylab.plot(X[0:499,0], posterior_mean_2)
+#    pylab.title('GEF load Z01 - smooth posterior mean component')
+#    pylab.xlabel('Time')
+#    pylab.ylabel('Load')
 
 def main():
     # Run everything
 #    fear_experiment('../data/abalone_500.mat', '../results/abalone_500_01.txt', max_depth=4, k=3)
-    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z01_02.txt', max_depth=6, k=5, subset=range(500), y_dim=1, description = 'BIC, 0 init')
-    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z09_02.txt', max_depth=6, k=5, subset=range(500), y_dim=9, description = 'BIC, 0 init')
-    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
+#    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z01_02.txt', max_depth=6, k=5, subset=range(500), y_dim=1, description = 'BIC, 0 init')
+#    fear_experiment('../data/gef_load_full_Xy.mat', '../results/gef_load_500_Z09_02.txt', max_depth=6, k=5, subset=range(500), y_dim=9, description = 'BIC, 0 init')
+#    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
     fear_experiment('../data/housing.mat', '../results/housing_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
     fear_experiment('../data/mauna2003.mat', '../results/mauna2003_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
     fear_experiment('../data/mauna2011.mat', '../results/mauna2011_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
