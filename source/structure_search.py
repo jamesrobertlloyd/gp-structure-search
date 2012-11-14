@@ -397,8 +397,9 @@ def run_all_kfold():
         print "Done one file!!!"   
     
 def run_test_kfold():
+    
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
-    output_file = '../results/messabout.txt'
+    output_file = '../results/r_pumadyn512_fold_3_of_10_result.txt'
     #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
     
     nll, bic, laplace, kernel, noise = parse_results(output_file)
@@ -409,6 +410,6 @@ def run_test_kfold():
     
 if __name__ == '__main__':
     #main()
-    #run_test_kfold()
-    run_all_kfold()
+    run_test_kfold()
+    #run_all_kfold()
  
