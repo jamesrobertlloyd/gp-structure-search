@@ -14,6 +14,7 @@ import gpml
 import utils.latex
 import utils.fear
 import config
+from utils import gaussians, psd_matrices
 
 import numpy as np
 nax = np.newaxis
@@ -31,6 +32,28 @@ def load_mat(data_file, y_dim=1):
     '''Load a Matlab file'''
     data = scipy.io.loadmat(data_file)
     return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
+
+def proj_psd(H):
+    assert np.allclose(H, H.T), 'not symmetric'
+    d, Q = scipy.linalg.eigh(H)
+    d = np.where(d > 0, d, 0.)
+    return np.dot(Q, d[:, nax] * Q.T)
+    
+
+def laplace_approx(nll, opt_hyper, hessian, prior_var):
+    d = opt_hyper.size
+    
+    hessian = proj_psd(hessian)
+
+    # quadratic centered at opt_hyper with maximum -nll
+    evidence = gaussians.Potential(np.zeros(d), psd_matrices.FullMatrix(hessian), -nll)
+    evidence = evidence.translate(opt_hyper)
+
+    # zero-centered Gaussian
+    prior = gaussians.Potential.from_moments_iso(np.zeros(d), prior_var)
+
+    # multiply the two Gaussians and integrate the result
+    return -(evidence + prior).integral()
 
 
 def expand_kernels(D, seed_kernels, verbose=False):    
