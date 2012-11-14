@@ -60,8 +60,8 @@ class BaseKernel(Kernel):#
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        output_variance, lengthscale = params
-        return SqExpKernel(output_variance, lengthscale)
+        lengthscale, output_variance = params
+        return SqExpKernel(lengthscale=lengthscale, output_variance=output_variance)
     
     def num_params(self):
         return 2
@@ -83,8 +83,8 @@ class SqExpKernelFamily(BaseKernelFamily):
 
 class SqExpKernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
-        self.output_variance = output_variance
         self.lengthscale = lengthscale
+        self.output_variance = output_variance
         
     def family(self):
         return SqExpKernelFamily()
@@ -127,8 +127,8 @@ class SqExpKernel(BaseKernel):
 
 class SqExpPeriodicKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        output_variance, period, lengthscale = params
-        return SqExpPeriodicKernel(output_variance, period, lengthscale)
+        lengthscale, period, output_variance = params
+        return SqExpPeriodicKernel(lengthscale, period, output_variance)
     
     def num_params(self):
         return 3
@@ -266,9 +266,603 @@ class RQKernel(BaseKernel):
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
     def depth(self):
+        return 0   
+    
+class ConstKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        output_variance = params
+        return ConstKernel(output_variance)
+    
+    def num_params(self):
+        return 1
+    
+    def pretty_print(self):
+        return colored('CS', self.depth())
+    
+    def default(self):
+        return ConstKernel(0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+class ConstKernel(BaseKernel):
+    def __init__(self, output_variance):
+        self.output_variance = output_variance
+        
+    def family(self):
+        return ConstKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '@covConst'
+    
+    def english_name(self):
+        return 'CS'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.output_variance])
+
+    def copy(self):
+        return ConstKernel(self.output_variance)
+    
+    def __repr__(self):
+        return 'ConstKernel(output_variance=%f)' % \
+            (self.output_variance)
+    
+    def pretty_print(self):
+        return colored('CS(ell=%1.1f)' % (self.output_variance),
+                       self.depth())
+        
+    def latex_print(self):
+        return 'CS'           
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+#                   (other.lengthscale, other.output_variance, other.alpha))
+        
+    def depth(self):
         return 0    
+
+class LinKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale = params
+        return LinKernel(lengthscale)
     
+    def num_params(self):
+        return 1
     
+    def pretty_print(self):
+        return colored('LN', self.depth())
+    
+    def default(self):
+        return LinKernel(0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+class LinKernel(BaseKernel):
+    def __init__(self, lengthscale):
+        self.lengthscale = lengthscale
+        
+    def family(self):
+        return LinKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '@covLINard'
+    
+    def english_name(self):
+        return 'LN'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale])
+
+    def copy(self):
+        return LinKernel(self.lengthscale)
+    
+    def __repr__(self):
+        return 'LinKernel(lengthscale=%f)' % \
+            (self.lengthscale)
+    
+    def pretty_print(self):
+        return colored('LN(ell=%1.1f)' % (self.lengthscale),
+                       self.depth())
+        
+    def latex_print(self):
+        return 'LN'           
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+#                   (other.lengthscale, other.output_variance, other.alpha))
+        
+    def depth(self):
+        return 0 
+
+class QuadraticKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        offset, output_variance = params
+        return QuadraticKernel(offset, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('QD', self.depth())
+    
+    def default(self):
+        return QuadraticKernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+class QuadraticKernel(BaseKernel):
+    def __init__(self, offset, output_variance):
+        self.offset = offset
+        self.output_variance = output_variance
+        
+    def family(self):
+        return QuadraticKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covLINard, 2}'
+    
+    def english_name(self):
+        return 'QD'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.offset, self.output_variance])
+
+    def copy(self):
+        return QuadraticKernel(self.offset, self.output_variance)
+    
+    def __repr__(self):
+        return 'QuadraticKernel(offset=%f, output_variance=%f)' % \
+            (self.offset, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('QD(off=%1.1f, sf=%1.1f)' % (self.offset, self.output_variance),
+                       self.depth())
+        
+    def latex_print(self):
+        return 'QD'           
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+#                   (other.lengthscale, other.output_variance, other.alpha))
+        
+    def depth(self):
+        return 0   
+
+class CubicKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        offset, output_variance = params
+        return CubicKernel(offset, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('CB', self.depth())
+    
+    def default(self):
+        return CubicKernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+class CubicKernel(BaseKernel):
+    def __init__(self, offset, output_variance):
+        self.offset = offset
+        self.output_variance = output_variance
+        
+    def family(self):
+        return CubicKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covLINard, 3}'
+    
+    def english_name(self):
+        return 'CB'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.offset, self.output_variance])
+
+    def copy(self):
+        return CubicKernel(self.offset, self.output_variance)
+    
+    def __repr__(self):
+        return 'CubicKernel(offset=%f, output_variance=%f)' % \
+            (self.offset, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('CB(off=%1.1f, sf=%1.1f)' % (self.offset, self.output_variance),
+                       self.depth())
+        
+    def latex_print(self):
+        return 'CB'           
+    
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance, self.alpha), 
+#                   (other.lengthscale, other.output_variance, other.alpha))
+        
+    def depth(self):
+        return 0   
+
+class PP0KernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance = params
+        return PP0Kernel(lengthscale, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('P0', self.depth())
+    
+    def default(self):
+        return PP0Kernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+
+class PP0Kernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance):
+        self.output_variance = output_variance
+        self.lengthscale = lengthscale
+        
+    def family(self):
+        return PP0KernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covPPiso, 0}'
+    
+    def english_name(self):
+        return 'P0'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+
+    def copy(self):
+        return PP0Kernel(self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'PP0Kernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('P0(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+    
+    def latex_print(self):
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'P0'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0 
+
+class PP1KernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance = params
+        return PP1Kernel(lengthscale, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('P1', self.depth())
+    
+    def default(self):
+        return PP1Kernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+
+class PP1Kernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance):
+        self.output_variance = output_variance
+        self.lengthscale = lengthscale
+        
+    def family(self):
+        return PP1KernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covPPiso, 1}'
+    
+    def english_name(self):
+        return 'P1'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+
+    def copy(self):
+        return PP0Kernel(self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'PP1Kernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('P1(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+    
+    def latex_print(self):
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'P1'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0 
+
+class PP2KernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance = params
+        return PP2Kernel(lengthscale, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('P2', self.depth())
+    
+    def default(self):
+        return PP2Kernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+
+class PP2Kernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance):
+        self.output_variance = output_variance
+        self.lengthscale = lengthscale
+        
+    def family(self):
+        return PP2KernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covPPiso, 2}'
+    
+    def english_name(self):
+        return 'P2'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+
+    def copy(self):
+        return PP2Kernel(self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'PP2Kernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('P2(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+    
+    def latex_print(self):
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'P2'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0 
+
+class PP3KernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance = params
+        return PP3Kernel(lengthscale, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('P3', self.depth())
+    
+    def default(self):
+        return PP3Kernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+
+class PP3Kernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance):
+        self.output_variance = output_variance
+        self.lengthscale = lengthscale
+        
+    def family(self):
+        return PP3KernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covPPiso, 3}'
+    
+    def english_name(self):
+        return 'P3'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+
+    def copy(self):
+        return PP3Kernel(self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'PP3Kernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('P3(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+    
+    def latex_print(self):
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'P3'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0 
+
+class MaternKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        lengthscale, output_variance = params
+        return MaternKernel(lengthscale, output_variance)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('MT', self.depth())
+    
+    def default(self):
+        return MaternKernel(0., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+
+class MaternKernel(BaseKernel):
+    def __init__(self, lengthscale, output_variance):
+        self.lengthscale = lengthscale
+        self.output_variance = output_variance
+        
+    def family(self):
+        return PP3KernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covMaterniso, 1}' # nu = 0.5
+    
+    def english_name(self):
+        return 'MT'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.lengthscale, self.output_variance])
+
+    def copy(self):
+        return PP3Kernel(self.lengthscale, self.output_variance)
+    
+    def __repr__(self):
+        return 'MaternKernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
+    
+    def pretty_print(self):
+        return colored('MT(ell=%1.1f, sf=%1.1f)' % (self.lengthscale, self.output_variance), self.depth())
+    
+    def latex_print(self):
+        #return 'SE(\\ell=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.output_variance)    
+        #return 'SE(\\ell=%1.1f)' % self.lengthscale
+        return 'MT'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+        return max_diff > CMP_TOLERANCE
+#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+    
+    def depth(self):
+        return 0 
     
 class MaskKernelFamily(KernelFamily):
     def __init__(self, ndim, active_dimension, base_kernel_family):
@@ -521,6 +1115,14 @@ def base_kernels(ndim=1):
         yield MaskKernel(ndim, dim, SqExpKernel(0, 0))
         yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
         yield MaskKernel(ndim, dim, RQKernel(0, 0, 0))
+        yield MaskKernel(ndim, dim, LinKernel(0))
+        yield MaskKernel(ndim, dim, QuadraticKernel(0, 0))
+        yield MaskKernel(ndim, dim, CubicKernel(0, 0))
+        yield MaskKernel(ndim, dim, PP0Kernel(0, 0))
+        yield MaskKernel(ndim, dim, PP1Kernel(0, 0))
+        yield MaskKernel(ndim, dim, PP2Kernel(0, 0))
+        yield MaskKernel(ndim, dim, PP3Kernel(0, 0))
+        yield MaskKernel(ndim, dim, MaternKernel(0, 0))
         
             
 
