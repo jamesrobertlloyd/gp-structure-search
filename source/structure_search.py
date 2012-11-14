@@ -223,123 +223,65 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     fear_finished = False
     job_finished = [False] * len(write_files)
     results = [None] * len(write_files)
-    sleep_count = 0
-    
+
     while not fear_finished:
+        job_status = utils.fear.qstat_status()
         for (i, write_file) in enumerate(write_files):
             if not job_finished[i]:
-                if utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
-                    # Another job has finished
-                    job_finished[i] = True
-                    sleep_count = 0
-                    # Copy files
-                    os.remove(write_file) # Not sure if necessary
-                    utils.fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
-                    # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
-                    gpml_result = scipy.io.loadmat(write_file)
-                    optimized_hypers = gpml_result['hyp_opt']
-                    nll = gpml_result['best_nll'][0, 0]
-                    hessian = gpml_result['hessian']
-                    assert isinstance(hessian, np.ndarray)  # just to make sure
-                    laplace_nle = laplace_approx(nll, optimized_hypers, hessian, PRIOR_VAR)
-                    kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
-                    noise_hyp = optimized_hypers['lik'][0, 0].ravel()
-                    k_opt = kernels[i].family().from_param_vector(kernel_hypers)
-                    BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
-                    results[i] = ScoredKernel(k_opt, nll, laplace_nle, BIC, noise_hyp) 
-                    # Tidy up
-                    utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
-                    utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
-                    utils.fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
-                    utils.fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
-                    utils.fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
-                    os.remove(data_files[i])
-                    os.remove(write_files[i])
-                    os.remove(script_files[i])
-                    os.remove(shell_files[i])
-                    # Tell the world
-                    if verbose:
-                        print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
+                if utils.fear.job_terminated(job_ids[i], status=job_status, fear=fear):
+                    if not utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
+                        # Job has finished but no output - re-submit
+                        print 'Shell script %s job_id %s failed, re-submitting...' % (shell_files[i], job_ids[i])
+                        job_ids[i] = utils.fear.qsub(shell_files[i], verbose=verbose, fear=fear)
+                    else:
+                        # Another job has finished
+                        job_finished[i] = True
+                        # Copy files
+                        os.remove(write_file) # Not sure if necessary
+                        utils.fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
+                        # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
+                        gpml_result = scipy.io.loadmat(write_file)
+                        optimized_hypers = gpml_result['hyp_opt']
+                        nll = gpml_result['best_nll'][0, 0]
+                        hessian = gpml_result['hessian']
+                        assert isinstance(hessian, np.ndarray)  # just to make sure
+                        laplace_nle = laplace_approx(nll, optimized_hypers, hessian, PRIOR_VAR)
+                        kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
+                        noise_hyp = optimized_hypers['lik'][0, 0].ravel()
+                        k_opt = kernels[i].family().from_param_vector(kernel_hypers)
+                        BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
+                        results[i] = ScoredKernel(k_opt, nll, laplace_nle, BIC, noise_hyp) 
+                        # Tidy up
+                        utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
+                        utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
+                        utils.fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
+                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
+                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
+                        os.remove(data_files[i])
+                        os.remove(write_files[i])
+                        os.remove(script_files[i])
+                        os.remove(shell_files[i])
+                        # Tell the world
+                        if verbose:
+                            print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
+                elif not (utils.fear.job_queued(job_ids[i], status=job_status, fear=fear) or utils.fear.job_running(job_ids[i], status=job_status, fear=fear)):
+                    # Job has some status other than running or queuing - something is wrong, delete and re-submit
+                    utils.fear.qdel(job_ids[i], fear=fear)
+                    print 'Shell script %s job_id %s stuck, deleting and re-submitting...' % (shell_files[i], job_ids[i])
+                    job_ids[i] = utils.fear.qsub(shell_files[i], verbose=verbose, fear=fear)
         
-        if sum(job_finished) == len(job_finished):
+        if all(job_finished):
             fear_finished = True    
         if not fear_finished:
+            # Count how many jobs are queued
+            n_queued = len([1 for job_id in job_ids if utils.fear.job_queued(job_id, status=job_status, fear=fear)])
+            # Count how many jobs are running
+            n_running = len([1 for job_id in job_ids if utils.fear.job_running(job_id,status=job_status, fear=fear)])
             if verbose:
+                print '%d jobs running' % n_running
+                print '%d jobs queued' % n_queued
                 print 'Sleeping'
-            sleep_count += 1
-            if sleep_count < n_sleep_timeout:
-                time.sleep(sleep_time)
-            else:
-                # Jobs taking too long - assume failure - resubmit
-                utils.fear.qdel_all(fear)
-                for (i, shell_file) in enumerate(shell_files):
-                    if not job_finished[i]:
-                        print "Re-submitting"
-                        utils.fear.qsub(shell_file, verbose=verbose, fear=fear)
-                if verbose:
-                    print 'Giving the jobs some time to run'
                 time.sleep(re_submit_wait)
-                sleep_count = 0
-                
-#### TO BE MERGED
-
-#    while not fear_finished:
-#        job_status = utils.fear.qstat_status()
-#        for (i, write_file) in enumerate(write_files):
-#            if not job_finished[i]:
-#                if utils.fear.job_terminated(job_ids[i], status=job_status, fear=fear):
-#                    if not utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
-#                        # Job has finished but no output - re-submit
-#                        print 'Shell script %s job_id %s failed, re-submitting...' % (shell_files[i], job_ids[i])
-#                        job_ids[i] = utils.fear.qsub(shell_files[i], verbose=verbose, fear=fear)
-#                    else:
-#                        # Another job has finished
-#                        job_finished[i] = True
-#                        # Copy files
-#                        os.remove(write_file) # Not sure if necessary
-#                        utils.fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
-#                        # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
-#                        gpml_result = scipy.io.loadmat(write_file)
-#                        optimized_hypers = gpml_result['hyp_opt']
-#                        nll = gpml_result['best_nll'][0, 0]
-#    #                    nlls = gpml_result['nlls'].ravel()
-#                        laplace_nle = nll # gpml_result['laplace_nle'][0, 0]   WARNING: this is wrong for now.
-#                        kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
-#                        noise_hyp = optimized_hypers['lik'][0, 0].ravel()
-#                        k_opt = kernels[i].family().from_param_vector(kernel_hypers)
-#                        BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
-#                        results[i] = (k_opt, nll, laplace_nle, BIC, noise_hyp)  #Todo: make this a dictionary.
-#                        # Tidy up
-#                        utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
-#                        utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
-#                        utils.fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
-#                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
-#                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
-#                        os.remove(data_files[i])
-#                        os.remove(write_files[i])
-#                        os.remove(script_files[i])
-#                        os.remove(shell_files[i])
-#                        # Tell the world
-#                        if verbose:
-#                            print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
-#                elif not (utils.fear.job_queued(job_ids[i], status=job_status, fear=fear) or utils.fear.job_running(job_ids[i], status=job_status, fear=fear)):
-#                    # Job has some status other than running or queuing - something is wrong, delete and re-submit
-#                    utils.fear.qdel(job_ids[i], fear=fear)
-#                    print 'Shell script %s job_id %s stuck, deleting and re-submitting...' % (shell_files[i], job_ids[i])
-#                    job_ids[i] = utils.fear.qsub(shell_files[i], verbose=verbose, fear=fear)
-#        
-#        if sum(job_finished) == len(job_finished):
-#            fear_finished = True    
-#        if not fear_finished:
-#            # Count how many jobs are queued
-#            n_queued = len([1 for job_id in job_ids if utils.fear.job_queued(job_id, status=job_status, fear=fear)])
-#            # Count how many jobs are running
-#            n_running = len([1 for job_id in job_ids if utils.fear.job_running(job_id,status=job_status, fear=fear)])
-#            if verbose:
-#                print '%d jobs running' % n_running
-#                print '%d jobs queued' % n_queued
-#                print 'Sleeping'
-#                time.sleep(re_submit_wait)
             
     fear.close()
     
