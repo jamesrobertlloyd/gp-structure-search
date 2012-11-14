@@ -146,7 +146,8 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     nlls = gpml_result['nlls'].ravel()
     #hessian = gpml_result['hessian'].ravel()
     
-    laplace_nle = 9999.0 #utils.laplace_nle(nll, hessian)
+    # WARNING - this is wwrong for now.
+    laplace_nle = nll #9999.0 #utils.laplace_nle(nll, hessian)
 
     # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()

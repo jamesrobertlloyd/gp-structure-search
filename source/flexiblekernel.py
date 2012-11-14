@@ -520,6 +520,8 @@ def base_kernels(ndim=1):
         # Make up default arguments.
         yield MaskKernel(ndim, dim, SqExpKernel(0, 0))
         yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
+        yield MaskKernel(ndim, dim, RQKernel(0, 0, 0))
+        
             
 
 def Carls_Mauna_kernel():

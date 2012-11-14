@@ -11,43 +11,51 @@ Created November 2012
 import flexiblekernel as fk
 import grammar
 import gpml
+import utils.latex
+import utils.fear
+import config
 
 import numpy as np
+nax = np.newaxis
 import pylab
 import scipy.io
 import sys
-import getopt
+import os
+import tempfile
+import subprocess
+import time
 
 
-def load_mat(data_file):
+
+def load_mat(data_file, y_dim=1):
     '''Load a Matlab file'''
     data = scipy.io.loadmat(data_file)
-    return data['X'], data['y'], np.shape(data['X'])[1]
+    return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
 
 
-def try_expanded_kernels(X, y, D, seed_kernels, expand=True, verbose=False):    
-    '''
-    expand: if false, just tries kernels that were passed in.
-    TODO: separate expansion and trying
-    '''
-
-            
+def expand_kernels(D, seed_kernels, verbose=False):    
+    '''Makes a list of all expansions of a set of kernels.'''
+      
     g = grammar.MultiDGrammar(D)
     print 'Seed kernels :'
     for k in seed_kernels:
         print k.pretty_print()
-    if expand:
-        kernels = []
-        for k in seed_kernels:
-            kernels = kernels + grammar.expand(k, g)
-        kernels = grammar.remove_duplicates(kernels)
-    else:
-        kernels = seed_kernels
+    kernels = []
+    for k in seed_kernels:
+        kernels = kernels + grammar.expand(k, g)
     kernels = grammar.remove_duplicates(kernels)
-    print 'Trying the following kernels :'
+    print 'Expanded kernels :'
     for k in kernels:
         print k.pretty_print()
             
+    return (kernels)
+
+def try_expanded_kernels(X, y, D, kernels, expand=True, verbose=False):    
+    '''
+    Expand: if false, just tries kernels that were passed in.
+    '''
+    
+    kernels = expand_kernels( kernels )           
     results = []
 
     # Call GPML with each of the expanded kernels
@@ -109,9 +117,250 @@ def experiment(data_file, results_filename, max_depth=2, k=2, verbose=True):
         outfile.write('Experiment results for\n datafile = %s\n max_depth = %f\n k = %f\n\n' % (data_file, max_depth, k)) 
         for kernel, nll, laplace in results:
             outfile.write( 'nll=%f, laplace=%f, kernel=%s\n' % (nll, laplace, kernel.__repr__()))
+            
 
 
-if __name__ == '__main__':
+def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
+                    verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
+                    description=''):
+    '''Recursively search for the best kernel, in parallel on the fear cluster.'''
+
+    # To do: change this to train/test splits.
+    X, y, D = load_mat(data_file, y_dim)
+    
+    current_kernels = fk.base_kernels()
+    
+    # Todo: change this to a dict.
+    nll_key = 1,
+    laplace_key = 2
+    BIC_key = 3
+    active_key = BIC_key
+        
+    results = []              # All results.
+    results_sequence = []     # Results sets indexed by level of expansion.
+    for r in range(max_depth):   
+        new_results = fear_run_experiments(current_kernels, X, y, verbose=verbose, \
+                                           sleep_time=sleep_time, n_sleep_timeout=n_sleep_timeout, \
+                                           re_submit_wait=re_submit_wait)
+            
+        results = results + new_results
+        
+        print
+        results = sorted(results, key=lambda p: p[active_key], reverse=True)
+        for kernel, nll, laplace, BIC in results:
+            print nll, laplace, BIC, kernel.pretty_print()
+        
+        results_sequence.append(results)
+        
+        best_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
+        current_kernels = expand_kernels(D, best_kernels, verbose=verbose)
+
+    # Write results to a file.  Todo: write a dictionary.
+    results = sorted(results, key=lambda p: p[active_key], reverse=True)
+    with open(results_filename, 'w') as outfile:
+        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' % (data_file, y_dim, subset, max_depth, k, description)) 
+        for (i, results) in enumerate(results_sequence):
+            outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
+            for kernel, nll, laplace, BIC in results:
+                outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))            
+            
+            
+
+
+def mkstemp_safe(directory, suffix):
+    (os_file_handle, file_name) = tempfile.mkstemp(dir=directory, suffix=suffix)
+    os.close(os_file_handle)
+    return file_name
+
+
+def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./temp/', fear=None):
+    # Write to a temp script
+    script_file = mkstemp_safe(local_dir, '.m')
+    shell_file = mkstemp_safe(local_dir, '.sh')
+    
+    f = open(script_file, 'w')
+    f.write(code)
+    f.close()
+    
+    # Local file reference without extension - MATLAB fails silently otherwise
+    f = open(shell_file, 'w')
+    f.write('/usr/local/apps/matlab/matlabR2011b/bin/matlab -nosplash -nojvm -nodisplay -singleCompThread -r ' \
+            + script_file.split('/')[-1].split('.')[0] + '\n')
+    f.close()
+        
+    fear.copy_to(script_file, remote_dir + script_file.split('/')[-1], fear)
+    fear.copy_to(shell_file, remote_dir + shell_file.split('/')[-1], fear)
+    
+    qsub(shell_file)
+    
+    # Tell the caller where the script file was written
+    return script_file, shell_file
+
+def qsub(shell_file, verbose=True, fear=None):
+    '''Submit a job onto the stack.'''
+    
+    #### WARNING - hardcoded path 'temp'
+    fear_string = ' '.join(['. /usr/local/grid/divf2/common/settings.sh;',
+                            'cd temp;'
+                            'chmod +x %s;' % shell_file.split('/')[-1],
+                            'qsub -l lr=0',
+                            shell_file.split('/')[-1] + ';',
+                            'cd ..'])
+
+    if verbose:
+        print 'Submitting : %s' % fear_string
+    fear.command(fear_string, fear)
+            
+
+
+def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=None, iters=300, \
+                         local_dir ='../temp/', remote_dir ='./temp/', \
+                         sleep_time=10, n_sleep_timeout=6, re_submit_wait=60):
+    '''Sends jobs to fear, waits for them, returns the results.'''
+   
+    # Make data into matrices in case they're unidimensional.
+    if X.ndim == 1: X = X[:, nax]
+    if y.ndim == 1: y = y[:, nax]
+    data = {'X': X, 'y': y}
+        
+    if noise is None:
+        noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
+    
+    fear = fear.connect()
+    
+    # Submit all the jobs and remember where we put them
+    data_files = []
+    write_files = []
+    script_files = []
+    shell_files = []
+    
+    for kernel in kernels:
+        
+        # Create data file and results file
+        data_files.append(mkstemp_safe(local_dir, '.mat'))
+        write_files.append(mkstemp_safe(local_dir, '.mat'))
+        
+        scipy.io.savemat(data_files[-1], data)  # Save regression data
+        
+        # Copy files to fear   
+        fear.copy_to(data_files[-1], remote_dir + data_files[-1].split('/')[-1], fear)
+#        fear.copy_to(write_files[-1], remote_dir + write_files[-1].split('/')[-1])
+        
+        # Create MATLAB code
+        code = gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_files[-1].split('/')[-1],
+                                            'writefile': write_files[-1].split('/')[-1],
+                                            'gpml_path': config.FEAR_GPML_PATH,
+                                            'kernel_family': kernel.gpml_kernel_expression(),
+                                            'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+                                            'noise': str(noise),
+                                            'iters': str(iters)}
+        
+        # Submit this to fear and save the file names
+        script_file, shell_file = qsub_matlab_code(code=code, verbose=verbose, local_dir=local_dir, remote_dir=remote_dir, fear=fear)
+        script_files.append(script_file)
+        shell_files.append(shell_file)
+        
+    # Wait for and read in results
+    fear_finished = False
+    job_finished = [False] * len(write_files)
+    results = [None] * len(write_files)
+    sleep_count = 0
+    
+    while not fear_finished:
+        for (i, write_file) in enumerate(write_files):
+            if not job_finished[i]:
+                if fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
+                    # Another job has finished
+                    job_finished[i] = True
+                    sleep_count = 0
+                    # Copy files
+                    os.remove(write_file) # Not sure if necessary
+                    fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
+                    # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
+                    gpml_result = scipy.io.loadmat(write_file)
+                    optimized_hypers = gpml_result['hyp_opt']
+                    nll = gpml_result['best_nll'][0, 0]
+#                    nlls = gpml_result['nlls'].ravel()
+                    laplace_nle = gpml_result['laplace_nle'][0, 0]
+                    kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
+                    k_opt = kernels[i].family().from_param_vector(kernel_hypers)
+                    BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
+                    results[i] = (k_opt, nll, laplace_nle, BIC)
+                    # Tidy up
+                    fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
+                    fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
+                    fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
+                    fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
+                    fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
+                    os.remove(data_files[i])
+                    os.remove(write_files[i])
+                    os.remove(script_files[i])
+                    os.remove(shell_files[i])
+                    # Tell the world
+                    if verbose:
+                        print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
+        
+        if sum(job_finished) == len(job_finished):
+            fear_finished = True    
+        if not fear_finished:
+            if verbose:
+                print 'Sleeping'
+            sleep_count += 1
+            if sleep_count < n_sleep_timeout:
+                time.sleep(sleep_time)
+            else:
+                # Jobs taking too long - assume failure - resubmit
+                fear.qdel_all(fear)
+                for (i, shell_file) in enumerate(shell_files):
+                    if not job_finished[i]:
+                        print "Re-submitting"
+                        qsub(shell_file, verbose=verbose, fear=fear)
+                if verbose:
+                    print 'Giving the jobs some time to run'
+                time.sleep(re_submit_wait)
+                sleep_count = 0
+            
+    fear.close()
+    
+    return results            
+
+def parse_all_results():
+    entries = [];
+    rownames = [];
+    
+    colnames = ['Dataset', 'NLL', 'Kernel' ]
+    for rt in gen_all_results():
+        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
+        entries.append(['%4.1f' % rt[1], rt[-1].latex_print()])
+        rownames.append(rt[0])
+    
+    utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
+
+def gen_all_results():
+    '''Look through all the files in the results directory'''
+    for r,d,f in os.walk("../results/"):
+        for files in f:
+            if files.endswith(".txt"):
+                results_filename = os.path.join(r,files)
+                best_tuple = parse_results( results_filename )
+                yield files.split('.')[-2], best_tuple[0], best_tuple[-1]
+                
+
+def parse_results( results_filename ):
+    result_tuples = [results_string_to_tuple(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
+    best_tuple = sorted(result_tuples, key=lambda p: p[2])[0]
+    return best_tuple
+    
+    # Put into a 
+def results_string_to_tuple(line):
+    nll = float(line.split("=")[1].split(", ")[0])
+    laplace = float(line.split("=")[2].split(", ")[0])
+    bic = float(line.split("=")[3].split(", ")[0])
+    line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
+    kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
+    return (nll, bic, laplace, kernel)   
+
+def main():
     data_file = sys.argv[1];
     results_filename = sys.argv[2];
     max_depth = int(sys.argv[3]);
@@ -122,4 +371,11 @@ if __name__ == '__main__':
     print 'max_depth=%d' % max_depth
     print 'k=%d' % k
     
-    experiment(data_file, results_filename, max_depth=max_depth, k=k)
+    #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
+    
+
+if __name__ == '__main__':
+    #main()
+    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_test.txt', max_depth=2, k=1, description = 'Dave test')
+
+    

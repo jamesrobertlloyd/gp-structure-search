@@ -29,7 +29,7 @@ def table(filename, rownames, colnames, entries):
         file.write( ' %s ' % colnames[0] )
         for c in range(1, len(colnames)):
             file.write( ' & \\rotatebox{0}{ %s } ' % colnames[c] )
-        
+
         file.write( ' \\\\ \\hline\n' )
 
         # Write first column and table entries.
