@@ -138,3 +138,11 @@ def job_queued(job_id, status=None, fear=None):
         return status[job_id] == 'qw'
     else:
         return False
+
+def job_loading(job_id, status=None, fear=None):
+    if status is None:
+        status = qstat_status(fear)
+    if status.has_key(job_id):
+        return status[job_id] == 't'
+    else:
+        return False
