@@ -129,7 +129,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
     # To do: change this to train/test splits.
     X, y, D = load_mat(data_file, y_dim)
     
-    current_kernels = list(fk.base_kernels())
+    current_kernels = list(fk.base_kernels(D))
     
     # Todo: change this to a dict.
     nll_key = 1,
