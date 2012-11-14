@@ -109,7 +109,7 @@ class ScoredKernel:
         return ScoredKernel(kernel, nll, laplace, BIC, noise)
     
     def __repr__(self):
-        return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s' % \
+        return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s)' % \
             (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
     
     @staticmethod
@@ -128,6 +128,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
     X, y, D = load_mat(data_file, y_dim)
     
     current_kernels = list(fk.base_kernels(D))
+    #current_kernels = list(fk.test_kernels(1))
         
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
@@ -327,8 +328,9 @@ def fear_run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
                 time.sleep(re_submit_wait)
                 
     print 'PPP'
-            
-    fear.close()
+    
+    if not fear is None:        
+        fear.close()
     
     return results            
 
@@ -360,7 +362,7 @@ def gen_all_results():
                 yield files.split('.')[-2], best_tuple
                 
 def parse_results( results_filename ):
-    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
+    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
     best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
        
@@ -391,7 +393,7 @@ def run_all_kfold():
         output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
         prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
         
-        fear_experiment(datafile, output_file, max_depth=1, k=3, description = 'Dave test')
+        fear_experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!')
         
         #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        
@@ -401,13 +403,13 @@ def run_all_kfold():
 def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
-    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result_happy.txt'
-    fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
+    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result.txt'
+    #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
     
-    nll, bic, laplace, kernel, noise = parse_results(output_file)
+    best_scored_kernel = parse_results(output_file)
     
-    prediction_file = 'AAAA'
-    gpml.make_predictions(kernel.gpml_kernel_expression(), kernel.param_vector(), datafile, prediction_file, noise, iters=30)
+    prediction_file = config.RESULTS_PATH + '/AAAAAA.mat'
+    gpml.make_predictions(best_scored_kernel.k_opt.gpml_kernel_expression(), best_scored_kernel.k_opt.param_vector(), datafile, prediction_file, best_scored_kernel.noise, iters=30)
     
     
 if __name__ == '__main__':

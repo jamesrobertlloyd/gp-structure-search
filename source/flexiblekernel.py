@@ -1124,6 +1124,19 @@ def base_kernels(ndim=1):
         yield MaskKernel(ndim, dim, PP3Kernel(0, 0))
         yield MaskKernel(ndim, dim, MaternKernel(0, 0))
         
+        
+def test_kernels(ndim=1):
+    '''
+    Generator of a subset of base kernels for testing
+    '''
+    for dim in range(ndim):
+        # Make up default arguments.
+        #yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
+        #yield MaskKernel(ndim, dim, LinKernel(0))
+        #yield MaskKernel(ndim, dim, MaternKernel(0, 0))   
+        
+        yield MaskKernel(ndim, dim, PP3Kernel(0, 0))  
+        yield MaskKernel(ndim, dim, QuadraticKernel(0, 0))   
             
 
 def Carls_Mauna_kernel():

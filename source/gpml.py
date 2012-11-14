@@ -367,25 +367,22 @@ model.hypers = hyp_opt;
 [ymu, ys2, predictions, fs2, loglik] = gp(model.hypers, @infExact, meanfunc, covfunc, likfunc, X, y, Xtest, ytest)
 
 actuals = ytest;
-train_time = NaN;
-trainfolds = NaN;
-testfolds = NaN;
-K = NaN;
-fold = NaN;
-seed = NaN;
-outdir = NaN;
 timestamp = now
 
 '%(writefile)s'
 
-%% Save all the results.        
-%%save( '%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'train_time', 'trainfolds', 'testfolds', 'K', 'fold', 'seed', 'outdir', 'timestamp' );
-save( '%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'timestamp' );
+save('%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'timestamp');
+
+pwd
+%%save('/home/dkd23/Dropbox/results/r_pumadyn512_fold_3_of_10_result.txt'
+
+a='Supposedly finished writing file'
+
 exit();
 """
 
 
-def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30):        
+def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30):  
     code = PREDICT_AND_SAVE_CODE % {'datafile': data_file,
                                     'writefile': write_file,
                                     'gpml_path': config.GPML_PATH,
