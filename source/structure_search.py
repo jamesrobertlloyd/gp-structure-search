@@ -37,7 +37,7 @@ def load_mat(data_file, y_dim=1):
 def proj_psd(H):
     assert np.allclose(H, H.T), 'not symmetric'
     d, Q = scipy.linalg.eigh(H)
-    d = np.where(d > 0, d, 0.)
+    d = np.clip(d, 1e-8, np.infty)
     return np.dot(Q, d[:, nax] * Q.T)
     
 
@@ -139,7 +139,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
         for (i, results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for result in results:
-                outfile.write( result )      
+                outfile.write( str(result) )      
             
 
 
@@ -149,10 +149,10 @@ def mkstemp_safe(directory, suffix):
     return file_name
 
 
-def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./temp/', fear=None):
+def qsub_matlab_code(code, verbose=True, fear=None):
     # Write to a temp script
-    script_file = mkstemp_safe(local_dir, '.m')
-    shell_file = mkstemp_safe(local_dir, '.sh')
+    script_file = mkstemp_safe(config.LOCAL_TEMP_PATH, '.m')
+    shell_file = mkstemp_safe(config.LOCAL_TEMP_PATH, '.sh')
     
     f = open(script_file, 'w')
     f.write(code)
@@ -164,8 +164,8 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
             + script_file.split('/')[-1].split('.')[0] + '\n')
     f.close()
         
-    utils.fear.copy_to(script_file, remote_dir + script_file.split('/')[-1], fear)
-    utils.fear.copy_to(shell_file, remote_dir + shell_file.split('/')[-1], fear)
+    utils.fear.copy_to(script_file, local_to_remote(script_file), fear)
+    utils.fear.copy_to(shell_file, local_to_remote(shell_file), fear)
     
     job_id = utils.fear.qsub(shell_file)
     
@@ -176,8 +176,13 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
     return script_file, shell_file, job_id         
 
 
-def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=None, iters=300, \
-                         local_dir ='../temp/', remote_dir ='./temp/', \
+def local_to_remote(local_path):
+    d, fname = os.path.split(local_path)
+    assert d == config.LOCAL_TEMP_PATH
+    return os.path.join(config.REMOTE_TEMP_PATH, fname)
+
+
+def fear_run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
                          sleep_time=10, n_sleep_timeout=6, re_submit_wait=60):
     '''Sends jobs to fear, waits for them, returns the results.'''
    
@@ -185,6 +190,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     if X.ndim == 1: X = X[:, nax]
     if y.ndim == 1: y = y[:, nax]
     data = {'X': X, 'y': y}
+    ndata = y.shape[0]
         
     if noise is None:
         noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
@@ -201,13 +207,14 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     for kernel in kernels:
         
         # Create data file and results file
-        data_files.append(mkstemp_safe(local_dir, '.mat'))
-        write_files.append(mkstemp_safe(local_dir, '.mat'))
+        data_files.append(mkstemp_safe(config.LOCAL_TEMP_PATH, '.mat'))
+        write_files.append(mkstemp_safe(config.LOCAL_TEMP_PATH, '.mat'))
         
         scipy.io.savemat(data_files[-1], data)  # Save regression data
         
         # Copy files to fear   
-        utils.fear.copy_to(data_files[-1], remote_dir + data_files[-1].split('/')[-1], fear)
+        #utils.fear.copy_to(data_files[-1], remote_dir + data_files[-1].split('/')[-1], fear)
+        utils.fear.copy_to(data_files[-1], local_to_remote(data_files[-1]), fear)
 #        fear.copy_to(write_files[-1], remote_dir + write_files[-1].split('/')[-1])
         
         # Create MATLAB code
@@ -220,7 +227,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                                             'iters': str(iters)}
         
         # Submit this to fear and save the file names
-        script_file, shell_file, job_id = qsub_matlab_code(code=code, verbose=verbose, local_dir=local_dir, remote_dir=remote_dir, fear=fear)
+        script_file, shell_file, job_id = qsub_matlab_code(code=code, verbose=verbose, fear=fear)
         script_files.append(script_file)
         shell_files.append(shell_file)
         job_ids.append(job_id)
@@ -231,42 +238,51 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     results = [None] * len(write_files)
 
     while not fear_finished:
+        print 'AAA'
         job_status = utils.fear.qstat_status()
+        print 'BBB'
         for (i, write_file) in enumerate(write_files):
+            print 'CCC'
             if not job_finished[i]:
+                print 'DDD'
                 if utils.fear.job_terminated(job_ids[i], status=job_status, fear=fear):
-                    if not utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
+                    print 'EEE'
+                    #if not utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
+                    if not utils.fear.file_exists(local_to_remote(write_file), fear):
+                        print 'FFF'
                         # Job has finished but no output - re-submit
                         print 'Shell script %s job_id %s failed, re-submitting...' % (shell_files[i], job_ids[i])
+                        print 'GGG'
                         job_ids[i] = utils.fear.qsub(shell_files[i], verbose=verbose, fear=fear)
+                        print 'HHH'
                     else:
                         # Another job has finished
                         job_finished[i] = True
                         # Copy files
+                        print 'III'
                         os.remove(write_file) # Not sure if necessary
-                        utils.fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
+                        print 'JJJ'
+                        utils.fear.copy_from(local_to_remote(write_file), write_file, fear)
+                        print 'KKK'
                         # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
-                        gpml_result = scipy.io.loadmat(write_file)
-                        optimized_hypers = gpml_result['hyp_opt']
-                        nll = gpml_result['best_nll'][0, 0]
-                        hessian = gpml_result['hessian']
-                        assert isinstance(hessian, np.ndarray)  # just to make sure
-                        laplace_nle = laplace_approx(nll, optimized_hypers, hessian, PRIOR_VAR)
-                        kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
-                        noise_hyp = optimized_hypers['lik'][0, 0].ravel()
-                        k_opt = kernels[i].family().from_param_vector(kernel_hypers)
-                        BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
-                        results[i] = ScoredKernel(k_opt, nll, laplace_nle, BIC, noise_hyp) 
+                        
+                        output = gpml.read_outputs(write_file)
+                        print 'LLL'
+                        results[i] = output_to_scored_kernel(output, kernels[i].family(), ndata)
+                        print 'MMM'
+                         
                         # Tidy up
-                        utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
-                        utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
-                        utils.fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
-                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
-                        utils.fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
+                        utils.fear.rm(local_to_remote(data_files[i]), fear)
+                        utils.fear.rm(local_to_remote(write_files[i]), fear)
+                        utils.fear.rm(local_to_remote(script_files[i]), fear)
+                        utils.fear.rm(local_to_remote(shell_files[i]), fear)
+                        utils.fear.rm(local_to_remote(shell_files[i]) + '*', fear)
+                        print 'NNN'
                         os.remove(data_files[i])
                         os.remove(write_files[i])
                         os.remove(script_files[i])
                         os.remove(shell_files[i])
+                        print 'OOO'
                         # Tell the world
                         if verbose:
                             print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
@@ -289,10 +305,18 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                 print '%d jobs queued' % n_queued
                 print 'Sleeping'
                 time.sleep(re_submit_wait)
+                
+    print 'PPP'
             
     fear.close()
     
     return results            
+
+def output_to_scored_kernel(output, kernel_family, ndata):
+    laplace_nle = laplace_approx(output.nll, output.kernel_hypers, output.hessian, PRIOR_VAR)
+    k_opt = kernel_family.from_param_vector(output.kernel_hypers)
+    BIC = 2 * output.nll + len(output.kernel_hypers) * np.log(ndata)
+    return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)
 
 def parse_all_results():
     entries = [];
@@ -357,8 +381,8 @@ def run_all_kfold():
 def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
-    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result.txt'
-    #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
+    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result_happy.txt'
+    fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
     
     nll, bic, laplace, kernel, noise = parse_results(output_file)
     

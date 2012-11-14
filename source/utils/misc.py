@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 nax = np.newaxis
 from PIL import Image
+import mkl_hack
 import scipy.linalg
 
 

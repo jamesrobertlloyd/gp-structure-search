@@ -12,7 +12,7 @@ nax = np.newaxis
 import scipy.io
 import tempfile, os
 import subprocess
-
+import structure_search
 import config
 
 def run_matlab_code(code, verbose=False):
@@ -108,11 +108,12 @@ exit();
 """
 
 class OptimizerOutput:
-    def __init__(self, kernel_hypers, nll, nlls, hessian):
+    def __init__(self, kernel_hypers, nll, nlls, hessian, noise_hyp):
         self.kernel_hypers = kernel_hypers
         self.nll = nll
         self.nlls = nlls
         self.hessian = hessian
+        self.noise_hyp = noise_hyp
 
 def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300):
     if X.ndim == 1:
@@ -139,24 +140,30 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
                                    'noise': str(noise),
                                    'iters': str(iters)}
     run_matlab_code(code, verbose)
-
-    # Load in the file that GPML saved things to.
-    gpml_result = scipy.io.loadmat(temp_write_file)
+    
+    output = read_outputs(temp_write_file)
     
     os.close(fd1)
     os.close(fd2)
     os.remove(temp_data_file)
     os.remove(temp_write_file)
 
+    return output
+
+
+def read_outputs(write_file):
+    gpml_result = scipy.io.loadmat(write_file)
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
-    nlls = gpml_result['nlls'].ravel()
     hessian = gpml_result['hessian']
+    nlls = gpml_result['nlls'].ravel()
+    assert isinstance(hessian, np.ndarray)  # just to make sure
 
-    # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
-
-    return OptimizerOutput(kernel_hypers, nll, nlls, hessian)
+    noise_hyp = optimized_hypers['lik'][0, 0].ravel()
+    
+    return OptimizerOutput(kernel_hypers, nll, nlls, hessian, noise_hyp)
+                        
 
 
 # Some Matlab code to sample from a GP prior, in a spectral way.

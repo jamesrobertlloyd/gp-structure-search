@@ -68,7 +68,7 @@ def qsub(shell_file, verbose=True, fear=None):
     
     #### WARNING - hardcoded path 'temp'
     fear_string = ' '.join(['. /usr/local/grid/divf2/common/settings.sh;',
-                            'cd temp;'
+                            'cd %s;' % config.REMOTE_TEMP_PATH,
                             'chmod +x %s;' % shell_file.split('/')[-1],
                             'qsub -l lr=0',
                             shell_file.split('/')[-1] + ';',
