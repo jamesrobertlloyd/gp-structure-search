@@ -25,6 +25,7 @@ import os
 import tempfile
 import subprocess
 import time
+import itertools
 
 PRIOR_VAR = 100.
 
@@ -74,6 +75,21 @@ def expand_kernels(D, seed_kernels, verbose=False):
             
     return (kernels)
 
+def replace_zeros(param_vector, sd):
+      
+    #### WARNING - assumes the default value is 0 - this may change
+    return [np.random.normal(scale=sd) if p == 0 else p for p in param_vector]
+
+def add_random_restarts_single_kernel(kernel, n_rand, sd):
+    '''Returns a list of kernels with random restarts for default values'''
+    # I'm sorry that python encourages me to code like this sometimes...
+    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_zeros(kernel.param_vector(), sd)), n_rand))
+
+def add_random_restarts(kernels, n_rand=1, sd=2):    
+    '''Augments the list to include random restarts of all default value parameters'''
+      
+    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
+
 class ScoredKernel:
     def __init__(self, k_opt, nll, laplace_nle, bic_nle, noise):
         self.k_opt = k_opt
@@ -106,7 +122,7 @@ class ScoredKernel:
 
 def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                     verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
-                    description=''):
+                    description='', n_rand=1, sd=2):
     '''Recursively search for the best kernel, in parallel on the fear cluster.'''
 
     X, y, D = load_mat(data_file, y_dim)
@@ -116,6 +132,8 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
     for r in range(max_depth):   
+        # Add restarts
+        current_kernels = add_random_restarts(current_kernels, n_rand, sd)
         new_results = fear_run_experiments(current_kernels, X, y, verbose=verbose, \
                                            sleep_time=sleep_time, n_sleep_timeout=n_sleep_timeout, \
                                            re_submit_wait=re_submit_wait)
