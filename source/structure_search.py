@@ -193,26 +193,10 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
     utils.fear.copy_to(script_file, remote_dir + script_file.split('/')[-1], fear)
     utils.fear.copy_to(shell_file, remote_dir + shell_file.split('/')[-1], fear)
     
-    qsub(shell_file)
+    utils.fear.qsub(shell_file)
     
     # Tell the caller where the script file was written
-    return script_file, shell_file
-
-def qsub(shell_file, verbose=True, fear=None):
-    '''Submit a job onto the stack.'''
-    
-    #### WARNING - hardcoded path 'temp'
-    fear_string = ' '.join(['. /usr/local/grid/divf2/common/settings.sh;',
-                            'cd temp;'
-                            'chmod +x %s;' % shell_file.split('/')[-1],
-                            'qsub -l lr=0',
-                            shell_file.split('/')[-1] + ';',
-                            'cd ..'])
-
-    if verbose:
-        print 'Submitting : %s' % fear_string
-    utils.fear.command(fear_string, fear)
-            
+    return script_file, shell_file         
 
 
 def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=None, iters=300, \
@@ -389,7 +373,7 @@ def run_all_kfold():
         output_file = os.path.join('../results/', files + "_result.txt")
         prediction_file = os.path.join('../results/', files + "_predictions.mat")
         
-        fear_experiment(datafile, output_file, max_depth=3, k=3, description = 'Dave test')
+        fear_experiment(datafile, output_file, max_depth=4, k=3, description = 'Dave test')
         
         #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        
