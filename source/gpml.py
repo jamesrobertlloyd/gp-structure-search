@@ -107,6 +107,13 @@ save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 exit();
 """
 
+class OptimizerOutput:
+    def __init__(self, kernel_hypers, nll, nlls, hessian):
+        self.kernel_hypers = kernel_hypers
+        self.nll = nll
+        self.nlls = nlls
+        self.hessian = hessian
+
 def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300):
     if X.ndim == 1:
         X = X[:, nax]
@@ -144,18 +151,12 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     optimized_hypers = gpml_result['hyp_opt']
     nll = gpml_result['best_nll'][0, 0]
     nlls = gpml_result['nlls'].ravel()
-    #hessian = gpml_result['hessian'].ravel()
-    
-    # WARNING - this is wrong for now.
-    laplace_nle = nll #9999.0 #utils.laplace_nle(nll, hessian)
+    hessian = gpml_result['hessian']
 
     # Strip out only kernel hyper-parameters.
     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
 
-    if return_all:
-        return kernel_hypers, nll, nlls, laplace_nle
-    else:
-        return kernel_hypers, nll
+    return OptimizerOutput(kernel_hypers, nll, nlls, hessian)
 
 
 # Some Matlab code to sample from a GP prior, in a spectral way.

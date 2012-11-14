@@ -26,6 +26,7 @@ import tempfile
 import subprocess
 import time
 
+PRIOR_VAR = 100.
 
 
 def load_mat(data_file, y_dim=1):
@@ -73,75 +74,28 @@ def expand_kernels(D, seed_kernels, verbose=False):
             
     return (kernels)
 
-def try_kernels(X, y, D, kernels, expand=True, verbose=False):    
-    '''
-    Expand: if false, just tries kernels that were passed in.
-    '''
-    
-             
-    results = []
-
-    # Call GPML with each of the expanded kernels
-    #pylab.figure()
-    for k in kernels:
-        #### TODO - think about initialisation
-        #init_params = np.random.normal(size=k.param_vector().size)
-        init_params = k.param_vector()
-        kernel_hypers, nll, nlls, laplace_nle = gpml.optimize_params(k.gpml_kernel_expression(), init_params, X, y, return_all=True, verbose=verbose)
-    
-        if verbose:
-            print "kernel_hypers =", kernel_hypers
-        print
-        print "nll =", nll
-        print "laplace =", laplace_nle
-       
-        k_opt = k.family().from_param_vector(kernel_hypers)
-        if verbose:
-            print k_opt.gpml_kernel_expression()
-        print k_opt.pretty_print()
-        if verbose:
-            print '[%s]' % k_opt.param_vector()
+class ScoredKernel:
+    def __init__(self, k_opt, nll, laplace_nle, bic_nle, noise):
+        self.k_opt = k_opt
+        self.nll = nll
+        self.laplace_nle = laplace_nle
+        self.bic_nle = bic_nle
+        self.noise = noise
         
-        # pylab.semilogx(range(1, nlls.size+1), nlls)
-        
-        results.append((k_opt, nll, laplace_nle))
-        
-        #pylab.draw()  
-        
-    return results
-
-
-def experiment(data_file, results_filename, max_depth=2, k=2, verbose=True):
-    '''Recursively search for the best kernel'''
-
-    X, y, D = load_mat(data_file)
+    def score(self, criterion='laplace'):
+        return {'bic': self.bic_nle,
+                'nll': self.nll,
+                'laplace': self.laplace_nle
+                }[criterion]
+                
+    @staticmethod
+    def from_printed_outputs(nll, laplace, BIC, noise=None, kernel=None):
+        return ScoredKernel(kernel, nll, laplace, BIC, noise)
     
-    kernels = [fk.MaskKernel(D, 0, fk.SqExpKernel(0, 0))]
-    
-    nll_key = 1
-    laplace_key = 2
-    active_key = laplace_key
-    
-    results = []
-    for r in range(max_depth):
-        kernels = expand_kernels( kernels )
-        new_results = try_kernels(X, y, D=D, kernels=kernels, verbose=verbose)
-        results = results + new_results
-        
-        print
-        results = sorted(results, key=lambda p: p[active_key], reverse=True)
-        for kernel, nll, laplace in results:
-            print nll, laplace, kernel.pretty_print()
-            
-        kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
+    def __repr__(self):
+        return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s' % \
+            (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
 
-    # Write results to a file
-    results = sorted(results, key=lambda p: p[nll_key], reverse=True)
-    with open(results_filename, 'w') as outfile:
-        outfile.write('Experiment results for\n datafile = %s\n max_depth = %f\n k = %f\n\n' % (data_file, max_depth, k)) 
-        for kernel, nll, laplace in results:
-            outfile.write( 'nll=%f, laplace=%f, kernel=%s\n' % (nll, laplace, kernel.__repr__()))
-            
 
 
 def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
@@ -149,16 +103,9 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
                     description=''):
     '''Recursively search for the best kernel, in parallel on the fear cluster.'''
 
-    # To do: change this to train/test splits.
     X, y, D = load_mat(data_file, y_dim)
     
     current_kernels = list(fk.base_kernels(D))
-    
-    # Todo: change this to a dict.
-    nll_key = 1,
-    laplace_key = 2
-    BIC_key = 3
-    active_key = BIC_key
         
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
@@ -170,25 +117,23 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
         results = results + new_results
         
         print
-        results = sorted(results, key=lambda p: p[active_key], reverse=True)
-        for kernel, nll, laplace, BIC, noise in results:
-            print nll, laplace, BIC, kernel.pretty_print()
+        results = sorted(results, key=ScoredKernel.score, reverse=True)
+        for result in results:
+            print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
         
         results_sequence.append(results)
         
-        best_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
+        best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
         current_kernels = expand_kernels(D, best_kernels, verbose=verbose)
 
     # Write results to a file.  Todo: write a dictionary.
-    results = sorted(results, key=lambda p: p[active_key], reverse=True)
+    results = sorted(results, key=ScoredKernel.score, reverse=True)
     with open(results_filename, 'w') as outfile:
         outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' % (data_file, y_dim, subset, max_depth, k, description)) 
         for (i, results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
-            for kernel, nll, laplace, BIC, noise in results:
-                outfile.write( 'nll=%f, laplace=%f, BIC=%f, noise=%f, kernel=%s\n' % \
-                               (nll, laplace, BIC, noise, kernel.__repr__()))            
-            
+            for result in results:
+                outfile.write( result )      
             
 
 
@@ -305,13 +250,14 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                     gpml_result = scipy.io.loadmat(write_file)
                     optimized_hypers = gpml_result['hyp_opt']
                     nll = gpml_result['best_nll'][0, 0]
-#                    nlls = gpml_result['nlls'].ravel()
-                    laplace_nle = nll # gpml_result['laplace_nle'][0, 0]   WARNING: this is wrong for now.
+                    hessian = gpml_result['hessian']
+                    assert isinstance(hessian, np.ndarray)  # just to make sure
+                    laplace_nle = laplace_approx(nll, optimized_hypers, hessian, PRIOR_VAR)
                     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
                     noise_hyp = optimized_hypers['lik'][0, 0].ravel()
                     k_opt = kernels[i].family().from_param_vector(kernel_hypers)
                     BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
-                    results[i] = (k_opt, nll, laplace_nle, BIC, noise_hyp)  #Todo: make this a dictionary.
+                    results[i] = ScoredKernel(k_opt, nll, laplace_nle, BIC, noise_hyp) 
                     # Tidy up
                     utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
                     utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
@@ -364,27 +310,34 @@ def parse_all_results():
 
 def gen_all_results():
     '''Look through all the files in the results directory'''
-    for r,d,f in os.walk("../results/"):
+    for r,d,f in os.walk(config.RESULTS_PATH):
         for files in f:
             if files.endswith(".txt"):
                 results_filename = os.path.join(r,files)
                 best_tuple = parse_results( results_filename )
-                yield files.split('.')[-2], best_tuple[0], best_tuple[-1]
+                yield files.split('.')[-2], best_tuple
                 
 def parse_results( results_filename ):
-    result_tuples = [results_string_to_tuple(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
-    best_tuple = sorted(result_tuples, key=lambda p: p[2])[0]
+    result_tuples = [parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
+    best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
     
     # Put into a 
-def results_string_to_tuple(line):
-    nll = float(line.split("=")[1].split(", ")[0])
-    laplace = float(line.split("=")[2].split(", ")[0])
-    bic = float(line.split("=")[3].split(", ")[0])
-    noise = float(line.split("=")[4].split(", ")[0])
-    line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
-    kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
-    return (nll, bic, laplace, kernel, noise)   
+def parse_results_string(line):
+    #line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
+    v = locals().copy()
+    v.update(fk.__dict__)
+    v['nan'] = np.NaN;
+    #eval_str = 'ScoredKernel.from_printed_outputs(' + line + ')'
+    return eval(line, globals(), v)
+    
+    #nll = float(line.split("=")[1].split(", ")[0])
+    #laplace = float(line.split("=")[2].split(", ")[0])
+    #bic = float(line.split("=")[3].split(", ")[0])
+    #noise = float(line.split("=")[4].split(", ")[0])
+    #line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
+    #kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
+    #return (nll, bic, laplace, kernel, noise)   
 
 def gen_all_kfold_datasets():
     '''Look through all the files in the results directory'''
@@ -409,8 +362,8 @@ def main():
 def run_all_kfold():
     for r, files in gen_all_kfold_datasets():
         datafile = os.path.join(r,files + ".mat")
-        output_file = os.path.join('../results/', files + "_result.txt")
-        prediction_file = os.path.join('../results/', files + "_predictions.mat")
+        output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
+        prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
         
         fear_experiment(datafile, output_file, max_depth=3, k=3, description = 'Dave test')
         
@@ -422,7 +375,7 @@ def run_all_kfold():
 def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
-    output_file = '../results/r_pumadyn512_fold_3_of_10_result.txt'
+    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result.txt'
     #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
     
     nll, bic, laplace, kernel, noise = parse_results(output_file)
