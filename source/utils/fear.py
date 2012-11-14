@@ -7,6 +7,9 @@ A set of utilities to maniuplate files on the fear cluster.
 '''
 
 import pysftp
+import config
+
+# TODO:  Make this into a class.
 
 def connect():
     return pysftp.Connection('fear', username=config.USERNAME, password=config.PASSWORD)

@@ -146,7 +146,7 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     nlls = gpml_result['nlls'].ravel()
     #hessian = gpml_result['hessian'].ravel()
     
-    # WARNING - this is wwrong for now.
+    # WARNING - this is wrong for now.
     laplace_nle = nll #9999.0 #utils.laplace_nle(nll, hessian)
 
     # Strip out only kernel hyper-parameters.
@@ -331,4 +331,59 @@ def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, ite
     return gpml_result['posterior_mean'].ravel()
 
 
+# Matlab code to make predictions on a dataset.
+PREDICT_AND_SAVE_CODE = r"""
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
+
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Set up model.
+meanfunc = {@meanConst}
+hyp.mean = mean(y)
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = %(noise)s
+
+%% Optimize a little anyways.
+[hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
+best_nll = nlls(end)
+
+model.hypers = hyp_opt;
+
+%% Evaluate a test points.
+[ymu, ys2, predictions, fs2, loglik] = gp(model.hypers, @infExact, meanfunc, covfunc, likfunc, X, y, Xtest, ytest)
+
+actuals = ytest;
+train_time = NaN;
+trainfolds = NaN;
+testfolds = NaN;
+K = NaN;
+fold = NaN;
+seed = NaN;
+outdir = NaN;
+timestamp = now
+
+'%(writefile)s'
+
+%% Save all the results.        
+%%save( '%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'train_time', 'trainfolds', 'testfolds', 'K', 'fold', 'seed', 'outdir', 'timestamp' );
+save( '%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'timestamp' );
+exit();
+"""
+
+
+def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30):        
+    code = PREDICT_AND_SAVE_CODE % {'datafile': data_file,
+                                    'writefile': write_file,
+                                    'gpml_path': config.GPML_PATH,
+                                    'kernel_family': kernel_expression,
+                                    'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
+                                    'noise': str(noise),
+                                    'iters': str(iters)}
+    run_matlab_code(code, verbose=True)
 

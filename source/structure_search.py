@@ -50,12 +50,12 @@ def expand_kernels(D, seed_kernels, verbose=False):
             
     return (kernels)
 
-def try_expanded_kernels(X, y, D, kernels, expand=True, verbose=False):    
+def try_kernels(X, y, D, kernels, expand=True, verbose=False):    
     '''
     Expand: if false, just tries kernels that were passed in.
     '''
     
-    kernels = expand_kernels( kernels )           
+             
     results = []
 
     # Call GPML with each of the expanded kernels
@@ -93,15 +93,16 @@ def experiment(data_file, results_filename, max_depth=2, k=2, verbose=True):
 
     X, y, D = load_mat(data_file)
     
-    seed_kernels = [fk.MaskKernel(D, 0, fk.SqExpKernel(0, 0))]
+    kernels = [fk.MaskKernel(D, 0, fk.SqExpKernel(0, 0))]
     
     nll_key = 1
     laplace_key = 2
     active_key = laplace_key
     
     results = []
-    for r in range(max_depth):     
-        new_results = try_expanded_kernels(X, y, D=D, seed_kernels=seed_kernels, verbose=verbose)
+    for r in range(max_depth):
+        kernels = expand_kernels( kernels )
+        new_results = try_kernels(X, y, D=D, kernels=kernels, verbose=verbose)
         results = results + new_results
         
         print
@@ -109,7 +110,7 @@ def experiment(data_file, results_filename, max_depth=2, k=2, verbose=True):
         for kernel, nll, laplace in results:
             print nll, laplace, kernel.pretty_print()
             
-        seed_kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
+        kernels = [r[0] for r in sorted(new_results, key=lambda p: p[active_key])[0:k]]
 
     # Write results to a file
     results = sorted(results, key=lambda p: p[nll_key], reverse=True)
@@ -128,7 +129,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
     # To do: change this to train/test splits.
     X, y, D = load_mat(data_file, y_dim)
     
-    current_kernels = fk.base_kernels()
+    current_kernels = list(fk.base_kernels())
     
     # Todo: change this to a dict.
     nll_key = 1,
@@ -147,7 +148,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
         
         print
         results = sorted(results, key=lambda p: p[active_key], reverse=True)
-        for kernel, nll, laplace, BIC in results:
+        for kernel, nll, laplace, BIC, noise in results:
             print nll, laplace, BIC, kernel.pretty_print()
         
         results_sequence.append(results)
@@ -161,8 +162,9 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
         outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' % (data_file, y_dim, subset, max_depth, k, description)) 
         for (i, results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
-            for kernel, nll, laplace, BIC in results:
-                outfile.write( 'nll=%f, laplace=%f, BIC=%f, kernel=%s\n' % (nll, laplace, BIC, kernel.__repr__()))            
+            for kernel, nll, laplace, BIC, noise in results:
+                outfile.write( 'nll=%f, laplace=%f, BIC=%f, noise=%f, kernel=%s\n' % \
+                               (nll, laplace, BIC, noise, kernel.__repr__()))            
             
             
 
@@ -188,8 +190,8 @@ def qsub_matlab_code(code, verbose=True, local_dir ='../temp/', remote_dir ='./t
             + script_file.split('/')[-1].split('.')[0] + '\n')
     f.close()
         
-    fear.copy_to(script_file, remote_dir + script_file.split('/')[-1], fear)
-    fear.copy_to(shell_file, remote_dir + shell_file.split('/')[-1], fear)
+    utils.fear.copy_to(script_file, remote_dir + script_file.split('/')[-1], fear)
+    utils.fear.copy_to(shell_file, remote_dir + shell_file.split('/')[-1], fear)
     
     qsub(shell_file)
     
@@ -209,7 +211,7 @@ def qsub(shell_file, verbose=True, fear=None):
 
     if verbose:
         print 'Submitting : %s' % fear_string
-    fear.command(fear_string, fear)
+    utils.fear.command(fear_string, fear)
             
 
 
@@ -226,7 +228,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     if noise is None:
         noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
     
-    fear = fear.connect()
+    fear = utils.fear.connect()
     
     # Submit all the jobs and remember where we put them
     data_files = []
@@ -243,7 +245,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
         scipy.io.savemat(data_files[-1], data)  # Save regression data
         
         # Copy files to fear   
-        fear.copy_to(data_files[-1], remote_dir + data_files[-1].split('/')[-1], fear)
+        utils.fear.copy_to(data_files[-1], remote_dir + data_files[-1].split('/')[-1], fear)
 #        fear.copy_to(write_files[-1], remote_dir + write_files[-1].split('/')[-1])
         
         # Create MATLAB code
@@ -269,29 +271,30 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
     while not fear_finished:
         for (i, write_file) in enumerate(write_files):
             if not job_finished[i]:
-                if fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
+                if utils.fear.file_exists(remote_dir + write_file.split('/')[-1], fear):
                     # Another job has finished
                     job_finished[i] = True
                     sleep_count = 0
                     # Copy files
                     os.remove(write_file) # Not sure if necessary
-                    fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
+                    utils.fear.copy_from(remote_dir + write_file.split('/')[-1], write_file, fear)
                     # Read results ##### THIS WILL CHANGE IF RUNNING DIFFERENT TYPE OF EXPERIMENT
                     gpml_result = scipy.io.loadmat(write_file)
                     optimized_hypers = gpml_result['hyp_opt']
                     nll = gpml_result['best_nll'][0, 0]
 #                    nlls = gpml_result['nlls'].ravel()
-                    laplace_nle = gpml_result['laplace_nle'][0, 0]
+                    laplace_nle = nll # gpml_result['laplace_nle'][0, 0]   WARNING: this is wrong for now.
                     kernel_hypers = optimized_hypers['cov'][0, 0].ravel()
+                    noise_hyp = optimized_hypers['lik'][0, 0].ravel()
                     k_opt = kernels[i].family().from_param_vector(kernel_hypers)
                     BIC = 2 * nll + len(kernel_hypers) * np.log(y.shape[0])
-                    results[i] = (k_opt, nll, laplace_nle, BIC)
+                    results[i] = (k_opt, nll, laplace_nle, BIC, noise_hyp)  #Todo: make this a dictionary.
                     # Tidy up
-                    fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
-                    fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
-                    fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
-                    fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
-                    fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
+                    utils.fear.rm(remote_dir + data_files[i].split('/')[-1], fear)
+                    utils.fear.rm(remote_dir + write_files[i].split('/')[-1], fear)
+                    utils.fear.rm(remote_dir + script_files[i].split('/')[-1], fear)
+                    utils.fear.rm(remote_dir + shell_files[i].split('/')[-1], fear)
+                    utils.fear.rm(remote_dir + shell_files[i].split('/')[-1] + '*', fear)
                     os.remove(data_files[i])
                     os.remove(write_files[i])
                     os.remove(script_files[i])
@@ -310,7 +313,7 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                 time.sleep(sleep_time)
             else:
                 # Jobs taking too long - assume failure - resubmit
-                fear.qdel_all(fear)
+                utils.fear.qdel_all(fear)
                 for (i, shell_file) in enumerate(shell_files):
                     if not job_finished[i]:
                         print "Re-submitting"
@@ -345,7 +348,6 @@ def gen_all_results():
                 best_tuple = parse_results( results_filename )
                 yield files.split('.')[-2], best_tuple[0], best_tuple[-1]
                 
-
 def parse_results( results_filename ):
     result_tuples = [results_string_to_tuple(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
     best_tuple = sorted(result_tuples, key=lambda p: p[2])[0]
@@ -356,9 +358,17 @@ def results_string_to_tuple(line):
     nll = float(line.split("=")[1].split(", ")[0])
     laplace = float(line.split("=")[2].split(", ")[0])
     bic = float(line.split("=")[3].split(", ")[0])
+    noise = float(line.split("=")[4].split(", ")[0])
     line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
     kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
-    return (nll, bic, laplace, kernel)   
+    return (nll, bic, laplace, kernel, noise)   
+
+def gen_all_kfold_datasets():
+    '''Look through all the files in the results directory'''
+    for r,d,f in os.walk("../data/kfold_data/"):
+        for files in f:
+            if files.endswith(".mat"):
+                yield r, files.split('.')[-2]
 
 def main():
     data_file = sys.argv[1];
@@ -373,9 +383,32 @@ def main():
     
     #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
     
-
+def run_all_kfold():
+    for r, files in gen_all_kfold_datasets():
+        datafile = os.path.join(r,files + ".mat")
+        output_file = os.path.join('../results/', files + "_result.txt")
+        prediction_file = os.path.join('../results/', files + "_predictions.mat")
+        
+        fear_experiment(datafile, output_file, max_depth=3, k=3, description = 'Dave test')
+        
+        #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
+        #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        
+        
+        print "Done one file!!!"   
+    
+def run_test_kfold():
+    datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
+    output_file = '../results/messabout.txt'
+    #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
+    
+    nll, bic, laplace, kernel, noise = parse_results(output_file)
+    
+    prediction_file = 'AAAA'
+    gpml.make_predictions(kernel.gpml_kernel_expression(), kernel.param_vector(), datafile, prediction_file, noise, iters=30)
+    
+    
 if __name__ == '__main__':
     #main()
-    fear_experiment('../data/bach_synth_r_200.mat', '../results/bach_synth_r_200_test.txt', max_depth=2, k=1, description = 'Dave test')
-
-    
+    #run_test_kfold()
+    run_all_kfold()
+ 
