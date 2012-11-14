@@ -150,14 +150,15 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
         best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
         current_kernels = expand_kernels(D, best_kernels, verbose=verbose)
 
-    # Write results to a file.  Todo: write a dictionary.
+    # Write results to a file.
     results = sorted(results, key=ScoredKernel.score, reverse=True)
     with open(results_filename, 'w') as outfile:
-        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' % (data_file, y_dim, subset, max_depth, k, description)) 
+        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' \
+                      % (data_file, y_dim, subset, max_depth, k, description)) 
         for (i, results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for result in results:
-                outfile.write( str(result) )      
+                print >> outfile, result      
             
 
 
@@ -213,7 +214,8 @@ def fear_run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     if noise is None:
         noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
     
-    fear = utils.fear.connect()
+    #fear = utils.fear.connect()
+    fear = None   # Hack to make us reconnect every time.
     
     # Submit all the jobs and remember where we put them
     data_files = []
@@ -389,7 +391,7 @@ def run_all_kfold():
         output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
         prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
         
-        fear_experiment(datafile, output_file, max_depth=4, k=3, description = 'Dave test')
+        fear_experiment(datafile, output_file, max_depth=1, k=3, description = 'Dave test')
         
         #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        

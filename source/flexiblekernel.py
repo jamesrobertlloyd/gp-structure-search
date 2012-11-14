@@ -432,7 +432,7 @@ class QuadraticKernel(BaseKernel):
         return QuadraticKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '{@covLINard, 2}'
+        return '{@covPoly, 2}'
     
     def english_name(self):
         return 'QD'
@@ -499,7 +499,7 @@ class CubicKernel(BaseKernel):
         return CubicKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '{@covLINard, 3}'
+        return '{@covPoly, 3}'
     
     def english_name(self):
         return 'CB'
