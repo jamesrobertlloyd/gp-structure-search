@@ -95,7 +95,13 @@ class ScoredKernel:
     def __repr__(self):
         return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s' % \
             (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
-
+    
+    @staticmethod
+    def parse_results_string(line):
+        v = locals().copy()
+        v.update(fk.__dict__)
+        v['nan'] = np.NaN;
+        return eval(line, globals(), v)
 
 
 def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
@@ -309,26 +315,10 @@ def gen_all_results():
                 yield files.split('.')[-2], best_tuple
                 
 def parse_results( results_filename ):
-    result_tuples = [parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
+    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("nll=")]
     best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
-    
-    # Put into a 
-def parse_results_string(line):
-    #line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
-    v = locals().copy()
-    v.update(fk.__dict__)
-    v['nan'] = np.NaN;
-    #eval_str = 'ScoredKernel.from_printed_outputs(' + line + ')'
-    return eval(line, globals(), v)
-    
-    #nll = float(line.split("=")[1].split(", ")[0])
-    #laplace = float(line.split("=")[2].split(", ")[0])
-    #bic = float(line.split("=")[3].split(", ")[0])
-    #noise = float(line.split("=")[4].split(", ")[0])
-    #line = line.replace("covMask", "MaskKernel")   # Fixes a bug in __repr__() that has already been fixed.
-    #kernel = fk.repr_string_to_kernel(line.split(" kernel=")[1])
-    #return (nll, bic, laplace, kernel, noise)   
+       
 
 def gen_all_kfold_datasets():
     '''Look through all the files in the results directory'''
