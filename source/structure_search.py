@@ -264,7 +264,8 @@ def fear_run_experiments(kernels, X, y, return_all=False, verbose=True, noise=No
                         # Tell the world
                         if verbose:
                             print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
-                elif not (utils.fear.job_queued(job_ids[i], status=job_status, fear=fear) or utils.fear.job_running(job_ids[i], status=job_status, fear=fear)):
+                elif not (utils.fear.job_queued(job_ids[i], status=job_status, fear=fear) or utils.fear.job_running(job_ids[i], status=job_status, fear=fear) \
+                          or utils.fear.job_loading(job_ids[i], status=job_status, fear=fear)):
                     # Job has some status other than running or queuing - something is wrong, delete and re-submit
                     utils.fear.qdel(job_ids[i], fear=fear)
                     print 'Shell script %s job_id %s stuck, deleting and re-submitting...' % (shell_files[i], job_ids[i])
