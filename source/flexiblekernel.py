@@ -18,6 +18,12 @@ import config
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
 CMP_TOLERANCE = np.log(1.01) # i.e. 1%
 
+def shrink_below_tolerance(x):
+    if np.abs(x) < CMP_TOLERANCE:
+        return 0
+    else:
+        return x 
+
 def paren_colors():
     if config.COLOR_SCHEME == 'dark':
         return ['red', 'green', 'cyan', 'magenta', 'yellow']
@@ -117,9 +123,9 @@ class SqExpKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
-#        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
     
     def depth(self):
         return 0
@@ -188,8 +194,11 @@ class SqExpPeriodicKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.period - other.period, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.period - other.period, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.period - other.period, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.period, self.output_variance), 
 #                   (other.lengthscale, other.period, other.output_variance))
         
@@ -260,8 +269,11 @@ class RQKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance, self.alpha - other.alpha]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance, self.alpha - other.alpha]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance, self.alpha - other.alpha]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance, self.alpha), 
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
@@ -326,8 +338,11 @@ class ConstKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance, self.alpha), 
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
@@ -392,8 +407,11 @@ class LinKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance, self.alpha), 
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
@@ -459,8 +477,11 @@ class QuadraticKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.offset - other.offset, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance, self.alpha), 
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
@@ -526,8 +547,11 @@ class CubicKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.offset - other.offset, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.offset - other.offset, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance, self.alpha), 
 #                   (other.lengthscale, other.output_variance, other.alpha))
         
@@ -593,8 +617,11 @@ class PP0Kernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
@@ -659,8 +686,11 @@ class PP1Kernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
@@ -725,8 +755,11 @@ class PP2Kernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
@@ -791,8 +824,11 @@ class PP3Kernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
@@ -857,8 +893,11 @@ class MaternKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
-        return max_diff > CMP_TOLERANCE
+        differences = [self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+#        max_diff = max(np.abs([self.lengthscale - other.lengthscale, self.output_variance - other.output_variance]))
+#        return max_diff > CMP_TOLERANCE
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
@@ -1135,8 +1174,8 @@ def test_kernels(ndim=1):
         #yield MaskKernel(ndim, dim, LinKernel(0))
         #yield MaskKernel(ndim, dim, MaternKernel(0, 0))   
         
-        yield MaskKernel(ndim, dim, PP3Kernel(0, 0))  
-        yield MaskKernel(ndim, dim, QuadraticKernel(0, 0))   
+        yield MaskKernel(ndim, dim, SqExpKernel(0, 0))  
+        yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))   
             
 
 def Carls_Mauna_kernel():
