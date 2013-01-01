@@ -1162,7 +1162,22 @@ def base_kernels(ndim=1):
         yield MaskKernel(ndim, dim, PP2Kernel(0, 0))
         yield MaskKernel(ndim, dim, PP3Kernel(0, 0))
         yield MaskKernel(ndim, dim, MaternKernel(0, 0))
-        
+ 
+def base_kernel_families():
+    '''
+    Generator of all base kernel families
+    '''
+    yield SqExpKernelFamily().default()
+    yield RQKernelFamily().default()
+    yield SqExpPeriodicKernelFamily().default()
+    yield LinKernelFamily().default()
+    yield QuadraticKernelFamily().default()
+    yield CubicKernelFamily().default()
+    yield PP0KernelFamily().default()
+    yield PP1KernelFamily().default()
+    yield PP2KernelFamily().default()
+    yield PP3KernelFamily().default()
+    yield MaternKernelFamily().default()       
         
 def test_kernels(ndim=1):
     '''
@@ -1175,8 +1190,15 @@ def test_kernels(ndim=1):
         #yield MaskKernel(ndim, dim, MaternKernel(0, 0))   
         
         yield MaskKernel(ndim, dim, SqExpKernel(0, 0))  
-        yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))   
-            
+        #yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0)) 
+         
+def test_kernel_families():
+    '''
+    Generator of all base kernel families
+    '''
+    yield SqExpKernelFamily().default()
+    #yield RQKernelFamily().default()
+    #yield SqExpPeriodicKernelFamily().default()        
 
 def Carls_Mauna_kernel():
     '''

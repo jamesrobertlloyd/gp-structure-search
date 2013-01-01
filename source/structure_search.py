@@ -27,6 +27,9 @@ import subprocess
 import time
 import itertools
 
+import cblparallel
+import re
+
 PRIOR_VAR = 100.
 
 
@@ -161,7 +164,103 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
             for result in results:
                 print >> outfile, result      
             
+def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
+               verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
+               description='', n_rand=1, sd=2, local_computation=True):
+    '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
+    X, y, D = load_mat(data_file, y_dim)
+    
+    current_kernels = list(fk.base_kernels(D))
+    #current_kernels = list(fk.test_kernels(D))
+        
+    results = []              # All results.
+    results_sequence = []     # Results sets indexed by level of expansion.
+    for r in range(max_depth):   
+        # Add restarts
+        current_kernels = add_random_restarts(current_kernels, n_rand, sd)
+        new_results = run_experiments(current_kernels, X, y, verbose=verbose, \
+                                           sleep_time=sleep_time, n_sleep_timeout=n_sleep_timeout, \
+                                           re_submit_wait=re_submit_wait, local_computation=local_computation)
+            
+        results = results + new_results
+        
+        print
+        results = sorted(results, key=ScoredKernel.score, reverse=True)
+        for result in results:
+            print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
+        
+        results_sequence.append(results)
+        
+        best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
+        current_kernels = expand_kernels(D, best_kernels, verbose=verbose)
+
+    # Write results to a file.
+    results = sorted(results, key=ScoredKernel.score, reverse=True)
+    with open(results_filename, 'w') as outfile:
+        outfile.write('Experiment results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' \
+                      % (data_file, y_dim, subset, max_depth, k, description)) 
+        for (i, results) in enumerate(results_sequence):
+            outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
+            for result in results:
+                print >> outfile, result  
+           
+def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
+                    sleep_time=10, n_sleep_timeout=6, re_submit_wait=60, local_computation=True):
+    '''Sets up the experiments, sends them to cblparallel, returns the results.'''
+   
+    # Make data into matrices in case they're unidimensional.
+    if X.ndim == 1: X = X[:, nax]
+    if y.ndim == 1: y = y[:, nax]
+    data = {'X': X, 'y': y}
+    ndata = y.shape[0]
+        
+    if noise is None:
+        noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
+    
+    if not local_computation:
+        fear = cblparallel.fear()
+    
+    # Create data file and move to fear if necessary
+    
+    data_file = mkstemp_safe(cblparallel.LOCAL_TEMP_PATH, '.mat')
+    scipy.io.savemat(data_file, data)  # Save regression data
+    
+    if not local_computation:
+        fear.copy_to(data_files[-1], os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
+    
+    # Create scripts
+    
+    scripts = [None] * len(kernels)
+    
+    for (i, kernel) in enumerate(kernels):
+        scripts[i] = gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
+                                                  'writefile': '%(output_file)s',
+                                                  'gpml_path': '/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27',
+                                                  'kernel_family': kernel.gpml_kernel_expression(),
+                                                  'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+                                                  'noise': str(noise),
+                                                  'iters': str(iters)}
+        # Need to be careful with % signs - HACK for the moment
+        scripts[i] = re.sub('% ', '%%', scripts[i])
+    
+    # Send to cblparallel
+    
+    output_files = cblparallel.run_batch_locally(scripts, language='matlab')  
+    
+    # Read in results
+    
+    results = [output_to_scored_kernel(gpml.read_outputs(output_file), kernels[i].family(), ndata) for (i, output_file) in enumerate(output_files)]
+    
+    # Tidy up
+    
+    os.remove(data_file)
+    if not local_computation:
+        fear.close()
+    
+    # Return results
+    
+    return results 
 
 def mkstemp_safe(directory, suffix):
     (os_file_handle, file_name) = tempfile.mkstemp(dir=directory, suffix=suffix)
@@ -403,13 +502,13 @@ def run_all_kfold():
 def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
-    output_file = config.RESULTS_PATH + '/r_pumadyn512_fold_3_of_10_result.txt'
-    #fear_experiment(datafile, output_file, max_depth=1, k=1, description = 'Dave test')
+    output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
+    experiment(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test')
     
-    best_scored_kernel = parse_results(output_file)
+    #best_scored_kernel = parse_results(output_file)
     
-    prediction_file = config.RESULTS_PATH + '/AAAAAA.mat'
-    gpml.make_predictions(best_scored_kernel.k_opt.gpml_kernel_expression(), best_scored_kernel.k_opt.param_vector(), datafile, prediction_file, best_scored_kernel.noise, iters=30)
+    #prediction_file = config.RESULTS_PATH + '/AAAAAA.mat'
+    #gpml.make_predictions(best_scored_kernel.k_opt.gpml_kernel_expression(), best_scored_kernel.k_opt.param_vector(), datafile, prediction_file, best_scored_kernel.noise, iters=30)
     
     
 if __name__ == '__main__':
