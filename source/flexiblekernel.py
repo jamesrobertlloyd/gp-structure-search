@@ -282,7 +282,8 @@ class RQKernel(BaseKernel):
     
 class ConstKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        output_variance = params
+        #### Note - expects list input
+        output_variance, = params
         return ConstKernel(output_variance)
     
     def num_params(self):
@@ -351,7 +352,8 @@ class ConstKernel(BaseKernel):
 
 class LinKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        lengthscale = params
+        #### Note - expects list input
+        lengthscale, = params
         return LinKernel(lengthscale)
     
     def num_params(self):
@@ -1168,8 +1170,8 @@ def base_kernel_families():
     Generator of all base kernel families
     '''
     yield SqExpKernelFamily().default()
-    yield RQKernelFamily().default()
     yield SqExpPeriodicKernelFamily().default()
+    yield RQKernelFamily().default()
     yield LinKernelFamily().default()
     yield QuadraticKernelFamily().default()
     yield CubicKernelFamily().default()
@@ -1197,8 +1199,8 @@ def test_kernel_families():
     Generator of all base kernel families
     '''
     yield SqExpKernelFamily().default()
-    #yield RQKernelFamily().default()
-    #yield SqExpPeriodicKernelFamily().default()        
+    #yield SqExpPeriodicKernelFamily().default() 
+    #yield RQKernelFamily().default()       
 
 def Carls_Mauna_kernel():
     '''

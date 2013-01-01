@@ -17,9 +17,10 @@ class OneDGrammar:
             return True
         elif tp == 'base':
             #### FIXME
-            return isinstance(tp, fk.SqExpKernel) or \
-                isinstance(tp, fk.SqExpPeriodicKernel) or \
-                isinstance(tp, fk.RQKernel)
+            #return isinstance(tp, fk.SqExpKernel) or \
+            #    isinstance(tp, fk.SqExpPeriodicKernel) or \
+            #    isinstance(tp, fk.RQKernel)
+            return isinstance(kernel, fk.BaseKernel)
         else:
             raise RuntimeError('Unknown type: %s' % tp)
     
