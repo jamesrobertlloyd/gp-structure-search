@@ -1183,19 +1183,14 @@ def base_kernel_families():
     yield PP2KernelFamily().default()
     yield PP3KernelFamily().default()
     yield MaternKernelFamily().default()       
-        
+    
 def test_kernels(ndim=1):
     '''
     Generator of a subset of base kernels for testing
     '''
     for dim in range(ndim):
-        # Make up default arguments.
-        #yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
-        #yield MaskKernel(ndim, dim, LinKernel(0))
-        #yield MaskKernel(ndim, dim, MaternKernel(0, 0))   
-        
-        yield MaskKernel(ndim, dim, SqExpKernel(0, 0))  
-        #yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0)) 
+        for k in test_kernel_families():
+            yield MaskKernel(ndim, dim, k) 
          
 def test_kernel_families():
     '''

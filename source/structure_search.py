@@ -72,9 +72,9 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var):
     return -(evidence + prior).integral()
 
 
-def expand_kernels(D, seed_kernels, verbose=False):    
+def expand_kernels(D, seed_kernels, verbose=False, debug=False):    
     '''Makes a list of all expansions of a set of kernels in D dimensions.'''
-    g = grammar.MultiDGrammar(D)
+    g = grammar.MultiDGrammar(D, debug=debug)
     if verbose:
         print 'Seed kernels :'
         for k in seed_kernels:
@@ -179,13 +179,15 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
 #### TODO - Give me a better name!
 def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
-               description='', n_rand=1, sd=2, local_computation=True):
+               description='', n_rand=1, sd=2, local_computation=True, debug=False):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
     X, y, D = load_mat(data_file, y_dim)
     
-    #current_kernels = list(fk.base_kernels(D))
-    current_kernels = list(fk.test_kernels(2))
+    if debug:
+        current_kernels = list(fk.test_kernels(4))
+    else:
+        current_kernels = list(fk.base_kernels(D))
         
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
@@ -206,7 +208,10 @@ def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k
         results_sequence.append(results)
         
         best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
-        current_kernels = expand_kernels(D, best_kernels, verbose=verbose)
+        if debug:
+            current_kernels = expand_kernels(4, best_kernels, verbose=verbose, debug=debug)
+        else:
+            current_kernels = expand_kernels(D, best_kernels, verbose=verbose, debug=debug)
 
     # Write results to a file.
     results = sorted(results, key=ScoredKernel.score, reverse=True)
@@ -502,7 +507,7 @@ def run_all_kfold():
         
         fear_experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!')
         
-        #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
+        k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        
         
         print "Done one file!!!"   
@@ -511,7 +516,7 @@ def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
-    experiment(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test')
+    experiment(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test', debug=True)
     
     #best_scored_kernel = parse_results(output_file)
     

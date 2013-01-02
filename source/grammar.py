@@ -41,9 +41,10 @@ MULTI_D_RULES = [#('A', ('+', 'A', 'B'), {'A': '1d', 'B': 'base'}),
                  ]
     
 class MultiDGrammar:
-    def __init__(self, ndim):
+    def __init__(self, ndim, debug=False):
         self.rules = MULTI_D_RULES
         self.ndim = ndim
+        self.debug = debug
         
     def type_matches(self, kernel, tp):
         if tp == 'multi':
@@ -79,13 +80,17 @@ class MultiDGrammar:
         if tp in ['1d', 'multi']:
             raise RuntimeError("Can't expand the '%s' type" % tp)
         elif tp == 'base':
-            return list(fk.base_kernel_families())
-            #return list(fk.test_kernel_families())
+            if self.debug:
+                return list(fk.test_kernel_families())
+            else:
+                return list(fk.base_kernel_families())
         elif tp == 'mask':
             result = []
             for d in range(self.ndim):
-                result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families()]
-                #result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.test_kernel_families()]
+                if self.debug:
+                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.test_kernel_families()]
+                else:
+                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families()]
             return result
         else:
             raise RuntimeError('Unknown type: %s' % tp)
