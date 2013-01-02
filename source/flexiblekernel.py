@@ -61,8 +61,10 @@ class Kernel:
 class BaseKernelFamily(KernelFamily):
     pass
 
-class BaseKernel(Kernel):#
-    pass
+class BaseKernel(Kernel):
+   def effective_params(self):
+      '''This is true of all base kernels, hence definition here'''  
+      return len(self.param_vector())
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -972,6 +974,9 @@ class MaskKernel(Kernel):
     
     def param_vector(self):
         return self.base_kernel.param_vector()
+        
+    def effective_params(self):
+        return len(self.param_vector())
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1047,6 +1052,9 @@ class SumKernel(Kernel):
 
     def param_vector(self):
         return np.concatenate([e.param_vector() for e in self.operands])
+        
+    def effective_params(self):
+        return len(self.param_vector())
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1129,6 +1137,10 @@ class ProductKernel(Kernel):
 
     def param_vector(self):
         return np.concatenate([e.param_vector() for e in self.operands])
+        
+    def effective_params(self):
+        '''The scale of a product of kernels is over parametrised'''
+        return len(self.param_vector()) - (len(self.operands) - 1)
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1146,24 +1158,15 @@ class ProductKernel(Kernel):
         else:
             return ProductKernel(self.operands + [other]).copy()
 
-            
+
+#### FIXME - Sort out the naming of the two functions below            
 def base_kernels(ndim=1):
     '''
     Generator of all base kernels for a certain dimensionality of data
     '''
     for dim in range(ndim):
-        # Make up default arguments.
-        yield MaskKernel(ndim, dim, SqExpKernel(0, 0))
-        yield MaskKernel(ndim, dim, SqExpPeriodicKernel(0, 0, 0))
-        yield MaskKernel(ndim, dim, RQKernel(0, 0, 0))
-        yield MaskKernel(ndim, dim, LinKernel(0))
-        yield MaskKernel(ndim, dim, QuadraticKernel(0, 0))
-        yield MaskKernel(ndim, dim, CubicKernel(0, 0))
-        yield MaskKernel(ndim, dim, PP0Kernel(0, 0))
-        yield MaskKernel(ndim, dim, PP1Kernel(0, 0))
-        yield MaskKernel(ndim, dim, PP2Kernel(0, 0))
-        yield MaskKernel(ndim, dim, PP3Kernel(0, 0))
-        yield MaskKernel(ndim, dim, MaternKernel(0, 0))
+        for k in base_kernel_families():
+            yield MaskKernel(ndim, dim, k)
  
 def base_kernel_families():
     '''

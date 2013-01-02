@@ -28,17 +28,27 @@ import time
 import itertools
 
 import cblparallel
+from cblparallel.util import mkstemp_safe
 import re
 
 PRIOR_VAR = 100.
 
-
 def load_mat(data_file, y_dim=1):
-    '''Load a Matlab file'''
+    '''
+    Load a Matlab file containing inputs X and outputs y, output as np.arrays
+     - X is (data points) x (input dimensions) array
+     - y is (data points) x (output dimensions) array
+     - y_dim selects which output dimension is returned (1 indexed)
+    Returns tuple (X, y, # data points)
+    '''
+     
     data = scipy.io.loadmat(data_file)
     return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
 
 def proj_psd(H):
+    '''
+    Makes stuff psd I presume?
+    '''
     assert np.allclose(H, H.T), 'not symmetric'
     d, Q = scipy.linalg.eigh(H)
     d = np.clip(d, 1e-8, np.infty)
@@ -58,39 +68,39 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var):
     prior = gaussians.Potential.from_moments_iso(np.zeros(d), prior_var)
 
     # multiply the two Gaussians and integrate the result
+    #### FIXME - this does not look like multiplication - but I need to check documentation - are these log densities?
     return -(evidence + prior).integral()
 
 
 def expand_kernels(D, seed_kernels, verbose=False):    
-    '''Makes a list of all expansions of a set of kernels.'''
-      
+    '''Makes a list of all expansions of a set of kernels in D dimensions.'''
     g = grammar.MultiDGrammar(D)
-    print 'Seed kernels :'
-    for k in seed_kernels:
-        print k.pretty_print()
+    if verbose:
+        print 'Seed kernels :'
+        for k in seed_kernels:
+            print k.pretty_print()
     kernels = []
     for k in seed_kernels:
         kernels = kernels + grammar.expand(k, g)
     kernels = grammar.remove_duplicates(kernels)
-    print 'Expanded kernels :'
-    for k in kernels:
-        print k.pretty_print()
-            
+    if verbose:
+        print 'Expanded kernels :'
+        for k in kernels:
+            print k.pretty_print()
     return (kernels)
 
-def replace_zeros(param_vector, sd):
-      
-    #### WARNING - assumes the default value is 0 - this may change
-    return [np.random.normal(scale=sd) if p == 0 else p for p in param_vector]
+def replace_defaults(param_vector, sd):
+    #### FIXME - remove dependence on special value of zero
+    ####       - Caution - remember print, compare etc when making the change
+    '''Replaces zeros in a list with Gaussians'''
+    return [np.random.normal(scale=sd) if p ==0 else p for p in param_vector]
 
 def add_random_restarts_single_kernel(kernel, n_rand, sd):
     '''Returns a list of kernels with random restarts for default values'''
-    # I'm sorry that python encourages me to code like this sometimes...
-    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_zeros(kernel.param_vector(), sd)), n_rand))
+    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
 
 def add_random_restarts(kernels, n_rand=1, sd=2):    
     '''Augments the list to include random restarts of all default value parameters'''
-      
     return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
 
 class ScoredKernel:
@@ -101,7 +111,8 @@ class ScoredKernel:
         self.bic_nle = bic_nle
         self.noise = noise
         
-    def score(self, criterion='laplace'):
+    def score(self, criterion='bic'):
+        #### FIXME - Change default to laplace when it is working again
         return {'bic': self.bic_nle,
                 'nll': self.nll,
                 'laplace': self.laplace_nle
@@ -117,12 +128,13 @@ class ScoredKernel:
     
     @staticmethod
     def parse_results_string(line):
+        #### Higher level of python fu than I understand - can guess but can someone comment?
         v = locals().copy()
         v.update(fk.__dict__)
         v['nan'] = np.NaN;
         return eval(line, globals(), v)
 
-
+#### TODO - To be deleted
 def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                     verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
                     description='', n_rand=1, sd=2):
@@ -164,6 +176,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
             for result in results:
                 print >> outfile, result      
             
+#### TODO - Give me a better name!
 def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
                description='', n_rand=1, sd=2, local_computation=True):
@@ -171,8 +184,8 @@ def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k
 
     X, y, D = load_mat(data_file, y_dim)
     
-    current_kernels = list(fk.base_kernels(D))
-    #current_kernels = list(fk.test_kernels(D))
+    #current_kernels = list(fk.base_kernels(D))
+    current_kernels = list(fk.test_kernels(2))
         
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
@@ -205,6 +218,7 @@ def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k
             for result in results:
                 print >> outfile, result  
            
+#### TODO - Give me a better name
 def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
                     sleep_time=10, n_sleep_timeout=6, re_submit_wait=60, local_computation=True):
     '''Sets up the experiments, sends them to cblparallel, returns the results.'''
@@ -244,9 +258,9 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
         # Need to be careful with % signs - HACK for the moment
         scripts[i] = re.sub('% ', '%%', scripts[i])
     
-    # Send to cblparallel
+    # Send to cblparallel and save output_files
     
-    output_files = cblparallel.run_batch_locally(scripts, language='matlab')  
+    output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8)  
     
     # Read in results
     
@@ -262,12 +276,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     
     return results 
 
-def mkstemp_safe(directory, suffix):
-    (os_file_handle, file_name) = tempfile.mkstemp(dir=directory, suffix=suffix)
-    os.close(os_file_handle)
-    return file_name
-
-
+#### TODO - To be removed
 def qsub_matlab_code(code, verbose=True, fear=None):
     # Write to a temp script
     script_file = mkstemp_safe(config.LOCAL_TEMP_PATH, '.m')
@@ -294,13 +303,13 @@ def qsub_matlab_code(code, verbose=True, fear=None):
     # Tell the caller where the script file was written
     return script_file, shell_file, job_id         
 
-
+#### TODO - this sort of operation should be provided by cblparallel
 def local_to_remote(local_path):
     d, fname = os.path.split(local_path)
     assert d == config.LOCAL_TEMP_PATH
     return os.path.join(config.REMOTE_TEMP_PATH, fname)
 
-
+#### TODO - To be removed
 def fear_run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
                          sleep_time=10, n_sleep_timeout=6, re_submit_wait=60):
     '''Sends jobs to fear, waits for them, returns the results.'''
@@ -436,7 +445,7 @@ def fear_run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
 def output_to_scored_kernel(output, kernel_family, ndata):
     laplace_nle = laplace_approx(output.nll, output.kernel_hypers, output.hessian, PRIOR_VAR)
     k_opt = kernel_family.from_param_vector(output.kernel_hypers)
-    BIC = 2 * output.nll + len(output.kernel_hypers) * np.log(ndata)
+    BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
     return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)
 
 def parse_all_results():
@@ -464,7 +473,6 @@ def parse_results( results_filename ):
     result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
     best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
-       
 
 def gen_all_kfold_datasets():
     '''Look through all the files in the results directory'''
