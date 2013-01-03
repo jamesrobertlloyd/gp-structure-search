@@ -13,10 +13,14 @@ from pyfear import fear
 from util import mkstemp_safe
 import os
 import psutil, subprocess, sys, time
+from counter import Progress
 
 from config import *
 
 #### WISHLIST
+####  - Limit number of active local jobs
+####  - Display progress
+####  - Loop more frequently
 ####  - Write setup function / make it possible for people to use this code without lots of hassle
 ####  - Provide convenience functions to setup MATLAB/python paths
 ####  - Merge job handling code
@@ -226,7 +230,7 @@ quit()
     return output_files
     
 def run_batch_locally(scripts, language='python', paths=[], max_cpu=0.9, max_mem=0.9, submit_sleep=1, job_check_sleep=30, \
-                      verbose=True, max_files_open=100):
+                      verbose=True, max_files_open=100, max_running_jobs=10):
     '''
     Receives a list of python scripts to run
 
@@ -279,17 +283,20 @@ quit()
     processes = [None] * len(scripts)
     fear_finished = False
     job_finished = [False] * len(scripts)  
-    should_sleep = False 
     
     files_open = 0
 
     # Loop through jobs, submitting jobs whenever CPU usage low enough, re-submitting failed jobs
+    if not verbose:
+        prog = Progress(len(scripts))
     while not fear_finished:
+        should_sleep = True
         for (i, code) in enumerate(scripts):
-            if (not job_finished[i]) and (processes[i] is None) and (files_open < max_files_open):
+            if (not job_finished[i]) and (processes[i] is None) and (files_open <= max_files_open) and (len([1 for p in processes if not p is None]) <= max_running_jobs):
                 # This script has not been run - check CPU and potentially run
+                #### FIXME - Merge if statements
                 if (psutil.cpu_percent() < max_cpu * 100) and (psutil.virtual_memory().percent < max_mem * 100):
-                    # Jobs can run, continue looping
+                    # Jobs can run
                     should_sleep = False
                     # Get the job ready
                     if language == 'python':
@@ -324,15 +331,13 @@ quit()
                             f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + LOCAL_MATLAB + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
                                     os.path.split(script_files[i])[-1].split('.')[0] + '\n')
                     # Start running the job
-                    print 'Submitting job %d of %d' % (i + 1, len(scripts))
+                    if verbose:
+                        print 'Submitting job %d of %d' % (i + 1, len(scripts))
                     stdout_file_handles[i] = open(stdout_files[i], 'w')
                     files_open = files_open + 1
                     processes[i] = subprocess.Popen(['sh', shell_files[i]], stdout = stdout_file_handles[i]);
                     # Sleep for a bit so the process can kick in (prevents 100s of jobs being sent to processor)
                     time.sleep(submit_sleep)
-                else:
-                    # If this is the last thing to happen in the loop then might as well sleep for a bit
-                    should_sleep = True
             elif (not job_finished[i]) and (not processes[i] is None):
                 # Ask the process how its doing
                 processes[i].poll()
@@ -340,9 +345,13 @@ quit()
                 if not processes[i].returncode is None:
                     if os.path.isfile(flag_files[i]):
                         job_finished[i] = True
-                        print 'Job %d of %d has completed' % (i + 1, len(scripts))
+                        if verbose:
+                            print 'Job %d of %d has completed' % (i + 1, len(scripts))
+                        else:
+                            prog.tick()
                     else:
-                        print 'Job %d has failed - will try again later' % i + 1
+                        if verbose:
+                            print 'Job %d has failed - will try again later' % i + 1
                         processes[i] = None
                     # Tidy up temp files
                     os.remove(script_files[i])
@@ -352,10 +361,12 @@ quit()
                     os.remove(stdout_files[i])
                     os.remove(flag_files[i])
                     processes[i] = None
-                else:
-                    should_sleep = True
+                    # Something useful happened
+                    should_sleep = False
         if all(job_finished):
-            fear_finished = True    
+            fear_finished = True 
+            if not verbose: 
+                prog.done()  
         elif should_sleep:
             # Count how many jobs are queued
             n_queued = 0
@@ -366,7 +377,6 @@ quit()
                 # print '%d jobs queued' % n_queued
                 print 'Sleeping for %d seconds' % job_check_sleep
                 time.sleep(job_check_sleep)
-            should_sleep = False
 
     #### TODO - return job output and error files as applicable (e.g. there may be multiple error files associated with one script)
     return output_files

@@ -31,6 +31,8 @@ import cblparallel
 from cblparallel.util import mkstemp_safe
 import re
 
+import shutil
+
 PRIOR_VAR = 100.
 
 def load_mat(data_file, y_dim=1):
@@ -265,7 +267,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     
     # Send to cblparallel and save output_files
     
-    output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8)  
+    output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
     
     # Read in results
     
@@ -273,6 +275,8 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     
     # Tidy up
     
+    for output_file in output_files:
+        os.remove(output_file)
     os.remove(data_file)
     if not local_computation:
         fear.close()
@@ -502,25 +506,41 @@ def main():
 def run_all_kfold():
     for r, files in gen_all_kfold_datasets():
         datafile = os.path.join(r,files + ".mat")
-        output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
-        prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
+        #output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
+        #prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
+        output_file = os.path.join('../results/', files + "_result.txt")
+        prediction_file = os.path.join('../results', files + "_predictions.mat")
         
-        fear_experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!')
+        experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=False)
         
-        k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
-        #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)        
+        #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
+        #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  
+        make_predictions(os.path.abspath(datafile), output_file, prediction_file)      
         
-        print "Done one file!!!"   
+        print "Done one file!!!"  
+        
+def make_predictions(data_file, results_file, prediction_file):
+    best_scored_kernel = parse_results(results_file)
+    code = gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file,
+                                         'writefile': '%(output_file)s',
+                                         'gpml_path': '/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27',
+                                         'kernel_family': best_scored_kernel.k_opt.gpml_kernel_expression(),
+                                         'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
+                                         'noise': str(best_scored_kernel.noise),
+                                         'iters': str(30)}
+    code = re.sub('% ', '%%', code) # HACK    
+    temp_results_file = cblparallel.run_batch_locally([code], language='matlab')[0]
+    shutil.copy(temp_results_file, prediction_file)
+    os.remove(temp_results_file)
     
 def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
-    experiment(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test', debug=True)
-    
-    #best_scored_kernel = parse_results(output_file)
-    
-    #prediction_file = config.RESULTS_PATH + '/AAAAAA.mat'
+    experiment(datafile, output_file, max_depth=1, k=1, description = 'J-Llo test', debug=True)
+    prediction_file = '../results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
+    make_predictions(os.path.abspath(datafile), output_file, prediction_file)
+                                   
     #gpml.make_predictions(best_scored_kernel.k_opt.gpml_kernel_expression(), best_scored_kernel.k_opt.param_vector(), datafile, prediction_file, best_scored_kernel.noise, iters=30)
     
     

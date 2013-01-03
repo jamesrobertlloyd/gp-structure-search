@@ -374,7 +374,7 @@ timestamp = now
 save('%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'timestamp');
 
 pwd
-%%save('/home/dkd23/Dropbox/results/r_pumadyn512_fold_3_of_10_result.txt'
+%% save('/home/dkd23/Dropbox/results/r_pumadyn512_fold_3_of_10_result.txt'
 
 a='Supposedly finished writing file'
 
