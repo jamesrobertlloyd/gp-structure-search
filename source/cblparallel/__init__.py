@@ -190,11 +190,12 @@ quit()
                             if verbose:
                                 print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
                         # Tidy up fear
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
                         #### TODO - record the output and error files for future reference
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + '*') # Kills temporary output files
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + '*') # Kills temporary output files
+                        fear.command('rm ' + ' ; rm '.join([os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + '*']))
                         # Tidy up local temporary directory
                         os.remove(script_files[i])
                         os.remove(shell_files[i])

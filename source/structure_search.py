@@ -526,14 +526,14 @@ def make_predictions(data_file, results_file, prediction_file, via_gate=True, lo
     best_scored_kernel = parse_results(results_file)
     code = gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file,
                                          'writefile': '%(output_file)s',
-                                         'gpml_path': '/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27',
+                                         'gpml_path': '/home/jrl44/Documents/MATLAB/GPML', #'/users/jrl44/GPML', #'/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27'
                                          'kernel_family': best_scored_kernel.k_opt.gpml_kernel_expression(),
                                          'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
                                          'noise': str(best_scored_kernel.noise),
                                          'iters': str(30)}
     code = re.sub('% ', '%%', code) # HACK    
-    #temp_results_file = cblparallel.run_batch_locally([code], language='matlab')[0]
-    temp_results_file = cblparallel.run_batch_locally([code], language='matlab')[0]
+    temp_results_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1)[0]
+    #temp_results_file = cblparallel.run_batch_on_fear([code], language='matlab', via_gate=False)[0]
     shutil.copy(temp_results_file, prediction_file)
     os.remove(temp_results_file)
     
@@ -541,7 +541,7 @@ def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
-    experiment(datafile, output_file, max_depth=1, k=1, description = 'J-Llo test', debug=True, via_gate=True, local_computation=False)
+    experiment(datafile, output_file, max_depth=1, k=1, description = 'J-Llo test', debug=True, via_gate=False, local_computation=False)
     prediction_file = '../results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     make_predictions(os.path.abspath(datafile), output_file, prediction_file)
                                    

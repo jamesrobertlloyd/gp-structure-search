@@ -68,11 +68,12 @@ class fear(object):
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
         if not self.via_gate:
-            cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
-                                                                                         'localpath' : localpath,
-                                                                                         'username' : USERNAME,
-                                                                                         'remotepath' : remotepath} 
-            return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+            #cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
+            #                                                                             'localpath' : localpath,
+            #                                                                             'username' : USERNAME,
+            #                                                                             'remotepath' : remotepath} 
+            #return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+            self._put(localpath=localpath, remotepath=remotepath)
         else:
             # FIXME - This is a hack
             # Put the file on gate
