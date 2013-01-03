@@ -20,10 +20,11 @@ class fear(object):
     TODO - add error checking / other niceties
     '''
 
-    def __init__(self):
+    def __init__(self, via_gate=False):
         '''
         Constructor - connects to fear
         '''
+        self.via_gate = via_gate
         self.connect()
         
     def __enter__(self):
@@ -36,13 +37,21 @@ class fear(object):
         '''
         Connect to fear and store connection object
         '''
-        self._connection = pysftp.Connection('fear', private_key=LOCAL_TO_REMOTE_KEY_FILE)
+        if not self.via_gate:
+            self._connection = pysftp.Connection('fear', private_key=LOCAL_TO_REMOTE_KEY_FILE)
+        else:
+            self._connection = pysftp.Connection('gate.eng.cam.ac.uk', username=USERNAME, password=HOME_TO_GATE_PWD)
         
     def disconnect(self):
         self._connection.close()
 
     def command(self, cmd):
         #### TODO - Allow port forwarding / tunneling - can this be authenticated / os independent?
+        if self.via_gate:
+            # Need to embellish command
+            cmd = 'ssh -i %(rsa_key)s %(username)s@fear "%(cmd)s"' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
+                                                                      'username' : USERNAME,
+                                                                      'cmd' : cmd}
         output =  self._connection.execute(cmd)
         return output
         
@@ -58,22 +67,55 @@ class fear(object):
         #return timeoutCommand(cmd='python fear_put.py %s %s' % (localpath, remotepath), verbose=verbose).run(timeout=timeout)
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
-        cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
-                                                                                     'localpath' : localpath,
-                                                                                     'username' : USERNAME,
-                                                                                     'remotepath' : remotepath} 
-        return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+        if not self.via_gate:
+            cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
+                                                                                         'localpath' : localpath,
+                                                                                         'username' : USERNAME,
+                                                                                         'remotepath' : remotepath} 
+            return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+        else:
+            # FIXME - This is a hack
+            # Put the file on gate
+            self._put(localpath=localpath, remotepath=os.path.split(localpath)[-1])
+            # Copy across to fear
+            cmd = 'ssh -i %(rsa_key)s %(username)s@fear "cat > %(remotepath)s" < %(temppath)s' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
+                                                                                                  'username' : USERNAME,
+                                                                                                  'remotepath' : remotepath,
+                                                                                                  'temppath' : os.path.split(localpath)[-1]}
+            self._connection.execute(cmd)                                                                                   
+            # Clear the temporary file
+            self._connection.execute('rm %s' % os.path.split(localpath)[-1])
+            #with open(localpath, 'rb') as local_file:
+            #    file_contents = local_file.read()
+            #cmd = 'echo "%s" > %s' % (file_contents, remotepath)
+            #self.command(cmd) 
         
     def copy_from(self, remotepath, localpath, timeout=10, verbose=False):
         #### The below is commented out since it has a habit of crashing (hence the timeoutCammand wrapper)
         #return timeoutCommand(cmd='python fear_get.py %s %s' % (remotepath, localpath), verbose=verbose).run(timeout=timeout)  
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
-        cmd = 'scp -i %(rsa_key)s (username)s@fear:%(remotepath)s %(localpath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
-                                                                                    'username' : USERNAME,
-                                                                                    'remotepath' : remotepath,
-                                                                                    'localpath' : localpath} 
-        return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+        if not self.via_gate:
+            cmd = 'scp -i %(rsa_key)s %(username)s@fear:%(remotepath)s %(localpath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
+                                                                                         'username' : USERNAME,
+                                                                                         'remotepath' : remotepath,
+                                                                                         'localpath' : localpath} 
+            return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+        else:
+            cmd = 'cat %s' % remotepath
+            file_contents = self.command(cmd)
+            with open(localpath, 'wb') as local_file:
+                local_file.writelines(file_contents)
+        
+    def copy_from_localhost(self, remotepath, localpath, timeout=10, verbose=False):
+        #### Document me!
+        cmd = 'ssh -i %(rsa_key)s %(username)s@%(localhost)s "cat %(remotepath)s ; rm %(remotepath)s"' % {'rsa_key' : GATE_TO_LOCAL_KEY_FILE,
+                                                                                                         'username' : USERNAME,
+                                                                                                         'localhost' : LOCAL_HOST,
+                                                                                                         'remotepath' : remotepath}
+        file_contents = self._connection.execute(cmd)
+        with open(localpath, 'wb') as local_file:
+            local_file.writelines(file_contents)
         
     def rm(self, remote_path):
         output = self.command('rm %s' % remote_path)
@@ -156,25 +198,25 @@ class fear(object):
         if update:
             self.qstat()
         # Count running jobs
-        return len([1 for job_id in self.status if job_running(job_id)])
+        return len([1 for job_id in self.status if self.job_running(job_id)])
             
     def jobs_queued(self, update=True):
         '''Returns number of jobs currently queued'''
         if update:
             self.qstat()
         # Count queued jobs
-        return len([1 for job_id in self.status if job_queued(job_id)])
+        return len([1 for job_id in self.status if self.job_queued(job_id)])
             
     def jobs_loading(self, update=True):
         '''Returns number of jobs currently loading'''
         if update:
             self.qstat()
         # Count loading jobs
-        return len([1 for job_id in self.status if job_loading(job_id)])
+        return len([1 for job_id in self.status if self.job_loading(job_id)])
         
     def jobs_alive(self, update=True):
         '''Returns number of jobs currently running, queueing or loading'''
         if update:
             self.qstat()
         # Count jobs
-        return jobs_running(update=False) + jobs_queued(update=False) + jobs_loading(update=False)
+        return self.jobs_running(update=False) + self.jobs_queued(update=False) + self.jobs_loading(update=False)

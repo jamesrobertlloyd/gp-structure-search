@@ -45,7 +45,7 @@ def setup():
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
-def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=50, verbose=True):
+def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, via_gate=False):
     '''
     Receives a list of python scripts to run
 
@@ -72,7 +72,8 @@ addpath(genpath('%s'))
     
     #### TODO - allow port forwarding / tunneling - copy to machine on network with more disk space than fear, then copy from that machine?
     python_transfer_code = '''
-from util import timeoutCommand
+#from util import timeoutCommand
+from subprocess_timeout import timeoutCommand
 print "Moving output file"
 if not timeoutCommand(cmd='scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_temp_path)s; rm %(output_file)s').run(timeout=%(timeout)d)[0]:
     raise RuntimeError('Copying output raised error or timed out')
@@ -111,7 +112,7 @@ quit()
 '''
     
     # Open a connection to fear as a with block - ensures connection is closed
-    with pyfear.fear() as fear:
+    with pyfear.fear(via_gate=via_gate) as fear:
     
         # Initialise lists of file locations job ids
         shell_files = [None] * len(scripts)
@@ -133,13 +134,17 @@ quit()
                         # Jobs can run, continue looping
                         should_sleep = False
                         # Create necessary files in local path (avoids collisions)
+                        if via_gate:
+                            local_path = HOME_TEMP_PATH
+                        else:
+                            local_path = LOCAL_TEMP_PATH
                         if language == 'python':
-                            script_files.append(mkstemp_safe(LOCAL_TEMP_PATH, '.py'))
+                            script_files[i] = mkstemp_safe(local_path, '.py')
                         elif language == 'matlab':
-                            script_files.append(mkstemp_safe(LOCAL_TEMP_PATH, '.mat'))
-                        shell_files.append(mkstemp_safe(LOCAL_TEMP_PATH, '.sh'))
-                        output_files.append(mkstemp_safe(LOCAL_TEMP_PATH, '.out'))
-                        flag_files.append(mkstemp_safe(LOCAL_TEMP_PATH, '.flag'))
+                            script_files[i] = mkstemp_safe(local_path, '.m')
+                        shell_files[i] = mkstemp_safe(local_path, '.sh')
+                        output_files[i] = mkstemp_safe(local_path, '.out')
+                        flag_files[i] = mkstemp_safe(local_path, '.flag')
                         # Customise code (path, transfer of output back to local host, flag file writing)
                         #### TODO - make path and output_transfer optional
                         if language == 'python':
@@ -178,6 +183,9 @@ quit()
                         else:
                             # Job has finished successfully
                             job_finished[i] = True
+                            if via_gate:
+                                # Copy the file from local storage machine (and delete it)
+                                fear.copy_from_localhost(localpath=output_files[i], remotepath=os.path.join(LOCAL_TEMP_PATH, os.path.split(output_files[i])[-1]))
                             # Tell the world
                             if verbose:
                                 print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
@@ -300,14 +308,14 @@ quit()
                     should_sleep = False
                     # Get the job ready
                     if language == 'python':
-                        script_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.py'))
+                        script_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.py'))
                     elif language == 'matlab':
-                        script_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.m'))
+                        script_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.m'))
                     # Create necessary files in local path
-                    shell_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.sh'))
-                    output_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.out'))
-                    stdout_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.o'))
-                    flag_files[i] = (mkstemp_safe(LOCAL_TEMP_PATH, '.flag'))
+                    shell_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.sh'))
+                    output_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.out'))
+                    stdout_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.o'))
+                    flag_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.flag'))
                     # Customise code
                     #### TODO - make path and output_transfer optional
                     if language == 'python':

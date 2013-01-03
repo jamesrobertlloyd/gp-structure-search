@@ -181,7 +181,7 @@ def fear_experiment(data_file, results_filename, y_dim=1, subset=None, max_depth
 #### TODO - Give me a better name!
 def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                verbose=True, sleep_time=60, n_sleep_timeout=20, re_submit_wait=60, \
-               description='', n_rand=1, sd=2, local_computation=True, debug=False):
+               description='', n_rand=1, sd=2, local_computation=True, debug=False, via_gate=False):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
     X, y, D = load_mat(data_file, y_dim)
@@ -198,7 +198,7 @@ def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k
         current_kernels = add_random_restarts(current_kernels, n_rand, sd)
         new_results = run_experiments(current_kernels, X, y, verbose=verbose, \
                                            sleep_time=sleep_time, n_sleep_timeout=n_sleep_timeout, \
-                                           re_submit_wait=re_submit_wait, local_computation=local_computation)
+                                           re_submit_wait=re_submit_wait, local_computation=local_computation, via_gate=via_gate)
             
         results = results + new_results
         
@@ -227,7 +227,7 @@ def experiment(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k
            
 #### TODO - Give me a better name
 def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
-                    sleep_time=10, n_sleep_timeout=6, re_submit_wait=60, local_computation=True):
+                    sleep_time=10, n_sleep_timeout=6, re_submit_wait=60, local_computation=True, via_gate=False):
     '''Sets up the experiments, sends them to cblparallel, returns the results.'''
    
     # Make data into matrices in case they're unidimensional.
@@ -240,7 +240,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
         noise = np.log(np.var(y)/10)   # Set default noise using a heuristic.
     
     if not local_computation:
-        fear = cblparallel.fear()
+        fear = cblparallel.fear(via_gate=via_gate)
     
     # Create data file and move to fear if necessary
     
@@ -248,7 +248,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     scipy.io.savemat(data_file, data)  # Save regression data
     
     if not local_computation:
-        fear.copy_to(data_files[-1], os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
+        fear.copy_to(data_file, os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
     
     # Create scripts
     
@@ -257,7 +257,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     for (i, kernel) in enumerate(kernels):
         scripts[i] = gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
                                                   'writefile': '%(output_file)s',
-                                                  'gpml_path': '/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27',
+                                                  'gpml_path': '/users/jrl44/GPML', #'/Users/JamesLloyd/Documents/MATLAB/GPML/gpml-matlab-v3.1-2010-09-27'
                                                   'kernel_family': kernel.gpml_kernel_expression(),
                                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
                                                   'noise': str(noise),
@@ -267,7 +267,10 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
     
     # Send to cblparallel and save output_files
     
-    output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
+    if local_computation:
+        output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
+    else:
+        output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=500, verbose=verbose, via_gate=via_gate)  
     
     # Read in results
     
@@ -279,7 +282,7 @@ def run_experiments(kernels, X, y, verbose=True, noise=None, iters=300, \
         os.remove(output_file)
     os.remove(data_file)
     if not local_computation:
-        fear.close()
+        fear.disconnect()
     
     # Return results
     
@@ -511,7 +514,7 @@ def run_all_kfold():
         output_file = os.path.join('../results/', files + "_result.txt")
         prediction_file = os.path.join('../results', files + "_predictions.mat")
         
-        experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=False)
+        experiment(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=True, via_gate=False, local_computation=False)
         
         #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  
@@ -519,7 +522,7 @@ def run_all_kfold():
         
         print "Done one file!!!"  
         
-def make_predictions(data_file, results_file, prediction_file):
+def make_predictions(data_file, results_file, prediction_file, via_gate=True, local_computation=False):
     best_scored_kernel = parse_results(results_file)
     code = gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file,
                                          'writefile': '%(output_file)s',
@@ -529,6 +532,7 @@ def make_predictions(data_file, results_file, prediction_file):
                                          'noise': str(best_scored_kernel.noise),
                                          'iters': str(30)}
     code = re.sub('% ', '%%', code) # HACK    
+    #temp_results_file = cblparallel.run_batch_locally([code], language='matlab')[0]
     temp_results_file = cblparallel.run_batch_locally([code], language='matlab')[0]
     shutil.copy(temp_results_file, prediction_file)
     os.remove(temp_results_file)
@@ -537,7 +541,7 @@ def run_test_kfold():
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
-    experiment(datafile, output_file, max_depth=1, k=1, description = 'J-Llo test', debug=True)
+    experiment(datafile, output_file, max_depth=1, k=1, description = 'J-Llo test', debug=True, via_gate=True, local_computation=False)
     prediction_file = '../results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     make_predictions(os.path.abspath(datafile), output_file, prediction_file)
                                    

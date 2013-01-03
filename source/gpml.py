@@ -104,7 +104,7 @@ end
 hessian = 0.5 * (hessian + hessian');
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
-exit();
+%% exit();
 """
 
 class OptimizerOutput:
@@ -378,7 +378,7 @@ pwd
 
 a='Supposedly finished writing file'
 
-exit();
+%% exit();
 """
 
 
