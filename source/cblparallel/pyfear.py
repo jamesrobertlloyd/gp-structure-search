@@ -17,7 +17,7 @@ import time
 class fear(object):
     '''
     Manages communications with the fear computing cluster
-    TODO - add error checking / other niceties
+    TODO - efficiently communicate over gate.eng.cam.ac.uk
     '''
 
     def __init__(self, via_gate=False):
@@ -48,26 +48,33 @@ class fear(object):
     def command(self, cmd):
         #### TODO - Allow port forwarding / tunneling - can this be authenticated / os independent?
         if self.via_gate:
-            # Need to embellish command
+            #### FIXME - This is an inefficient hack
+            ####       - If anyone knows how to set up the appropriate SSH client object across gate then please implement!!!
             cmd = 'ssh -i %(rsa_key)s %(username)s@fear "%(cmd)s"' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
                                                                       'username' : USERNAME,
                                                                       'cmd' : cmd}
         output =  self._connection.execute(cmd)
         return output
         
+    def multiple_commands(self, cmds):
+        '''
+        Just places semicolons between commands - trying to eak out some extra speed
+        '''
+        return self.command(' ; '.join(cmds))
+        
     def _put(self, localpath, remotepath):
         output = self._connection.put(localpath=localpath, remotepath=remotepath)
         return output
     
     def _get(self, remotepath, localpath):
+        #### FIXME - This occassionally hangs
         self._connection.get(remotepath=remotepath, localpath=localpath)
         
     def copy_to(self, localpath, remotepath, timeout=10, verbose=False):
-        #### The below is commented out since it has a habit of crashing (hence the timeoutCammand wrapper)
-        #return timeoutCommand(cmd='python fear_put.py %s %s' % (localpath, remotepath), verbose=verbose).run(timeout=timeout)
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
         if not self.via_gate:
+            #### This scp command is very inefficient
             #cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
             #                                                                             'localpath' : localpath,
             #                                                                             'username' : USERNAME,
@@ -75,7 +82,9 @@ class fear(object):
             #return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
             self._put(localpath=localpath, remotepath=remotepath)
         else:
-            # FIXME - This is a hack
+            #### FIXME - This is an inefficient hack
+            ####       - If anyone knows how to set up the appropriate SFTP client object across gate then please implement!!!
+            
             # Put the file on gate
             self._put(localpath=localpath, remotepath=os.path.split(localpath)[-1])
             # Copy across to fear
@@ -86,10 +95,16 @@ class fear(object):
             self._connection.execute(cmd)                                                                                   
             # Clear the temporary file
             self._connection.execute('rm %s' % os.path.split(localpath)[-1])
+            
+            #### This is an even more hacky way to do things
             #with open(localpath, 'rb') as local_file:
             #    file_contents = local_file.read()
             #cmd = 'echo "%s" > %s' % (file_contents, remotepath)
             #self.command(cmd) 
+    
+    def copy_to_temp(self, localpath, timeout=10, verbose=False):
+        #### TODO - make this OS independent
+        self.copy_to(localpath=localpath, remotepath=os.path.join(REMOTE_TEMP_PATH, os.path.split(localpath)[-1]), timeout=timeout, verbose=verbose)
         
     def copy_from(self, remotepath, localpath, timeout=10, verbose=False):
         #### The below is commented out since it has a habit of crashing (hence the timeoutCammand wrapper)
@@ -97,19 +112,22 @@ class fear(object):
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
         if not self.via_gate:
+            #### FIXME - This is inefficient - but paramiko's SFTPClient.get operation sometimes hangs bringing down all of python
             cmd = 'scp -i %(rsa_key)s %(username)s@fear:%(remotepath)s %(localpath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
                                                                                          'username' : USERNAME,
                                                                                          'remotepath' : remotepath,
                                                                                          'localpath' : localpath} 
             return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
         else:
+            #### FIXME - again, this is a hack
             cmd = 'cat %s' % remotepath
             file_contents = self.command(cmd)
             with open(localpath, 'wb') as local_file:
                 local_file.writelines(file_contents)
         
     def copy_from_localhost(self, remotepath, localpath, timeout=10, verbose=False):
-        #### Document me!
+        #### FIXME - Another hack introduced to deal with gate
+        ####       - This is using localhost as a storage machine
         cmd = 'ssh -i %(rsa_key)s %(username)s@%(localhost)s "cat %(remotepath)s ; rm %(remotepath)s"' % {'rsa_key' : GATE_TO_LOCAL_KEY_FILE,
                                                                                                          'username' : USERNAME,
                                                                                                          'localhost' : LOCAL_HOST,
@@ -119,11 +137,12 @@ class fear(object):
             local_file.writelines(file_contents)
         
     def rm(self, remote_path):
-        output = self.command('rm %s' % remote_path)
-        return output
+        #output = self.command('rm %s' % remote_path)
+        #return output
+        self._connection._sftp.remove(remote_path)
     
     def file_exists(self, remote_path):
-        #### TODO - Replace this with an ls statement?
+        #### TODO - Replace this with an ls statement or proper OS independent query
         response = self.command('if [ -e %s ] \nthen \necho ''exists'' \nfi' % remote_path)
         return response == ['exists\n']
     
