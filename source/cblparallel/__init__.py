@@ -45,7 +45,7 @@ def setup():
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
-def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, location='local'):
+def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True):
     '''
     Receives a list of python scripts to run
 
@@ -112,7 +112,7 @@ quit()
 '''
     
     # Open a connection to fear as a with block - ensures connection is closed
-    with pyfear.fear(via_gate=(location=='home')) as fear:
+    with pyfear.fear(via_gate=(LOCATION=='home')) as fear:
     
         # Initialise lists of file locations job ids
         shell_files = [None] * len(scripts)
@@ -125,10 +125,13 @@ quit()
         job_finished = [False] * len(scripts) 
         
         # Modify all scripts and create local temporary files
+        #### TODO - Writing to the network can be slow
+        ####      - Perhaps it would be better writing to local disk followed by a block file transfer (is this possible?)
+        ####      - Would make sense to do this when reading output files as well - perhaps this should be provided in this module?
         
         for (i, code) in enumerate(scripts):
             print 'Writing temp files for job %d of %d' % (i + 1, len(scripts))
-            if location == 'local':
+            if LOCATION == 'local':
                 temp_dir = LOCAL_TEMP_PATH
             else:
                 temp_dir = HOME_TEMP_PATH
@@ -187,8 +190,11 @@ quit()
                         #jobs_alive -= 1 - would not have been counted earlier
                         should_sleep = False
                         # Has the job failed to write a flag or is the output file empty
+                        #### FIXME - If LOCATION=='home' need to check .out file on local is non-empty
+                        #### TODO - Can likely increase speed by checking status of files (on fear and local) in one block - not sure how to do it though
+                        ####      - In particular checking for file existence should probably be done with a SFTP client rather than SSH - might be faster?
                         if (not fear.file_exists(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))) or \
-                           (os.stat(output_files[i]).st_size == 0):
+                           ((LOCATION=='local') and (os.stat(output_files[i]).st_size == 0)):
                             # Job has finished but missing output - resubmit later
                             print 'Shell script %s job_id %s failed' % (os.path.split(shell_files[i])[-1], job_ids[i])
                             # Save job id for file deletion
@@ -200,7 +206,7 @@ quit()
                             # Save job id for file deletion
                             old_job_id = job_ids[i]
                             # Move files if necessary
-                            if location=='home':
+                            if LOCATION=='home':
                                 # Copy the file from local storage machine (and delete it)
                                 fear.copy_from_localhost(localpath=output_files[i], remotepath=os.path.join(LOCAL_TEMP_PATH, os.path.split(output_files[i])[-1]))
                             # Tell the world
@@ -333,22 +339,26 @@ quit()
     while not fear_finished:
         should_sleep = True
         for (i, code) in enumerate(scripts):
-            if (not job_finished[i]) and (processes[i] is None) and (files_open <= max_files_open) and (len([1 for p in processes if not p is None]) <= max_running_jobs):
+            if (not job_finished[i]) and (processes[i] is None) and (files_open <= max_files_open) and (len([1 for p in processes if not p is None]) < max_running_jobs):
                 # This script has not been run - check CPU and potentially run
                 #### FIXME - Merge if statements
                 if (psutil.cpu_percent() < max_cpu * 100) and (psutil.virtual_memory().percent < max_mem * 100):
                     # Jobs can run
                     should_sleep = False
                     # Get the job ready
+                    if LOCATION == 'local':
+                        temp_dir = LOCAL_TEMP_PATH
+                    else:
+                        temp_dir = HOME_TEMP_PATH
                     if language == 'python':
-                        script_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.py'))
+                        script_files[i] = (mkstemp_safe(temp_dir, '.py'))
                     elif language == 'matlab':
-                        script_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.m'))
+                        script_files[i] = (mkstemp_safe(temp_dir, '.m'))
                     # Create necessary files in local path
-                    shell_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.sh'))
-                    output_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.out'))
-                    stdout_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.o'))
-                    flag_files[i] = (mkstemp_safe(HOME_TEMP_PATH, '.flag'))
+                    shell_files[i] = (mkstemp_safe(temp_dir, '.sh'))
+                    output_files[i] = (mkstemp_safe(temp_dir, '.out'))
+                    stdout_files[i] = (mkstemp_safe(temp_dir, '.o'))
+                    flag_files[i] = (mkstemp_safe(temp_dir, '.flg'))
                     # Customise code
                     #### TODO - make path and output_transfer optional
                     if language == 'python':
@@ -369,7 +379,11 @@ quit()
                         if language == 'python':
                             f.write('python ' + script_files[i] + '\n')
                         elif language == 'matlab':
-                            f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + LOCAL_MATLAB + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
+                            if LOCATION == 'home':
+                                matlab_path = HOME_MATLAB
+                            else:
+                                matlab_path = LOCAL_MATLAB
+                            f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + matlab_path + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
                                     os.path.split(script_files[i])[-1].split('.')[0] + '\n')
                     # Start running the job
                     if verbose:
