@@ -139,8 +139,11 @@ class fear(object):
     def rm(self, remote_path):
         #output = self.command('rm %s' % remote_path)
         #return output
-        self._connection._sftp.remove(remote_path)
-    
+	try:
+            self._connection._sftp.remove(remote_path)
+        except:
+            return 'Error'    
+
     def file_exists(self, remote_path):
         #### TODO - Replace this with an ls statement or proper OS independent query
         response = self.command('if [ -e %s ] \nthen \necho ''exists'' \nfi' % remote_path)

@@ -112,7 +112,7 @@ quit()
 '''
     
     # Open a connection to fear as a with block - ensures connection is closed
-    with pyfear.fear(via_gate=via_gate) as fear:
+    with pyfear.fear(via_gate=(location=='home')) as fear:
     
         # Initialise lists of file locations job ids
         shell_files = [None] * len(scripts)
@@ -127,6 +127,7 @@ quit()
         # Modify all scripts and create local temporary files
         
         for (i, code) in enumerate(scripts):
+            print 'Writing temp files for job %d of %d' % (i + 1, len(scripts))
             if location == 'local':
                 temp_dir = LOCAL_TEMP_PATH
             else:
@@ -167,7 +168,7 @@ quit()
             should_sleep = True
             for i in range(len(scripts)): # Make me more pythonic with zipping
                 # Does the job need to be run and can we run it?
-                if (not job_finished[i]) and (job_ids[i] is None) and (fear.jobs_alive() <= max_jobs):
+                if (not job_finished[i]) and (job_ids[i] is None) and (jobs_alive <= max_jobs):
                     # Something has happened
                     should_sleep = False
                     # Transfer files to fear
@@ -183,7 +184,7 @@ quit()
                     # Has the process terminated?
                     if fear.job_terminated(job_ids[i], update=False):
                         # Decrement job count
-                        jobs_alive -= 1
+                        #jobs_alive -= 1 - would not have been counted earlier
                         should_sleep = False
                         # Has the job failed to write a flag or is the output file empty
                         if (not fear.file_exists(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))) or \
@@ -205,6 +206,10 @@ quit()
                             # Tell the world
                             if verbose:
                                 print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))
+                            # Tidy up local temporary directory - actually - do this in one batch later
+                            #os.remove(script_files[i])
+                            #os.remove(shell_files[i])
+                            #os.remove(flag_files[i])
                         # Tidy up fear
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
@@ -215,9 +220,9 @@ quit()
                         #### TODO - is the following line faster?
                         #fear.command('rm ' + ' ; rm '.join([os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.o%s' % old_job_id), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.e%s' % old_job_id)]))
                         # Tidy up local temporary directory
-                        os.remove(script_files[i])
-                        os.remove(shell_files[i])
-                        os.remove(flag_files[i])    
+                        #os.remove(script_files[i])
+                        #os.remove(shell_files[i])
+                        #os.remove(flag_files[i])    
                         job_ids[i] = None                     
                             
                     elif not (fear.job_queued(job_ids[i]) or fear.job_running(job_ids[i]) \
@@ -239,9 +244,9 @@ quit()
                         #### TODO - is the following line faster?
                         #fear.command('rm ' + ' ; rm '.join([os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.o%s' % old_job_id), os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.e%s' % old_job_id)]))
                         # Tidy up local temporary directory
-                        os.remove(script_files[i])
-                        os.remove(shell_files[i])
-                        os.remove(flag_files[i])    
+                        #os.remove(script_files[i])
+                        #os.remove(shell_files[i])
+                        #os.remove(flag_files[i])    
                         job_ids[i] = None   
             if all(job_finished):
                 fear_finished = True    
@@ -254,6 +259,13 @@ quit()
                     print '%d jobs queued' % fear.jobs_queued(update=False)
                     print 'Sleeping for %d seconds' % job_check_sleep
                     time.sleep(job_check_sleep)
+
+    # Tidy up temporary directory
+    for i in range(len(scripts)):
+        print 'Removing temp files for job %d of %d' % (i + 1, len(scripts))
+        os.remove(script_files[i])
+        os.remove(shell_files[i])
+        os.remove(flag_files[i])
 
     #### TODO - return job output and error files as applicable (e.g. there may be multiple error files associated with one script)
     return output_files
