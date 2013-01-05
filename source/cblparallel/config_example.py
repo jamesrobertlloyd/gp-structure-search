@@ -20,3 +20,11 @@ GATE_TO_REMOTE_KEY_FILE    = '/users/f/jrl44/.ssh/jrl44gate2fear'
 GATE_TO_LOCAL_KEY_FILE     = '/users/f/jrl44/.ssh/jrl44gate2sagarmatha'
 LOCATION                   = 'home'
 HOME_TO_GATE_PWD           = '' #### Remove me!
+
+HOME_TO_REMOTE_PORT        = 6666
+REMOTE_TO_HOME_PORT        = 6666
+REMOTE_TO_REMOTE_PORT      = 6666
+HOME_TO_REMOTE_KEY_FILE    = '/Users/JamesLloyd/.ssh/jrl44macpro2fear'
+REMOTE_TO_HOME_KEY_FILE    = '/users/jrl44/.ssh/JamesLloydfear2macpro'
+REMOTE_TO_REMOTE_KEY_FILE  = '/users/jrl44/.ssh/jrl44fear2fear'
+HOME_USERNAME              = 'JamesLloyd' 

@@ -25,7 +25,7 @@ from config import *
 ####  - Provide convenience functions to setup MATLAB/python paths
 ####  - Merge job handling code
 ####  - Return STDOUT and STDERR from scripts
-####  - Allow job handling across gate.eng.cam.ac.uk 
+####  - Tidy up port forwarding
 ####  - Write unit tests
 ####  - Write asynchronous job handling
 ####  - Add support for jobs in arbitrary languages (will require more user input)
@@ -41,7 +41,14 @@ def setup():
     '''
     pass
     
-#### TODO - Combine these functions - they share much code
+def start_port_forwarding():
+    #### TODO - Make me nicer!
+    cmd = 'ssh -N -f -L %d:fear:22 %s@gate.eng.cam.ac.uk' % (HOME_TO_REMOTE_PORT, USERNAME)
+    subprocess.call(cmd.split(' '))
+    cmd = 'ssh -N -f -R %d:localhost:22 -p %d %s@localhost' % (REMOTE_TO_HOME_PORT, HOME_TO_REMOTE_PORT, USERNAME)
+    subprocess.call(cmd.split(' '))
+    
+#### TODO - Combine these functions? - they share much code
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
@@ -71,7 +78,26 @@ addpath(genpath('%s'))
 ''' % REMOTE_MATLAB_PATH
     
     #### TODO - allow port forwarding / tunneling - copy to machine on network with more disk space than fear, then copy from that machine?
-    python_transfer_code = '''
+    #### FIXME - Now does port forwarding but with fixed port numbers = bad
+    if LOCATION == 'home':
+        python_transfer_code = '''
+from subprocess_timeout import timeoutCommand
+print "Setting up port forwarding"
+timeoutCommand(cmd='ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear').run(timeout=%(timeout)d)
+print "Moving output file"
+if not timeoutCommand(cmd='scp -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s').run(timeout=%(timeout)d)[0]:
+    raise RuntimeError('Copying output raised error or timed out')
+''' % {'rsa_remote' : REMOTE_TO_REMOTE_KEY_FILE,
+       'r2rport' : REMOTE_TO_REMOTE_PORT,
+       'r2hport' : REMOTE_TO_HOME_PORT,
+       'username' : USERNAME,
+       'timeout' : file_copy_timeout,
+       'rsa_home' : REMOTE_TO_HOME_KEY_FILE,
+       'output_file' : '%(output_file)s',
+       'home_user' : HOME_USERNAME,
+       'local_temp_path' : HOME_TEMP_PATH}
+    else:    
+        python_transfer_code = '''
 #from util import timeoutCommand
 from subprocess_timeout import timeoutCommand
 print "Moving output file"
@@ -84,8 +110,22 @@ if not timeoutCommand(cmd='scp -i %(rsa_key)s %(output_file)s %(username)s@%(loc
        'local_temp_path' : LOCAL_TEMP_PATH,
        'timeout' : file_copy_timeout}
     
+    #### TODO - make this location independent
     #### TODO - does this suffer from the instabilities that lead to the verbosity of the python command above
-    matlab_transfer_code = '''
+    if LOCATION == 'home':
+        matlab_transfer_code = '''
+system('ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear')
+system('scp -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s')
+''' % {'rsa_remote' : REMOTE_TO_REMOTE_KEY_FILE,
+       'r2rport' : REMOTE_TO_REMOTE_PORT,
+       'r2hport' : REMOTE_TO_HOME_PORT,
+       'username' : USERNAME,
+       'rsa_home' : REMOTE_TO_HOME_KEY_FILE,
+       'output_file' : '%(output_file)s',
+       'home_user' : HOME_USERNAME,
+       'local_temp_path' : HOME_TEMP_PATH}
+    else:
+        matlab_transfer_code = '''
 system('scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_temp_path)s; rm %(output_file)s')
 ''' % {'rsa_key' : REMOTE_TO_LOCAL_KEY_FILE,
        'output_file' : '%(output_file)s',
@@ -194,7 +234,7 @@ quit()
                         #### TODO - Can likely increase speed by checking status of files (on fear and local) in one block - not sure how to do it though
                         ####      - In particular checking for file existence should probably be done with a SFTP client rather than SSH - might be faster?
                         if (not fear.file_exists(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))) or \
-                           ((LOCATION=='local') and (os.stat(output_files[i]).st_size == 0)):
+                           (os.stat(output_files[i]).st_size == 0):
                             # Job has finished but missing output - resubmit later
                             print 'Shell script %s job_id %s failed' % (os.path.split(shell_files[i])[-1], job_ids[i])
                             # Save job id for file deletion
@@ -206,9 +246,9 @@ quit()
                             # Save job id for file deletion
                             old_job_id = job_ids[i]
                             # Move files if necessary
-                            if LOCATION=='home':
-                                # Copy the file from local storage machine (and delete it)
-                                fear.copy_from_localhost(localpath=output_files[i], remotepath=os.path.join(LOCAL_TEMP_PATH, os.path.split(output_files[i])[-1]))
+                            #if LOCATION=='home':
+                            #    # Copy the file from local storage machine (and delete it)
+                            #    fear.copy_from_localhost(localpath=output_files[i], remotepath=os.path.join(LOCAL_TEMP_PATH, os.path.split(output_files[i])[-1]))
                             # Tell the world
                             if verbose:
                                 print '%d / %d jobs complete' % (sum(job_finished), len(job_finished))

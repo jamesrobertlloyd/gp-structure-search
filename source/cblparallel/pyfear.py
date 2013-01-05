@@ -31,7 +31,7 @@ class fear(object):
         return self
 
     def __exit__(self, _type, value, traceback):
-        self.disconnect
+        self.disconnect()
         
     def connect(self):
         '''
@@ -40,19 +40,21 @@ class fear(object):
         if not self.via_gate:
             self._connection = pysftp.Connection('fear', private_key=LOCAL_TO_REMOTE_KEY_FILE)
         else:
-            self._connection = pysftp.Connection('gate.eng.cam.ac.uk', username=USERNAME, password=HOME_TO_GATE_PWD)
+            #### FIXME - Currently assumes that necessary port forwarding already in place
+            self._connection = pysftp.Connection('localhost', port=HOME_TO_REMOTE_PORT, username=USERNAME, private_key=HOME_TO_REMOTE_KEY_FILE)
+            #self._connection = pysftp.Connection('gate.eng.cam.ac.uk', username=USERNAME, password=HOME_TO_GATE_PWD)
         
     def disconnect(self):
         self._connection.close()
 
     def command(self, cmd):
         #### TODO - Allow port forwarding / tunneling - can this be authenticated / os independent?
-        if self.via_gate:
-            #### FIXME - This is an inefficient hack
-            ####       - If anyone knows how to set up the appropriate SSH client object across gate then please implement!!!
-            cmd = 'ssh -i %(rsa_key)s %(username)s@fear "%(cmd)s"' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
-                                                                      'username' : USERNAME,
-                                                                      'cmd' : cmd}
+        #if self.via_gate:
+        #    #### FIXME - This is an inefficient hack
+        #    ####       - If anyone knows how to set up the appropriate SSH client object across gate then please implement!!!
+        #    cmd = 'ssh -i %(rsa_key)s %(username)s@fear "%(cmd)s"' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
+        #                                                              'username' : USERNAME,
+        #                                                              'cmd' : cmd}
         output =  self._connection.execute(cmd)
         return output
         
@@ -63,44 +65,44 @@ class fear(object):
         return self.command(' ; '.join(cmds))
         
     def _put(self, localpath, remotepath):
-        output = self._connection.put(localpath=localpath, remotepath=remotepath)
-        return output
+        return self._connection.put(localpath=localpath, remotepath=remotepath)
     
     def _get(self, remotepath, localpath):
         #### FIXME - This occassionally hangs
         self._connection.get(remotepath=remotepath, localpath=localpath)
         
     def copy_to(self, localpath, remotepath, timeout=10, verbose=False):
+        self._put(localpath=localpath, remotepath=remotepath)
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
-        if not self.via_gate:
-            #### This scp command is very inefficient
-            #cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
-            #                                                                             'localpath' : localpath,
-            #                                                                             'username' : USERNAME,
-            #                                                                             'remotepath' : remotepath} 
-            #return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
-            self._put(localpath=localpath, remotepath=remotepath)
-        else:
-            #### FIXME - This is an inefficient hack
-            ####       - If anyone knows how to set up the appropriate SFTP client object across gate then please implement!!!
-            
-            # Put the file on gate
-            self._put(localpath=localpath, remotepath=os.path.split(localpath)[-1])
-            # Copy across to fear
-            cmd = 'ssh -i %(rsa_key)s %(username)s@fear "cat > %(remotepath)s" < %(temppath)s' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
-                                                                                                  'username' : USERNAME,
-                                                                                                  'remotepath' : remotepath,
-                                                                                                  'temppath' : os.path.split(localpath)[-1]}
-            self._connection.execute(cmd)                                                                                   
-            # Clear the temporary file
-            self._connection.execute('rm %s' % os.path.split(localpath)[-1])
-            
-            #### This is an even more hacky way to do things
-            #with open(localpath, 'rb') as local_file:
-            #    file_contents = local_file.read()
-            #cmd = 'echo "%s" > %s' % (file_contents, remotepath)
-            #self.command(cmd) 
+        #if not self.via_gate:
+        #    #### This scp command is very inefficient
+        #    #cmd = 'scp -i %(rsa_key)s %(localpath)s %(username)s@fear:%(remotepath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
+        #    #                                                                             'localpath' : localpath,
+        #    #                                                                             'username' : USERNAME,
+        #    #                                                                             'remotepath' : remotepath} 
+        #    #return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
+        #    self._put(localpath=localpath, remotepath=remotepath)
+        #else:
+        #    #### FIXME - This is an inefficient hack
+        #    ####       - If anyone knows how to set up the appropriate SFTP client object across gate then please implement!!!
+        #    
+        #    # Put the file on gate
+        #    self._put(localpath=localpath, remotepath=os.path.split(localpath)[-1])
+        #    # Copy across to fear
+        #    cmd = 'ssh -i %(rsa_key)s %(username)s@fear "cat > %(remotepath)s" < %(temppath)s' % {'rsa_key' : GATE_TO_REMOTE_KEY_FILE,
+        #                                                                                          'username' : USERNAME,
+        #                                                                                          'remotepath' : remotepath,
+        #                                                                                          'temppath' : os.path.split(localpath)[-1]}
+        #    self._connection.execute(cmd)                                                                                   
+        #    # Clear the temporary file
+        #    self._connection.execute('rm %s' % os.path.split(localpath)[-1])
+        #    
+        #    #### This is an even more hacky way to do things
+        #    #with open(localpath, 'rb') as local_file:
+        #    #    file_contents = local_file.read()
+        #    #cmd = 'echo "%s" > %s' % (file_contents, remotepath)
+        #    #self.command(cmd) 
     
     def copy_to_temp(self, localpath, timeout=10, verbose=False):
         #### TODO - make this OS independent
@@ -111,12 +113,18 @@ class fear(object):
         #return timeoutCommand(cmd='python fear_get.py %s %s' % (remotepath, localpath), verbose=verbose).run(timeout=timeout)  
         #### TODO - Make this operating system independent
         #### TODO - Allow port forwarding / tunneling via gate.eng.cam.ac.uk - can we make authentication work?
-        if not self.via_gate:
+        if True:#not self.via_gate:
             #### FIXME - This is inefficient - but paramiko's SFTPClient.get operation sometimes hangs bringing down all of python
-            cmd = 'scp -i %(rsa_key)s %(username)s@fear:%(remotepath)s %(localpath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
-                                                                                         'username' : USERNAME,
-                                                                                         'remotepath' : remotepath,
-                                                                                         'localpath' : localpath} 
+            if not via_gate:
+                cmd = 'scp -i %(rsa_key)s %(username)s@fear:%(remotepath)s %(localpath)s' % {'rsa_key' : LOCAL_TO_REMOTE_KEY_FILE,
+                                                                                             'username' : USERNAME,
+                                                                                             'remotepath' : remotepath,
+                                                                                             'localpath' : localpath}
+            else:
+                cmd = 'scp -P %(port)d -i %(rsa_key)s %(username)s@localhost:%(remotepath)s %(localpath)s' % {'port' : HOME_TO_REMOTE_PORT, 'rsa_key' : HOME_TO_REMOTE_KEY_FILE,
+                                                                                             'username' : USERNAME,
+                                                                                             'remotepath' : remotepath,
+                                                                                             'localpath' : localpath}                                                                        
             return timeoutCommand(cmd=cmd, verbose=verbose).run(timeout=timeout)
         else:
             #### FIXME - again, this is a hack
@@ -126,6 +134,7 @@ class fear(object):
                 local_file.writelines(file_contents)
         
     def copy_from_localhost(self, remotepath, localpath, timeout=10, verbose=False):
+        #### DO NOT USE!
         #### FIXME - Another hack introduced to deal with gate
         ####       - This is using localhost as a storage machine
         cmd = 'ssh -i %(rsa_key)s %(username)s@%(localhost)s "cat %(remotepath)s ; rm %(remotepath)s"' % {'rsa_key' : GATE_TO_LOCAL_KEY_FILE,

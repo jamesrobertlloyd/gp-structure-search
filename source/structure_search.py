@@ -326,6 +326,8 @@ def make_predictions(data_file, results_file, prediction_file, local_computation
     # Create a connection to fear if not performing calculations locally
     if not local_computation:
         # If not in CBL need to communicate with fear via gate.eng.cam.ac.uk
+        if (LOCATION == 'home'):
+            cblparallel.start_port_forwarding()
         fear = cblparallel.fear(via_gate=(LOCATION=='home'))
         # Move data file to fear
         if verbose:
@@ -354,7 +356,7 @@ def make_predictions(data_file, results_file, prediction_file, local_computation
     if local_computation:   
         temp_results_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1)[0]
     else:
-        temp_results_file = cblparallel.run_batch_on_fear([code], language='matlab', via_gate=False)[0]
+        temp_results_file = cblparallel.run_batch_on_fear([code], language='matlab')[0]
     # Move prediction file from temporary directory and tidy up
     shutil.copy(temp_results_file, prediction_file)
     os.remove(temp_results_file)
@@ -367,13 +369,15 @@ def make_predictions(data_file, results_file, prediction_file, local_computation
     else:
         os.remove(os.path.join(cblparallel.LOCAL_TEMP_PATH, os.path.split(data_file)[-1]))
     
-def run_all_kfold():
+def run_all_kfold(local_computation = True):
+    if (not local_computation) and (LOCATION == 'home'):
+        cblparallel.start_port_forwarding()
     for r, files in gen_all_kfold_datasets():
         datafile = os.path.join(r,files + ".mat")
         output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
         prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
         
-        perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=True)
+        perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=True, local_computation=local_computation)
         
         #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
         #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  
@@ -381,11 +385,13 @@ def run_all_kfold():
         
         print "Done one file!!!"  
     
-def run_test_kfold():
+def run_test_kfold(local_computation = True):
     
     datafile = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../results' + '/r_pumadyn512_fold_3_of_10_result.txt'
-    perform_kernel_search(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test', debug=True, local_computation=True)
+    if (not local_computation) and (LOCATION == 'home'):
+        cblparallel.start_port_forwarding()
+    perform_kernel_search(datafile, output_file, max_depth=2, k=1, description = 'J-Llo test', debug=True, local_computation=local_computation)
     prediction_file = '../results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     make_predictions(os.path.abspath(datafile), output_file, prediction_file, local_computation=True)
                                    
