@@ -49,7 +49,7 @@ def load_mat(data_file, y_dim=1):
 
 def proj_psd(H):
     '''
-    Makes stuff psd I presume?
+    Makes stuff psd I presume? Comments welcome.
     '''
     assert np.allclose(H, H.T), 'not symmetric'
     d, Q = scipy.linalg.eigh(H)
@@ -118,7 +118,7 @@ class ScoredKernel:
         self.noise = noise
         
     def score(self, criterion='bic'):
-        #### FIXME - Change default to laplace when it is working again
+        #### FIXME - Change default to laplace when it is definitely bug free
         return {'bic': self.bic_nle,
                 'nll': self.nll,
                 'laplace': self.laplace_nle
@@ -138,37 +138,136 @@ class ScoredKernel:
         v = locals().copy()
         v.update(fk.__dict__)
         v['nan'] = np.NaN;
-        return eval(line, globals(), v)   
+        return eval(line, globals(), v) 
+        
+def covariance_similarity(kernels, X, local_computation=True, verbose=True): 
+    '''
+    Evaluate a similarity matrix or kernels, in terms of their covariance matrix evaluated on training inputs
+    Assumes kernels is a list of ScoredKernel objects
+    '''
+    # Construct data and send to fear if appropriate
+    # Make data into matrices in case they're unidimensional.
+    if X.ndim == 1: X = X[:, nax]
+    data = {'X': X}
+    if not local_computation:
+        # If not in CBL need to communicate with fear via gate.eng.cam.ac.uk
+        fear = cblparallel.fear(via_gate=(LOCATION=='home'))
+    if LOCATION=='home':
+        data_file = mkstemp_safe(cblparallel.HOME_TEMP_PATH, '.mat')
+    else:
+        data_file = mkstemp_safe(cblparallel.LOCAL_TEMP_PATH, '.mat')
+    scipy.io.savemat(data_file, data)
+    if not local_computation:
+        if verbose:
+            print 'Moving data file to fear'
+        fear.copy_to_temp(data_file)
+    # Construct testing code
+    if not local_computation:
+        gpml_path = REMOTE_GPML_PATH
+    elif LOCATION == 'local':
+        gpml_path = LOCAL_GPML_PATH
+    else:
+        gpml_path = HOME_GPML_PATH
+    code = gpml.SIMILARITY_CODE_HEADER % {'datafile': data_file.split('/')[-1],
+                                          'gpml_path': gpml_path}
+    for (i, kernel) in enumerate([k.k_opt for k in kernels]):
+        code = code + gpml.SIMILARITY_CODE_COV % {'iter' : i + 1,
+                                                  'kernel_family': kernel.gpml_kernel_expression(),
+                                                  'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector())}
+    code = code + gpml.SIMILARITY_CODE_FOOTER % {'writefile': '%(output_file)s'} # N.B. cblparallel manages output files
+    code = re.sub('% ', '%% ', code) # HACK - cblparallel not fond of % signs
+    # Run code
+    if local_computation:
+        output_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1, job_check_sleep=30, verbose=True, single_thread=False)[0] 
+    else:
+        output_file = cblparallel.run_batch_on_fear([code], language='matlab', max_jobs=500, verbose=verbose)[0]
+    # Read in results
+    gpml_result = scipy.io.loadmat(output_file)
+    similarity = gpml_result['sim_matrix']
+    # Tidy up
+    os.remove(output_file)
+    os.remove(data_file)
+    if not local_computation:
+        # TODO - hide paths from end user
+        fear.rm(os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
+        fear.disconnect()
+    # Return
+    return similarity
+        
+def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
+    '''
+    Test the top n_eval performing kernels for equivalence, in terms of their covariance matrix evaluated on training inputs
+    Assumes kernels is a list of ScoredKernel objects
+    '''
+    #### HACK - this needs lots of computing power - do it locally with multi-threading
+    local_computation = True
+    # Sort
+    kernels = sorted(kernels, key=ScoredKernel.score, reverse=False)
+    # Find covariance similarity for top n_eval
+    n_eval = min(n_eval, len(kernels))
+    similarity_matrix = covariance_similarity(kernels[:n_eval], X, local_computation=local_computation)
+    # Remove similar kernels
+    #### TODO - What is a good heuristic for determining equivalence?
+    ####      - Currently using Frobenius norm - truncate if Frobenius norm is below 1% of average
+    cut_off = similarity_matrix.mean() / 100.0
+    equivalence_graph = similarity_matrix < cut_off
+    # For all kernels (best first)
+    for i in range(n_eval):
+        # For all other worse kernels
+        for j in range(i+1, n_eval):
+            # If equivalent
+            if equivalence_graph[i,j]:
+                # Destroy the inferior duplicate
+                kernels[j] = None
+    # Sort the results
+    kernels = [k for k in kernels if k is not None]
+    kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
+    return kernels
         
 def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
-                          verbose=True, \
-                          description='No description', n_rand=1, sd=2, local_computation=False, debug=False):
+                          verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
+    # Load data - input, output and number of input dimensions
     X, y, D = load_mat(data_file, y_dim)
-    
+    # Initialise kernels to be base kernels
     if debug:
         current_kernels = list(fk.test_kernels(4))
     else:
         current_kernels = list(fk.base_kernels(D))
-        
+    # Initialise list of results
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
-    for r in range(max_depth):   
-        # Add restarts
+    # Perform search
+    for depth in range(max_depth):   
+        # Add random restarts to kernels
         current_kernels = add_random_restarts(current_kernels, n_rand, sd)
-        new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, \
-                                       local_computation=local_computation)
-            
-        results = results + new_results
-        
-        print
-        results = sorted(results, key=ScoredKernel.score, reverse=True)
-        for result in results:
+        # Score the kernels
+        new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation)
+        # Sort the new results
+        new_results = sorted(new_results, key=ScoredKernel.score, reverse=True)
+        # Remove near duplicates from these results (top m results only for efficiency)
+        print 'Printing new results'
+        for result in new_results:
             print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
-        
+        new_results = remove_duplicates(new_results, X, local_computation=local_computation)
+        print 'Printing new results after duplicate removal'
+        for result in new_results:
+            print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
+        # Collate results
+        results = results + new_results
+        # Sort all results
+        results = sorted(results, key=ScoredKernel.score, reverse=True)
+        # Remove duplicates - not necessary here? Heuristic can go a bit funny!
+        # results = remove_duplicates(results, X, local_computation=local_computation)
         results_sequence.append(results)
-        
+        if verbose:
+            print 'Printing all results'
+            for result in results:
+                print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
+        # Extract the best k kernels from the new results
+        #### Thoughts - Search can get stuck since can replace kernels in place
+        ####          - Remove duplicates here - or higher up?
         best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
         if debug:
             current_kernels = expand_kernels(4, best_kernels, verbose=verbose, debug=debug)
@@ -238,7 +337,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
                                                   'iters': str(iters)}
         #### Need to be careful with % signs
         #### For the moment, cblparallel expects no single % signs - FIXME
-        scripts[i] = re.sub('% ', '%%', scripts[i])
+        scripts[i] = re.sub('% ', '%% ', scripts[i])
     
     # Send to cblparallel and save output_files
     if verbose:
@@ -246,7 +345,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     if local_computation:
         output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
     else:
-        output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=500, verbose=verbose)  
+        output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=1000, verbose=verbose)  
     
     # Read in results
     results = [None] * len(kernels)
@@ -254,7 +353,6 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
         if verbose:
             print 'Reading output file %d of %d' % (i + 1, len(kernels))
         results[i] = output_to_scored_kernel(gpml.read_outputs(output_file), kernels[i].family(), ndata)
-    #results = [output_to_scored_kernel(gpml.read_outputs(output_file), kernels[i].family(), ndata) for (i, output_file) in enumerate(output_files)]
     
     # Tidy up
     for (i, output_file) in enumerate(output_files):
@@ -264,64 +362,12 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     os.remove(data_file)
     if not local_computation:
         # TODO - hide paths from end user
-        fear.rm(os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file[i])[-1]))
+        fear.rm(os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
         fear.disconnect()
     
     # Return results
-    return results                  
-
-def output_to_scored_kernel(output, kernel_family, ndata):
-    laplace_nle = laplace_approx(output.nll, output.kernel_hypers, output.hessian, PRIOR_VAR)
-    k_opt = kernel_family.from_param_vector(output.kernel_hypers)
-    BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
-    return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)
-
-def parse_all_results():
-    entries = [];
-    rownames = [];
+    return results     
     
-    colnames = ['Dataset', 'NLL', 'Kernel' ]
-    for rt in gen_all_results():
-        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append(['%4.1f' % rt[1], rt[-1].latex_print()])
-        rownames.append(rt[0])
-    
-    utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
-
-def gen_all_results():
-    '''Look through all the files in the results directory'''
-    for r,d,f in os.walk(config.RESULTS_PATH):
-        for files in f:
-            if files.endswith(".txt"):
-                results_filename = os.path.join(r,files)
-                best_tuple = parse_results( results_filename )
-                yield files.split('.')[-2], best_tuple
-                
-def parse_results( results_filename ):
-    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
-    best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
-    return best_tuple
-
-def gen_all_kfold_datasets():
-    '''Look through all the files in the results directory'''
-    for r,d,f in os.walk("../data/kfold_data/"):
-        for files in f:
-            if files.endswith(".mat"):
-                yield r, files.split('.')[-2]
-
-def main():
-    data_file = sys.argv[1];
-    results_filename = sys.argv[2];
-    max_depth = int(sys.argv[3]);
-    k = int(sys.argv[4]);
-    
-    print 'Datafile=%s' % data_file
-    print 'results_filename=%s' % results_filename
-    print 'max_depth=%d' % max_depth
-    print 'k=%d' % k
-    
-    #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
-        
 def make_predictions(data_file, results_file, prediction_file, local_computation=False):
     # Create a connection to fear if not performing calculations locally
     if not local_computation:
@@ -352,7 +398,7 @@ def make_predictions(data_file, results_file, prediction_file, local_computation
                                          'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
                                          'noise': str(best_scored_kernel.noise),
                                          'iters': str(30)}
-    code = re.sub('% ', '%%', code) # HACK - cblparallel currently does not like % signs
+    code = re.sub('% ', '%% ', code) # HACK - cblparallel currently does not like % signs
     if local_computation:   
         temp_results_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1)[0]
     else:
@@ -363,19 +409,81 @@ def make_predictions(data_file, results_file, prediction_file, local_computation
     if not local_computation:
         # TODO - hide paths from end user
         fear.rm(os.path.join(cblparallel.REMOTE_TEMP_PATH, os.path.split(data_file)[-1]))
-        fear.disconnect()
+        fear.disconnect()         
     elif LOCATION == 'home':
         os.remove(os.path.join(cblparallel.HOME_TEMP_PATH, os.path.split(data_file)[-1]))
     else:
-        os.remove(os.path.join(cblparallel.LOCAL_TEMP_PATH, os.path.split(data_file)[-1]))
+        os.remove(os.path.join(cblparallel.LOCAL_TEMP_PATH, os.path.split(data_file)[-1]))   
+
+def output_to_scored_kernel(output, kernel_family, ndata):
+    '''Computes Laplace marginal lik approx and BIC - returns scored Kernel'''
+    laplace_nle = laplace_approx(output.nll, output.kernel_hypers, output.hessian, PRIOR_VAR)
+    k_opt = kernel_family.from_param_vector(output.kernel_hypers)
+    BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
+    return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)
+
+def parse_all_results():
+    '''
+    Creates a table of some sort?
+    '''
+    entries = [];
+    rownames = [];
+    
+    colnames = ['Dataset', 'NLL', 'Kernel' ]
+    for rt in gen_all_results():
+        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
+        entries.append(['%4.1f' % rt[1], rt[-1].latex_print()])
+        rownames.append(rt[0])
+    
+    utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
+
+def gen_all_results():
+    '''Look through all the files in the results directory'''
+    for r,d,f in os.walk(config.RESULTS_PATH):
+        for files in f:
+            if files.endswith(".txt"):
+                results_filename = os.path.join(r,files)
+                best_tuple = parse_results( results_filename )
+                yield files.split('.')[-2], best_tuple
+                
+def parse_results( results_filename ):
+    '''
+    Returns the best kernel in an experiment output file as a ScoredKernel
+    '''
+    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
+    best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
+    return best_tuple
+
+def gen_all_kfold_datasets():
+    '''Look through all the files in the results directory'''
+    for r,d,f in os.walk("../data/kfold_data/"):
+        for files in f:
+            if files.endswith(".mat"):
+                yield r, files.split('.')[-2]
+
+def main():
+    '''
+    Currently does nothing
+    '''
+    data_file = sys.argv[1];
+    results_filename = sys.argv[2];
+    max_depth = int(sys.argv[3]);
+    k = int(sys.argv[4]);
+    
+    print 'Datafile=%s' % data_file
+    print 'results_filename=%s' % results_filename
+    print 'max_depth=%d' % max_depth
+    print 'k=%d' % k
+    
+    #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
     
 def run_all_kfold(local_computation = True):
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
     for r, files in gen_all_kfold_datasets():
         datafile = os.path.join(r,files + ".mat")
-        output_file = os.path.join(config.RESULTS_PATH, files + "_result.txt")
-        prediction_file = os.path.join(config.RESULTS_PATH, files + "_predictions.mat")
+        output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
+        prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
         
         perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=True, local_computation=local_computation)
         

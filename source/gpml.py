@@ -381,7 +381,7 @@ a='Supposedly finished writing file'
 %% exit();
 """
 
-
+#### TODO - remove me
 def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30):  
     code = PREDICT_AND_SAVE_CODE % {'datafile': data_file,
                                     'writefile': write_file,
@@ -391,4 +391,41 @@ def make_predictions(kernel_expression, kernel_init_params, data_file, write_fil
                                     'noise': str(noise),
                                     'iters': str(iters)}
     run_matlab_code(code, verbose=True)
+    
+# Matlab code to evaluate similarity of kernels
+SIMILARITY_CODE_HEADER = r"""
+fprintf('Load the data, it should contain inputs X')
+load '%(datafile)s'
 
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Create list of covariance functions
+"""
+
+SIMILARITY_CODE_COV = r"""
+covs{%(iter)d} = %(kernel_family)s
+hyps{%(iter)d} = %(kernel_params)s
+"""
+
+SIMILARITY_CODE_FOOTER = r"""
+%% Evaluate similarities
+n_kernels = length(covs);
+sim_matrix = zeros(n_kernels);
+%% Note - quadratic evaluations of kernels to avoid huge memory requirements
+for i = 1:n_kernels
+  cov_i = feval(covs{i}{:}, hyps{i}, X);
+  for j = (i+1):n_kernels
+    cov_j = feval(covs{j}{:}, hyps{j}, X);
+    %% Compute Frobenius norm
+    sq_diff = (cov_i - cov_j) .^ 2;
+    frobenius = sqrt(sum(sq_diff(:)));
+    %% Put in sim matrix
+    sim_matrix(i, j) = frobenius;
+  end
+end
+%% Make symmetric
+sim_matrix = sim_matrix + sim_matrix';
+
+save( '%(writefile)s', 'sim_matrix' );
+"""
