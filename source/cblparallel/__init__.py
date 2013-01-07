@@ -79,11 +79,14 @@ addpath(genpath('%s'))
     
     #### TODO - allow port forwarding / tunneling - copy to machine on network with more disk space than fear, then copy from that machine?
     #### FIXME - Now does port forwarding but with fixed port numbers = bad
+    #### TODO - Fix port forard leak
     if LOCATION == 'home':
         python_transfer_code = '''
 from subprocess_timeout import timeoutCommand
+import subprocess
 print "Setting up port forwarding"
-timeoutCommand(cmd='ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear').run(timeout=%(timeout)d)
+if subprocess.Popen("netstat -an | grep %(r2rport)d | grep LISTEN", shell=True, stdout=subprocess.PIPE).communicate()[0] == '':
+    timeoutCommand(cmd='ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear').run(timeout=%(timeout)d)
 print "Moving output file"
 if not timeoutCommand(cmd='scp -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s').run(timeout=%(timeout)d)[0]:
     raise RuntimeError('Copying output raised error or timed out')
@@ -114,7 +117,10 @@ if not timeoutCommand(cmd='scp -i %(rsa_key)s %(output_file)s %(username)s@%(loc
     #### TODO - does this suffer from the instabilities that lead to the verbosity of the python command above
     if LOCATION == 'home':
         matlab_transfer_code = '''
-system('ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear')
+[status, result] = system('netstat -an | grep %(r2rport)d | grep LISTEN')
+if isempty(strfind(result, 'LISTEN'))
+  system('ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear')
+end
 system('scp -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s')
 ''' % {'rsa_remote' : REMOTE_TO_REMOTE_KEY_FILE,
        'r2rport' : REMOTE_TO_REMOTE_PORT,
@@ -317,7 +323,7 @@ quit()
     return output_files
     
 def run_batch_locally(scripts, language='python', paths=[], max_cpu=0.9, max_mem=0.9, submit_sleep=1, job_check_sleep=30, \
-                      verbose=True, max_files_open=100, max_running_jobs=10):
+                      verbose=True, max_files_open=100, max_running_jobs=10, single_thread=True):
     '''
     Receives a list of python scripts to run
 
@@ -423,8 +429,12 @@ quit()
                                 matlab_path = HOME_MATLAB
                             else:
                                 matlab_path = LOCAL_MATLAB
-                            f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + matlab_path + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
-                                    os.path.split(script_files[i])[-1].split('.')[0] + '\n')
+                            if single_thread:
+                                f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + matlab_path + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
+                                        os.path.split(script_files[i])[-1].split('.')[0] + '\n')
+                            else:
+                                f.write('cd ' + os.path.split(script_files[i])[0] + ';\n' + matlab_path + ' -nosplash -nojvm -nodisplay -r ' + \
+                                        os.path.split(script_files[i])[-1].split('.')[0] + '\n')
                     # Start running the job
                     if verbose:
                         print 'Submitting job %d of %d' % (i + 1, len(scripts))
