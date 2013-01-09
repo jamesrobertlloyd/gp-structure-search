@@ -673,7 +673,7 @@ class PP1Kernel(BaseKernel):
         return np.array([self.lengthscale, self.output_variance])
 
     def copy(self):
-        return PP0Kernel(self.lengthscale, self.output_variance)
+        return PP1Kernel(self.lengthscale, self.output_variance)
     
     def __repr__(self):
         return 'PP1Kernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
