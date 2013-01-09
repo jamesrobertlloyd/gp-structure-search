@@ -429,3 +429,26 @@ sim_matrix = sim_matrix + sim_matrix';
 
 save( '%(writefile)s', 'sim_matrix' );
 """
+
+SIMILARITY_CODE_FOOTER_HIGH_MEM = r"""
+%% Precompute covariance matrices
+for i = 1:length(covs);
+  cov_matrices{i} = feval(covs{i}{:}, hyps{i}, X);
+end
+%% Evaluate similarities
+n_kernels = length(covs);
+sim_matrix = zeros(n_kernels);
+for i = 1:n_kernels
+  for j = (i+1):n_kernels
+    %% Compute Frobenius norm
+    sq_diff = (cov_matrices{i} - cov_matrices{j}) .^ 2;
+    frobenius = sqrt(sum(sq_diff(:)));
+    %% Put in sim matrix
+    sim_matrix(i, j) = frobenius;
+  end
+end
+%% Make symmetric
+sim_matrix = sim_matrix + sim_matrix';
+
+save( '%(writefile)s', 'sim_matrix' );
+"""

@@ -174,7 +174,7 @@ def covariance_similarity(kernels, X, local_computation=True, verbose=True):
         code = code + gpml.SIMILARITY_CODE_COV % {'iter' : i + 1,
                                                   'kernel_family': kernel.gpml_kernel_expression(),
                                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector())}
-    code = code + gpml.SIMILARITY_CODE_FOOTER % {'writefile': '%(output_file)s'} # N.B. cblparallel manages output files
+    code = code + gpml.SIMILARITY_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'} # N.B. cblparallel manages output files
     code = re.sub('% ', '%% ', code) # HACK - cblparallel not fond of % signs
     # Run code
     if local_computation:
@@ -487,13 +487,15 @@ def run_all_kfold(local_computation = True, skip_complete=False):
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = 'Real experiments!', verbose=True, local_computation=local_computation)
+            perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation)
             
             #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
             #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  
             make_predictions(os.path.abspath(datafile), output_file, prediction_file)      
             
             print "Done one file!!!"  
+        else:
+            print 'Skipping file %s' % files
     
 def run_test_kfold(local_computation = True):
     
