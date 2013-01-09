@@ -880,7 +880,7 @@ class MaternKernel(BaseKernel):
         return np.array([self.lengthscale, self.output_variance])
 
     def copy(self):
-        return MaternKernelFamily(self.lengthscale, self.output_variance)
+        return MaternKernel(self.lengthscale, self.output_variance)
     
     def __repr__(self):
         return 'MaternKernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
