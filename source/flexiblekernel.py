@@ -867,7 +867,7 @@ class MaternKernel(BaseKernel):
         self.output_variance = output_variance
         
     def family(self):
-        return PP3KernelFamily()
+        return MaternKernelFamily()
         
     def gpml_kernel_expression(self):
         return '{@covMaterniso, 1}' # nu = 0.5
@@ -880,7 +880,7 @@ class MaternKernel(BaseKernel):
         return np.array([self.lengthscale, self.output_variance])
 
     def copy(self):
-        return PP3Kernel(self.lengthscale, self.output_variance)
+        return MaternKernelFamily(self.lengthscale, self.output_variance)
     
     def __repr__(self):
         return 'MaternKernel(lengthscale=%f, output_variance=%f)' % (self.lengthscale, self.output_variance)
