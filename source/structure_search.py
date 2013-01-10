@@ -225,7 +225,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
     return kernels
         
 def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
-                          verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False):
+                          verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False, zip_files=False, max_jobs=500):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
     # Load data - input, output and number of input dimensions
@@ -243,7 +243,7 @@ def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max
         # Add random restarts to kernels
         current_kernels = add_random_restarts(current_kernels, n_rand, sd)
         # Score the kernels
-        new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation)
+        new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
         # Sort the new results
         new_results = sorted(new_results, key=ScoredKernel.score, reverse=True)
         # Remove near duplicates from these results (top m results only for efficiency)
@@ -284,7 +284,7 @@ def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max
             for result in results:
                 print >> outfile, result  
            
-def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False):
+def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500):
     '''Sets up the experiments, sends them to cblparallel, returns the results.'''
    
     # Make data into matrices in case they're unidimensional.
@@ -345,7 +345,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     if local_computation:
         output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
     else:
-        output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=1000, verbose=verbose)  
+        output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=max_jobs, verbose=verbose, zip_files=zip_files)  
     
     # Read in results
     results = [None] * len(kernels)
@@ -477,7 +477,7 @@ def main():
     
     #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
     
-def run_all_kfold(local_computation = True, skip_complete=False):
+def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500):
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
     for r, files in gen_all_kfold_datasets():
@@ -487,7 +487,7 @@ def run_all_kfold(local_computation = True, skip_complete=False):
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation)
+            perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
             
             #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
             #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  

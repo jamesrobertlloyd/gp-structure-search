@@ -17,6 +17,8 @@ from counter import Progress
 
 from config import *
 
+import zipfile, zlib
+
 #### WISHLIST
 ####  - Limit number of active local jobs
 ####  - Display progress
@@ -52,7 +54,7 @@ def start_port_forwarding():
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
-def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True):
+def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, zip_files=True):
     '''
     Receives a list of python scripts to run
 
@@ -175,12 +177,13 @@ quit()
         ####      - Perhaps it would be better writing to local disk followed by a block file transfer (is this possible?)
         ####      - Would make sense to do this when reading output files as well - perhaps this should be provided in this module?
         
+        if LOCATION == 'local':
+            temp_dir = LOCAL_TEMP_PATH
+        else:
+            temp_dir = HOME_TEMP_PATH
+
         for (i, code) in enumerate(scripts):
             print 'Writing temp files for job %d of %d' % (i + 1, len(scripts))
-            if LOCATION == 'local':
-                temp_dir = LOCAL_TEMP_PATH
-            else:
-                temp_dir = HOME_TEMP_PATH
             if language == 'python':
                 script_files[i] = mkstemp_safe(temp_dir, '.py')
             elif language == 'matlab':
@@ -206,7 +209,22 @@ quit()
                 elif language == 'matlab':
                     f.write('cd ' + REMOTE_TEMP_PATH + ';\n' + REMOTE_MATLAB + ' -nosplash -nojvm -nodisplay -singleCompThread -r ' + \
                             os.path.split(script_files[i])[-1].split('.')[0] + '\n')
-            
+
+        # Zip and send files
+
+        if zip_files:
+            print 'Zipping files'
+            zip_file_name = mkstemp_safe(temp_dir, '.zip')
+            zf = zipfile.ZipFile(zip_file_name, mode='w')
+            for script in script_files:
+                zf.write(script, arcname=(os.path.split(script)[-1]), compress_type=zipfile.ZIP_DEFLATED)
+            for shell in shell_files:
+                zf.write(shell, arcname=(os.path.split(shell)[-1]), compress_type=zipfile.ZIP_DEFLATED)
+            zf.close()
+            print 'Sending zip file to fear'
+            fear.copy_to_temp(zip_file_name)
+            print 'Unzipping on fear'
+            fear.command('cd %(temp_path)s ; unzip %(zip_file)s ; rm %(zip_file)s' % {'temp_path' : REMOTE_TEMP_PATH, 'zip_file' : os.path.split(zip_file_name)[-1]})
 
         # Loop through jobs, submitting jobs whenever fear usage low enough, re-submitting failed jobs
         while not fear_finished:
@@ -216,20 +234,41 @@ quit()
             # Sleep unless anything happens
             should_sleep = True
             for i in range(len(scripts)): # Make me more pythonic with zipping
+                #fear.qstat()
+                #jobs_alive = fear.jobs_alive(update=False)
                 # Does the job need to be run and can we run it?
                 if (not job_finished[i]) and (job_ids[i] is None) and (jobs_alive <= max_jobs):
                     # Something has happened
                     should_sleep = False
                     # Transfer files to fear
-                    fear.copy_to_temp(script_files[i])
-                    fear.copy_to_temp(shell_files[i])
+                    if not zip_files:
+                        fear.copy_to_temp(script_files[i])
+                        fear.copy_to_temp(shell_files[i])
                     # Submit the job to fear
                     print 'Submitting job %d of %d' % (i + 1, len(scripts))
                     job_ids[i] = fear.qsub(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]), verbose=verbose) # Hide path constant
                     # Increment job count
                     jobs_alive += 1
+
+                #### FIXME - This was an attempt at better utilisation of fear - back fired since calling qstat is slow - correct solution is to have job sending and job completion checking in different threads - but would need to be carerful with the shared lists
+
+                #for j in range(len(scripts)):
+                #    if (not job_finished[j]) and (job_ids[j] is None) and (jobs_alive <= max_jobs):
+                #        # Something has happened
+                #        should_sleep = False
+                #        # Transfer files to fear
+                #        if not zip_files:
+                #            fear.copy_to_temp(script_files[j])
+                #            fear.copy_to_temp(shell_files[j])
+                #        # Submit the job to fear
+                #        print 'Submitting job %d of %d' % (j + 1, len(scripts))
+                #        job_ids[j] = fear.qsub(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[j])[-1]), verbose=verbose) # Hide path constant
+                #        # Increment job count
+                #        jobs_alive += 1
+
                 # Otherwise was it running last we checked?
                 elif (not job_finished[i]) and (not job_ids[i] is None):
+                #if (not job_finished[i]) and (not job_ids[i] is None):
                     # Has the process terminated?
                     if fear.job_terminated(job_ids[i], update=False):
                         # Decrement job count
@@ -318,6 +357,8 @@ quit()
         os.remove(script_files[i])
         os.remove(shell_files[i])
         os.remove(flag_files[i])
+    if zip_files:
+        os.remove(zip_file_name)
 
     #### TODO - return job output and error files as applicable (e.g. there may be multiple error files associated with one script)
     return output_files
