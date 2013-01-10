@@ -33,6 +33,8 @@ import re
 
 import shutil
 
+import random
+
 PRIOR_VAR = 100.
 
 def load_mat(data_file, y_dim=1):
@@ -477,10 +479,13 @@ def main():
     
     #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
     
-def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500):
+def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
-    for r, files in gen_all_kfold_datasets():
+    data_sets = list(gen_all_kfold_datasets())
+    if random_walk:
+        random.shuffle(data_sets)
+    for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(RESULTS_PATH, files + "_result.txt")))):
             datafile = os.path.join(r,files + ".mat")
