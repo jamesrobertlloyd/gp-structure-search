@@ -1,8 +1,5 @@
 import numpy as np
-import os
 import scipy.io
-
-import config
 
 """Dataset of sea levels collected by the PSMSL. The original datasets were downloaded
 from http://www.psmsl.org/data/obtaining/complete.php. We ran the provided scripts
