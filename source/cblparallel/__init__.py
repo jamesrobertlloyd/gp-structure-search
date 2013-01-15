@@ -54,7 +54,7 @@ def start_port_forwarding():
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
-def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, zip_files=True):
+def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, zip_files=False):
     '''
     Receives a list of python scripts to run
 
