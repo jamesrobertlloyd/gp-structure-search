@@ -452,3 +452,18 @@ sim_matrix = sim_matrix + sim_matrix';
 
 save( '%(writefile)s', 'sim_matrix' );
 """
+
+
+def load_mat(data_file, y_dim=1):
+    '''
+    Load a Matlab file containing inputs X and outputs y, output as np.arrays
+     - X is (data points) x (input dimensions) array
+     - y is (data points) x (output dimensions) array
+     - y_dim selects which output dimension is returned (1 indexed)
+    Returns tuple (X, y, # data points)
+    '''
+     
+    data = scipy.io.loadmat(data_file)
+
+    return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
+

@@ -9,6 +9,7 @@ Created November 2012
 '''
 
 import flexiblekernel as fk
+from flexiblekernel import ScoredKernel
 import grammar
 import gpml
 import utils.latex
@@ -35,20 +36,11 @@ import shutil
 
 import random
 
+## For Laplace?  TODO: rename or move.
 PRIOR_VAR = 100.
 
-def load_mat(data_file, y_dim=1):
-    '''
-    Load a Matlab file containing inputs X and outputs y, output as np.arrays
-     - X is (data points) x (input dimensions) array
-     - y is (data points) x (output dimensions) array
-     - y_dim selects which output dimension is returned (1 indexed)
-    Returns tuple (X, y, # data points)
-    '''
-     
-    data = scipy.io.loadmat(data_file)
-    return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
 
+#### TODO - Move to utils
 def proj_psd(H):
     '''
     Makes stuff psd I presume? Comments welcome.
@@ -58,7 +50,7 @@ def proj_psd(H):
     d = np.clip(d, 1e-8, np.infty)
     return np.dot(Q, d[:, nax] * Q.T)
     
-
+#### TODO - Move to utils
 def laplace_approx(nll, opt_hyper, hessian, prior_var):
     #### FIXME - Believed to have a bug
     ####       - Might be MATLAB though - test this code on some known integrals
@@ -76,7 +68,7 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var):
     # multiply the two Gaussians and integrate the result
     return -(evidence + prior).integral()
 
-
+#### TODO - Move to grammar
 def expand_kernels(D, seed_kernels, verbose=False, debug=False):    
     '''Makes a list of all expansions of a set of kernels in D dimensions.'''
     g = grammar.MultiDGrammar(D, debug=debug)
@@ -94,54 +86,25 @@ def expand_kernels(D, seed_kernels, verbose=False, debug=False):
             print k.pretty_print()
     return (kernels)
 
+#### TODO - move to kernels
 def replace_defaults(param_vector, sd):
     #### FIXME - remove dependence on special value of zero
     ####       - Caution - remember print, compare etc when making the change (e.g. just replacing 0 with None would cause problems later)
     '''Replaces zeros in a list with Gaussians'''
     return [np.random.normal(scale=sd) if p ==0 else p for p in param_vector]
 
+#### TODO - move to kernels
 def add_random_restarts_single_kernel(kernel, n_rand, sd):
     '''Returns a list of kernels with random restarts for default values'''
     return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
 
+#### TODO - move to kernels
 def add_random_restarts(kernels, n_rand=1, sd=2):    
     '''Augments the list to include random restarts of all default value parameters'''
     return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
 
-class ScoredKernel:
-    '''
-    Wrapper around a kernel with various scores and noise parameter
-    '''
-    def __init__(self, k_opt, nll, laplace_nle, bic_nle, noise):
-        self.k_opt = k_opt
-        self.nll = nll
-        self.laplace_nle = laplace_nle
-        self.bic_nle = bic_nle
-        self.noise = noise
-        
-    def score(self, criterion='bic'):
-        #### FIXME - Change default to laplace when it is definitely bug free
-        return {'bic': self.bic_nle,
-                'nll': self.nll,
-                'laplace': self.laplace_nle
-                }[criterion]
-                
-    @staticmethod
-    def from_printed_outputs(nll, laplace, BIC, noise=None, kernel=None):
-        return ScoredKernel(kernel, nll, laplace, BIC, noise)
-    
-    def __repr__(self):
-        return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s)' % \
-            (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
-    
-    @staticmethod
-    def parse_results_string(line):
-        #### FIXME - Higher level of python fu than I understand - can guess but can someone comment?
-        v = locals().copy()
-        v.update(fk.__dict__)
-        v['nan'] = np.NaN;
-        return eval(line, globals(), v) 
-        
+
+#### TODO - move to new module to make it clear this deals with messy cluster stuff        
 def covariance_similarity(kernels, X, local_computation=True, verbose=True): 
     '''
     Evaluate a similarity matrix or kernels, in terms of their covariance matrix evaluated on training inputs
@@ -151,6 +114,7 @@ def covariance_similarity(kernels, X, local_computation=True, verbose=True):
     # Make data into matrices in case they're unidimensional.
     if X.ndim == 1: X = X[:, nax]
     data = {'X': X}
+	#### TODO - Move if statetments to cblparallel
     if not local_computation:
         # If not in CBL need to communicate with fear via gate.eng.cam.ac.uk
         fear = cblparallel.fear(via_gate=(LOCATION=='home'))
@@ -231,7 +195,7 @@ def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
     # Load data - input, output and number of input dimensions
-    X, y, D = load_mat(data_file, y_dim)
+    X, y, D = gpml.load_mat(data_file, y_dim)
     # Initialise kernels to be base kernels
     if debug:
         current_kernels = list(fk.test_kernels(4))
@@ -285,7 +249,8 @@ def perform_kernel_search(data_file, results_filename, y_dim=1, subset=None, max
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for result in results:
                 print >> outfile, result  
-           
+
+#### TODO - move to new module to make it clear this deals with messy cluster stuff           
 def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500):
     '''Sets up the experiments, sends them to cblparallel, returns the results.'''
    
@@ -424,7 +389,7 @@ def output_to_scored_kernel(output, kernel_family, ndata):
     BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
     return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)
 
-def parse_all_results():
+def parse_all_results(folder=RESULTS_PATH, save_file='kernels.tex'):
     '''
     Creates a table of some sort?
     '''
@@ -432,27 +397,28 @@ def parse_all_results():
     rownames = [];
     
     colnames = ['Dataset', 'NLL', 'Kernel' ]
-    for rt in gen_all_results():
+    for rt in gen_all_results(folder):
         print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append(['%4.1f' % rt[1], rt[-1].latex_print()])
+        entries.append(['%4.1f' % rt[-1].nll, rt[-1].latex_print()])
         rownames.append(rt[0])
     
-    utils.latex.table('../latex/tables/kernels.tex', rownames, colnames, entries)
+    utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
 
-def gen_all_results():
+def gen_all_results(folder=RESULTS_PATH):
     '''Look through all the files in the results directory'''
-    for r,d,f in os.walk(config.RESULTS_PATH):
-        for files in f:
-            if files.endswith(".txt"):
-                results_filename = os.path.join(r,files)
-                best_tuple = parse_results( results_filename )
-                yield files.split('.')[-2], best_tuple
+    file_list = sorted([f for (r,d,f) in os.walk(folder)][0])
+    #for r,d,f in os.walk(folder):
+    for files in file_list:
+        if files.endswith(".txt"):
+            results_filename = os.path.join(folder,files)#r
+            best_tuple = parse_results( results_filename )
+            yield files.split('.')[-2], best_tuple
                 
 def parse_results( results_filename ):
     '''
     Returns the best kernel in an experiment output file as a ScoredKernel
     '''
-    result_tuples = [ScoredKernel.parse_results_string(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
+    result_tuples = [fk.repr_string_to_kernel(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
     best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
 
@@ -479,10 +445,13 @@ def main():
     
     #experiment(data_file, results_filename, max_depth=max_depth, k=k)    
     
+#### TODO - Move to experiment.py
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
+	#### TODO - make this always happen in cblparallel.__init__
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
     data_sets = list(gen_all_kfold_datasets())
+	#### FIXME - Comment / or make more elegant
     if random_walk:
         random.shuffle(data_sets)
     for r, files in data_sets:
@@ -492,7 +461,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_kernel_search(datafile, output_file, max_depth=4, k=3, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
+            perform_kernel_search(datafile, output_file, max_depth=8, k=1, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
             
             #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
             #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  

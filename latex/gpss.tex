@@ -259,6 +259,55 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 
 \input{"tables/kernels.tex"}
 
+\input{"tables/kernels2.tex"}
+\input{"tables/kernels3.tex"}
+
+\subsection{Comparison to additive kernels table}
+
+Some results are in - how do they do?
+9 Jan results had some errors - read numbers with caution - k=3, depth=4, BIC.
+18 Jan results are currently not known to be buggy - k=3, depth=4, BIC.
+
+Results are not terrible but there is certainly room for improvement against additive kernels.
+Some thoughts: surprising that Sq Exp is often better than HKL and GP GAM - are the experiments in a strange regime of some sort?
+I will try running the experiments deeper with only Laplace approx.
+This should be able to include additive kernels and will indirectly test the Laplace approx.
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{l | r r r r r}
+Method & bach & concrete & pumadyn-8nh & servo & housing \\
+\hline
+Linear regression & & & & & \\
+GP GAM & & & & & \\
+HKL & 0.199 & 0.147 & 0.346 & 0.199 & 0.151 \\
+Sq-exp & 0.045 & 0.157 & 0.317 & 0.126 & 0.092 \\
+Additive & 0.045 & 0.089 & 0.316 & 0.110 & 0.102 \\
+\hline
+9 Jan & 0.300 & 0.117 & 0.318 & 0.127 & 0.115 \\
+18 Jan & 0.211 & 0.121 & 0.318 & 0.134 & 0.172\\
+\end{tabular}
+\caption{MSE}
+\end{center}
+\end{table*}
+
+\begin{table*}[h!]
+\begin{center}
+\begin{tabular}{l | r r r r r}
+Method & bach & concrete & pumadyn-8nh & servo & housing \\
+\hline
+Linear regression & & & & & \\
+GP GAM & & & & & \\
+Sq-exp & -0.131 & 0.398 & 0.843 & 0.429 & 0.207 \\
+Additive & -0.131 & 0.114 & 0.841 & 0.309 & 0.194 \\
+\hline
+9 Jan & 0.540 & 0.291 & 0.846 & 0.372 & 0.112 \\
+18 Jan & 0.331 & 0.355 & 0.846 & 0.314 & 0.249\\
+\end{tabular}
+\caption{Mean neg log lik}
+\end{center}
+\end{table*}
+
 \section{DISCUSSION}
 
 Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 

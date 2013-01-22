@@ -966,7 +966,7 @@ class MaskKernel(Kernel):
             
     def latex_print(self):
         #return 'M_%d \\left(' % self.active_dimension + self.base_kernel.latex_print() + '\\right)'                 
-        return self.base_kernel.latex_print() + '_%d' % self.active_dimension
+        return self.base_kernel.latex_print() + '_{%d}' % self.active_dimension
             
     def __repr__(self):
         return 'MaskKernel(ndim=%d, active_dimension=%d, base_kernel=%s)' % \
@@ -1173,16 +1173,16 @@ def base_kernel_families():
     Generator of all base kernel families
     '''
     yield SqExpKernelFamily().default()
-    yield SqExpPeriodicKernelFamily().default()
-    yield RQKernelFamily().default()
-    yield LinKernelFamily().default()
-    yield QuadraticKernelFamily().default()
-    yield CubicKernelFamily().default()
-    yield PP0KernelFamily().default()
-    yield PP1KernelFamily().default()
-    yield PP2KernelFamily().default()
-    yield PP3KernelFamily().default()
-    yield MaternKernelFamily().default()       
+    #yield SqExpPeriodicKernelFamily().default()
+    #yield RQKernelFamily().default()
+    #yield LinKernelFamily().default()
+    #yield QuadraticKernelFamily().default()
+    #yield CubicKernelFamily().default()
+    #yield PP0KernelFamily().default()
+    #yield PP1KernelFamily().default()
+    #yield PP2KernelFamily().default()
+    #yield PP3KernelFamily().default()
+    #yield MaternKernelFamily().default()       
     
 def test_kernels(ndim=1):
     '''
@@ -1230,5 +1230,38 @@ def repr_string_to_kernel(string):
     '''This is defined in this module so that all the kernel class names
     don't have to have the module name in front of them.'''
     return eval(string)
+
+
+class ScoredKernel:
+    '''
+    Wrapper around a kernel with various scores and noise parameter
+    '''
+    def __init__(self, k_opt, nll, laplace_nle, bic_nle, noise):
+        self.k_opt = k_opt
+        self.nll = nll
+        self.laplace_nle = laplace_nle
+        self.bic_nle = bic_nle
+        self.noise = noise
+        
+    def score(self, criterion='bic'):#'laplace'):#'bic'):
+        #### FIXME - Change default to laplace when it is definitely bug free
+        return {'bic': self.bic_nle,
+                'nll': self.nll,
+                'laplace': self.laplace_nle
+                }[criterion]
+                
+    @staticmethod
+    def from_printed_outputs(nll, laplace, BIC, noise=None, kernel=None):
+        return ScoredKernel(kernel, nll, laplace, BIC, noise)
+    
+    def __repr__(self):
+        return 'ScoredKernel(k_opt=%s, nll=%f, laplace_nle=%f, bic_nle=%f, noise=%s)' % \
+            (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
+
+    def pretty_print(self):
+		return self.k_opt.pretty_print()
+
+    def latex_print(self):
+		return self.k_opt.latex_print()
 
  
