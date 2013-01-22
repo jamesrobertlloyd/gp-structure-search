@@ -1,8 +1,10 @@
 import itertools
 import numpy as np
 nax = np.newaxis
+import utils
 
 from misc import array_map, my_inv, full_shape, broadcast, dot, process_slice, match_shapes, _err_string, set_err_info, transp
+import scipy.linalg
 
 class BaseMatrix:
     def __init__(self):
@@ -638,3 +640,29 @@ class FixedEigMatrix(BaseMatrix):
         sp = np.random.gamma(1., 1., size=sp_shape)
         return FixedEigMatrix(d, Q, sp)
 
+
+def proj_psd(H):
+    '''
+    Makes stuff psd I presume? Comments welcome.
+    '''
+    assert np.allclose(H, H.T), 'not symmetric'
+    d, Q = scipy.linalg.eigh(H)
+    d = np.clip(d, 1e-8, np.infty)
+    return np.dot(Q, d[:, nax] * Q.T)
+    
+def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
+    #### FIXME - Believed to have a bug
+    ####       - Might be MATLAB though - test this code on some known integrals
+    d = opt_hyper.size
+    
+    hessian = proj_psd(hessian)
+
+    # quadratic centered at opt_hyper with maximum -nll
+    evidence = utils.gaussians.Potential(np.zeros(d), FullMatrix(hessian), -nll)
+    evidence = evidence.translate(opt_hyper)
+
+    # zero-centered Gaussian
+    prior = utils.gaussians.Potential.from_moments_iso(np.zeros(d), prior_var)
+
+    # multiply the two Gaussians and integrate the result
+    return -(evidence + prior).integral()

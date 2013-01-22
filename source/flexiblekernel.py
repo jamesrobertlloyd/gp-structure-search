@@ -6,6 +6,8 @@ Created Nov 2012
           Roger Grosse (rgrosse@mit.edu)
 '''
 
+import itertools
+from utils import psd_matrices
 import numpy as np
 try:
     import termcolor
@@ -1264,4 +1266,26 @@ class ScoredKernel:
     def latex_print(self):
 		return self.k_opt.latex_print()
 
- 
+    @staticmethod	
+    def from_matlab_output(output, kernel_family, ndata):
+        '''Computes Laplace marginal lik approx and BIC - returns scored Kernel'''
+        laplace_nle = psd_matrices.laplace_approx(output.nll, output.kernel_hypers, output.hessian)
+        k_opt = kernel_family.from_param_vector(output.kernel_hypers)
+        BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
+        return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)	
+
+
+def replace_defaults(param_vector, sd):
+    #### FIXME - remove dependence on special value of zero
+    ####       - Caution - remember print, compare etc when making the change (e.g. just replacing 0 with None would cause problems later)
+    '''Replaces zeros in a list with Gaussians'''
+    return [np.random.normal(scale=sd) if p ==0 else p for p in param_vector]
+
+def add_random_restarts_single_kernel(kernel, n_rand, sd):
+    '''Returns a list of kernels with random restarts for default values'''
+    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
+
+def add_random_restarts(kernels, n_rand=1, sd=2):    
+    '''Augments the list to include random restarts of all default value parameters'''
+    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
+

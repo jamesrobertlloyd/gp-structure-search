@@ -9,6 +9,7 @@ Some routines to test our kernel-handling routines.
 
 import gpml
 import flexiblekernel as fk
+import grammar
 
 import os
 import scipy.io
@@ -20,4 +21,14 @@ def test_kernel_eval():
     k.pretty_print()
     
     
+def test_kernel_expand():
+    k = fk.Carls_Mauna_kernel()
+    k_expanded = grammar.expand_kernels(1, [k])
+    assert len(k_expanded) > 1
     
+def test_kernel_expand_multi_d():
+    D = 3
+    k_base = list(fk.base_kernels(3))
+    k_expanded = grammar.expand_kernels(3, k_base)
+    assert len(k_expanded) > len(k_base)
+

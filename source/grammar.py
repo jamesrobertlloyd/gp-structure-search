@@ -199,7 +199,22 @@ def remove_duplicates(kernels):
         curr = k
     return result
     
-
+def expand_kernels(D, seed_kernels, verbose=False, debug=False):    
+    '''Makes a list of all expansions of a set of kernels in D dimensions.'''
+    g = MultiDGrammar(D, debug=debug)
+    if verbose:
+        print 'Seed kernels :'
+        for k in seed_kernels:
+            print k.pretty_print()
+    kernels = []
+    for k in seed_kernels:
+        kernels = kernels + expand(k, g)
+    kernels = remove_duplicates(kernels)
+    if verbose:
+        print 'Expanded kernels :'
+        for k in kernels:
+            print k.pretty_print()
+    return (kernels)
 
 
 
