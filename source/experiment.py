@@ -66,8 +66,13 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
     kernels = [k for k in kernels if k is not None]
     kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
     return kernels
-        
-      
+    
+#def remove_nans_from_list(a_list):
+#    return [element for element in a_list if not np.isnan(element)]  
+    
+def remove_nan_scored_kernels(scored_kernels):    
+    return [k for k in scored_kernels if not np.isnan(k.score())] 
+    
 def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
                           verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False, zip_files=False, max_jobs=500):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
@@ -88,6 +93,8 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd)
         # Score the kernels
         new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
+        # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
+        new_results = remove_nan_scored_kernels(new_results)
         # Sort the new results
         new_results = sorted(new_results, key=ScoredKernel.score, reverse=True)
         # Remove near duplicates from these results (top m results only for efficiency)
@@ -171,7 +178,13 @@ def gen_all_kfold_datasets():
             if files.endswith(".mat"):
                 yield r, files.split('.')[-2]
 
-
+def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2):
+    #### FIXME - D is redundant
+    X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
+    perform_kernel_search(X, y, D, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd)
+    best_scored_kernel = parse_results(output_file)
+    predictions = make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation)
+    scipy.io.savemat(prediction_file, predictions, appendmat=False)
 
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
 	#### TODO - make this always happen in cblparallel.__init__
@@ -184,15 +197,11 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
     for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(RESULTS_PATH, files + "_result.txt")))):
-            datafile = os.path.join(r,files + ".mat")
+            data_file = os.path.join(r,files + ".mat")
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_kernel_search(datafile, output_file, max_depth=8, k=1, description = '1 per cent Frobenius cut off', verbose=True, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
-            
-            #k_opt, nll, laplace_nle, BIC, noise_hyp = parse_results(output_file)
-            #gpml.make_predictions(k_opt.gpml_kernel_expression(), k_opt.param_vector(), datafile, prediction_file, noise_hyp, iters=30)  
-            make_predictions(os.path.abspath(datafile), output_file, prediction_file)      
+            perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='1 % Frobenius cut off', debug=False, local_computation=False, n_rand=1, sd=2)
             
             print "Done one file!!!"  
         else:
@@ -203,15 +212,10 @@ def run_test_kfold(local_computation = True):
     #### TODO - Add description
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
+    prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     #### TODO - make this always happen in cblparallel.__init__
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
-    #### FIXME - D is redundant
-    X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
-    perform_kernel_search(X, y, D, data_file, output_file, max_depth=1, k=1, description = 'DaDu test', debug=True, local_computation=local_computation)
-    prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
-    best_scored_kernel = parse_results(output_file)
-    predictions = make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=True)
-    scipy.io.savemat(prediction_file, predictions, appendmat=False)
+    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation)
 
 

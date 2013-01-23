@@ -141,20 +141,28 @@ system('scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_t
        'local_host' : LOCAL_HOST,
        'local_temp_path' : LOCAL_TEMP_PATH}
        
+#    python_completion_code = '''
+#print 'Writing completion flag'
+#with open('%(flag_file)s', 'w') as f:
+#    f.write('Goodbye, World')
+#print "I'll bite your legs off!"
+#quit()
+#'''       
     python_completion_code = '''
-print 'Writing completion flag'
-with open('%(flag_file)s', 'w') as f:
-    f.write('Goodbye, World')
 print "I'll bite your legs off!"
 quit()
 '''
   
     #### TODO - Is this completely stable       
+#    matlab_completion_code = '''
+#fprintf('\\nWriting completion flag\\n');
+#ID = fopen('%(flag_file)s', 'w');
+#fprintf(ID, 'Goodbye, world');
+#fclose(ID);
+#fprintf('\\nGoodbye, World\\n');
+#quit()
+#'''
     matlab_completion_code = '''
-fprintf('\\nWriting completion flag\\n');
-ID = fopen('%(flag_file)s', 'w');
-fprintf(ID, 'Goodbye, world');
-fclose(ID);
 fprintf('\\nGoodbye, World\\n');
 quit()
 '''
@@ -197,8 +205,9 @@ quit()
                 code = python_path_code + code + python_transfer_code + python_completion_code
             elif language == 'matlab':
                 code = matlab_path_code + code + matlab_transfer_code + matlab_completion_code
-            code = code % {'output_file': os.path.join(REMOTE_TEMP_PATH, os.path.split(output_files[i])[-1]),
-                           'flag_file' : os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1])}
+            #code = code % {'output_file': os.path.join(REMOTE_TEMP_PATH, os.path.split(output_files[i])[-1]),
+            #               'flag_file' : os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1])}
+            code = code % {'output_file': os.path.join(REMOTE_SCRATCH_PATH, os.path.split(output_files[i])[-1])}
             # Write code and shell file
             with open(script_files[i], 'w') as f:
                 f.write(code)
@@ -278,8 +287,9 @@ quit()
                         #### FIXME - If LOCATION=='home' need to check .out file on local is non-empty
                         #### TODO - Can likely increase speed by checking status of files (on fear and local) in one block - not sure how to do it though
                         ####      - In particular checking for file existence should probably be done with a SFTP client rather than SSH - might be faster?
-                        if (not fear.file_exists(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))) or \
-                           (os.stat(output_files[i]).st_size == 0):
+                        #if (not fear.file_exists(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))) or \
+                        #   (os.stat(output_files[i]).st_size == 0):
+                        if (os.stat(output_files[i]).st_size == 0):
                             # Job has finished but missing output - resubmit later
                             print 'Shell script %s job_id %s failed' % (os.path.split(shell_files[i])[-1], job_ids[i])
                             # Save job id for file deletion
@@ -304,7 +314,7 @@ quit()
                         # Tidy up fear
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
                         #### TODO - record the output and error files for future reference
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.o%s' % old_job_id))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.e%s' % old_job_id))
@@ -328,7 +338,7 @@ quit()
                         # Tidy up fear
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
-                        fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
+                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
                         #### TODO - record the output and error files for future reference
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.o%s' % old_job_id))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.e%s' % old_job_id))
