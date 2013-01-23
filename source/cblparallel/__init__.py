@@ -32,6 +32,17 @@ import zipfile, zlib
 ####  - Write asynchronous job handling
 ####  - Add support for jobs in arbitrary languages (will require more user input)
 
+def start_port_forwarding():
+    #### TODO - Check that the port forward is not already active to prevent ssh process proliferation
+    ####      - Use python statements rather than system calls
+    cmd = 'ssh -N -f -L %d:fear:22 %s@gate.eng.cam.ac.uk' % (HOME_TO_REMOTE_PORT, USERNAME)
+    subprocess.call(cmd.split(' '))
+    cmd = 'ssh -N -f -R %d:localhost:22 -p %d %s@localhost' % (REMOTE_TO_HOME_PORT, HOME_TO_REMOTE_PORT, USERNAME)
+    subprocess.call(cmd.split(' '))
+    
+if LOCATION=='home':
+    start_port_forwarding()
+
 def setup():
     '''
     Run an interactive script to setup various preliminaries e.g.
@@ -43,12 +54,29 @@ def setup():
     '''
     pass
     
-def start_port_forwarding():
-    #### TODO - Make me nicer!
-    cmd = 'ssh -N -f -L %d:fear:22 %s@gate.eng.cam.ac.uk' % (HOME_TO_REMOTE_PORT, USERNAME)
-    subprocess.call(cmd.split(' '))
-    cmd = 'ssh -N -f -R %d:localhost:22 -p %d %s@localhost' % (REMOTE_TO_HOME_PORT, HOME_TO_REMOTE_PORT, USERNAME)
-    subprocess.call(cmd.split(' '))
+def create_temp_file(extension):
+    if LOCATION=='home':
+        return mkstemp_safe(HOME_TEMP_PATH, extension)
+    else:
+        return mkstemp_safe(LOCAL_TEMP_PATH, extension)
+        
+def copy_to_remote(file_name):
+    with pyfear.fear(via_gate=(LOCATION=='home')) as fear:
+        fear.copy_to_temp(file_name)
+      
+def remove_temp_file(file_name, local_computation=False):
+    os.remove(file_name)
+    if not local_computation:
+        with pyfear.fear(via_gate=(LOCATION=='home')) as fear:
+            fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(file_name)[-1]))
+        
+def gpml_path(local_computation=True):
+    if not local_computation:
+        return REMOTE_GPML_PATH
+    elif LOCATION == 'local':
+        return LOCAL_GPML_PATH
+    else:
+        return HOME_GPML_PATH
     
 #### TODO - Combine these functions? - they share much code
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
@@ -338,7 +366,7 @@ quit()
                         # Tidy up fear
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(script_files[i])[-1]))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]))
-                        #fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
+                        # fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(flag_files[i])[-1]))
                         #### TODO - record the output and error files for future reference
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.o%s' % old_job_id))
                         fear.rm(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]) + ('.e%s' % old_job_id))
