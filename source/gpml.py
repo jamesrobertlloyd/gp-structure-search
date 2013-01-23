@@ -13,9 +13,7 @@ import scipy.io
 import tempfile, os
 import subprocess
 
-import structure_search
 import config
-from utils import psd_matrices
 
 
 def run_matlab_code(code, verbose=False):
@@ -469,7 +467,4 @@ def load_mat(data_file, y_dim=1):
     data = scipy.io.loadmat(data_file)
     #### TODO - this should return a dictionary, not a tuple
     return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1], data['Xtest'], data['ytest'][:,y_dim-1]
-
-
-
 
