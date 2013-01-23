@@ -32,8 +32,6 @@ def run_matlab_code(code, verbose=False):
     stdin = open(script_file)
     stdout = open(stdout_file, 'w')
     stderr = open(stderr_file, 'w')
-    
-#    subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
     subprocess.call(call, stdin=stdin, stdout=stdout, stderr=stderr)
     
     stdin.close()

@@ -217,5 +217,3 @@ def run_test_kfold(local_computation = True):
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
     perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation)
-
-

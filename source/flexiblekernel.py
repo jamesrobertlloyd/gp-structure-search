@@ -64,9 +64,9 @@ class BaseKernelFamily(KernelFamily):
     pass
 
 class BaseKernel(Kernel):
-   def effective_params(self):
-      '''This is true of all base kernels, hence definition here'''  
-      return len(self.param_vector())
+    def effective_params(self):
+        '''This is true of all base kernels, hence definition here'''  
+        return len(self.param_vector())
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -1228,6 +1228,24 @@ def Carls_Mauna_kernel():
     
     return kernel
 
+
+def break_kernel_into_summands(k):
+    '''Recursive function that takes a kernel, and expands it into a polynomial.'''
+    
+    # TODO - this doesn't actually do any multiplication.
+    if isinstance(k, SumKernel):
+        return k.operands.copy()
+    else:
+        return k.copy()
+    
+#def plot_kernel_decomposition( k ):#, X, y ):
+#    '''Generates plots of a kernel decomposition'''
+    
+#    summands = break_kernel_into_summands(k)
+#    for s in summands:
+#        plot_kernel
+    
+
 def repr_string_to_kernel(string):
     '''This is defined in this module so that all the kernel class names
     don't have to have the module name in front of them.'''
@@ -1261,10 +1279,10 @@ class ScoredKernel:
             (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
 
     def pretty_print(self):
-		return self.k_opt.pretty_print()
+        return self.k_opt.pretty_print()
 
     def latex_print(self):
-		return self.k_opt.latex_print()
+        return self.k_opt.latex_print()
 
     @staticmethod	
     def from_matlab_output(output, kernel_family, ndata):
