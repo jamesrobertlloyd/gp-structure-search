@@ -1229,8 +1229,8 @@ def Carls_Mauna_kernel():
     return kernel
 
 def repr_string_to_kernel(string):
-    '''This is defined in this module so that all the kernel class names
-    don't have to have the module name in front of them.'''
+    """This is defined in this module so that all the kernel class names
+    don't have to have the module name in front of them."""
     return eval(string)
 
 
