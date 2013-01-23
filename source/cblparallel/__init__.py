@@ -177,7 +177,7 @@ system('scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_t
 #quit()
 #'''       
     python_completion_code = '''
-print "I'll bite your legs off!"
+print "I will bite your legs off!"
 quit()
 '''
   
@@ -190,10 +190,10 @@ quit()
 #fprintf('\\nGoodbye, World\\n');
 #quit()
 #'''
-    matlab_completion_code = '''
+    matlab_completion_code = """
 fprintf('\\nGoodbye, World\\n');
 quit()
-'''
+"""
     
     # Open a connection to fear as a with block - ensures connection is closed
     with pyfear.fear(via_gate=(LOCATION=='home')) as fear:
