@@ -178,18 +178,15 @@ def gen_all_kfold_datasets():
             if files.endswith(".mat"):
                 yield r, files.split('.')[-2]
 
-def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2):
+def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
     #### FIXME - D is redundant
     X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
-    perform_kernel_search(X, y, D, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd)
+    perform_kernel_search(X, y, D, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
     best_scored_kernel = parse_results(output_file)
-    predictions = make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation)
+    predictions = make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
 
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
-	#### TODO - make this always happen in cblparallel.__init__
-    if (not local_computation) and (LOCATION == 'home'):
-        cblparallel.start_port_forwarding()
     data_sets = list(gen_all_kfold_datasets())
 	#### FIXME - Comment / or make more elegant
     if random_walk:
@@ -201,14 +198,14 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='1 % Frobenius cut off', debug=False, local_computation=False, n_rand=1, sd=2)
+            perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='1 % Frobenius cut off', debug=False, local_computation=False, n_rand=1, sd=2, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:
             print 'Skipping file %s' % files
     
   
-def run_test_kfold(local_computation = True):
+def run_test_kfold(local_computation = True, max_jobs=600):
     #### TODO - Add description
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
@@ -216,4 +213,5 @@ def run_test_kfold(local_computation = True):
     #### TODO - make this always happen in cblparallel.__init__
     if (not local_computation) and (LOCATION == 'home'):
         cblparallel.start_port_forwarding()
-    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation)
+    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
+
