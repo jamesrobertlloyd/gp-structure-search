@@ -9,7 +9,6 @@ Created on Nov 2012
 import flexiblekernel as fk
 import grammar
 import gpml
-import structure_search
 import utils.latex
 
 import numpy as np
@@ -17,6 +16,34 @@ import pylab
 import scipy.io
 import sys
 import os
+
+from job_controller import *
+import flexiblekernel as fk
+from flexiblekernel import ScoredKernel
+import grammar
+import gpml
+import utils.latex
+import utils.fear
+from config import *
+from utils import gaussians, psd_matrices
+
+import numpy as np
+nax = np.newaxis
+import pylab
+import scipy.io
+import sys
+import os
+import tempfile
+import subprocess
+import time
+
+import cblparallel
+from cblparallel.util import mkstemp_safe
+import re
+
+import shutil
+import random
+
 
 def kernel_test():
     k = fk.MaskKernel(4, 3, fk.SqExpKernel(0, 0))
@@ -910,8 +937,6 @@ def plot_gef_load_Z01():
 #    pylab.xlabel('Time')
 #    pylab.ylabel('Load')
 
-
-
 def main():
     # Run everything
 #    fear_experiment('../data/abalone_500.mat', '../results/abalone_500_01.txt', max_depth=4, k=3)
@@ -929,6 +954,52 @@ def main():
 #    fear_experiment('../data/unicycle_pitch_angle_400.mat', '../results/unicycle_pitch_angle_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
 #    fear_experiment('../data/unicycle_pitch_ang_vel_400.mat', '../results/unicycle_pitch_ang_vel_400_02.txt', max_depth=6, k=5, description = 'BIC, 0 init')
 
-if __name__ == '__main__':
-    main()
+def debug_laplace():
+    # Load data set
+    X, y, D, Xtest, ytest = gpml.load_mat('../data/kfold_data/r_concrete_500_fold_10_of_10.mat', y_dim=1)
+    # Load the suspicious kernel
+    sk = fk.repr_string_to_kernel('ScoredKernel(k_opt=ProductKernel([ MaskKernel(ndim=8, active_dimension=0, base_kernel=CubicKernel(offset=1.757755, output_variance=7.084045)), MaskKernel(ndim=8, active_dimension=7, base_kernel=SqExpPeriodicKernel(lengthscale=-2.701080, period=-0.380918, output_variance=-0.071214)) ]), nll=6348.096611, laplace_nle=-184450132.068237, bic_nle=12720.630212, noise=[-1.77276072])')
+    # Create some code to evaluate it
+    if X.ndim == 1: X = X[:, nax]
+    if y.ndim == 1: y = y[:, nax]
+    ndata = y.shape[0]  
+    
+    
+    # Create data file
+    data_file = cblparallel.create_temp_file('.mat')
+    scipy.io.savemat(data_file, {'X': X, 'y': y}) # Save regression data
+    
+    # Move to fear
+    cblparallel.copy_to_remote(data_file)
+    
+    
+    scripts = [gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
+                                              'writefile': '%(output_file)s', # N.B. cblparallel manages output files
+                                              'gpml_path': cblparallel.gpml_path(local_computation=False),
+                                              'kernel_family': sk.k_opt.gpml_kernel_expression(),
+                                              'kernel_params': '[ %s ]' % ' '.join(str(p) for p in sk.k_opt.param_vector()),
+                                              'noise': str(sk.noise),
+                                              'iters': str(300)}]
+    #### Need to be careful with % signs
+    #### For the moment, cblparallel expects no single % signs - FIXME
+    scripts[0] = re.sub('% ', '%% ', scripts[0])
+    
+    # Test
+    
+    #scripts[0] = re.sub('delta = 1e-6', 'delta = 1e-7', scripts[0])
+    #scripts[0] = re.sub('hyp.lik = [-1.77276072]', 'hyp.lik = [-0.77276072]', scripts[0])
+    
+    output_file = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=600)[0]  
+    
+    # Read in results
+    output = gpml.read_outputs(output_file)
+    result = ScoredKernel.from_matlab_output(output, sk.k_opt.family(), ndata)
+    print result
+    print output.hessian
+        
+    os.remove(output_file)
+    # Remove temporary data file (perhaps on the cluster server)
+    cblparallel.remove_temp_file(data_file, local_computation=False)
+    
+
 
