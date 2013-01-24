@@ -82,7 +82,7 @@ def gpml_path(local_computation=True):
 ####      - Maybe this could be achieved by creating a generic object like fear that (re)moves files etc.
 ####      - but either does this on fear, on local machine, or on fear via gate.eng.cam.ac.uk
 
-def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=120, max_jobs=500, verbose=True, zip_files=False):
+def run_batch_on_fear(scripts, language='python', job_check_sleep=30, file_copy_timeout=300, max_jobs=500, verbose=True, zip_files=False):
     '''
     Receives a list of python scripts to run
 
@@ -151,21 +151,23 @@ if not timeoutCommand(cmd='scp -i %(rsa_key)s %(output_file)s %(username)s@%(loc
 if isempty(strfind(result, 'LISTEN'))
   system('ssh -i %(rsa_remote)s -N -f -L %(r2rport)d:localhost:%(r2hport)d %(username)s@fear')
 end
-system('scp -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s')
+system('scp -o ConnectTimeout=%(timeout)d -P %(r2rport)d -i %(rsa_home)s %(output_file)s %(home_user)s@localhost:%(local_temp_path)s; rm %(output_file)s')
 ''' % {'rsa_remote' : REMOTE_TO_REMOTE_KEY_FILE,
        'r2rport' : REMOTE_TO_REMOTE_PORT,
        'r2hport' : REMOTE_TO_HOME_PORT,
        'username' : USERNAME,
+       'timeout' : file_copy_timeout,
        'rsa_home' : REMOTE_TO_HOME_KEY_FILE,
        'output_file' : '%(output_file)s',
        'home_user' : HOME_USERNAME,
        'local_temp_path' : HOME_TEMP_PATH}
     else:
         matlab_transfer_code = '''
-system('scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_temp_path)s; rm %(output_file)s')
+system('scp -o ConnectTimeout=%(timeout)d -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_temp_path)s; rm %(output_file)s')
 ''' % {'rsa_key' : REMOTE_TO_LOCAL_KEY_FILE,
        'output_file' : '%(output_file)s',
        'username' : USERNAME,
+       'timeout' : file_copy_timeout,
        'local_host' : LOCAL_HOST,
        'local_temp_path' : LOCAL_TEMP_PATH}
        
@@ -177,7 +179,7 @@ system('scp -i %(rsa_key)s %(output_file)s %(username)s@%(local_host)s:%(local_t
 #quit()
 #'''       
     python_completion_code = '''
-print "I'll bite your legs off!"
+print "I will bite your legs off!"
 quit()
 '''
   
@@ -190,10 +192,10 @@ quit()
 #fprintf('\\nGoodbye, World\\n');
 #quit()
 #'''
-    matlab_completion_code = '''
+    matlab_completion_code = """
 fprintf('\\nGoodbye, World\\n');
 quit()
-'''
+"""
     
     # Open a connection to fear as a with block - ensures connection is closed
     with pyfear.fear(via_gate=(LOCATION=='home')) as fear:

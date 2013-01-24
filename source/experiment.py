@@ -210,8 +210,5 @@ def run_test_kfold(local_computation = True, max_jobs=600):
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
-    #### TODO - make this always happen in cblparallel.__init__
-    if (not local_computation) and (LOCATION == 'home'):
-        cblparallel.start_port_forwarding()
     perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
 
