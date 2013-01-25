@@ -212,4 +212,7 @@ def run_test_kfold(local_computation = True, max_jobs=600):
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
 
-
+def make_figures():
+    X,y, D = gpml.load_mat('../data/mauna2003.mat')
+    k = fk.Carls_Mauna_kernel()
+    gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=0.0)
