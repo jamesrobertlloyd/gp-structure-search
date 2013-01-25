@@ -9,56 +9,56 @@ import gpml
 import mitparallel as mp
 
 
-def covariance_similarity_code(kernels, data_file, output_file):
-    header = gpml.SIMILARITY_CODE_HEADER % {'datafile': data_file.split('/')[-1],
-                                            'gpml_path': config.GPML_PATH}
+## def covariance_similarity_code(kernels, data_file, output_file):
+##     header = gpml.SIMILARITY_CODE_HEADER % {'datafile': data_file.split('/')[-1],
+##                                             'gpml_path': config.GPML_PATH}
 
-    body = ''
-    for i, kernel in enumerate(kernels):
-        k_opt = kernel.k_opt
-        kernel_family = k_opt.gpml_kernel_expression()
-        kernel_params = '[ ' +  ' '.join(map(str, k_opt.param_vector())) + ' ]'
-        body += gpml.SIMILARITY_CODE_COV % {'iter': i + 1,
-                                            'kernel_family': kernel_family,
-                                            'kernel_params': kernel_params}
+##     body = ''
+##     for i, kernel in enumerate(kernels):
+##         k_opt = kernel.k_opt
+##         kernel_family = k_opt.gpml_kernel_expression()
+##         kernel_params = '[ ' +  ' '.join(map(str, k_opt.param_vector())) + ' ]'
+##         body += gpml.SIMILARITY_CODE_COV % {'iter': i + 1,
+##                                             'kernel_family': kernel_family,
+##                                             'kernel_params': kernel_params}
 
-    footer = gpml.SIMILARITY_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'}
+##     footer = gpml.SIMILARITY_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'}
 
-    return '\n'.join([header, body, footer])
+##     return '\n'.join([header, body, footer])
 
 
-def covariance_similarity(kernels, X):
-    '''
-    Evaluate a similarity matrix of kernels, in terms of their covariance matrix evaluated on training inputs
-    Input:
-     - kernels           - A list of fk.ScoredKernel
-     - X                 - A matrix (data_points x dimensions) of input locations
-    Return:
-     - A matrix of similarities between the input kernels
-    '''
-    # Make data into matrices in case they're unidimensional.
-    if X.ndim == 1: X = X[:, nax]
+## def covariance_similarity(kernels, X):
+##     '''
+##     Evaluate a similarity matrix of kernels, in terms of their covariance matrix evaluated on training inputs
+##     Input:
+##      - kernels           - A list of fk.ScoredKernel
+##      - X                 - A matrix (data_points x dimensions) of input locations
+##     Return:
+##      - A matrix of similarities between the input kernels
+##     '''
+##     # Make data into matrices in case they're unidimensional.
+##     if X.ndim == 1: X = X[:, nax]
 
-    data_file = mp.util.create_temp_file('.mat')
-    scipy.io.savemat(data_file, {'X': X})
+##     data_file = mp.util.create_temp_file('.mat')
+##     scipy.io.savemat(data_file, {'X': X})
 
-    output_file = mp.util.create_temp_file('.mat')
+##     output_file = mp.util.create_temp_file('.mat')
 
-    code = covariance_similarity_code(kernels, data_file, output_file)
-    mp.matlab.run_matlab_code(code)
+##     code = covariance_similarity_code(kernels, data_file, output_file)
+##     mp.matlab.run_matlab_code(code)
 
-    gpml_result = scipy.io.loadmat(output_file)
-    similarity = gpml_result['sim_matrix']
+##     gpml_result = scipy.io.loadmat(output_file)
+##     similarity = gpml_result['sim_matrix']
 
-    os.remove(data_file)
-    os.remove(output_file)
+##     os.remove(data_file)
+##     os.remove(output_file)
 
-    return similarity
+##     return similarity
 
 
 def evaluate_kernel_code(kernel, data_file, output_file, noise, iters):
     kernel_params = '[ ' + ' '.join(map(str, kernel.param_vector())) + ' ]'
-    return gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
+    return gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file,
                                         'writefile': output_file,
                                         'gpml_path': config.GPML_PATH,
                                         'kernel_family': kernel.gpml_kernel_expression(),
@@ -69,7 +69,7 @@ def evaluate_kernel_code(kernel, data_file, output_file, noise, iters):
 
     
     
-def evaluate_kernel(kernel, X, y, verbose=True, noise=None, iters=300):
+def evaluate_kernel(kernel, X, y, noise=None, iters=300):
     '''
     Sets up a kernel optimisation and nll calculation experiment, returns the result as scored kernel
     Input:
@@ -95,7 +95,7 @@ def evaluate_kernel(kernel, X, y, verbose=True, noise=None, iters=300):
     output_file = mp.util.create_temp_file('.mat')
 
     script = evaluate_kernel_code(kernel, data_file, output_file, noise, iters)
-    mp.matlab.run_matlab_code(script)
+    mp.matlab.run(script)
 
     result = flexiblekernel.ScoredKernel.from_matlab_output(gpml.read_outputs(output_file),
                                                             kernel.family(), ndata)
@@ -108,7 +108,7 @@ def evaluate_kernel(kernel, X, y, verbose=True, noise=None, iters=300):
 
 def make_predictions_code(kernel, data_file, output_file):
     kernel_params = '[ ' + ' '.join(map(str, kernel.param_vector())) + ' ]'
-    return gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file.split('/')[-1],
+    return gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file,
                                          'writefile': output_file,
                                          'gpml_path': config.GPML_PATH,
                                          'kernel_family': kernel.k_opt.gpml_kernel_expression(),
@@ -148,7 +148,9 @@ def make_predictions(kernel, X, y, Xtest, ytest):
     output_file = mp.util.create_temp_file('.mat')
 
     code = make_predictions_code(kernel, data_file, output_file)
-    mp.matlab.run_code(code)
+    print code
+    assert False
+    mp.matlab.run(code)
 
     results = scipy.io.loadmat(output_file)
 
@@ -156,8 +158,51 @@ def make_predictions(kernel, X, y, Xtest, ytest):
     os.remove(output_file)
 
     return results
-    
 
+def compute_K_code(kernels, data_file, output_file, randproj):
+    header = gpml.COMPUTE_K_CODE_HEADER % {'datafile': data_file,
+                                           'gpml_path': config.GPML_PATH,
+                                           }
     
+    body = ''
+    for i, kernel in enumerate(kernels):
+        k_opt = kernel.k_opt
+        kernel_family = k_opt.gpml_kernel_expression()
+        kernel_params = '[ ' +  ' '.join(map(str, k_opt.param_vector())) + ' ]'
+        body += gpml.SIMILARITY_CODE_COV % {'iter': i + 1,
+                                            'kernel_family': kernel_family,
+                                            'kernel_params': kernel_params}
+
+    footer = gpml.COMPUTE_K_CODE_FOOTER % {'randproj': str(randproj).lower(),
+                                           'writefile': output_file,
+                                           }
+
+    return '\n'.join([header, body, footer])
+
+
+def compute_K(kernels, X, Q=None):
+    # Make data into matrices in case they're unidimensional.
+    if X.ndim == 1: X = X[:, nax]
+
+    # random projections
+    randproj = (Q is not None)
+
+    data_file = mp.util.create_temp_file('.mat')
+    if randproj:
+        scipy.io.savemat(data_file, {'X': X, 'Q': Q})
+    else:
+        scipy.io.savemat(data_file, {'X': X})
+    output_file = mp.util.create_temp_file('.mat')
+
+    code = compute_K_code(kernels, data_file, output_file, randproj)
+    mp.matlab.run(code)
+
+    results = scipy.io.loadmat(output_file)
+    K_list = [results['cov_matrices'][0, i] for i in range(results['cov_matrices'].shape[1])]
+
+    os.remove(data_file)
+    os.remove(output_file)
+
+    return K_list
 
 

@@ -468,3 +468,36 @@ def load_mat(data_file, y_dim=1):
     #### TODO - this should return a dictionary, not a tuple
     return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1], data['Xtest'], data['ytest'][:,y_dim-1]
 
+
+COMPUTE_K_CODE_HEADER = r"""
+fprintf('Load the data, it should contain inputs X');
+load '%(datafile)s';
+
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Create list of covariance functions"""
+
+COMPUTE_K_CODE_COVS = r"""
+covs{%(iter)d} = %(kernel_family)s;
+hyps{%(iter)d} = %(kernel_params)s;
+"""
+
+COMPUTE_K_CODE_FOOTER = r"""
+%% Random projection
+randproj = %(randproj)s;
+
+for i = 1:length(covs)
+  K = feval(covs{i}{:}, hyps{i}, X);
+
+  if randproj
+    K = K(:);
+    K = Q' * K;
+  end
+
+  cov_matrices{i} = K;
+end
+
+save('%(writefile)s', 'cov_matrices');
+"""
+
