@@ -9,52 +9,6 @@ import gpml
 import mitparallel as mp
 
 
-## def covariance_similarity_code(kernels, data_file, output_file):
-##     header = gpml.SIMILARITY_CODE_HEADER % {'datafile': data_file.split('/')[-1],
-##                                             'gpml_path': config.GPML_PATH}
-
-##     body = ''
-##     for i, kernel in enumerate(kernels):
-##         k_opt = kernel.k_opt
-##         kernel_family = k_opt.gpml_kernel_expression()
-##         kernel_params = '[ ' +  ' '.join(map(str, k_opt.param_vector())) + ' ]'
-##         body += gpml.SIMILARITY_CODE_COV % {'iter': i + 1,
-##                                             'kernel_family': kernel_family,
-##                                             'kernel_params': kernel_params}
-
-##     footer = gpml.SIMILARITY_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'}
-
-##     return '\n'.join([header, body, footer])
-
-
-## def covariance_similarity(kernels, X):
-##     '''
-##     Evaluate a similarity matrix of kernels, in terms of their covariance matrix evaluated on training inputs
-##     Input:
-##      - kernels           - A list of fk.ScoredKernel
-##      - X                 - A matrix (data_points x dimensions) of input locations
-##     Return:
-##      - A matrix of similarities between the input kernels
-##     '''
-##     # Make data into matrices in case they're unidimensional.
-##     if X.ndim == 1: X = X[:, nax]
-
-##     data_file = mp.util.create_temp_file('.mat')
-##     scipy.io.savemat(data_file, {'X': X})
-
-##     output_file = mp.util.create_temp_file('.mat')
-
-##     code = covariance_similarity_code(kernels, data_file, output_file)
-##     mp.matlab.run_matlab_code(code)
-
-##     gpml_result = scipy.io.loadmat(output_file)
-##     similarity = gpml_result['sim_matrix']
-
-##     os.remove(data_file)
-##     os.remove(output_file)
-
-##     return similarity
-
 
 def evaluate_kernel_code(kernel, data_file, output_file, noise, iters):
     kernel_params = '[ ' + ' '.join(map(str, kernel.param_vector())) + ' ]'
@@ -149,7 +103,7 @@ def make_predictions(kernel, X, y, Xtest, ytest):
 
     code = make_predictions_code(kernel, data_file, output_file)
     print code
-    assert False
+    assert False  # haven't tested yet, make sure code is reasonable
     mp.matlab.run(code)
 
     results = scipy.io.loadmat(output_file)
