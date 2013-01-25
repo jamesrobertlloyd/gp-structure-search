@@ -100,7 +100,7 @@ class SqExpKernel(BaseKernel):
         return SqExpKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covSEiso'
+        return '{@covSEiso}'
     
     def english_name(self):
         return 'SqExp'
@@ -169,7 +169,7 @@ class SqExpPeriodicKernel(BaseKernel):
         return SqExpPeriodicKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covPeriodic'
+        return '{@covPeriodic}'
     
     def english_name(self):
         return 'Periodic'
@@ -244,7 +244,7 @@ class RQKernel(BaseKernel):
         return RQKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covRQiso'
+        return '{@covRQiso}'
     
     def english_name(self):
         return 'RQ'
@@ -316,7 +316,7 @@ class ConstKernel(BaseKernel):
         return ConstKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covConst'
+        return '{@covConst}'
     
     def english_name(self):
         return 'CS'
@@ -386,7 +386,7 @@ class LinKernel(BaseKernel):
         return LinKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covLINard'
+        return '{@covLINard}'
     
     def english_name(self):
         return 'LN'
@@ -1234,7 +1234,7 @@ def break_kernel_into_summands(k):
     
     # TODO - this doesn't actually do any multiplication.
     if isinstance(k, SumKernel):
-        return k.operands.copy()
+        return list(k.operands)   # Might want to make this a deep copy.
     else:
         return k.copy()
     
