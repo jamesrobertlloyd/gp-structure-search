@@ -351,4 +351,31 @@ Machine learning can be more data-driven, analogous to the high-thoughput approa
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
 
+\section{Appendix}
+
+\subsection{Deriving the marginal variance}
+
+Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( 0, k_1)$ and $\vf_2 \sim \gp( 0, k_2)$, then
+\begin{align*}
+\left[ \begin{array}{c} \vf_1 \\ \vf_1^\star \\ \vf_2 \\ \vf_2^\star \\ \vf \\ \vf^\star \end{array} \right]
+\sim
+\Nt{\left[ \begin{array}{c} \vmu_1 \\ \vmu_1^\star \\ \vmu_2 \\ \vmu_2^\star \\ \vmu_1 + \vmu_2 \\ \vmu_1^\star + \vmu_2^\star \end{array} \right]
+}
+{\left[ \begin{array}{cccccc} 
+\vk_1 & \vk_1^\star & 0 & 0 & \vk_1 & \vk_1^\star \\ 
+\vk_1^\star & \vk_1^{\star\star} & 0 & 0 & \vk_1^\star & \vk_1^{\star\star} \\
+0 & 0 & \vk_2 & \vk_2^\star & \vk_2 & \vk_2^\star \\ 
+0 & 0 & \vk_2^\star & \vk_2^{\star\star} & \vk_2^\star & \vk_2^{\star\star} \\
+\vk_1 & \vk_1^\star & \vk_2 & \vk_2^\star & \vk_1 + \vk_2 & \vk_1^\star + \vk_2^\star \\ 
+\vk_1^\star & \vk_1^{\star\star}  & \vk_2^\star & \vk_2^{\star\star}  & \vk_1^\star + \vk_2^\star & \vk_1^{\star\star} + \vk_2^{\star\star}\\
+\end{array} \right]
+}
+\end{align*}
+then by the formula for Gaussian conditionals, we get that
+\begin{align*}
+\vf_1*\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
+{\vk_1^{\star\star} + \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }
+\end{align*}.
+
+It's also easy to derive the conditional covariance this way:
 \end{document}
