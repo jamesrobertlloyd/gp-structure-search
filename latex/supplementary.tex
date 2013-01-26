@@ -8,9 +8,6 @@
 \usepackage{hyperref}
 \usepackage{color}
 \usepackage{wasysym}
-\usepackage{subfigure}
-\usepackage{bm}
-\newcommand{\theHalgorithm}{\arabic{algorithm}}
 \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
 \hypersetup{ %
     pdftitle={},
@@ -65,159 +62,63 @@
 %
 %\runningauthor{Surname 1, Surname 2, Surname 3, ...., Surname n}
 
-\twocolumn[
-\icmltitle{Kernel Structure Discovery in Gaussian Process Models}
-%\icmlauthor{Anonymous Authors}
-%\icmladdress{ Unknown Institution}
-\icmlkeywords{nonparametrics, gaussian process, machine learning, ICML}
-\vskip 0.3in
-]
+\onecolumn
 
+\icmltitlerunning{Warped Mixtures}
 
-\begin{abstract}
-Gaussian process (GP) models are used widely and successfully.  However, their effictiveness depends critically on choosing an appropriate family of kernels.  This aspect of GP modeling has been sorely underdeveloped.  In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
-\end{abstract}
+\icmltitle{Supplementary Material for
+\\
+Kernel Structure Discovery in Gaussian Process Models}
 
-\section{Introduction}
-
-Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].  In general, learning the model class from data seems superior proposing the model beforehand.  In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.  Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
-
-\subsection{How to use commenting}
-
-\NA{Needs attention.}
-\TBD{To be done.}
-\PROBLEM{Problem.}
-\fTBD{Margin to be done.}
-\fPROBLEM{Margin problem.}
-
-\section{GP Structure}
-
-[Standard GP intro \cite{rasmussen38gaussian}]
-
-
-\section{Related Work}
-
-Compositional Model search for unsupervsied learning: \cite{grosse2012exploiting}
-
-Hyperkernels \cite{ong2002hyperkernels}
-
-\subsection{ANOVA Kernels}
-
-Additive Gaussian Processes \cite{duvenaud2011additive11}
-
-Support vector regression with ANOVA decomposition kernels \cite{stitson1999support}
-
-\subsubsection{Smoothing spline ANOVA models}
-
-A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}. An SS-ANOVA model is estimated as a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.  Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
-
-\subsection{Hierarchical Kernel Learning}
-
-In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.  The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels.\footnote{In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.  For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
-Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
-% \subsubsection{All-subsets kernel with uniform weightings}
-In \cite{DBLP:journals/corr/abs-0909-0844}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
-\begin{equation}
-\label{eqn:uniform}
-k_{a}({\bf x, x'}) = v_D^2 \prod_{d=1}^D \left(1 + \alpha k_{d}(x_{d}, x_{d}') \right)
-\end{equation}
-which has computational complexity $O(D)$.  However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
-
-The main difficulty with the approach of \cite{DBLP:journals/corr/abs-0909-0844} is that hyperparameters are hard to set other than by cross-validation.  In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
-
-Accuracy versus interpretability in flexible modeling: Implementing a tradeoff using Gaussian process models \cite{plate1999accuracy}
-
-A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs. However, the effect of a particular degree of interaction cannot be quantified by that approach. Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
-
-\subsection{Genetic Searches}
-
-Evolving kernel functions for SVMs by genetic programming: \cite{diosan2007evolving}
-
-A Genetic Programming based kernel construction and optimization method for Relevance Vector Machines: \cite{bing2010gp}
-
-\subsection{Equation Learning}
-
-Equation discovery with ecological applications \cite{dzeroski1999equation}
-
-Discovering admissible model equations from observed data based on scale-types and identity constraints \cite{washio1999discovering}
-
-\subsection{Multiple Kernel Learning}
-
-\cite{christoudias2009bayesian} previously showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.  They call this \emph{Bayesian localized multiple kernel learning}.
-
-
-\section{Experiments}
-
-\subsection{Kernels used}
-
-\input{"tables/kernel_descriptions.tex"}
-Table \ref{tbl:kernel_descriptions} describes the various kernels used in our search.
-
+%\icmlauthor{Anonymous Author 1}
+%\icmladdress{Anonymous Institution}
 
 %\subsection{Real datasets}
 
-\subsubsection{Mauna Loa Atmoshperic Carbon Dioxide}
+\appendix
+
+\section{blah}
+
+Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( 0, k_1)$ and $\vf_2 \sim \gp( 0, k_2)$, then
+\begin{align*}
+\left[ \begin{array}{c} \vf_1 \\ \vf_1^\star \\ \vf_2 \\ \vf_2^\star \\ \vf \\ \vf^\star \end{array} \right]
+\sim
+\Nt{\left[ \begin{array}{c} \vmu_1 \\ \vmu_1^\star \\ \vmu_2 \\ \vmu_2^\star \\ \vmu_1 + \vmu_2 \\ \vmu_1^\star + \vmu_2^\star \end{array} \right]
+}
+{\left[ \begin{array}{cccccc} 
+\vk_1 & \vk_1^\star & 0 & 0 & \vk_1 & \vk_1^\star \\ 
+\vk_1^\star & \vk_1^{\star\star} & 0 & 0 & \vk_1^\star & \vk_1^{\star\star} \\
+0 & 0 & \vk_2 & \vk_2^\star & \vk_2 & \vk_2^\star \\ 
+0 & 0 & \vk_2^\star & \vk_2^{\star\star} & \vk_2^\star & \vk_2^{\star\star} \\
+\vk_1 & \vk_1^\star & \vk_2 & \vk_2^\star & \vk_1 + \vk_2 & \vk_1^\star + \vk_2^\star \\ 
+\vk_1^\star & \vk_1^{\star\star}  & \vk_2^\star & \vk_2^{\star\star}  & \vk_1^\star + \vk_2^\star & \vk_1^{\star\star} + \vk_2^{\star\star}\\
+\end{array} \right]
+}
+\end{align*}
+where $\vk_1 = k_1( \vX, \vX )$ and $\vk_1^\star = k_1( \vX^\star, \vX )$. By the formula for Gaussian conditionals, we get that
+\begin{align*}
+\vf_1^\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
+{\vk_1^{\star\star} + \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }.
+\end{align*}
+
+It's also easy to derive the conditional covariance this way:
+\begin{align*}
+\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\end{align*}
+
+These formula express the posterior model uncertainty for different components of the signal, integrating over the possible configurations of the other components.
+
+
+\section{Mauna Loa Atmoshperic Carbon Dioxide}
 
 As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/carls_kernel}
-%\caption{Carl's kernel function on the Mauna dataset.}
-%\end{figure}
-
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/our_kernel}
-%\caption{Our best kernel function on the Mauna dataset.}
-%\end{figure}
-
-%\begin{figure}[h]
-%\includegraphics[width=\columnwidth]{../figures/carls_kernel_draw1}
-%\caption{A draw from Carl's kernel.}
-%\end{figure}
-
-%\begin{figure}[h]
-%\includegraphics[width=\columnwidth]{../figures/carls_kernel_draw1}
-%\caption{Another draw from Carl's kernel.}
-%\end{figure}
-
-%\begin{figure}[h]
-%\includegraphics[width=\columnwidth]{../figures/mauna_prior_draw_best_cov_v3}
-%\caption{Another draw from our kernel.}
-%\end{figure}
-
-%\begin{figure}[h]
-%\includegraphics[width=\columnwidth]{../figures/mauna_prior_draw_best_cov_v3}
-%\caption{Another draw from our kernel.}
-%\end{figure}
 
 \subsection{Decomposition}
 
 A benefit of the GP framework is that, when a function modeled with additive structure, we can decompose the signal into a sum of functions, and examine the individual components of our signal.
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
-\caption{The complete posterior on the Mauna dataset.}
-\end{figure}
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_1}
-\caption{The long-term smooth trend component of the Mauna posterior, corresponding to a SE kernel with a long lengthscale.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_2_zoom}
-\caption{The periodic, yearly component, corresponding to a SE kernel with a long lengthscale multiplied by a periodic kernel with a yearly period.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_3}
-\caption{The medium-term anomaly component of the Mauna posterior, corresponding to an SE kernel with a lengthscale of several years.}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_4}
-\caption{The noise component of the Mauna posterior, corresponding to an SE kernel with a very short lengthscale.}
-\end{figure}
 
 \subsubsection{Load forecasting}
 
@@ -228,7 +129,7 @@ The relationships (geographical or otherwise) between the zones and the temperat
 
 \footnotetext{\texttt{http://www.gefcom.org/}}
 \begin{figure}
-\includegraphics[width=\columnwidth]{../figures/gef_load_z01_t09_500}
+\includegraphics[width=0.5\columnwidth]{../figures/gef_load_z01_t09_500}
 \caption{Zone 1 and temperature station 9 from GEFCom2012 load forecasting data.}
 \label{fig:gef_z01_t09}
 \end{figure}
@@ -255,7 +156,7 @@ One can visualise how the different components of the kernel capture the structu
 Figure~\ref{fig:gef_z01_two_means} shows the components of the Gaussian process posterior mean corresponding to the additive components of the kernel function (after expanding brackets and grouping product terms).
 
 \begin{figure}
-\includegraphics[width=\columnwidth]{../figures/gef_load_z01_500_posteriors}
+\includegraphics[width=0.5\columnwidth]{../figures/gef_load_z01_500_posteriors}
 \caption{Zone 1 from GEFCom 2012 separated into smooth and periodic component}
 \label{fig:gef_z01_two_means}
 \end{figure}
@@ -334,28 +235,7 @@ Additive & -0.131 & 0.114 & 0.841 & 0.309 & 0.194 \\
 \end{center}
 \end{table*}
 
-\section{Discussion}
-
-Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
-
-\section{Future Work}
-\subsection{Bayesian Optimization}
-
-cite Ryan Adams, Lizotte, de Frietas
-
-\subsection{A Kernel between kernels}
-
-Hyperkernels \cite{ong2002hyperkernels}
-\section{Model-based search over models}
-
-Bayesian optimization for hyper-parameter search: \cite{snoek2012practical}
-
-
-\section{Conclusion}
-
-\subsubsection*{Acknowledgements}
-
-
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
+
 \end{document}

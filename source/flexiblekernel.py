@@ -957,7 +957,7 @@ class MaternKernelFamily(BaseKernelFamily):
     
     @staticmethod    
     def description():
-        return "Mat\\`{e}rn"
+        return "Mat\\'{e}rn"
 
     @staticmethod    
     def params_description():
