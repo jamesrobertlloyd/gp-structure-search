@@ -216,3 +216,4 @@ def make_figures():
     X,y, D = gpml.load_mat('../data/mauna2003.mat')
     k = fk.Carls_Mauna_kernel()
     gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=0.0)
+  

@@ -17,7 +17,7 @@ import config
 import flexiblekernel as fk
 
 
-def run_matlab_code(code, verbose=False):
+def run_matlab_code(code, verbose=False, jvm=True):
     # Write to a temp script
     (fd1, script_file) = tempfile.mkstemp(suffix='.m')
     (fd2, stdout_file) = tempfile.mkstemp(suffix='.txt')
@@ -27,7 +27,9 @@ def run_matlab_code(code, verbose=False):
     f.write(code)
     f.close()
     
-    call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
+    jvm_string = '-nojvm'
+    if jvm: jvm_string = ''
+    call = [config.MATLAB_LOCATION, '-nosplash', jvm_string, '-nodisplay']
     print call
     
     stdin = open(script_file)
@@ -455,41 +457,6 @@ save( '%(writefile)s', 'sim_matrix' );
 
 
 # Matlab code to decompose posterior into additive parts.
-EVAL_KERNEL_DECOMPOSITION_CODE = r"""
-%% Load the data, it should contain X and y.
-load '%(datafile)s'
-
-a='Load GPML'
-addpath(genpath('%(gpml_path)s'));
-
-
-complete_covfunc = %(kernel_family)s
-complete_hypers = %(kernel_params)s
-complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X);
-
-decomp_list = %(kernel_family_list)s
-decomp_hypers = %(kernel_params_list)s
-
-for i = 1:length(decomp_list)
-    cur_cov = decomp_list{i};
-    cur_hyp = decomp_hypers{i};
-    
-    decomp_sigma = feval(cur_cov{:}, cur_hyp, X, X);
-    decomp_mean = decomp_sigma' / complete_sigma * y;
-    decomp_var = diag(decomp_sigma - decomp_sigma' / complete_sigma * decomp_sigma;
-    
-    fig
-end
-
-
-
-
-save( '%(writefile)s', 'sigma' );
-exit();
-"""
-
-
-# Generic matlab code to set up a script.
 MATLAB_PLOT_DECOMP_CALLER_CODE = r"""
 load '%(datafile)s'  %% Load the data, it should contain X and y.
 
@@ -503,15 +470,15 @@ exit();"""
 def plot_decomposition(kernel, X, y, figname, noise=None):
     matlab_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'matlab'))
     figname = os.path.abspath(os.path.join(os.path.dirname(__file__), figname))
-    print figname
+    print 'Plotting to: %s' % figname
+    
     kernel_components = fk.break_kernel_into_summands(kernel)
-    kernel_components.append(kernel)
-    latex_names = [k.latex_print() for k in kernel_components]
+    latex_names = [k.latex_print().strip() for k in kernel_components]
+    kernel_params_list = ','.join('[ %s ]' % ' '.join(str(p) for p in k.param_vector()) for k in kernel_components)
     
     if X.ndim == 1: X = X[:, nax]
     if y.ndim == 1: y = y[:, nax]
     if noise is None: noise = np.log(np.var(y)/10)   # Just a heuristic.
-        
     data = {'X': X, 'y': y}
     (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
@@ -522,12 +489,12 @@ def plot_decomposition(kernel, X, y, figname, noise=None):
         'kernel_family': kernel.gpml_kernel_expression(),
         'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
         'kernel_family_list': '{ %s }' % ','.join(str(k.gpml_kernel_expression()) for k in kernel_components),
-        'kernel_params_list': '{ %s }' % ','.join('[ %s ]' % ' '.join(str(p) for p in k.param_vector()) for k in kernel_components),
+        'kernel_params_list': '{ %s }' % kernel_params_list,
         'noise': str(noise),
         'latex_names': "{ ' %s ' }" % "','".join(latex_names),
         'figname': figname}
     
-    run_matlab_code(code, verbose=True)
+    run_matlab_code(code, verbose=True, jvm=True)
     os.close(fd1)
     #os.remove(temp_data_file)
 

@@ -1,6 +1,7 @@
 function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decomp_hypers, noise, figname, latex_names)
 
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
+% TODO: Maybe assert that noise is zero?
 
 x_left = min(X) - (max(X) - min(X))*0.1;
 x_right = max(X) + (max(X) - min(X))*0.1;
@@ -18,11 +19,12 @@ complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sig
 figure(1); clf; hold on;
 plot( X, y, '.' ); hold on; 
 mean_var_plot(xrange, complete_mean, 2.*sqrt(complete_var));
-title(latex_names{end});
+combined_latex_name = [sprintf('%s + ',latex_names{1:end-1}), latex_names{end}];
+title(combined_latex_name);
 filename = sprintf('%s_all.fig', figname);
 saveas( gcf, filename );
-filename = sprintf('%s_all.pdf', figname);
-save2pdf( filename, gcf, 400, true )
+%filename = sprintf('%s_all.pdf', figname);
+%save2pdf( filename, gcf, 400, true )
 
 for i = 1:numel(decomp_list)
     cur_cov = decomp_list{i};
@@ -43,12 +45,11 @@ for i = 1:numel(decomp_list)
     plot( X, removed_mean, '.' ); hold on; 
     mean_var_plot(xrange, decomp_mean, 2.*sqrt(decomp_var));
     title(latex_names{i});
+    fprintf([latex_names{i}, '\n']);
     filename = sprintf('%s_%d.fig', figname, i);
     saveas( gcf, filename );
-    filename = sprintf('%s_%d.pdf', figname, i);
-    save2pdf( filename, gcf, 400, true )
-
-    fprintf('.');
+    %filename = sprintf('%s_%d.pdf', figname, i);
+    %save2pdf( filename, gcf, 400, true );
 end
 end
 
@@ -69,4 +70,6 @@ function mean_var_plot( xrange, forecast_mu, forecast_scale )
     % Make plot prettier.
     set(gcf, 'color', 'white');
     set(gca, 'TickDir', 'out');
+    
+    xlim([min(xrange), max(xrange)]);
 end
