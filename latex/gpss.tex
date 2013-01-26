@@ -156,6 +156,12 @@ Christoudias et al.\cite{christoudias2009bayesian} previously showed how mixture
 
 \section{EXPERIMENTS}
 
+\subsection{Kernels used}
+
+\input{"tables/kernel_descriptions.tex"}
+Table \ref{tbl:kernel_descriptions} describes the various kernels used in our search.
+
+
 \subsection{Real datasets}
 
 \subsubsection{Mauna Loa Atmoshperic Carbon Dioxide}
@@ -203,22 +209,22 @@ A benefit of the GP framework is that, when a function modeled with additive str
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_1}
-\caption{A part of the decomposition of the posterior on the Mauna dataset.}
+\caption{The long-term smooth trend component of the Mauna posterior, corresponding to a SE kernel with a long lengthscale.}
 \end{figure}
 
 \begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_2}
-\caption{A part of the decomposition of the posterior on the Mauna dataset.}
+\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_2_zoom}
+\caption{The periodic, yearly component, corresponding to a SE kernel with a long lengthscale multiplied by a periodic kernel with a yearly period.}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_3}
-\caption{A part of the decomposition of the posterior on the Mauna dataset.}
+\caption{The medium-term anomaly component of the Mauna posterior, corresponding to an SE kernel with a lengthscale of several years.}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_4}
-\caption{A part of the decomposition of the posterior on the Mauna dataset.}
+\caption{The noise component of the Mauna posterior, corresponding to an SE kernel with a very short lengthscale.}
 \end{figure}
 
 \subsubsection{Load forecasting}

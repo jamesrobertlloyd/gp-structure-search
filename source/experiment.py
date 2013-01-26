@@ -146,7 +146,7 @@ def parse_all_results(folder=RESULTS_PATH, save_file='kernels.tex'):
     colnames = ['Dataset', 'NLL', 'Kernel' ]
     for rt in gen_all_results(folder):
         print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append(['%4.1f' % rt[-1].nll, rt[-1].latex_print()])
+        entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
         rownames.append(rt[0])
     
     utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
@@ -216,4 +216,16 @@ def make_figures():
     X,y, D = gpml.load_mat('../data/mauna2003.mat')
     k = fk.Carls_Mauna_kernel()
     gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=0.0)
-  
+
+def make_kernel_description_table():
+    '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
+    entries = [];
+    rownames = [];
+    
+    colnames = ['Abbreviation', 'Description', 'Parameters' ]
+    for k in fk.base_kernel_families():
+        # print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
+        rownames.append( k.latex_print() )
+        entries.append([ k.family().description(), k.family().params_description()])
+    
+    utils.latex.table('../latex/tables/kernel_descriptions.tex', rownames, colnames, entries, 'kernel_descriptions')
