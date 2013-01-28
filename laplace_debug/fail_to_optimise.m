@@ -18,7 +18,7 @@ hyp.cov = [ 1.757755 7.084045 -2.70108 -0.380918 -0.071214 ];
 likfunc = @likGauss;
 hyp.lik = [-1.77276072];
 
-[hyp_opt, nlls] = minimize(hyp, @gp, -300, @infExact, meanfunc, covfunc, likfunc, X, y);
+[hyp_opt, nlls] = minimize(hyp, @gp, +10000000, @infExact, meanfunc, covfunc, likfunc, X, y);
 best_nll = nlls(end);
 
 %% Plot minimum found in dimension 4
