@@ -1277,14 +1277,14 @@ def base_kernel_families():
     yield SqExpKernelFamily().default()
     #yield SqExpPeriodicKernelFamily().default()
     yield RQKernelFamily().default()
-    #yield LinKernelFamily().default()
+    yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
-    #yield PP1KernelFamily().default()
+    yield PP1KernelFamily().default()
     #yield PP2KernelFamily().default()
     #yield PP3KernelFamily().default()
-    #yield MaternKernelFamily().default()       
+    yield MaternKernelFamily().default()       
     
 def test_kernels(ndim=1):
     '''

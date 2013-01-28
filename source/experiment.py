@@ -176,6 +176,8 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
 	#### FIXME - Comment / or make more elegant
     if random_walk:
         random.shuffle(data_sets)
+    else:
+        data_sets.sort()
     for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(RESULTS_PATH, files + "_result.txt")))):
