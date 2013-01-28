@@ -77,6 +77,8 @@ Kernel Structure Discovery in Gaussian Process Models}
 
 \appendix
 
+
+
 \section{Derivation of Component Marginal Variance}
 
 Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$, then
@@ -114,6 +116,9 @@ The covariance between the two components, conditioned on their sum is given by:
 \end{align}
 
 These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
+
+
+
 
 
 \section{James' Derivation of the Posterior Marginal Conditional Variance}
@@ -176,18 +181,10 @@ and for the variance we obtain
 \end{eqnarray}
 \end{proof}
 
-\section{Mauna Loa Atmoshperic Carbon Dioxide}
-
-As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
-
-
-\subsection{Decomposition}
-
-A benefit of the GP framework is that, when a function modeled with additive structure, we can decompose the signal into a sum of functions, and examine the individual components of our signal.
 
 
 
-\subsubsection{Load forecasting}
+\section{Load forecasting}
 
 Similar to the above, we apply the methodology to another highly structured time series, but with additional input data.
 We analyse hourly load data for a US utility; this data was recently the focus of a data mining competition; the load forecasting track of GEFCom2012\footnotemark.
@@ -236,6 +233,9 @@ We can however examine the posterior mean of the Gaussian process at other point
 \TBD{What else can we say about this data? Numerical results might take a while to produce.}
 
 \section{Complete listings of chosen kernels}
+
+Below, we show the best kernel structure found for each fold of the datasets used in the results tables.
+
 %\input{"tables/kernels.tex"}
 %\input{"tables/kernels2.tex"}
 %\input{"tables/kernels3.tex"}
