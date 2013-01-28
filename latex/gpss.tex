@@ -448,7 +448,7 @@ Average statistics for these experiments are presented in tables \ref{table:MSE}
 \input{tables/regression_results_mse.tex}
 \input{tables/regression_results_nll.tex}
 
-Our method outperforms the other methods in \emph{all} tests.
+Our method outperforms the other methods in \emph{all} tests (but not statistically significantly yet).
 Some points for discussion
 \begin{itemize}
 \item Experiments just using SE kernel can outperform additive kernel surprisingly. This is presumably a regularisation effect of using a finite depth search and/or BIC. We could make this a more Bayesian result (i.e.~more a property of the model) by placing a prior on kernels that depends on the number of components.
