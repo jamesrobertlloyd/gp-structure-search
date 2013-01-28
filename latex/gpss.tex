@@ -29,6 +29,34 @@
 \input{include/commenting.tex}
 \usepackage{format/icml2013}
 
+%%%% Copied below from NIPS paper but caused errors (now commented out) - are they defined somewhere else e.g. icml2013?
+
+\newtheorem{thm}{Theorem}%[section]
+%\newtheorem{lem}[thm]{Lemma}
+%\newtheorem{prop}[thm]{Proposition}
+%\newtheorem{cor}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[thm]{Definition}%[section]
+\newtheorem{conj}{Conjecture}[section]
+\newtheorem{exmp}{Example}[section]
+\newtheorem{rem}[thm]{Remark}
+
+\theoremstyle{remark}
+%\newtheorem{rem}{Remark}
+\newtheorem{note}{Note}
+\newtheorem{case}{Case}
+
+\numberwithin{equation}{section}
+\numberwithin{thm}{section}
+
+%%%% Copied above from NIPS paper but caused errors - are they defined somewhere else e.g. icml2013?
+
+\newcommand{\Normal}{\mathcal{N}}
+
+\newcommand{\dist}{\ \sim\ }
+\def\given{\,|\,}
+
 %% For submission, make all render blank.
 %\renewcommand{\LATER}[1]{}
 %\renewcommand{\fLATER}[1]{}
@@ -220,6 +248,96 @@ A benefit of the GP framework is that, when a function modeled with additive str
 %\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_4}
 %\caption{The noise component of the Mauna posterior, corresponding to an SE kernel with a very short lengthscale.}
 %\end{figure}
+
+\subsubsection{Derivations of posterior of components}
+
+Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( 0, k_1)$ and $\vf_2 \sim \gp( 0, k_2)$, then
+\begin{align*}
+\left[ \begin{array}{c} \vf_1 \\ \vf_1^\star \\ \vf_2 \\ \vf_2^\star \\ \vf \\ \vf^\star \end{array} \right]
+\sim
+\Nt{\left[ \begin{array}{c} \vmu_1 \\ \vmu_1^\star \\ \vmu_2 \\ \vmu_2^\star \\ \vmu_1 + \vmu_2 \\ \vmu_1^\star + \vmu_2^\star \end{array} \right]
+}
+{\left[ \begin{array}{cccccc} 
+\vk_1 & \vk_1^\star & 0 & 0 & \vk_1 & \vk_1^\star \\ 
+\vk_1^\star & \vk_1^{\star\star} & 0 & 0 & \vk_1^\star & \vk_1^{\star\star} \\
+0 & 0 & \vk_2 & \vk_2^\star & \vk_2 & \vk_2^\star \\ 
+0 & 0 & \vk_2^\star & \vk_2^{\star\star} & \vk_2^\star & \vk_2^{\star\star} \\
+\vk_1 & \vk_1^\star & \vk_2 & \vk_2^\star & \vk_1 + \vk_2 & \vk_1^\star + \vk_2^\star \\ 
+\vk_1^\star & \vk_1^{\star\star}  & \vk_2^\star & \vk_2^{\star\star}  & \vk_1^\star + \vk_2^\star & \vk_1^{\star\star} + \vk_2^{\star\star}\\
+\end{array} \right]
+}
+\end{align*}
+where $\vk_1 = k_1( \vX, \vX )$ and $\vk_1^\star = k_1( \vX^\star, \vX )$. By the formula for Gaussian conditionals, we get that
+\begin{align*}
+\vf_1^\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
+{\vk_1^{\star\star} + \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }.
+\end{align*}
+
+It's also easy to derive the conditional covariance this way:
+\begin{align*}
+\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\end{align*}
+
+These formula express the posterior model uncertainty for different components of the signal, integrating over the possible configurations of the other components.
+
+\begin{lem}
+\label{lem:cond}
+If
+\begin{eqnarray}
+x & \dist & \Normal(\mu, \Lambda^{-1}) \\
+y \given x & \dist & \Normal(Ax + b, L^{-1})
+\end{eqnarray}
+then
+\begin{eqnarray}
+y & \dist & \Normal(A\mu + b, L^{-1} + A\Lambda^{-1}A') \\
+x \given y & \dist & \Normal(\Sigma(A'L(y-b) + \Lambda\mu, \Sigma)
+\end{eqnarray}
+where
+\begin{equation}
+\Sigma = (\Lambda + A'LA)^{-1}.
+\end{equation}
+\end{lem}
+\begin{prop}
+If
+\begin{eqnarray}
+f_1 & \dist & \Normal(0, K_1) \\
+f \given f_1 & \dist & \Normal(f_1, K_2) \\
+f_1^* \given f_1 & \dist & \Normal(k_1^*K_1^{-1}f_1, K_1^{**} - k_1^*K_1^{-1}k_1^{*t})
+\end{eqnarray}
+then
+\begin{eqnarray}
+f_1 \given f & \dist & \Normal(\Sigma K_2^{-1}f, \Sigma) \\
+f_1^* \given f & \dist & \Normal(k_1^*\Lambda f, K_1^{**} - k_1^*\Delta k_1^{*t})
+\end{eqnarray}
+where
+\begin{eqnarray}
+\Sigma & = & (K_1^{-1} + K_2^{-1})^{-1} \\
+\Lambda & = & (K_1 + K_2)^{-1} \\
+\Delta & = & K_1^{-1} - (K_1 + K_1K_2^{-1}K_1)^{-1}
+\end{eqnarray}
+\end{prop}
+
+\begin{proof}
+We first apply the second half of lemma~\ref{lem:cond} with $x=f_1$, $y=f$, $\mu=b=0$, $A=I$, $\Lambda^{-1} = K_1$ and $L^{-1} = K_2$ yielding
+\begin{eqnarray}
+f_1 \given f & \dist & \Normal(\Sigma K_2^{-1}f, \Sigma).
+\end{eqnarray}
+Since $f_1^*$ is independent of $f$ given $f_1$ we have $p(f_1^* \given f) = \int p(f_1^* \given f_1) p(f_1 \given f) \textrm{d}f_1$\PROBLEM{I think this is true - think graphical models} i.e.~we condition $f_1^*$ on the posterior of $f_1$.
+We apply the first half of lemma~\ref{lem:cond} with $x=(f_1\given f)$, $y=f_1^*$, $\mu=\Sigma K_2^{-1}f$, $b=0$, $A = k_1^*K_1^{-1}$, $\Lambda^{-1}=\Sigma$ and $L^{-1} = K_1^{**} - k_1^*K_1^{-1}k_1^{*t}$.
+Then for the mean of $f_1^* \given f$ we get the expression
+\begin{eqnarray}
+& k_1^*K_1^{-1} \Sigma K_2^{-1}f \\
+= & k_1^*K_1^{-1} (K_1^{-1} + K_2^{-1})^{-1} K_2^{-1}f \\
+= & k_1^*(K_1 + K_2)^{-1}f \\
+= & k_1^*\Lambda f
+\end{eqnarray}
+and for the variance we obtain
+\begin{eqnarray}
+& K_1^{**} - k_1^*K_1^{-1}k_1^{*t} + k_1^*K_1^{-1} \Sigma K_1^{-1}k_1^{*t} \\
+= & K_1^{**} - k_1^*(K_1^{-1} - (K_1 + K_1K_2^{-1}K_1)^{-1})k_1^{*t} \\
+= & K_1^{**} - k_1^*\Delta k_1^{*t}
+\end{eqnarray}
+\end{proof}
 
 \subsubsection{Load forecasting}
 
