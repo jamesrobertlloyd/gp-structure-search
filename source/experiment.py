@@ -34,14 +34,14 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
     local_computation = True
     # Sort
     kernels = sorted(kernels, key=ScoredKernel.score, reverse=False)
-    # Find covariance similarity for top n_eval
+    # Find covariance distance for top n_eval
     n_eval = min(n_eval, len(kernels))
-    similarity_matrix = covariance_similarity(kernels[:n_eval], X, local_computation=local_computation)
+    distance_matrix = covariance_distance(kernels[:n_eval], X, local_computation=local_computation)
     # Remove similar kernels
     #### TODO - What is a good heuristic for determining equivalence?
     ####      - Currently using Frobenius norm - truncate if Frobenius norm is below 1% of average
-    cut_off = similarity_matrix.mean() / 100.0
-    equivalence_graph = similarity_matrix < cut_off
+    cut_off = distance_matrix.mean() / 100.0
+    equivalence_graph = distance_matrix < cut_off
     # For all kernels (best first)
     for i in range(n_eval):
         # For all other worse kernels

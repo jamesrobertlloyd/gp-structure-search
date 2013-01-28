@@ -34,9 +34,9 @@ import re
 import shutil
 import random
 
-def covariance_similarity(kernels, X, local_computation=True, verbose=True): 
+def covariance_distance(kernels, X, local_computation=True, verbose=True): 
     '''
-    Evaluate a similarity matrix of kernels, in terms of their covariance matrix evaluated on training inputs
+    Evaluate a distance matrix of kernels, in terms of their covariance matrix evaluated on training inputs
     Input:
      - kernels           - A list of fk.ScoredKernel
      - X                 - A matrix (data_points x dimensions) of input locations
@@ -55,13 +55,13 @@ def covariance_similarity(kernels, X, local_computation=True, verbose=True):
             print 'Moving data file to fear'
         cblparallel.copy_to_remote(data_file)
     # Construct testing code
-    code = gpml.SIMILARITY_CODE_HEADER % {'datafile': data_file.split('/')[-1],
+    code = gpml.DISTANCE_CODE_HEADER % {'datafile': data_file.split('/')[-1],
                                           'gpml_path': cblparallel.gpml_path(local_computation)}
     for (i, kernel) in enumerate([k.k_opt for k in kernels]):
-        code = code + gpml.SIMILARITY_CODE_COV % {'iter' : i + 1,
+        code = code + gpml.DISTANCE_CODE_COV % {'iter' : i + 1,
                                                   'kernel_family': kernel.gpml_kernel_expression(),
                                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector())}
-    code = code + gpml.SIMILARITY_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'} # N.B. cblparallel manages output files
+    code = code + gpml.DISTANCE_CODE_FOOTER_HIGH_MEM % {'writefile': '%(output_file)s'} # N.B. cblparallel manages output files
     code = re.sub('% ', '%% ', code) # HACK - cblparallel not fond of % signs at the moment
     # Run code - either locally or on cluster - returning location of output file
     if local_computation:
@@ -70,12 +70,12 @@ def covariance_similarity(kernels, X, local_computation=True, verbose=True):
         output_file = cblparallel.run_batch_on_fear([code], language='matlab', max_jobs=500, verbose=verbose)[0]
     # Read in results from experiment
     gpml_result = scipy.io.loadmat(output_file)
-    similarity = gpml_result['sim_matrix']
+    distance = gpml_result['sim_matrix']
     # Remove temporary files (perhaps on the cluster server)
     cblparallel.remove_temp_file(output_file, local_computation)
     cblparallel.remove_temp_file(data_file, local_computation)
-    # Return similarity matrix
-    return similarity
+    # Return distance matrix
+    return distance
 
        
 def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500):

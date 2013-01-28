@@ -394,8 +394,8 @@ def make_predictions(kernel_expression, kernel_init_params, data_file, write_fil
                                     'iters': str(iters)}
     run_matlab_code(code, verbose=True)
     
-# Matlab code to evaluate similarity of kernels
-SIMILARITY_CODE_HEADER = r"""
+# Matlab code to evaluate DISTANCE of kernels
+DISTANCE_CODE_HEADER = r"""
 fprintf('Load the data, it should contain inputs X')
 load '%(datafile)s'
 
@@ -405,12 +405,12 @@ addpath(genpath('%(gpml_path)s'));
 %% Create list of covariance functions
 """
 
-SIMILARITY_CODE_COV = r"""
+DISTANCE_CODE_COV = r"""
 covs{%(iter)d} = %(kernel_family)s
 hyps{%(iter)d} = %(kernel_params)s
 """
 
-SIMILARITY_CODE_FOOTER = r"""
+DISTANCE_CODE_FOOTER = r"""
 %% Evaluate similarities
 n_kernels = length(covs);
 sim_matrix = zeros(n_kernels);
@@ -432,7 +432,7 @@ sim_matrix = sim_matrix + sim_matrix';
 save( '%(writefile)s', 'sim_matrix' );
 """
 
-SIMILARITY_CODE_FOOTER_HIGH_MEM = r"""
+DISTANCE_CODE_FOOTER_HIGH_MEM = r"""
 %% Precompute covariance matrices
 for i = 1:length(covs);
   cov_matrices{i} = feval(covs{i}{:}, hyps{i}, X);
