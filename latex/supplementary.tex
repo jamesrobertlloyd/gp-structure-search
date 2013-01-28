@@ -77,10 +77,10 @@ Kernel Structure Discovery in Gaussian Process Models}
 
 \appendix
 
-\section{blah}
+\section{Derivation of Component Marginal Variance}
 
-Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( 0, k_1)$ and $\vf_2 \sim \gp( 0, k_2)$, then
-\begin{align*}
+Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$, then
+\begin{align}
 \left[ \begin{array}{c} \vf_1 \\ \vf_1^\star \\ \vf_2 \\ \vf_2^\star \\ \vf \\ \vf^\star \end{array} \right]
 \sim
 \Nt{\left[ \begin{array}{c} \vmu_1 \\ \vmu_1^\star \\ \vmu_2 \\ \vmu_2^\star \\ \vmu_1 + \vmu_2 \\ \vmu_1^\star + \vmu_2^\star \end{array} \right]
@@ -94,19 +94,26 @@ Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\v
 \vk_1^\star & \vk_1^{\star\star}  & \vk_2^\star & \vk_2^{\star\star}  & \vk_1^\star + \vk_2^\star & \vk_1^{\star\star} + \vk_2^{\star\star}\\
 \end{array} \right]
 }
-\end{align*}
-where $\vk_1 = k_1( \vX, \vX )$ and $\vk_1^\star = k_1( \vX^\star, \vX )$. By the formula for Gaussian conditionals, we get that
-\begin{align*}
+\end{align}
+where $\vk_1 = k_1( \vX, \vX )$ and $\vk_1^\star = k_1( \vX^\star, \vX )$. 
+
+By the formula for Gaussian conditionals:
+\begin{align}
+\vx_A | \vx B \sim \Nt{\vmu_A + \vSigma_{AB} (\vSigma_{AA}\inv + \vSigma_{BB}\inv \left( \vx_B - \vmu_B \right) }
+{\vSigma_{AA} - \vSigma_{AB} (\vSigma_{AA} + \vSigma_{BB})\inv \vSigma_{BA} },
+\end{align}
+we get that the conditional variance of a Gaussian conditioned on its sum with another Gaussian is given by
+\begin{align}
 \vf_1^\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
-{\vk_1^{\star\star} + \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }.
-\end{align*}
+{\vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }.
+\end{align}
 
-It's also easy to derive the conditional covariance this way:
-\begin{align*}
+The covariance between the two components, conditioned on their sum is given by:
+\begin{align}
 \cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-\end{align*}
+\end{align}
 
-These formula express the posterior model uncertainty for different components of the signal, integrating over the possible configurations of the other components.
+These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 
 
 \section{Mauna Loa Atmoshperic Carbon Dioxide}

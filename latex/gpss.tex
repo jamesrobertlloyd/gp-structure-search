@@ -218,33 +218,61 @@ As an example of a GP modeling problem where choosing an appropriate structure i
 %\caption{Another draw from our kernel.}
 %\end{figure}
 
-\subsection{Decomposition}
+\subsection{Decomposing the Signal}
 
-A benefit of the GP framework is that, when a function modeled with additive structure, we can decompose the signal into a sum of functions, and examine the individual components of our signal.
+A benefit of the GP framework is that, when a function is modeled with additive structure, we can decompose the signal into a sum of functions, and examine each individual component of our signal.
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
 \caption{The complete posterior on the Mauna dataset.}
 \end{figure}
 
+The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
+\begin{align}
+\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
+\end{align}
+and the covariance between the two components, conditioned on their sum is given by:
+\begin{align}
+\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\end{align}
+Derivations of these formulae are given in the supplementary material.
+
+These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
+
+\TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
+\TBD{Smooth the flow of the previous subsection.}
+
+Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figures \ref{fig:mauna_decomp1}, \ref{fig:mauna_decomp2}, \ref{fig:mauna_decomp3} and \ref{fig:mauna_decomp4} show the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
+
+\begin{figure}
+\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
+\caption{The complete posterior on the Mauna dataset.}
+\label{fig:mauna_all}
+\end{figure}
+
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_1}
 \caption{The long-term smooth trend component of the Mauna posterior, corresponding to a SE kernel with a long lengthscale.}
+\label{fig:mauna_decomp1}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_2_zoom}
 \caption{The periodic, yearly component, corresponding to a SE kernel with a long lengthscale multiplied by a periodic kernel with a yearly period.}
+\label{fig:mauna_decomp2}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_3}
 \caption{The medium-term anomaly component of the Mauna posterior, corresponding to an SE kernel with a lengthscale of several years.}
+\label{fig:mauna_decomp3}
 \end{figure}
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_4}
 \caption{The noise component of the Mauna posterior, corresponding to an SE kernel with a very short lengthscale.}
+\label{fig:mauna_decomp4}
 \end{figure}
 
 \subsubsection{Derivations of posterior of components}
@@ -409,6 +437,7 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 
 \subsection{Numerical evaluation of search method}
 
+<<<<<<< HEAD
 In addition to demonstrating the interpretability of our method we have compared the predictive performance of our method against other state of the art GP kernel search methods.
 
 In particular we have extended the comparison of \cite{duvenaud2011additive11} to include our method.
@@ -416,6 +445,8 @@ In particular we have extended the comparison of \cite{duvenaud2011additive11} t
 For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood of the held out fold.
 Average statistics for these experiments are presented in tables \ref{table:MSE} and \ref{table:nll}.
 
+=======
+>>>>>>> f17af2f4cf91af9009ac36e29c71e877e65011f5
 \begin{table*}[h!]
 \begin{center}
 \begin{tabular}{l | r r r r r}
