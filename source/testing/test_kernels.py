@@ -7,12 +7,12 @@ Some routines to test our kernel-handling routines.
           David Duvenaud (dkd23@cam.ac.uk)
 '''
 
-import gpml
-import flexiblekernel as fk
-import grammar
-
 import os
 import scipy.io
+
+import flexiblekernel as fk
+import gpml
+import grammar
 
 def test_kernel_eval():
     '''Tests whether we can take a string and make a kernel out of it.'''
