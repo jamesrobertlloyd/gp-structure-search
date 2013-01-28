@@ -971,8 +971,6 @@ def debug_laplace():
     
     # Move to fear
     cblparallel.copy_to_remote(data_file)
-    
-    
     scripts = [gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
                                               'writefile': '%(output_file)s', # N.B. cblparallel manages output files
                                               'gpml_path': cblparallel.gpml_path(local_computation=False),
@@ -986,7 +984,7 @@ def debug_laplace():
     
     # Test
     
-    #scripts[0] = re.sub('delta = 1e-6', 'delta = 1e-7', scripts[0])
+    scripts[0] = re.sub('delta = 1e-6', 'delta = 1e-6', scripts[0])
     #scripts[0] = re.sub('hyp.lik = [-1.77276072]', 'hyp.lik = [-0.77276072]', scripts[0])
     
     output_file = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=600)[0]  
@@ -996,7 +994,7 @@ def debug_laplace():
     result = ScoredKernel.from_matlab_output(output, sk.k_opt.family(), ndata)
     print result
     print output.hessian
-        
+    
     os.remove(output_file)
     # Remove temporary data file (perhaps on the cluster server)
     cblparallel.remove_temp_file(data_file, local_computation=False)
