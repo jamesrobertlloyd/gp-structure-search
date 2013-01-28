@@ -434,19 +434,17 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 \input{"tables/kernels2.tex"}
 \input{"tables/kernels3.tex"}
 \input{"tables/kernels4.tex"}
+\input{"tables/kernels5.tex"}
 
 \subsection{Numerical evaluation of search method}
 
-<<<<<<< HEAD
 In addition to demonstrating the interpretability of our method we have compared the predictive performance of our method against other state of the art GP kernel search methods.
 
 In particular we have extended the comparison of \cite{duvenaud2011additive11} to include our method.
 5 data sets were split into 10 equally sized folds.
-For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood of the held out fold.
+For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood on the held out fold.
 Average statistics for these experiments are presented in tables \ref{table:MSE} and \ref{table:nll}.
 
-=======
->>>>>>> f17af2f4cf91af9009ac36e29c71e877e65011f5
 \begin{table*}[h!]
 \begin{center}
 \begin{tabular}{l | r r r r r}
@@ -481,6 +479,14 @@ SE, RQ, BIC, k=1, 8 levels & -0.141 & 0.065 & 0.840 & 0.265 & 0.059\\
 \label{table:nll}
 \end{center}
 \end{table*}
+
+Our method outperforms the other methods in \emph{all} tests.
+Some points for discussion
+\begin{itemize}
+\item Experiments just using SE kernel can outperform additive kernel surprisingly. This is presumably a regularisation effect of using a finite depth search and/or BIC. We could make this a more Bayesian result (i.e.~more a property of the model) by placing a prior on kernels that depends on the number of components.
+\item Need to discuss design choices e.g.~$k$ (i.e.~$k$ best kernels expanded), depth of search, base kernels.
+\item \ldots
+\end{itemize}
 
 \section{Discussion}
 
