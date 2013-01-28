@@ -1,8 +1,8 @@
 import itertools
 import numpy as np
 nax = np.newaxis
-import utils
 
+import gaussians
 from misc import array_map, my_inv, full_shape, broadcast, dot, process_slice, match_shapes, _err_string, set_err_info, transp
 import scipy.linalg
 
@@ -658,11 +658,11 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
     hessian = proj_psd(hessian)
 
     # quadratic centered at opt_hyper with maximum -nll
-    evidence = utils.gaussians.Potential(np.zeros(d), FullMatrix(hessian), -nll)
+    evidence = gaussians.Potential(np.zeros(d), FullMatrix(hessian), -nll)
     evidence = evidence.translate(opt_hyper)
 
     # zero-centered Gaussian
-    prior = utils.gaussians.Potential.from_moments_iso(np.zeros(d), prior_var)
+    prior = gaussians.Potential.from_moments_iso(np.zeros(d), prior_var)
 
     # multiply the two Gaussians and integrate the result
     return -(evidence + prior).integral()

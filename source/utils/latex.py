@@ -11,7 +11,10 @@ def clean(string):
     '''Prepare a string for latex'''
     return string.replace('_', '').strip('1234567890')
 
-def table(filename, rownames, colnames, entries):
+def table(filename, rownames, colnames, entries, label=None):
+    
+    if label == None:
+        label = filename.strip('/')[-1]
 
     rownames = [clean(s) for s in rownames]
     colnames = [clean(s) for s in colnames] 
@@ -36,9 +39,10 @@ def table(filename, rownames, colnames, entries):
         for r in range(len(rownames)):
             file.write( rownames[r])
             for c in range(0, len(colnames) - 1):
-                file.write( ' & $ %s $' % entries[r][c] )
+                file.write( ' & %s ' % entries[r][c] )
             file.write( ' \\\\\n' )
 
         file.write( '\\end{tabular}\n');
         file.write( '\\end{center}\n');
+        file.write( '\\label{tbl:%s}\n' % label)
         file.write( '\\end{table*}\n');

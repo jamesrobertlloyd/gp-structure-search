@@ -32,3 +32,8 @@ def test_kernel_expand_multi_d():
     k_expanded = grammar.expand_kernels(3, k_base)
     assert len(k_expanded) > len(k_base)
 
+def test_kernel_decompose_1d():
+    '''Checks that a kernel decomposes into a sum properly'''
+    k = fk.Carls_Mauna_kernel()
+    kparts = break_kernel_into_summands(k)
+    

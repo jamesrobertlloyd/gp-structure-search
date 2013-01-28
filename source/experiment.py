@@ -8,33 +8,21 @@ Main file for setting up experiments, and compiling results.
 Created Jan 2013          
 '''
 
-# This might be a good place to switch to an MIT controller
-from job_controller import *
+import numpy as np
+nax = np.newaxis
+import os
+import random
+import scipy.io
+
 import flexiblekernel as fk
 from flexiblekernel import ScoredKernel
 import grammar
 import gpml
 import utils.latex
-import utils.fear
-from config import *
-from utils import gaussians, psd_matrices
-
-import numpy as np
-nax = np.newaxis
-import pylab
-import scipy.io
-import sys
-import os
-import tempfile
-import subprocess
-import time
-
 import cblparallel
 from cblparallel.util import mkstemp_safe
-import re
-
-import shutil
-import random
+from config import *
+from job_controller import *   # This might be a good, if hacky, place to switch to an MIT controller.
 
        
 def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
@@ -66,10 +54,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
     kernels = [k for k in kernels if k is not None]
     kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
     return kernels
-    
-#def remove_nans_from_list(a_list):
-#    return [element for element in a_list if not np.isnan(element)]  
-    
+ 
 def remove_nan_scored_kernels(scored_kernels):    
     return [k for k in scored_kernels if not np.isnan(k.score())] 
     
@@ -146,7 +131,7 @@ def parse_all_results(folder=RESULTS_PATH, save_file='kernels.tex'):
     colnames = ['Dataset', 'NLL', 'Kernel' ]
     for rt in gen_all_results(folder):
         print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append(['%4.1f' % rt[-1].nll, rt[-1].latex_print()])
+        entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
         rownames.append(rt[0])
     
     utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
@@ -212,4 +197,20 @@ def run_test_kfold(local_computation = True, max_jobs=600):
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
 
+def make_figures():
+    X,y, D = gpml.load_mat('../data/mauna2003.mat')
+    k = fk.Carls_Mauna_kernel()
+    gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=0.0)
 
+def make_kernel_description_table():
+    '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
+    entries = [];
+    rownames = [];
+    
+    colnames = ['', 'Description', 'Parameters' ]
+    for k in fk.base_kernel_families():
+        # print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
+        rownames.append( k.latex_print() )
+        entries.append([ k.family().description(), k.family().params_description()])
+    
+    utils.latex.table('../latex/tables/kernel_descriptions.tex', rownames, colnames, entries, 'kernel_descriptions')

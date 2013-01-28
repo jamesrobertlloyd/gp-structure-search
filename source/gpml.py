@@ -14,9 +14,10 @@ import tempfile, os
 import subprocess
 
 import config
+import flexiblekernel as fk
 
 
-def run_matlab_code(code, verbose=False):
+def run_matlab_code(code, verbose=False, jvm=True):
     # Write to a temp script
     (fd1, script_file) = tempfile.mkstemp(suffix='.m')
     (fd2, stdout_file) = tempfile.mkstemp(suffix='.txt')
@@ -26,14 +27,14 @@ def run_matlab_code(code, verbose=False):
     f.write(code)
     f.close()
     
-    call = [config.MATLAB_LOCATION, '-nosplash', '-nojvm', '-nodisplay']
+    jvm_string = '-nojvm'
+    if jvm: jvm_string = ''
+    call = [config.MATLAB_LOCATION, '-nosplash', jvm_string, '-nodisplay']
     print call
     
     stdin = open(script_file)
     stdout = open(stdout_file, 'w')
     stderr = open(stderr_file, 'w')
-    
-#    subprocess.call(call, stdin=open(script_file), stdout=open(stdout_file, 'w'), stderr=open(stderr_file, 'w'))
     subprocess.call(call, stdin=stdin, stdout=stdout, stderr=stderr)
     
     stdin.close()
@@ -455,6 +456,49 @@ save( '%(writefile)s', 'sim_matrix' );
 """
 
 
+# Matlab code to decompose posterior into additive parts.
+MATLAB_PLOT_DECOMP_CALLER_CODE = r"""
+load '%(datafile)s'  %% Load the data, it should contain X and y.
+
+addpath(genpath('%(gpml_path)s'));
+addpath(genpath('%(matlab_script_path)s'));
+
+plot_decomp(X, y, %(kernel_family)s, %(kernel_params)s, %(kernel_family_list)s, %(kernel_params_list)s, %(noise)s, '%(figname)s', %(latex_names)s)
+exit();"""
+
+
+def plot_decomposition(kernel, X, y, figname, noise=None):
+    matlab_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'matlab'))
+    figname = os.path.abspath(os.path.join(os.path.dirname(__file__), figname))
+    print 'Plotting to: %s' % figname
+    
+    kernel_components = fk.break_kernel_into_summands(kernel)
+    latex_names = [k.latex_print().strip() for k in kernel_components]
+    kernel_params_list = ','.join('[ %s ]' % ' '.join(str(p) for p in k.param_vector()) for k in kernel_components)
+    
+    if X.ndim == 1: X = X[:, nax]
+    if y.ndim == 1: y = y[:, nax]
+    if noise is None: noise = np.log(np.var(y)/10)   # Just a heuristic.
+    data = {'X': X, 'y': y}
+    (fd1, temp_data_file) = tempfile.mkstemp(suffix='.mat')
+    scipy.io.savemat(temp_data_file, data)
+    
+    code = MATLAB_PLOT_DECOMP_CALLER_CODE % {'datafile': temp_data_file,
+        'gpml_path': config.GPML_PATH,
+        'matlab_script_path': matlab_dir,
+        'kernel_family': kernel.gpml_kernel_expression(),
+        'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+        'kernel_family_list': '{ %s }' % ','.join(str(k.gpml_kernel_expression()) for k in kernel_components),
+        'kernel_params_list': '{ %s }' % kernel_params_list,
+        'noise': str(noise),
+        'latex_names': "{ ' %s ' }" % "','".join(latex_names),
+        'figname': figname}
+    
+    run_matlab_code(code, verbose=True, jvm=True)
+    os.close(fd1)
+    #os.remove(temp_data_file)
+
+
 def load_mat(data_file, y_dim=1):
     '''
     Load a Matlab file containing inputs X and outputs y, output as np.arrays
@@ -466,5 +510,41 @@ def load_mat(data_file, y_dim=1):
      
     data = scipy.io.loadmat(data_file)
     #### TODO - this should return a dictionary, not a tuple
-    return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1], data['Xtest'], data['ytest'][:,y_dim-1]
+    if 'Xtest' in data:
+        return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1], data['Xtest'], data['ytest'][:,y_dim-1]
+    else:
+        return data['X'], data['y'][:,y_dim-1], np.shape(data['X'])[1]
+
+
+COMPUTE_K_CODE_HEADER = r"""
+fprintf('Load the data, it should contain inputs X');
+load '%(datafile)s';
+
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Create list of covariance functions"""
+
+COMPUTE_K_CODE_COVS = r"""
+covs{%(iter)d} = %(kernel_family)s;
+hyps{%(iter)d} = %(kernel_params)s;
+"""
+
+COMPUTE_K_CODE_FOOTER = r"""
+%% Random projection
+randproj = %(randproj)s;
+
+for i = 1:length(covs)
+  K = feval(covs{i}{:}, hyps{i}, X);
+
+  if randproj
+    K = K(:);
+    K = Q' * K;
+  end
+
+  cov_matrices{i} = K;
+end
+
+save('%(writefile)s', 'cov_matrices');
+"""
 

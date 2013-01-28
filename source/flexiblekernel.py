@@ -64,9 +64,9 @@ class BaseKernelFamily(KernelFamily):
     pass
 
 class BaseKernel(Kernel):
-   def effective_params(self):
-      '''This is true of all base kernels, hence definition here'''  
-      return len(self.param_vector())
+    def effective_params(self):
+        '''This is true of all base kernels, hence definition here'''  
+        return len(self.param_vector())
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -90,6 +90,14 @@ class SqExpKernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Squared-exponential"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"    
 
 class SqExpKernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
@@ -100,7 +108,7 @@ class SqExpKernel(BaseKernel):
         return SqExpKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covSEiso'
+        return '{@covSEiso}'
     
     def english_name(self):
         return 'SqExp'
@@ -158,6 +166,14 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    @staticmethod    
+    def description():
+        return "Periodic"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale, period"       
+    
     
 class SqExpPeriodicKernel(BaseKernel):
     def __init__(self, lengthscale, period, output_variance):
@@ -169,7 +185,7 @@ class SqExpPeriodicKernel(BaseKernel):
         return SqExpPeriodicKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covPeriodic'
+        return '{@covPeriodic}'
     
     def english_name(self):
         return 'Periodic'
@@ -233,6 +249,14 @@ class RQKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    @staticmethod    
+    def description():
+        return "Rational Quadratic"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale, alpha"
+        
     
 class RQKernel(BaseKernel):
     def __init__(self, lengthscale, output_variance, alpha):
@@ -244,7 +268,7 @@ class RQKernel(BaseKernel):
         return RQKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covRQiso'
+        return '{@covRQiso}'
     
     def english_name(self):
         return 'RQ'
@@ -308,6 +332,14 @@ class ConstKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    @staticmethod    
+    def description():
+        return "Constant"
+
+    @staticmethod    
+    def params_description():
+        return "none"        
+    
 class ConstKernel(BaseKernel):
     def __init__(self, output_variance):
         self.output_variance = output_variance
@@ -316,7 +348,7 @@ class ConstKernel(BaseKernel):
         return ConstKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covConst'
+        return '{@covConst}'
     
     def english_name(self):
         return 'CS'
@@ -377,6 +409,14 @@ class LinKernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+
+    @staticmethod    
+    def description():
+        return "Linear"
+
+    @staticmethod    
+    def params_description():
+        return "none"     
     
 class LinKernel(BaseKernel):
     def __init__(self, lengthscale):
@@ -386,7 +426,7 @@ class LinKernel(BaseKernel):
         return LinKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '@covLINard'
+        return '{@covLINard}'
     
     def english_name(self):
         return 'LN'
@@ -446,6 +486,14 @@ class QuadraticKernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Quadratic"
+
+    @staticmethod    
+    def params_description():
+        return "offset"     
     
 class QuadraticKernel(BaseKernel):
     def __init__(self, offset, output_variance):
@@ -517,6 +565,14 @@ class CubicKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    @staticmethod    
+    def description():
+        return "Cubic"
+
+    @staticmethod    
+    def params_description():
+        return "offset"     
+    
 class CubicKernel(BaseKernel):
     def __init__(self, offset, output_variance):
         self.offset = offset
@@ -587,6 +643,15 @@ class PP0KernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
 
+    @staticmethod    
+    def description():
+        return "Piecewise Polynomial 0"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"   
+    
+
 class PP0Kernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
         self.output_variance = output_variance
@@ -632,6 +697,7 @@ class PP0Kernel(BaseKernel):
     
     def depth(self):
         return 0 
+      
 
 class PP1KernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -655,6 +721,14 @@ class PP1KernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Piecewise Polynomial 1"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"      
 
 class PP1Kernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
@@ -701,6 +775,7 @@ class PP1Kernel(BaseKernel):
     
     def depth(self):
         return 0 
+        
 
 class PP2KernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -724,6 +799,14 @@ class PP2KernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Piecewise Polynomial 2"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"      
 
 class PP2Kernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
@@ -769,7 +852,8 @@ class PP2Kernel(BaseKernel):
 #        return cmp((self.lengthscale, self.output_variance), (other.lengthscale, other.output_variance))
     
     def depth(self):
-        return 0 
+        return 0
+
 
 class PP3KernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -793,6 +877,14 @@ class PP3KernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Piecewise Polynomial 3"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"       
 
 class PP3Kernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
@@ -862,6 +954,14 @@ class MaternKernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    @staticmethod    
+    def description():
+        return "Mat\\'{e}rn"
+
+    @staticmethod    
+    def params_description():
+        return "lengthscale"    
 
 class MaternKernel(BaseKernel):
     def __init__(self, lengthscale, output_variance):
@@ -1228,6 +1328,24 @@ def Carls_Mauna_kernel():
     
     return kernel
 
+
+def break_kernel_into_summands(k):
+    '''Recursive function that takes a kernel, and expands it into a polynomial.'''
+    
+    # TODO - this doesn't actually do any multiplication.
+    if isinstance(k, SumKernel):
+        return list(k.operands)   # Might want to make this a deep copy.
+    else:
+        return k.copy()
+    
+#def plot_kernel_decomposition( k ):#, X, y ):
+#    '''Generates plots of a kernel decomposition'''
+    
+#    summands = break_kernel_into_summands(k)
+#    for s in summands:
+#        plot_kernel
+    
+
 def repr_string_to_kernel(string):
     """This is defined in this module so that all the kernel class names
     don't have to have the module name in front of them."""
@@ -1261,10 +1379,10 @@ class ScoredKernel:
             (self.k_opt, self.nll, self.laplace_nle, self.bic_nle, self.noise)
 
     def pretty_print(self):
-		return self.k_opt.pretty_print()
+        return self.k_opt.pretty_print()
 
     def latex_print(self):
-		return self.k_opt.latex_print()
+        return self.k_opt.latex_print()
 
     @staticmethod	
     def from_matlab_output(output, kernel_family, ndata):
@@ -1288,4 +1406,3 @@ def add_random_restarts_single_kernel(kernel, n_rand, sd):
 def add_random_restarts(kernels, n_rand=1, sd=2):    
     '''Augments the list to include random restarts of all default value parameters'''
     return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
-
