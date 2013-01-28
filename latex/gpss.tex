@@ -314,38 +314,8 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 
 \subsection{Comparison to additive kernels table}
 
-\begin{table*}[h!]
-\begin{center}
-\begin{tabular}{l | r r r r r}
-Method & bach & concrete & pumadyn-8nh & servo & housing \\
-\hline
-Linear regression & & & & & \\
-GP GAM & & & & & \\
-HKL & 0.199 & 0.147 & 0.346 & 0.199 & 0.151 \\
-Sq-exp & 0.045 & 0.157 & 0.317 & 0.126 & 0.092 \\
-Additive & 0.045 & 0.089 & 0.316 & 0.110 & 0.102 \\
-\hline
-SE + RQ, BIC, k=1, 8 levels & 0.044 & 0.087 & 0.315 & 0.102 & 0.082\\
-\end{tabular}
-\caption{MSE}
-\end{center}
-\end{table*}
-
-\begin{table*}[h!]
-\begin{center}
-\begin{tabular}{l | r r r r r}
-Method & bach & concrete & pumadyn-8nh & servo & housing \\
-\hline
-Linear regression & & & & & \\
-GP GAM & & & & & \\
-Sq-exp & -0.131 & 0.398 & 0.843 & 0.429 & 0.207 \\
-Additive & -0.131 & 0.114 & 0.841 & 0.309 & 0.194 \\
-\hline
-SE + RQ, BIC, k=1, 8 levels & -0.141 & 0.065 & 0.840 & 0.265 & 0.059\\
-\end{tabular}
-\caption{Mean neg log lik}
-\end{center}
-\end{table*}
+\input{tables/regression_results_mse.tex}
+\input{tables/regression_results_nll.tex}
 
 \section{Discussion}
 

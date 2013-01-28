@@ -5,7 +5,7 @@ function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decom
 
 x_left = min(X) - (max(X) - min(X))*0.1;
 x_right = max(X) + (max(X) - min(X))*0.1;
-xrange = linspace(x_left, x_right, 1000)';
+xrange = linspace(x_left, x_right, 2000)';
 
 % TODO: check if noise formula is correct.
 complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*exp(noise);
