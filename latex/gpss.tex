@@ -407,16 +407,14 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 \input{"tables/kernels3.tex"}
 \input{"tables/kernels4.tex"}
 
-\subsection{Comparison to additive kernels table}
+\subsection{Numerical evaluation of search method}
 
-Some results are in - how do they do?
-9 Jan results had some errors - read numbers with caution - k=3, depth=4, BIC.
-18 Jan results are currently not known to be buggy - k=3, depth=4, BIC.
+In addition to demonstrating the interpretability of our method we have compared the predictive performance of our method against other state of the art GP kernel search methods.
 
-Results are not terrible but there is certainly room for improvement against additive kernels.
-Some thoughts: surprising that Sq Exp is often better than HKL and GP GAM - are the experiments in a strange regime of some sort?
-I will try running the experiments deeper with only Laplace approx.
-This should be able to include additive kernels and will indirectly test the Laplace approx.
+In particular we have extended the comparison of \cite{duvenaud2011additive11} to include our method.
+5 data sets were split into 10 equally sized folds.
+For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood of the held out fold.
+Average statistics for these experiments are presented in tables \ref{table:MSE} and \ref{table:nll}.
 
 \begin{table*}[h!]
 \begin{center}
@@ -429,9 +427,10 @@ HKL & 0.199 & 0.147 & 0.346 & 0.199 & 0.151 \\
 Sq-exp & 0.045 & 0.157 & 0.317 & 0.126 & 0.092 \\
 Additive & 0.045 & 0.089 & 0.316 & 0.110 & 0.102 \\
 \hline
-SE + RQ, BIC, k=1, 8 levels & 0.044 & 0.087 & 0.315 & 0.102 & 0.082\\
+SE, RQ, BIC, k=1, 8 levels & 0.044 & 0.087 & 0.315 & 0.102 & 0.082\\
 \end{tabular}
 \caption{MSE}
+\label{table:MSE}
 \end{center}
 \end{table*}
 
@@ -445,9 +444,10 @@ GP GAM & & & & & \\
 Sq-exp & -0.131 & 0.398 & 0.843 & 0.429 & 0.207 \\
 Additive & -0.131 & 0.114 & 0.841 & 0.309 & 0.194 \\
 \hline
-SE + RQ, BIC, k=1, 8 levels & -0.141 & 0.065 & 0.840 & 0.265 & 0.059\\
+SE, RQ, BIC, k=1, 8 levels & -0.141 & 0.065 & 0.840 & 0.265 & 0.059\\
 \end{tabular}
 \caption{Mean neg log lik}
+\label{table:nll}
 \end{center}
 \end{table*}
 
@@ -466,7 +466,6 @@ Hyperkernels \cite{ong2002hyperkernels}
 \section{Model-based search over models}
 
 Bayesian optimization for hyper-parameter search: \cite{snoek2012practical}
-
 
 \section{Conclusion}
 
