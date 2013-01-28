@@ -102,6 +102,7 @@
 \newcommand{\inv}{^{{\mathsmaller{-1}}}}
 \newcommand{\tohalf}{^{{\mathsmaller{\nicefrac{1}{2}}}}}
 
+\newcommand{\Normal}{\mathcal{N}}
 \newcommand{\N}[3]{\mathcal{N}\!\left(#1|#2,#3\right)}
 \newcommand{\Nt}[2]{\mathcal{N}\!\left(#1,#2\right)}
 \newcommand{\bN}[3]{\mathcal{N}\big(#1|#2,#3\big)}
@@ -134,3 +135,20 @@
 \newtheorem{prop}{Proposition}
 \newtheorem{cor}{Corollary}
 \newtheorem{lem}{Lemma}
+\newtheorem{thm}{Theorem}%[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}[thm]{Definition}%[section]
+\newtheorem{conj}{Conjecture}[section]
+\newtheorem{exmp}{Example}[section]
+\newtheorem{rem}[thm]{Remark}
+
+\theoremstyle{remark}
+\newtheorem{note}{Note}
+\newtheorem{case}{Case}
+
+\numberwithin{equation}{section}
+\numberwithin{thm}{section}
+
+\newcommand{\dist}{\ \sim\ }
+\def\given{\,|\,}
