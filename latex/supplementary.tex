@@ -77,6 +77,8 @@ Kernel Structure Discovery in Gaussian Process Models}
 
 \appendix
 
+
+
 \section{Derivation of Component Marginal Variance}
 
 Let us assume that our function $\vf$ is a sum of two functions, $\vf_1$ and $\vf_2$, where $\vf = \vf_1 + \vf_2$.  If $\vf_1$ and $\vf_2$ are a priori independent, and $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$, then
@@ -116,18 +118,73 @@ The covariance between the two components, conditioned on their sum is given by:
 These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 
 
-\section{Mauna Loa Atmoshperic Carbon Dioxide}
-
-As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
-
-
-\subsection{Decomposition}
-
-A benefit of the GP framework is that, when a function modeled with additive structure, we can decompose the signal into a sum of functions, and examine the individual components of our signal.
 
 
 
-\subsubsection{Load forecasting}
+\section{James' Derivation of the Posterior Marginal Conditional Variance}
+\begin{lem}
+\label{lem:cond}
+If
+\begin{eqnarray}
+x & \dist & \Normal(\mu, \Lambda^{-1}) \\
+y \given x & \dist & \Normal(Ax + b, L^{-1})
+\end{eqnarray}
+then
+\begin{eqnarray}
+y & \dist & \Normal(A\mu + b, L^{-1} + A\Lambda^{-1}A') \\
+x \given y & \dist & \Normal(\Sigma(A'L(y-b) + \Lambda\mu, \Sigma)
+\end{eqnarray}
+where
+\begin{equation}
+\Sigma = (\Lambda + A'LA)^{-1}.
+\end{equation}
+\end{lem}
+\begin{prop}
+If
+\begin{eqnarray}
+f_1 & \dist & \Normal(0, K_1) \\
+f \given f_1 & \dist & \Normal(f_1, K_2) \\
+f_1^* \given f_1 & \dist & \Normal(k_1^*K_1^{-1}f_1, K_1^{**} - k_1^*K_1^{-1}k_1^{*t})
+\end{eqnarray}
+then
+\begin{eqnarray}
+f_1 \given f & \dist & \Normal(\Sigma K_2^{-1}f, \Sigma) \\
+f_1^* \given f & \dist & \Normal(k_1^*\Lambda f, K_1^{**} - k_1^*\Delta k_1^{*t})
+\end{eqnarray}
+where
+\begin{eqnarray}
+\Sigma & = & (K_1^{-1} + K_2^{-1})^{-1} \\
+\Lambda & = & (K_1 + K_2)^{-1} \\
+\Delta & = & K_1^{-1} - (K_1 + K_1K_2^{-1}K_1)^{-1}
+\end{eqnarray}
+\end{prop}
+
+\begin{proof}
+We first apply the second half of lemma~\ref{lem:cond} with $x=f_1$, $y=f$, $\mu=b=0$, $A=I$, $\Lambda^{-1} = K_1$ and $L^{-1} = K_2$ yielding
+\begin{eqnarray}
+f_1 \given f & \dist & \Normal(\Sigma K_2^{-1}f, \Sigma).
+\end{eqnarray}
+Since $f_1^*$ is independent of $f$ given $f_1$ we have $p(f_1^* \given f) = \int p(f_1^* \given f_1) p(f_1 \given f) \textrm{d}f_1$\PROBLEM{I think this is true - think graphical models} i.e.~we condition $f_1^*$ on the posterior of $f_1$.
+We apply the first half of lemma~\ref{lem:cond} with $x=(f_1\given f)$, $y=f_1^*$, $\mu=\Sigma K_2^{-1}f$, $b=0$, $A = k_1^*K_1^{-1}$, $\Lambda^{-1}=\Sigma$ and $L^{-1} = K_1^{**} - k_1^*K_1^{-1}k_1^{*t}$.
+Then for the mean of $f_1^* \given f$ we get the expression
+\begin{eqnarray}
+& k_1^*K_1^{-1} \Sigma K_2^{-1}f \\
+= & k_1^*K_1^{-1} (K_1^{-1} + K_2^{-1})^{-1} K_2^{-1}f \\
+= & k_1^*(K_1 + K_2)^{-1}f \\
+= & k_1^*\Lambda f
+\end{eqnarray}
+and for the variance we obtain
+\begin{eqnarray}
+& K_1^{**} - k_1^*K_1^{-1}k_1^{*t} + k_1^*K_1^{-1} \Sigma K_1^{-1}k_1^{*t} \\
+= & K_1^{**} - k_1^*(K_1^{-1} - (K_1 + K_1K_2^{-1}K_1)^{-1})k_1^{*t} \\
+= & K_1^{**} - k_1^*\Delta k_1^{*t}
+\end{eqnarray}
+\end{proof}
+
+
+
+
+\section{Load forecasting}
 
 Similar to the above, we apply the methodology to another highly structured time series, but with additional input data.
 We analyse hourly load data for a US utility; this data was recently the focus of a data mining competition; the load forecasting track of GEFCom2012\footnotemark.
@@ -175,72 +232,15 @@ We can however examine the posterior mean of the Gaussian process at other point
 
 \TBD{What else can we say about this data? Numerical results might take a while to produce.}
 
-\subsection{Synthetic experiments}
+\section{Complete listings of chosen kernels}
 
-\subsubsection{Bach Synthetic Dataset}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.  We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.  This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
+Below, we show the best kernel structure found for each fold of the datasets used in the results tables.
 
-This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
-
-If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
-
-\subsection{Methods}
-
-\subsubsection{Our method}
-All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.
-
-\subsubsection{Hierarchical Kernel Learning}	
-HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
-
-\input{"tables/kernels.tex"}
-\input{"tables/kernels2.tex"}
-\input{"tables/kernels3.tex"}
-
-\subsection{Comparison to additive kernels table}
-
-Some results are in - how do they do?
-9 Jan results had some errors - read numbers with caution - k=3, depth=4, BIC.
-18 Jan results are currently not known to be buggy - k=3, depth=4, BIC.
-
-Results are not terrible but there is certainly room for improvement against additive kernels.
-Some thoughts: surprising that Sq Exp is often better than HKL and GP GAM - are the experiments in a strange regime of some sort?
-I will try running the experiments deeper with only Laplace approx.
-This should be able to include additive kernels and will indirectly test the Laplace approx.
-
-\begin{table*}[h!]
-\begin{center}
-\begin{tabular}{l | r r r r r}
-Method & bach & concrete & pumadyn-8nh & servo & housing \\
-\hline
-Linear regression & & & & & \\
-GP GAM & & & & & \\
-HKL & 0.199 & 0.147 & 0.346 & 0.199 & 0.151 \\
-Sq-exp & 0.045 & 0.157 & 0.317 & 0.126 & 0.092 \\
-Additive & 0.045 & 0.089 & 0.316 & 0.110 & 0.102 \\
-\hline
-9 Jan & 0.300 & 0.117 & 0.318 & 0.127 & 0.115 \\
-18 Jan & 0.211 & 0.121 & 0.318 & 0.134 & 0.172\\
-\end{tabular}
-\caption{MSE}
-\end{center}
-\end{table*}
-
-\begin{table*}[h!]
-\begin{center}
-\begin{tabular}{l | r r r r r}
-Method & bach & concrete & pumadyn-8nh & servo & housing \\
-\hline
-Linear regression & & & & & \\
-GP GAM & & & & & \\
-Sq-exp & -0.131 & 0.398 & 0.843 & 0.429 & 0.207 \\
-Additive & -0.131 & 0.114 & 0.841 & 0.309 & 0.194 \\
-\hline
-9 Jan & 0.540 & 0.291 & 0.846 & 0.372 & 0.112 \\
-18 Jan & 0.331 & 0.355 & 0.846 & 0.314 & 0.249\\
-\end{tabular}
-\caption{Mean neg log lik}
-\end{center}
-\end{table*}
+%\input{"tables/kernels.tex"}
+%\input{"tables/kernels2.tex"}
+%\input{"tables/kernels3.tex"}
+\input{"tables/kernels4.tex"}
+\input{"tables/kernels5.tex"}
 
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
