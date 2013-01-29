@@ -121,7 +121,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                 print >> outfile, result  
 
 
-def parse_all_results(folder=RESULTS_PATH, save_file='kernels.tex'):
+def parse_all_results(folder=D1_RESULTS_PATH, save_file='kernels.tex', one_d=False):
     '''
     Creates a list of results, then sends them to be formatted into latex.
     '''
@@ -131,7 +131,11 @@ def parse_all_results(folder=RESULTS_PATH, save_file='kernels.tex'):
     colnames = ['Dataset', 'NLL', 'Kernel' ]
     for rt in gen_all_results(folder):
         print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
+        if not one_d:
+            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
+        else:
+            # Remove any underscored dimensions
+            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % re.sub('_{[0-9]+}', '', rt[-1].latex_print())])
         rownames.append(rt[0])
     
     utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
@@ -157,11 +161,21 @@ def parse_results( results_filename ):
     return best_tuple
 
 def gen_all_kfold_datasets():
-    '''Look through all the files in the results directory'''
+    '''Look through all the files in the k fold data directory'''
     for r,d,f in os.walk("../data/kfold_data/"):
         for files in f:
             if files.endswith(".mat"):
                 yield r, files.split('.')[-2]
+
+def gen_all_1d_datasets():
+    '''Look through all the files in the 1d data directory'''
+    file_list = []
+    for r,d,f in os.walk("../data/1d_data/"):
+        for files in f:
+            if files.endswith(".mat"):
+                file_list.append((r, files.split('.')[-2]))
+    file_list.sort()
+    return file_list
 
 def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
     #### FIXME - D is redundant
@@ -170,6 +184,13 @@ def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1
     best_scored_kernel = parse_results(output_file)
     predictions = make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
+   
+#### WARNING - Code duplication 
+def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
+    X, y, D = gpml.load_mat(data_file, y_dim=1)
+    assert(D==1)
+    perform_kernel_search(X, y, 1, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+    best_scored_kernel = parse_results(output_file)
 
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
     data_sets = list(gen_all_kfold_datasets())
@@ -185,7 +206,24 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='1 % Frobenius cut off', debug=False, local_computation=False, n_rand=1, sd=2, max_jobs=max_jobs)
+            perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
+            
+            print "Done one file!!!"  
+        else:
+            print 'Skipping file %s' % files
+            
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1):
+    data_sets = list(gen_all_1d_datasets())
+	#### FIXME - Comment / or make more elegant
+    if random_walk:
+        random.shuffle(data_sets)
+    for r, files in data_sets:
+        # Do we need to run this test?
+        if not(skip_complete and (os.path.isfile(os.path.join(D1_RESULTS_PATH, files + "_result.txt")))):
+            data_file = os.path.join(r,files + ".mat")
+            output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
+            
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:
@@ -203,6 +241,17 @@ def make_figures():
     X, y, D = gpml.load_mat('../data/mauna2003.mat')
     k = fk.Carls_Mauna_kernel()
     gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=-100000.0)
+
+def make_all_1d_figures(folder=D1_RESULTS_PATH):
+    data_sets = list(gen_all_1d_datasets())
+    for r, files in data_sets:
+        results_file = os.path.join(folder, files + "_result.txt")
+        # Is the experiment complete
+        if os.path.isfile(results_file):
+            # Find best kernel and produce plots
+            X, y, D = gpml.load_mat(os.path.join(r,files + ".mat"))
+            best_kernel = parse_results(os.path.join(folder, files + "_result.txt"))
+            gpml.plot_decomposition(best_kernel.k_opt, X, y, '../figures/decomposition/' + files, noise=best_kernel.noise)
 
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''

@@ -18,6 +18,7 @@ except:
 import config
 
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
+#### MAGIC NUMBER - CAUTION
 CMP_TOLERANCE = np.log(1.01) # i.e. 1%
 
 def shrink_below_tolerance(x):
@@ -1269,22 +1270,27 @@ def base_kernels(ndim=1):
     for dim in range(ndim):
         for k in base_kernel_families():
             yield MaskKernel(ndim, dim, k)
+            #### Need OneDGrammar to be operational to use this
+            #if ndim > 1:
+            #    yield MaskKernel(ndim, dim, k)
+            #else:
+            #    yield k
  
 def base_kernel_families():
     '''
     Generator of all base kernel families
     '''
     yield SqExpKernelFamily().default()
-    #yield SqExpPeriodicKernelFamily().default()
+    yield SqExpPeriodicKernelFamily().default()
     yield RQKernelFamily().default()
     yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
-    yield PP1KernelFamily().default()
+    #yield PP1KernelFamily().default()
     #yield PP2KernelFamily().default()
     #yield PP3KernelFamily().default()
-    yield MaternKernelFamily().default()       
+    #yield MaternKernelFamily().default()       
     
 def test_kernels(ndim=1):
     '''
@@ -1332,6 +1338,7 @@ def Carls_Mauna_kernel():
 def break_kernel_into_summands(k):
     '''Recursive function that takes a kernel, and expands it into a polynomial.'''
     
+    #### TODO - This should take an option specifying if masks should be stripped
     # TODO - this doesn't actually do any multiplication.
     if isinstance(k, SumKernel):
         return list(k.operands)   # Might want to make this a deep copy.
