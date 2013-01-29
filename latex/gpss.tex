@@ -49,7 +49,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{Kernel Structure Discovery in Gaussian Process Models}
+\icmltitle{Kernel Structure Discovery in Regression Models}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML}
@@ -65,7 +65,7 @@ Gaussian process (GP) models are used widely and successfully.  However, their e
 
 Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].  In general, learning the model class from data seems superior proposing the model beforehand.  In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.  Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
-
+[Zoubin says:  There has been tons of work done on automatic structure discovery in unsupervised settings, but little done in supervised learning.]
 
 \section{Gaussian Processes Priors}
 
@@ -73,7 +73,11 @@ Gaussian processes are a flexible and tractable prior over functions, useful for
 
 \NA{Note: The above paragraph is plagarized from my additive GP paper. -David} 
 
-\section{Expressing Structure through GPs}
+[TODO: add GP math intro]
+
+\section{Expressing Structure through Kernels}
+
+[Emphasize that these techniques could work on SVMs, but that this would be difficult because model selection is hard without evidence measures]
 
 [Explain exactly how one can express structure on functions, with examples]
 
