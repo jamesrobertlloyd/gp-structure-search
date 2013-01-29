@@ -4,16 +4,16 @@ experiment_name = '28 Jan';
 
 experiments = {};
 experiments{1} = 'bach_synth_r_200';
-experiments{2} = 'r_concrete_500';
-experiments{3} = 'r_pumadyn512';
-experiments{4} = 'r_servo';
-experiments{5} = 'r_housing';
+% experiments{2} = 'r_concrete_500';
+% experiments{3} = 'r_pumadyn512';
+% experiments{4} = 'r_servo';
+% experiments{5} = 'r_housing';
 
 %folder = '../saved_results/9-Jan/';
 %folder = '../saved_results/18-Jan/';
 %folder = '../saved_results/22-Jan/';
-%folder = '../results/';
-folder = '../../saved_results/28-Jan/';
+folder = '../../results/';
+%folder = '../../saved_results/28-Jan/';
 
 MSEs = zeros(length(experiments),1);
 liks = zeros(length(experiments),1);
@@ -51,8 +51,8 @@ experiment = 'bach_synth_r_200';
 %folder = '../saved_results/9-Jan/';
 %folder = '../saved_results/18-Jan/';
 %folder = '../saved_results/22-Jan/';
-folder = '../../saved_results/28-Jan/';
-%folder = '../results/';
+%folder = '../../saved_results/28-Jan/';
+folder = '../../results/';
 
 files = {};
 for i = 1:10

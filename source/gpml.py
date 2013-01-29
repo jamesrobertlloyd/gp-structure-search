@@ -472,6 +472,7 @@ def plot_decomposition(kernel, X, y, figname, noise=None):
     figname = os.path.abspath(os.path.join(os.path.dirname(__file__), figname))
     print 'Plotting to: %s' % figname
     
+    #### TODO - make break_kernel... do something
     kernel_components = fk.break_kernel_into_summands(kernel)
     latex_names = [k.latex_print().strip() for k in kernel_components]
     kernel_params_list = ','.join('[ %s ]' % ' '.join(str(p) for p in k.param_vector()) for k in kernel_components)
