@@ -6,9 +6,7 @@ function c = colorbrew( i, flag, N )
 % David Duvenaud
 % March 2012
 
-if nargin <2
-    flag = 'qual';
-end
+if nargin < 2; flag = 'qual'; end
 
 switch flag
     case 'qual'
@@ -20,9 +18,11 @@ switch flag
         c_array(6, :) = [ 255, 255, 51 ];  % yellow
         c_array(7, :) = [ 166, 86, 40 ];   % brown
         c_array(8, :) = [ 247, 129, 191 ]; % pink
-        c_array(9, :) = [ 153, 153, 153]; % grey
+        c_array(9, :) = [ 153, 153, 153];  % grey
+        c_array(10, :) = [ 0, 0, 0];  % black
         
-        c = c_array( mod(i - 1, 10) + 1, : ) ./ 255;
+        % Wrap around to the end.
+        c = c_array( mod(i - 1, 11) + 1, : ) ./ 255;
         
     case 'seq'
         
@@ -32,22 +32,9 @@ switch flag
         204, 76, 2;
         153, 52, 4;
         102, 37, 6];
-% 
-%         c_array_d = [255, 255, 217;
-%             237, 248, 217;
-%             199, 233, 180;
-%         127, 205, 187;
-%         65, 182, 196;
-%         29, 145, 192;
-%         34, 94, 168;
-%         37, 52, 148;
-%         8, 29, 88];
     
-        d = size(c_array_d, 1);
-
-    
-        c_array = interp1((1:d)', c_array_d, linspace(1, d, N)');
-        
+        d = size(c_array_d, 1);  
+        c_array = interp1((1:d)', c_array_d, linspace(1, d, N)'); 
         c = c_array( i, : ) ./ 255;
         
     case 'div'
@@ -56,21 +43,14 @@ switch flag
         213, 62, 79;
         244, 109, 67;
         253, 174, 97;
-%         254, 224, 139;
-%         210, 225, 142;
         171, 221, 164;
         102, 194, 165;
         50, 136, 189;
         94, 79, 162];
     
         d = size(c_array_d, 1);
-
-    
         c_array = interp1((1:d)', c_array_d, linspace(1, d, N)');
-        
         c = c_array( i, : ) ./ 255;
-        
 end
-
 
 end

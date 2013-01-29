@@ -202,7 +202,7 @@ def run_test_kfold(local_computation = True, max_jobs=600):
 def make_figures():
     X, y, D = gpml.load_mat('../data/mauna2003.mat')
     k = fk.Carls_Mauna_kernel()
-    gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=0.0)
+    gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=-100000.0)
 
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
