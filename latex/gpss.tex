@@ -187,7 +187,7 @@ These distributions express the posterior model uncertainty about different comp
 \TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
 
-Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figures \ref{fig:mauna_decomp1}, \ref{fig:mauna_decomp2}, \ref{fig:mauna_decomp3} and \ref{fig:mauna_decomp4} show the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
+Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
 
 \begin{figure}
@@ -196,30 +196,30 @@ Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression mo
 \label{fig:mauna_all}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_1}
-\caption{The long-term smooth trend component of the Mauna posterior, corresponding to a SE kernel with a long lengthscale.}
-\label{fig:mauna_decomp1}
-\end{figure}
+\begin{figure*}
+\begin{minipage}{4\columnwidth}
+%\begin{figure*}
+\begin{minipage}[l]{0.45\linewidth}
+\includegraphics[width=0.45\linewidth]{../figures/decomposition/mauna_test_all}
+%\captionof{figure}{The complete posterior on the Mauna dataset.}
+\label{fig:mauna_all}
+\end{minipage}
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_2}
-\caption{The periodic, yearly component, corresponding to a SE kernel with a long lengthscale multiplied by a periodic kernel with a yearly period.}
-\label{fig:mauna_decomp2}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_3}
-\caption{The medium-term anomaly component of the Mauna posterior, corresponding to an SE kernel with a lengthscale of several years.}
-\label{fig:mauna_decomp3}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_4}
-\caption{The noise component of the Mauna posterior, corresponding to an SE kernel with a very short lengthscale.}
-\label{fig:mauna_decomp4}
-\end{figure}
-
+\begin{minipage}[r]{0.45\linewidth}
+\centering
+\newcommand{\fwmauna}{3cm}
+\begin{tabular}{cc}
+ \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_1} & 
+ \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_2} \\
+ \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_3} & 
+ \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_4} 
+\end{tabular}
+%\caption{Automatic decomposition of airline data.
+\end{minipage}
+\end{minipage}
+\end{figure*}
+%\label{fig:mauna_decomps}
+%\end{figure*}
 
 
 
