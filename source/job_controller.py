@@ -131,7 +131,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     if verbose:
         print 'Sending scripts to cblparallel'
     if local_computation:
-        output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=0.8, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=6, verbose=verbose)  
+        output_files = cblparallel.run_batch_locally(scripts, language='matlab', max_cpu=1.1, job_check_sleep=5, submit_sleep=0.1, max_running_jobs=10, verbose=verbose)  
     else:
         output_files = cblparallel.run_batch_on_fear(scripts, language='matlab', max_jobs=max_jobs, verbose=verbose, zip_files=zip_files)  
     
