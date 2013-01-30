@@ -389,18 +389,17 @@ class ConstKernel(BaseKernel):
 
 class LinKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        #### Note - expects list input
-        lengthscale, = params
-        return LinKernel(lengthscale)
+        offset, lengthscale = params
+        return LinKernel(offset=offset, lengthscale=lengthscale)
     
     def num_params(self):
-        return 1
+        return 2
     
     def pretty_print(self):
         return colored('LN', self.depth())
     
     def default(self):
-        return LinKernel(0.)
+        return LinKernel(0., 0.)
     
     def __cmp__(self, other):
         assert isinstance(other, KernelFamily)
@@ -417,34 +416,35 @@ class LinKernelFamily(BaseKernelFamily):
 
     @staticmethod    
     def params_description():
-        return "bias"     
+        return "bias"
     
 class LinKernel(BaseKernel):
-    def __init__(self, lengthscale):
+    def __init__(self, offset, lengthscale):
+        self.offset = offset
         self.lengthscale = lengthscale
         
     def family(self):
         return LinKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '{@covLINard}'
+        return '{@covSum, {@covConst, @covLINard}}'
     
     def english_name(self):
         return 'LN'
     
     def param_vector(self):
         # order of args matches GPML
-        return np.array([self.lengthscale])
+        return np.array([self.offset, self.lengthscale])
 
     def copy(self):
-        return LinKernel(self.lengthscale)
+        return LinKernel(offset=self.offset, lengthscale=self.lengthscale)
     
     def __repr__(self):
-        return 'LinKernel(lengthscale=%f)' % \
-            (self.lengthscale)
+        return 'LinKernel(offset=%f, lengthscale=%f)' % \
+            (self.offset, self.lengthscale)
     
     def pretty_print(self):
-        return colored('LN(ell=%1.1f)' % (self.lengthscale),
+        return colored('LN(off=%1.1f, ell=%1.1f)' % (self.offset, self.lengthscale),
                        self.depth())
         
     def latex_print(self):
@@ -454,7 +454,7 @@ class LinKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        differences = [self.lengthscale - other.lengthscale]
+        differences = [self.offset - other.offset, self.lengthscale - other.lengthscale]
         differences = map(shrink_below_tolerance, differences)
         return cmp(differences, [0] * len(differences))
 #        max_diff = max(np.abs([self.lengthscale - other.lengthscale]))
@@ -1355,7 +1355,7 @@ def break_kernel_into_summands(k):
         # Break the summands into a list of kernels.
         return list(k_dist.operands)
     else:
-        return k_dist.copy()
+        return [k_dist.copy()]
 
 def distribute_products(k):
     "Recursively distribute products to get a polynomial."
