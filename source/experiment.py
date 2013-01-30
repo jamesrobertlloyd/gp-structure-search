@@ -212,7 +212,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
         else:
             print 'Skipping file %s' % files
             
-def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1):
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=1):
     data_sets = list(gen_all_1d_datasets())
 	#### FIXME - Comment / or make more elegant
     if random_walk:
@@ -223,7 +223,7 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             data_file = os.path.join(r,files + ".mat")
             output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
             
-            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:
