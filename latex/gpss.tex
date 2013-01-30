@@ -85,6 +85,8 @@ Examples: Local linear structure, local periodicity.
 
 Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range trends with local variation, local periodicity, long-range trends 
 
+\input{tables/simple_kernels_table.tex}
+
 \input{tables/example_structures_table.tex}
 
 
@@ -190,33 +192,27 @@ These distributions express the posterior model uncertainty about different comp
 Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
 
-\begin{figure}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
-\caption{The complete posterior on the Mauna dataset.}
-\label{fig:mauna_all}
-\end{figure}
-
 \begin{figure*}
-\begin{minipage}{4\columnwidth}
+%\begin{minipage}{2\columnwidth}
 %\begin{figure*}
-\begin{minipage}[l]{0.45\linewidth}
-\includegraphics[width=0.45\linewidth]{../figures/decomposition/mauna_test_all}
-%\captionof{figure}{The complete posterior on the Mauna dataset.}
+\begin{minipage}{\columnwidth}
+\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
+\captionof{figure}{The complete posterior on the Mauna dataset.}
 \label{fig:mauna_all}
 \end{minipage}
-
-\begin{minipage}[r]{0.45\linewidth}
+%
+\begin{minipage}{\columnwidth}
 \centering
-\newcommand{\fwmauna}{3cm}
+\newcommand{\fwmauna}{4cm}
 \begin{tabular}{cc}
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_1} & 
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_2} \\
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_3} & 
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_4} 
 \end{tabular}
-%\caption{Automatic decomposition of airline data.
+\caption{Automatic decomposition of Mauna Loa data.}
 \end{minipage}
-\end{minipage}
+%\end{minipage}
 \end{figure*}
 %\label{fig:mauna_decomps}
 %\end{figure*}
