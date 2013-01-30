@@ -101,8 +101,8 @@ where $\vk_1 = k_1( \vX, \vX )$ and $\vk_1^\star = k_1( \vX^\star, \vX )$.
 
 By the formula for Gaussian conditionals:
 \begin{align}
-\vx_A | \vx B \sim \Nt{\vmu_A + \vSigma_{AB} (\vSigma_{AA}\inv + \vSigma_{BB}\inv \left( \vx_B - \vmu_B \right) }
-{\vSigma_{AA} - \vSigma_{AB} (\vSigma_{AA} + \vSigma_{BB})\inv \vSigma_{BA} },
+\vx_A | \vx B \sim \Nt{\vmu_A + \vSigma_{AB} \vSigma_{BB}\inv \left( \vx_B - \vmu_B \right) }
+{\vSigma_{AA} - \vSigma_{AB} \vSigma_{BB}\inv \vSigma_{BA} },
 \end{align}
 we get that the conditional variance of a Gaussian conditioned on its sum with another Gaussian is given by
 \begin{align}
@@ -118,6 +118,47 @@ The covariance between the two components, conditioned on their sum is given by:
 These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 
 
+
+\section{Decompositions}
+
+\begin{figure}
+\includegraphics[width=10cm]{../figures/decomposition/01-airline/01-airline_all.pdf}
+\caption{The complete posterior on the Airline dataset.}
+\label{fig:mauna_all}
+\end{figure}
+
+\newcommand{\fw}{8cm}
+\begin{figure*}
+\centering
+\begin{tabular}{cc}
+ \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_7.pdf} &  \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_8.pdf} \\
+  \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_5.pdf} &  \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_6.pdf} \\
+   \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_3.pdf} &  \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_4.pdf} \\
+    \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_1.pdf} &  \includegraphics[width=\fw]{../figures/decomposition/01-airline/01-airline_2.pdf}
+\end{tabular}
+\caption{Automatic decomposition of airline data.
+}
+\label{fig:kernels}
+\end{figure*}
+
+
+\section{Complete listings of chosen kernels}
+
+Below, we show the best kernel structure found for each fold of the datasets used in the results tables.
+
+%\input{"tables/kernels.tex"}
+%\input{"tables/kernels2.tex"}
+%\input{"tables/kernels3.tex"}
+\input{"tables/kernels4.tex"}
+\input{"tables/kernels5.tex"}
+
+\bibliographystyle{format/icml2013}
+\bibliography{gpss}
+
+\end{document}
+
+
+% Extra stuff
 
 
 
@@ -184,6 +225,8 @@ and for the variance we obtain
 
 
 
+
+
 \section{Load forecasting}
 
 Similar to the above, we apply the methodology to another highly structured time series, but with additional input data.
@@ -232,17 +275,4 @@ We can however examine the posterior mean of the Gaussian process at other point
 
 \TBD{What else can we say about this data? Numerical results might take a while to produce.}
 
-\section{Complete listings of chosen kernels}
 
-Below, we show the best kernel structure found for each fold of the datasets used in the results tables.
-
-%\input{"tables/kernels.tex"}
-%\input{"tables/kernels2.tex"}
-%\input{"tables/kernels3.tex"}
-\input{"tables/kernels4.tex"}
-\input{"tables/kernels5.tex"}
-
-\bibliographystyle{format/icml2013}
-\bibliography{gpss}
-
-\end{document}
