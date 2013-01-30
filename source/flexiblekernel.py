@@ -1347,7 +1347,11 @@ def strip_masks(k):
         return k  
 
 def break_kernel_into_summands(k):
-    '''Takes a kernel, expands it into a polynomial, and breaks terms up into a list.'''    
+    '''Takes a kernel, expands it into a polynomial, and breaks terms up into a list.
+    
+    Mutually Recursive with distribute_products().
+    Always returns a list.
+    '''    
     # First, distribute all products within the kernel.
     k_dist = distribute_products(k)
     
@@ -1355,30 +1359,24 @@ def break_kernel_into_summands(k):
         # Break the summands into a list of kernels.
         return list(k_dist.operands)
     else:
-        return [k_dist.copy()]
-    
-def get_operands_list(k):
-    '''Takes a kernel, returns the operands if it has them, otherwise returns the kernel itself.'''    
-    if isinstance(k, SumKernel):
-        return list(k.operands)
-    elif isinstance(k, ProductKernel):
-        raise Exception('this shouldnt happen')
-    else:
-        return [k]
+        return [k_dist]
 
 def distribute_products(k):
-    "Recursively distribute products to get a polynomial.  Always returns a sumkernel."
-    # Todo: think a bit about deep copies.
+    """Distribute products to get a polynomial.  
     
+    Mutually recursive with break_kernel_into_summands().
+    Always returns a sumkernel.
+    """
+
     if isinstance(k, ProductKernel):
         # Recursively distribute products.
-        distributed_ops = [get_operands_list(distribute_products(op)) for op in k.operands]
+        distributed_ops = [break_kernel_into_summands(op) for op in k.operands]
         # Now combine all elements in all combinations. Itertools is awesome.
         new_prod_ks = [ProductKernel( prod ) for prod in itertools.product(*distributed_ops)]
         return SumKernel(new_prod_ks)
     
     elif isinstance(k, SumKernel):
-        return SumKernel([subop for op in k.operands for subop in get_operands_list(distribute_products(op))])
+        return SumKernel([subop for op in k.operands for subop in break_kernel_into_summands(op)])
     else:
         return k
 

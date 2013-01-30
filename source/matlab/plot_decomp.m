@@ -23,6 +23,8 @@ figure(1); clf; hold on;
 plot( X, y, '.' ); hold on; 
 mean_var_plot(xrange, complete_mean, 2.*sqrt(complete_var));
 combined_latex_name = [sprintf('%s + ',latex_names{1:end-1}), latex_names{end}];
+combined_latex_name = strrep(combined_latex_name, '\left', '');
+combined_latex_name = strrep(combined_latex_name, '\right', '');
 title(combined_latex_name);
 filename = sprintf('%s_all.fig', figname);
 saveas( gcf, filename );
