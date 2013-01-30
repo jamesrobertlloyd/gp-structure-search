@@ -244,14 +244,18 @@ def make_figures():
 
 def make_all_1d_figures(folder=D1_RESULTS_PATH):
     data_sets = list(gen_all_1d_datasets())
-    for r, files in data_sets:
-        results_file = os.path.join(folder, files + "_result.txt")
+    for r, file in data_sets:
+        results_file = os.path.join(folder, file + "_result.txt")
         # Is the experiment complete
         if os.path.isfile(results_file):
             # Find best kernel and produce plots
-            X, y, D = gpml.load_mat(os.path.join(r,files + ".mat"))
-            best_kernel = parse_results(os.path.join(folder, files + "_result.txt"))
-            gpml.plot_decomposition(best_kernel.k_opt, X, y, '../figures/decomposition/' + files, noise=best_kernel.noise)
+            X, y, D = gpml.load_mat(os.path.join(r,file + ".mat"))
+            best_kernel = parse_results(os.path.join(folder, file + "_result.txt"))
+            stripped_kernel = fk.strip_masks(best_kernel.k_opt)
+            fig_folder = os.path.join('../figures/decomposition/', file)
+            if not os.path.exists(fig_folder):
+                os.makedirs(fig_folder)
+            gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), noise=best_kernel.noise)
 
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''

@@ -34,6 +34,8 @@ def test_kernel_expand_multi_d():
 
 def test_kernel_decompose_1d():
     '''Checks that a kernel decomposes into a sum properly'''
-    k = fk.Carls_Mauna_kernel()
-    kparts = break_kernel_into_summands(k)
+    # = fk.Carls_Mauna_kernel()
+    #kparts = break_kernel_into_summands(k)
+    
+    k = fk.repr_string_to_kernel('ScoredKernel(k_opt=ProductKernel([ SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-1.155844, output_variance=0.053888)), MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=1.849842, output_variance=0.682585)), MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=5.202112, output_variance=3.644150)), MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(lengthscale=0.568343)) ]), SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.033653, period=2.486995, output_variance=0.843627)), MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(lengthscale=2.847578)) ]) ]), nll=553.386337, laplace_nle=597.255308, bic_nle=1156.470807, noise=[ 0.9277132])')
     

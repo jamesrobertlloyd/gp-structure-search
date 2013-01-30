@@ -1,14 +1,16 @@
-function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decomp_hypers, noise, figname, latex_names)
+function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decomp_hypers, log_noise, figname, latex_names)
 
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
 % TODO: Maybe assert that noise is zero?
+
+y = y - mean(y);
 
 x_left = min(X) - (max(X) - min(X))*0.1;
 x_right = max(X) + (max(X) - min(X))*0.1;
 xrange = linspace(x_left, x_right, 2000)';
 
 % TODO: check if noise formula is correct.
-complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*exp(noise);
+complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*(2*exp(log_noise));
 complete_sigmastar = feval(complete_covfunc{:}, complete_hypers, X, xrange);
 complete_sigmastarstart = feval(complete_covfunc{:}, complete_hypers, xrange, xrange);
 

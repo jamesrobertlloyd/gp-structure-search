@@ -7,7 +7,6 @@ Created Nov 2012
 '''
 
 import itertools
-from utils import psd_matrices
 import numpy as np
 try:
     import termcolor
@@ -16,6 +15,7 @@ except:
     has_termcolor = False
 
 import config
+from utils import psd_matrices
 
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
 #### MAGIC NUMBER - CAUTION
@@ -417,7 +417,7 @@ class LinKernelFamily(BaseKernelFamily):
 
     @staticmethod    
     def params_description():
-        return "none"     
+        return "bias"     
     
 class LinKernel(BaseKernel):
     def __init__(self, lengthscale):
@@ -1335,23 +1335,43 @@ def Carls_Mauna_kernel():
     return kernel
 
 
-def break_kernel_into_summands(k):
-    '''Recursive function that takes a kernel, and expands it into a polynomial.'''
-    
-    #### TODO - This should take an option specifying if masks should be stripped
-    # TODO - this doesn't actually do any multiplication.
-    if isinstance(k, SumKernel):
-        return list(k.operands)   # Might want to make this a deep copy.
+def strip_masks(k):
+    """Recursively strips masks out of a kernel, for when we used a multi-d grammar on a 1d problem."""    
+    if isinstance(k, MaskKernel):
+        return strip_masks(k.base_kernel)
+    elif isinstance(k, SumKernel):
+        return SumKernel([strip_masks(op) for op in k.operands])
+    elif isinstance(k, ProductKernel):
+        return ProductKernel([strip_masks(op) for op in k.operands])
     else:
-        return k.copy()
+        return k  
+
+def break_kernel_into_summands(k):
+    '''Takes a kernel, expands it into a polynomial, and breaks terms up into a list.'''    
+    # First, distribute all products within the kernel.
+    k_dist = distribute_products(k)
     
-#def plot_kernel_decomposition( k ):#, X, y ):
-#    '''Generates plots of a kernel decomposition'''
+    if isinstance(k_dist, SumKernel):
+        # Break the summands into a list of kernels.
+        return list(k_dist.operands)
+    else:
+        return k_dist.copy()
+
+def distribute_products(k):
+    "Recursively distribute products to get a polynomial."
+    # Todo: think a bit about deep copies.
     
-#    summands = break_kernel_into_summands(k)
-#    for s in summands:
-#        plot_kernel
+    if isinstance(k, ProductKernel):
+        # Recursively distribute products.
+        distributed_ops = [distribute_products(op).operands for op in k.operands]
+        # Now combine all elements in all combinations. Itertools is awesome.
+        new_prod_ks = [ProductKernel( prod ) for prod in itertools.product(*distributed_ops)]
+        return SumKernel(new_prod_ks)
     
+    elif isinstance(k, SumKernel):
+        return SumKernel([distribute_products(op) for op in k.operands])
+    else:
+        return k
 
 def repr_string_to_kernel(string):
     """This is defined in this module so that all the kernel class names
