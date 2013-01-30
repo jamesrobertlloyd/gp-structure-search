@@ -3,6 +3,7 @@ function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decom
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
 % TODO: Maybe assert that noise is zero?
 
+
 y = y - mean(y);
 
 x_left = min(X) - (max(X) - min(X))*0.1;
@@ -46,6 +47,8 @@ for i = 1:numel(decomp_list)
     figure(i + 1); clf; hold on;
     plot( X, removed_mean, '.' ); hold on; 
     mean_var_plot(xrange, decomp_mean, 2.*sqrt(decomp_var));
+    latex_names{i} = strrep(latex_names{i}, '\left', '');
+    latex_names{i} = strrep(latex_names{i}, '\right', '');
     title(latex_names{i});
     fprintf([latex_names{i}, '\n']);
     filename = sprintf('%s_%d.fig', figname, i);

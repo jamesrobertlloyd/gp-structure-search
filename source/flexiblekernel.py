@@ -1356,20 +1356,29 @@ def break_kernel_into_summands(k):
         return list(k_dist.operands)
     else:
         return [k_dist.copy()]
+    
+def get_operands_list(k):
+    '''Takes a kernel, returns the operands if it has them, otherwise returns the kernel itself.'''    
+    if isinstance(k, SumKernel):
+        return list(k.operands)
+    elif isinstance(k, ProductKernel):
+        raise Exception('this shouldnt happen')
+    else:
+        return [k]
 
 def distribute_products(k):
-    "Recursively distribute products to get a polynomial."
+    "Recursively distribute products to get a polynomial.  Always returns a sumkernel."
     # Todo: think a bit about deep copies.
     
     if isinstance(k, ProductKernel):
         # Recursively distribute products.
-        distributed_ops = [distribute_products(op).operands for op in k.operands]
+        distributed_ops = [get_operands_list(distribute_products(op)) for op in k.operands]
         # Now combine all elements in all combinations. Itertools is awesome.
         new_prod_ks = [ProductKernel( prod ) for prod in itertools.product(*distributed_ops)]
         return SumKernel(new_prod_ks)
     
     elif isinstance(k, SumKernel):
-        return SumKernel([distribute_products(op) for op in k.operands])
+        return SumKernel([subop for op in k.operands for subop in get_operands_list(distribute_products(op))])
     else:
         return k
 
