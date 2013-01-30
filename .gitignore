@@ -62,6 +62,7 @@ config.py
 temp/
 
 results/
+1d_results/
 sandpit/
 saved_results/
 scratch/
