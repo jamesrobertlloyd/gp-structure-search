@@ -1281,9 +1281,9 @@ def base_kernel_families():
     Generator of all base kernel families
     '''
     yield SqExpKernelFamily().default()
-    yield SqExpPeriodicKernelFamily().default()
-    yield RQKernelFamily().default()
-    yield LinKernelFamily().default()
+    #yield SqExpPeriodicKernelFamily().default()
+    #yield RQKernelFamily().default()
+    #yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
