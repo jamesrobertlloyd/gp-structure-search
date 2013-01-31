@@ -1,6 +1,6 @@
 % Turns all figures in a directory into pdfs.
 
-dirname = '/homes/mlghomes/dkd23/git/gp-structure-search/figures/decomposition/01-airline/';
+dirname = '../../figures/decomposition/02-solar/';
 
 files = dir([dirname '*.fig']);
 for f_ix = 1:numel(files)

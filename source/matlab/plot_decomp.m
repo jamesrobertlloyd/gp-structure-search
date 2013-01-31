@@ -3,7 +3,9 @@ function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decom
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
 % TODO: Maybe assert that noise is zero?
 
-
+% Convert to double in case python saved as integers
+X = double(X);
+y = double(y);
 y = y - mean(y);
 
 x_left = min(X) - (max(X) - min(X))*0.1;
