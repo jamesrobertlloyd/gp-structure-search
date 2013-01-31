@@ -1,15 +1,19 @@
-function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, decomp_hypers, log_noise, figname, latex_names)
+function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, ...
+                     decomp_hypers, log_noise, figname, latex_names, ...
+                     full_name)
 
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
-% TODO: Maybe assert that noise is zero?
 
 % Convert to double in case python saved as integers
 X = double(X);
 y = double(y);
 y = y - mean(y);
 
-x_left = min(X) - (max(X) - min(X))*0.1;
-x_right = max(X) + (max(X) - min(X))*0.1;
+left_extend = 0.05;  % What proportion to extend beyond the data range.
+right_extend = 0.2;
+
+x_left = min(X) - (max(X) - min(X))*left_extend;
+x_right = max(X) + (max(X) - min(X))*right_extend;
 xrange = linspace(x_left, x_right, 2000)';
 
 % TODO: check if noise formula is correct.
@@ -24,10 +28,9 @@ complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sig
 figure(1); clf; hold on;
 plot( X, y, '.' ); hold on; 
 mean_var_plot(xrange, complete_mean, 2.*sqrt(complete_var));
-combined_latex_name = [sprintf('%s + ',latex_names{1:end-1}), latex_names{end}];
-combined_latex_name = strrep(combined_latex_name, '\left', '');
-combined_latex_name = strrep(combined_latex_name, '\right', '');
-title(combined_latex_name);
+full_name = strrep(full_name, '\left', '');
+full_name = strrep(full_name, '\right', '');
+title(full_name);
 filename = sprintf('%s_all.fig', figname);
 saveas( gcf, filename );
 %filename = sprintf('%s_all.pdf', figname);
