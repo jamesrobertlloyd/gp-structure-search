@@ -112,7 +112,7 @@ These distributions express the posterior model uncertainty about different comp
 
 \section{Searching over structures}
 
-\TBD{Needs works e.g.~justification / cite Roger}
+\TBD{Needs works e.g.~justification / cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?}
 
 Notes on the algorithm
 \begin{enumerate}
@@ -120,8 +120,16 @@ Notes on the algorithm
 \item For each $\kappa \in \aleph$ optimise parameters by optimising nll on training data; record nll and BIC
 \item Remove approximately duplicate `kernels' by standardising forms, detecting equivalent parameters and examining Frobenius norm between covariance matrices (\TBD{this heuristic to be examined - currently not used in results presented since $k = 1$ - see below}).
 \item Set $\beth$ = best $k$ kernels as determined by BIC
-\item Set $\aleph$ = expansion of all kernels in $\beth$.
+\item Set $\aleph$ = expansion of all kernels in $\beth$ with some random initialisations of new kernel parameters (keeping previously learned parameters - practically this is quite important)
+\item Return to step 2, repeating until some fixed depth $D$ (\TBD{this could be replaced with stopping when no kernel is an improvement})
 \end{enumerate}
+
+Expanding a kernel involves
+\begin{itemize}
+\item For each kernel component (i.e.~any product, sum or base kernel)
+\item Either add by, multiply by or replace with (only base kernels) all base kernels $\times$ applied to all single input dimensions
+\item \TBD{Experiments suggest that pruning `expansions' may be beneficial when the base kernel space is large - not yet implemented}
+\end{itemize}
 
 \section{Related Work}
 
@@ -170,12 +178,32 @@ Discovering admissible model equations from observed data based on scale-types a
 
 \cite{christoudias2009bayesian} previously showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.  They call this \emph{Bayesian localized multiple kernel learning}.
 
+\paragraph{Using DBNs to learn a kernel function}
+
+\TBD{Cite relevant work by Salkhutdinov and Hinton}
 
 \section{Experiments}
 
 To evaluate the effectiveness of our method we performed two types of experiments; testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
 The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
-The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied linear smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
+The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
+
+\subsection{Decomposition}
+
+We demonstrate the decompositions produced by our method on two time series.
+For the search we used $k = 1$, $D = 8$ and three base kernels; SE, RQ and LN (see table~\ref{tbl:kernel_descriptions}) \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, rough functions and linear structure}.
+
+\input{"tables/kernel_descriptions.tex"}
+
+\paragraph{Mauna Loa Atmospheric Carbon Dioxide}
+
+As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+
+Figures \ref{fig:mauna_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa dataset.
+Note in particular that whilst the interior of the data can be smoothed effectively with a single base kernel model, the extrapolations improve dramatically as the search descends.
+
+Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth $\gp$ regression model together with the additive components of the posterior.
+The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.
 
 \begin{figure}[h!]
 \centering
@@ -189,6 +217,25 @@ The decomposition experiments produce highly interpretable decompositions of tim
 \caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
 \label{fig:mauna_grow}
 \end{figure}
+
+\begin{figure}[h!]
+\newcommand{\wmgd}{8cm}  % width mauna growth decomp
+\newcommand{\hmgd}{3cm}  % height mauna growth decomp
+\begin{tabular}{c}
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_all} \\ = \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_3} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_4_zoom} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_1} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_2} \\
+\end{tabular}
+\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 8.  Subsequent rows: automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, yearly periodic, medium-term anomaly and short-term noise components, respectively.}
+\end{figure}
+\label{fig:mauna_decomp}
+
+\paragraph{Airline passenger data}
+
+Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
+\TBD{Make similar observations of good performance and perhaps draw attention to the selection of a linear kernel}.
 
 \begin{figure}[h!]
 \centering
@@ -222,84 +269,14 @@ The decomposition experiments produce highly interpretable decompositions of tim
 \label{fig:airline_decomp}
 \end{figure}
 
+\subsection{Regression accuracy}
 
-\begin{figure}[h!]
-\newcommand{\wmgd}{8cm}  % width mauna growth decomp
-\newcommand{\hmgd}{3cm}  % height mauna growth decomp
-\begin{tabular}{c}
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_all} \\ = \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_3} \\ + \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_4_zoom} \\ + \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_1} \\ + \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_2} \\
-\end{tabular}
-\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 8.  Subsequent rows: automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, yearly periodic, medium-term anomaly and short-term noise components, respectively.}
-\end{figure}
-\label{fig:mauna_decomp}
+$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 
-
-
-Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa and airline datasets.
-
-Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
-
-\paragraph{Kernels used}
-%
-Table \ref{tbl:kernel_descriptions} describes the base kernels used in our search.
-%
-\input{"tables/kernel_descriptions.tex"}
-
-%\subsection{Real datasets}
-
-\subsection{Mauna Loa Atmospheric Carbon Dioxide}
-
-As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
-
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/carls_kernel}
-%\caption{Carl's kernel function on the Mauna dataset.}
-%\end{figure}
-
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/our_kernel}
-%\caption{Our best kernel function on the Mauna dataset.}
-%\end{figure}
-
-Figure \ref{fig:airline_decomp} shows a decomposition of the airline data posterior.
-
-\subsection{Synthetic experiments}
-
-\subsubsection{Bach Synthetic Dataset}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.  We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.  This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
-
-This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
-
-If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
-
-\subsection{Methods}
-
-\paragraph{Structure Search}
-All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.
-
-\paragraph{Hierarchical Kernel Learning}	
-HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
-
-%\input{"tables/kernels.tex"}
-%\input{"tables/kernels2.tex"}
-%\input{"tables/kernels3.tex"}
-%\input{"tables/kernels4.tex"}
-%\input{"tables/kernels5.tex"}
-
-\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11}
-
-\subsection{Numerical evaluation of search method}
-
-In addition to demonstrating the interpretability of our method we have compared the predictive performance of our method against other state of the art GP kernel search methods.
-
-In particular we have extended the comparison of \cite{duvenaud2011additive11} to include our method.
+We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
 5 data sets were split into 10 equally sized folds.
-For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood on the held out fold.
-Average statistics for these experiments are presented in tables \ref{table:MSE} and \ref{table:nll}.
+For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood on the held out fold (data missing at random \TBD{we could likely do much better by creating folds that remove continuous regions if extrapolation ability carries over to high dimensional data}.
+Average statistics for these experiments are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.
 
 \input{tables/regression_results_mse.tex}
 \input{tables/regression_results_nll.tex}
@@ -308,9 +285,28 @@ Our method outperforms the other methods in \emph{all} tests (but not statistica
 Some points for discussion
 \begin{itemize}
 \item Experiments just using SE kernel can outperform additive kernel surprisingly. This is presumably a regularisation effect of using a finite depth search and/or BIC. We could make this a more Bayesian result (i.e.~more a property of the model) by placing a prior on kernels that depends on the number of components.
-\item Need to discuss design choices e.g.~$k$ (i.e.~$k$ best kernels expanded), depth of search, base kernels.
+\item Need to discuss design choices e.g.~$k$, depth of search, base kernels.
 \item \ldots
 \end{itemize}
+
+\subsubsection{Notes on data sets / methods}
+
+\paragraph{Bach Synthetic Dataset}
+In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.  We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.  This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
+
+This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
+
+If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
+
+\paragraph{Structure Search}
+All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
+
+\paragraph{Hierarchical Kernel Learning}	
+HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
+
+\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11}
+
+\paragraph{GP-GAM and linear model?}
 
 \section{Discussion}
 
@@ -332,7 +328,6 @@ Bayesian optimization for hyper-parameter search: \cite{snoek2012practical}
 \section{Conclusion}
 
 \subsubsection*{Acknowledgements}
-
 
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
