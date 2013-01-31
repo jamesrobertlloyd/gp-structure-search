@@ -186,18 +186,56 @@ These distributions express the posterior model uncertainty about different comp
 \TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
 
-Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
+\begin{figure}
+\centering
+\newcommand{\fwmaunag}{8cm}
+\newcommand{\hmg}{3cm}
+\begin{tabular}{c}
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_2/03-mauna2003_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
+\label{fig:mauna_grow}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+\newcommand{\wmg}{8cm}  % width maunu growth
+\newcommand{\hmg}{3cm}  % height maunu growth
+\begin{tabular}{c}
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_2/03-mauna2003_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
+\label{fig:mauna_grow}
+\end{figure}
+
+\begin{figure}
+\centering
+\newcommand{\wag}{8cm}  % width airline growth
+\newcommand{\hag}{3cm}  % height airline growth
+\begin{tabular}{c}
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_0/01-airline-months_all} \\ 
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_1/01-airline-months_all} \\
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_2/01-airline-months_all} \\
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_3/01-airline-months_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
+\label{fig:airline_grow}
+\end{figure}
 
 
 \begin{figure*}
-%\begin{minipage}{2\columnwidth}
-%\begin{figure*}
 \begin{minipage}{\columnwidth}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
 \captionof{figure}{The complete posterior on the Mauna dataset.}
 \label{fig:mauna_all}
 \end{minipage}
-%
+% don't leave a space here!
 \begin{minipage}{\columnwidth}
 \centering
 \newcommand{\fwmauna}{4cm}
@@ -207,12 +245,16 @@ Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression mo
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_3} & 
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_4} 
 \end{tabular}
-\caption{Automatic decomposition of Mauna Loa data.}
+\caption{Automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, periodic, medium-term and short-term components, respectively.  The blue dots show the posterior mean after conditioning on all other parts of the kernel. }
 \end{minipage}
-%\end{minipage}
 \end{figure*}
-%\label{fig:mauna_decomps}
-%\end{figure*}
+\label{fig:mauna_decomps}
+
+
+
+Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa and airline datasets.
+
+Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
 
 
