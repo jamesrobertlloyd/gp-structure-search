@@ -463,7 +463,7 @@ load '%(datafile)s'  %% Load the data, it should contain X and y.
 addpath(genpath('%(gpml_path)s'));
 addpath(genpath('%(matlab_script_path)s'));
 
-plot_decomp(X, y, %(kernel_family)s, %(kernel_params)s, %(kernel_family_list)s, %(kernel_params_list)s, %(noise)s, '%(figname)s', %(latex_names)s)
+plot_decomp(X, y, %(kernel_family)s, %(kernel_params)s, %(kernel_family_list)s, %(kernel_params_list)s, %(noise)s, '%(figname)s', %(latex_names)s, %(full_kernel_name)s)
 exit();"""
 
 
@@ -493,6 +493,7 @@ def plot_decomposition(kernel, X, y, figname, noise=None):
         'kernel_params_list': '{ %s }' % kernel_params_list,
         'noise': str(noise),
         'latex_names': "{ ' %s ' }" % "','".join(latex_names),
+        'full_kernel_name': "{ '%s' }" % kernel.latex_print().strip(), 
         'figname': figname}
     
     run_matlab_code(code, verbose=True, jvm=True)

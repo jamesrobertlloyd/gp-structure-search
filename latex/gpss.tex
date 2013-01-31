@@ -49,7 +49,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{Kernel Structure Discovery in Regression Models}
+\icmltitle{Structure Discovery through Kernel Search}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML}
@@ -100,17 +100,14 @@ Compositional Model search for unsupervsied learning: \cite{grosse2012exploiting
 
 Hyperkernels \cite{ong2002hyperkernels}
 
-\subsection{ANOVA Kernels}
-
-Additive Gaussian Processes \cite{duvenaud2011additive11}
+\paragraph{ANOVA Kernels}
 
 Support vector regression with ANOVA decomposition kernels \cite{stitson1999support}
 
-\subsubsection{Smoothing spline ANOVA models}
-
+%\subsubsection{Smoothing spline ANOVA models}
 A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}. An SS-ANOVA model is estimated as a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.  Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
 
-\subsection{Hierarchical Kernel Learning}
+\paragraph{Hierarchical Kernel Learning}
 
 In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.  The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels.\footnote{In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.  For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
 Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
@@ -128,19 +125,19 @@ Accuracy versus interpretability in flexible modeling: Implementing a tradeoff u
 
 A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs. However, the effect of a particular degree of interaction cannot be quantified by that approach. Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
 
-\subsection{Genetic Searches}
+\paragraph{Genetic Searches}
 
 Evolving kernel functions for SVMs by genetic programming: \cite{diosan2007evolving}
 
 A Genetic Programming based kernel construction and optimization method for Relevance Vector Machines: \cite{bing2010gp}
 
-\subsection{Equation Learning}
+\paragraph{Equation Learning}
 
 Equation discovery with ecological applications \cite{dzeroski1999equation}
 
 Discovering admissible model equations from observed data based on scale-types and identity constraints \cite{washio1999discovering}
 
-\subsection{Multiple Kernel Learning}
+\paragraph{Multiple Kernel Learning}
 
 \cite{christoudias2009bayesian} previously showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.  They call this \emph{Bayesian localized multiple kernel learning}.
 
@@ -189,18 +186,56 @@ These distributions express the posterior model uncertainty about different comp
 \TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
 
-Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
+\begin{figure}
+\centering
+\newcommand{\fwmaunag}{8cm}
+\newcommand{\hmg}{3cm}
+\begin{tabular}{c}
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
+ \includegraphics[width=\fwmaunag,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_2/03-mauna2003_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
+\label{fig:mauna_grow}
+\end{figure}
+
+
+
+\begin{figure}
+\centering
+\newcommand{\wmg}{8cm}  % width maunu growth
+\newcommand{\hmg}{3cm}  % height maunu growth
+\begin{tabular}{c}
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_2/03-mauna2003_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
+\label{fig:mauna_grow}
+\end{figure}
+
+\begin{figure}
+\centering
+\newcommand{\wag}{8cm}  % width airline growth
+\newcommand{\hag}{3cm}  % height airline growth
+\begin{tabular}{c}
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_0/01-airline-months_all} \\ 
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_1/01-airline-months_all} \\
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_2/01-airline-months_all} \\
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_3/01-airline-months_all}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
+\label{fig:airline_grow}
+\end{figure}
 
 
 \begin{figure*}
-%\begin{minipage}{2\columnwidth}
-%\begin{figure*}
 \begin{minipage}{\columnwidth}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
 \captionof{figure}{The complete posterior on the Mauna dataset.}
 \label{fig:mauna_all}
 \end{minipage}
-%
+% don't leave a space here!
 \begin{minipage}{\columnwidth}
 \centering
 \newcommand{\fwmauna}{4cm}
@@ -210,12 +245,16 @@ Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression mo
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_3} & 
  \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_4} 
 \end{tabular}
-\caption{Automatic decomposition of Mauna Loa data.}
+\caption{Automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, periodic, medium-term and short-term components, respectively.  The blue dots show the posterior mean after conditioning on all other parts of the kernel. }
 \end{minipage}
-%\end{minipage}
 \end{figure*}
-%\label{fig:mauna_decomps}
-%\end{figure*}
+\label{fig:mauna_decomps}
+
+
+
+Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa and airline datasets.
+
+Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
 
 
@@ -230,10 +269,10 @@ If the dataset is large enough, HKL can construct a hull around only those subse
 
 \subsection{Methods}
 
-\subsubsection{Our method}
+\paragraph{Structure Search}
 All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.
 
-\subsubsection{Hierarchical Kernel Learning}	
+\paragraph{Hierarchical Kernel Learning}	
 HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
 
 %\input{"tables/kernels.tex"}
@@ -241,6 +280,8 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 %\input{"tables/kernels3.tex"}
 %\input{"tables/kernels4.tex"}
 %\input{"tables/kernels5.tex"}
+
+\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11}
 
 \subsection{Numerical evaluation of search method}
 

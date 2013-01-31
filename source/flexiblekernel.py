@@ -1352,7 +1352,7 @@ def break_kernel_into_summands(k):
     Mutually Recursive with distribute_products().
     Always returns a list.
     '''    
-    # First, distribute all products within the kernel.
+    # First, recursively distribute all products within the kernel.
     k_dist = distribute_products(k)
     
     if isinstance(k_dist, SumKernel):
@@ -1362,22 +1362,25 @@ def break_kernel_into_summands(k):
         return [k_dist]
 
 def distribute_products(k):
-    """Distribute products to get a polynomial.  
+    """Distributes products to get a polynomial.
     
     Mutually recursive with break_kernel_into_summands().
     Always returns a sumkernel.
     """
 
     if isinstance(k, ProductKernel):
-        # Recursively distribute products.
+        # Recursively distribute each of the terms to be multiplied.
         distributed_ops = [break_kernel_into_summands(op) for op in k.operands]
-        # Now combine all elements in all combinations. Itertools is awesome.
+        
+        # Now produce a sum of all combinations of terms in the products. Itertools is awesome.
         new_prod_ks = [ProductKernel( prod ) for prod in itertools.product(*distributed_ops)]
         return SumKernel(new_prod_ks)
     
     elif isinstance(k, SumKernel):
+        # Recursively distribute each the operands to be summed, then combine them back into a new SumKernel.
         return SumKernel([subop for op in k.operands for subop in break_kernel_into_summands(op)])
     else:
+        # Base case: A kernel that's just, like, a kernel, man.
         return k
 
 def repr_string_to_kernel(string):
