@@ -89,10 +89,39 @@ Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range 
 
 \input{tables/example_structures_table.tex}
 
+\subsection{Decomposing the Signal}
+
+A benefit of the GP framework is that, when a function is modeled with additive structure, we can decompose the signal into a sum of functions, and examine each individual component of our signal.
+Moreover, the marginal posterior distributions over individual components are analytically tractable.
+
+The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
+\begin{align}
+\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
+\end{align}
+and the covariance between the two components, conditioned on their sum is given by:
+\begin{align}
+\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\end{align}
+Derivations of these formulae are given in the supplementary material.
+
+These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
+
+\TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
+\TBD{Smooth the flow of the previous subsection.}
 
 \section{Searching over structures}
 
-[Explain how we search over structures.  Talk about marginal likelihood].
+\TBD{Needs works e.g.~justification / cite Roger}
+
+Notes on the algorithm
+\begin{enumerate}
+\item Initial set of kernels $\aleph$ = all base kernels $\times$ applied to all single input dimensions $\times$ random kernel parameter initialisations
+\item For each $\kappa \in \aleph$ optimise parameters by optimising nll on training data; record nll and BIC
+\item Remove approximately duplicate `kernels' by standardising forms, detecting equivalent parameters and examining Frobenius norm between covariance matrices (\TBD{this heuristic to be examined - currently not used in results presented since $k = 1$ - see below}).
+\item Set $\beth$ = best $k$ kernels as determined by BIC
+\item Set $\aleph$ = expansion of all kernels in $\beth$.
+\end{enumerate}
 
 \section{Related Work}
 
@@ -144,47 +173,9 @@ Discovering admissible model equations from observed data based on scale-types a
 
 \section{Experiments}
 
-\paragraph{Kernels used}
-%
-Table \ref{tbl:kernel_descriptions} describes the base kernels used in our search.
-%
-\input{"tables/kernel_descriptions.tex"}
-
-%\subsection{Real datasets}
-
-\subsection{Mauna Loa Atmospheric Carbon Dioxide}
-
-As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
-
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/carls_kernel}
-%\caption{Carl's kernel function on the Mauna dataset.}
-%\end{figure}
-
-%\begin{figure}
-%\includegraphics[width=\columnwidth]{../figures/our_kernel}
-%\caption{Our best kernel function on the Mauna dataset.}
-%\end{figure}
-
-\subsection{Decomposing the Signal}
-
-A benefit of the GP framework is that, when a function is modeled with additive structure, we can decompose the signal into a sum of functions, and examine each individual component of our signal.
-
-The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
-\begin{align}
-\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
-\end{align}
-and the covariance between the two components, conditioned on their sum is given by:
-\begin{align}
-\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-\end{align}
-Derivations of these formulae are given in the supplementary material.
-
-These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
-
-\TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
-\TBD{Smooth the flow of the previous subsection.}
+To evaluate the effectiveness of our method we performed two types of experiments; testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
+The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
+The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied linear smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
 \begin{figure}
 \centering
@@ -256,7 +247,27 @@ Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's inc
 
 Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
+\paragraph{Kernels used}
+%
+Table \ref{tbl:kernel_descriptions} describes the base kernels used in our search.
+%
+\input{"tables/kernel_descriptions.tex"}
 
+%\subsection{Real datasets}
+
+\subsection{Mauna Loa Atmospheric Carbon Dioxide}
+
+As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+
+%\begin{figure}
+%\includegraphics[width=\columnwidth]{../figures/carls_kernel}
+%\caption{Carl's kernel function on the Mauna dataset.}
+%\end{figure}
+
+%\begin{figure}
+%\includegraphics[width=\columnwidth]{../figures/our_kernel}
+%\caption{Our best kernel function on the Mauna dataset.}
+%\end{figure}
 
 \subsection{Synthetic experiments}
 
