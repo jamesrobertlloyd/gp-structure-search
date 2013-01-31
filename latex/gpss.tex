@@ -186,23 +186,23 @@ These distributions express the posterior model uncertainty about different comp
 \TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \newcommand{\wmg}{8cm}  % width maunu growth
-\newcommand{\hmg}{3cm}  % height maunu growth
+\newcommand{\hmg}{4.5cm}  % height maunu growth
 \begin{tabular}{c}
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_2/03-mauna2003_all}
 \end{tabular}
-\caption{Posterior mean and variance for different levels of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
+\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably.}
 \label{fig:mauna_grow}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h!]
 \centering
 \newcommand{\wag}{8cm}  % width airline growth
-\newcommand{\hag}{3cm}  % height airline growth
+\newcommand{\hag}{4.5cm}  % height airline growth
 \begin{tabular}{c}
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_0/01-airline-months_all} \\ 
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_1/01-airline-months_all} \\
@@ -214,7 +214,25 @@ These distributions express the posterior model uncertainty about different comp
 \end{figure}
 
 
-\begin{figure*}
+\begin{figure}[h!]
+\centering
+\newcommand{\wagd}{8cm}  % width airline growth decomp
+\newcommand{\hagd}{4.5cm}  % height airline growth decomp
+\begin{tabular}{c}
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_all} \\ 
+ = \\ 
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_1} \\
+ + \\
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_2} \\
+ + \\
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_3}
+\end{tabular}
+\caption{First row:  The airline dataset and posterior.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
+\label{fig:airline_decomp}
+\end{figure}
+
+
+\begin{figure*}[h!]
 \begin{minipage}{\columnwidth}
 \includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
 \captionof{figure}{The complete posterior on the Mauna dataset.}
@@ -241,7 +259,7 @@ Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's inc
 
 Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
-
+Figure \ref{fig:airline_decomp} shows a decomposition of the airline data posterior.
 
 \subsection{Synthetic experiments}
 
@@ -293,14 +311,15 @@ Some points for discussion
 Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
 
 \section{Future Work}
-\subsection{Bayesian Optimization}
+\paragraph{Bayesian Optimization}
 
 cite Ryan Adams, Lizotte, de Frietas
 
-\subsection{A Kernel between kernels}
+\paragraph{A Kernel between kernels}
 
 Hyperkernels \cite{ong2002hyperkernels}
-\section{Model-based search over models}
+
+\paragraph{Model-based search over models}
 
 Bayesian optimization for hyper-parameter search: \cite{snoek2012practical}
 
