@@ -49,7 +49,7 @@
 \begin{document}
 
 \twocolumn[
-\icmltitle{Structure Discovery through Kernel Search}
+\icmltitle{Kernel Structure Discovery}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML}
@@ -189,7 +189,7 @@ These distributions express the posterior model uncertainty about different comp
 \begin{figure}[h!]
 \centering
 \newcommand{\wmg}{8cm}  % width maunu growth
-\newcommand{\hmg}{4.5cm}  % height maunu growth
+\newcommand{\hmg}{4cm}  % height maunu growth
 \begin{tabular}{c}
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_0/03-mauna2003_all} \\ 
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003_max_level_1/03-mauna2003_all} \\
@@ -202,7 +202,7 @@ These distributions express the posterior model uncertainty about different comp
 \begin{figure}[h!]
 \centering
 \newcommand{\wag}{8cm}  % width airline growth
-\newcommand{\hag}{4.5cm}  % height airline growth
+\newcommand{\hag}{4cm}  % height airline growth
 \begin{tabular}{c}
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_0/01-airline-months_all} \\ 
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-months_max_level_1/01-airline-months_all} \\
@@ -217,7 +217,7 @@ These distributions express the posterior model uncertainty about different comp
 \begin{figure}[h!]
 \centering
 \newcommand{\wagd}{8cm}  % width airline growth decomp
-\newcommand{\hagd}{4.5cm}  % height airline growth decomp
+\newcommand{\hagd}{4cm}  % height airline growth decomp
 \begin{tabular}{c}
  \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_all} \\ 
  = \\ 
@@ -227,37 +227,30 @@ These distributions express the posterior model uncertainty about different comp
  + \\
  \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-months_max_level_8/01-airline-months_3}
 \end{tabular}
-\caption{First row:  The airline dataset and posterior.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
+\caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
 \label{fig:airline_decomp}
 \end{figure}
 
 
-\begin{figure*}[h!]
-\begin{minipage}{\columnwidth}
-\includegraphics[width=\columnwidth]{../figures/decomposition/mauna_test_all}
-\captionof{figure}{The complete posterior on the Mauna dataset.}
-\label{fig:mauna_all}
-\end{minipage}
-% don't leave a space here!
-\begin{minipage}{\columnwidth}
-\centering
-\newcommand{\fwmauna}{4cm}
-\begin{tabular}{cc}
- \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_1} & 
- \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_2} \\
- \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_3} & 
- \includegraphics[width=\fwmauna]{../figures/decomposition/mauna_test_4} 
+\begin{figure}[h!]
+\newcommand{\wmgd}{8cm}  % width mauna growth decomp
+\newcommand{\hmgd}{3cm}  % height mauna growth decomp
+\begin{tabular}{c}
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_all} \\ = \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_3} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_4_zoom} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_1} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003_max_level_8/03-mauna2003_2} \\
 \end{tabular}
-\caption{Automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, periodic, medium-term and short-term components, respectively.  The blue dots show the posterior mean after conditioning on all other parts of the kernel. }
-\end{minipage}
-\end{figure*}
-\label{fig:mauna_decomps}
+\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 8.  Subsequent rows: automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, yearly periodic, medium-term anomaly and short-term noise components, respectively.}
+\end{figure}
+\label{fig:mauna_decomp}
 
 
 
 Figures \ref{fig:mauna_grow} and \ref{fig:airline_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa and airline datasets.
 
-Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomps} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
+Figure \ref{fig:mauna_all} shows the complete posterior of a $\gp$ regression model of the Mauna Loa dataset.  Figure \ref{fig:mauna_decomp} shows the same posterior signal decomposed into long-term, periodic, medium-term and short-term components, respectively.
 
 Figure \ref{fig:airline_decomp} shows a decomposition of the airline data posterior.
 
