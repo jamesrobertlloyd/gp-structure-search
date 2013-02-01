@@ -29,7 +29,6 @@
 \input{include/commenting.tex}
 \usepackage{format/icml2013}
 
-
 %% For submission, make all render blank.
 %\renewcommand{\LATER}[1]{}
 %\renewcommand{\fLATER}[1]{}
@@ -58,6 +57,7 @@
 
 
 \begin{abstract}
+\TBD{Shift focus away from GPs?}
 Gaussian process (GP) models are used widely and successfully.
 However, their effictiveness depends critically on choosing an appropriate family of kernels.
 This aspect of GP modeling has been sorely underdeveloped.
@@ -80,9 +80,9 @@ The kind of structure which can be captured by a GP model is mainly determined b
 One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.
 For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
 
-\NA{Note: The above paragraph is plagarized from my additive GP paper. -David} 
+\TBD{Note: The above paragraph is plagarized from my additive GP paper. -David} 
 
-[TODO: add GP math intro]
+[TODO: add GP math intro\TBD{ Really? Just cite?}]
 
 \section{Expressing Structure through Kernels}
 
@@ -140,11 +140,11 @@ These expressions allow us to decompose the posterior into a sum of interpretabl
 
 Notes on the algorithm
 \begin{enumerate}
-\item Initial set of kernels $\aleph$ = all base kernels $\times$ applied to all single input dimensions $\times$ random kernel parameter initialisations
-\item For each $\kappa \in \aleph$ optimise parameters by optimising nll on training data; record nll and BIC
+\item Initial set of kernels $\mathcal{K}$ = all base kernels $\times$ applied to all single input dimensions $\times$ random kernel parameter initialisations
+\item For each $\kappa \in \mathcal{K}$ optimise parameters by optimising nll on training data; record nll and BIC
 \item Remove approximately duplicate `kernels' by standardising forms, detecting equivalent parameters and examining Frobenius norm between covariance matrices (\TBD{this heuristic to be examined - currently not used in results presented since $k = 1$ - see below}).
-\item Set $\beth$ = best $k$ kernels as determined by BIC
-\item Set $\aleph$ = expansion of all kernels in $\beth$ with some random initialisations of new kernel parameters (keeping previously learned parameters - practically this is quite important)
+\item Set $\mathcal{K}^*$ = best $k$ kernels as determined by BIC
+\item Set $\mathcal{K}$ = expansion of all kernels in $\mathcal{K}^*$ with some random initialisations of new kernel parameters (keeping previously learned parameters - practically this is quite important)
 \item Return to step 2, repeating until some fixed depth $D$ (\TBD{this could be replaced with stopping when no kernel is an improvement})
 \end{enumerate}
 
@@ -224,7 +224,7 @@ The decomposition experiments produce highly interpretable decompositions of tim
 \subsection{Decomposition}
 
 We demonstrate the decompositions produced by our method on two time series.
-For the search we used $k = 1$, $D = 8$ and three base kernels; SE, RQ and LN (see table~\ref{tbl:kernel_descriptions}) \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, rough functions and linear structure}.
+For the search we used $k = 1$, $D = 8$ and four base kernels; SE, PE, RQ and LN (see table~\ref{tbl:kernel_descriptions}) \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure}.
 
 \input{"tables/kernel_descriptions.tex"}
 
