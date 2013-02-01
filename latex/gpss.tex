@@ -58,18 +58,27 @@
 
 
 \begin{abstract}
-Gaussian process (GP) models are used widely and successfully.  However, their effictiveness depends critically on choosing an appropriate family of kernels.  This aspect of GP modeling has been sorely underdeveloped.  In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
+Gaussian process (GP) models are used widely and successfully.
+However, their effictiveness depends critically on choosing an appropriate family of kernels.
+This aspect of GP modeling has been sorely underdeveloped.
+In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
 \end{abstract}
 
 \section{Introduction}
 
-Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].  In general, learning the model class from data seems superior proposing the model beforehand.  In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.  Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
+Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].
+In general, learning the model class from data seems superior proposing the model beforehand.
+In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.
+Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
-[Zoubin says:  There has been tons of work done on automatic structure discovery in unsupervised settings, but little done in supervised learning.]
+[Zoubin says: There has been tons of work done on automatic structure discovery in unsupervised settings, but little done in supervised learning.]
 
 \section{Gaussian Processes Priors}
 
-Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.  The kind of structure which can be captured by a GP model is mainly determined by its \emph{kernel}: the covariance function.  One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.  For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
+Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
+The kind of structure which can be captured by a GP model is mainly determined by its \emph{kernel}: the covariance function.
+One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.
+For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
 
 \NA{Note: The above paragraph is plagarized from my additive GP paper. -David} 
 
@@ -91,13 +100,21 @@ Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range 
 
 \subsection{Convenience Priors}
 
-One of the main advantage of kernel methods, and Gaussian process regression in particular, is that the kernel can be used to specify interesting prior structure to the model.  However, in practice, GPs are typically used with only the squared-exp kernel.   [Apparently, this was one of Sholkopf's big dissapointment with GPs... is there a quote from him on this? -David]
+One of the main advantage of kernel methods, and Gaussian process regression in particular, is that the kernel can be used to specify interesting prior structure to the model.
+However, in practice, GPs are typically used with only the squared-exp kernel.
+[Apparently, this was one of Sholkopf's big dissapointment with GPs... is there a quote from him on this? -David]
 
-A frequent criticism of the Bayesian framework is that priors are often chosen purely for convenience.  Gaussian process priors may be a good examples of a model chosen for its tractability.  However, specifying a compound kernel typically does not change the order of computational complexity of inference in Gaussian process models.  The broad use of simple kernels may be simply due to the difficulty of determining which kinds of structure exist in the data and guessing how to express that through a covariance function.  Hence, automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.  Indeed, the authors of this paper were sometimes surprised by the kernels chosen by the automated search, which were able to express structure which was not obvioulsy expressible through a simple combination of kernels.
+A frequent criticism of the Bayesian framework is that priors are often chosen purely for convenience.  Gaussian process priors may be a good examples of a model chosen for its tractability.
+However, specifying a compound kernel typically does not change the order of computational complexity of inference in Gaussian process models.
+The broad use of simple kernels may be simply due to the difficulty of determining which kinds of structure exist in the data and guessing how to express that through a covariance function.
+Hence, automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
+Indeed, the authors of this paper were sometimes surprised by the kernels chosen by the automated search, which were able to express structure which was not obvioulsy expressible through a simple combination of kernels.
 
 \subsection{Decomposing the Signal}
 
-The sorts of structure implied by complex kernel might not be immediately interpretable.  However, there is one property of GPs that allows us to break down the signal into interpretable parts.  Specifically, a function $f \sim GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$.
+The sorts of structure implied by complex kernel might not be immediately interpretable.
+However, there is one property of GPs that allows us to break down the signal into interpretable parts.
+Specifically, a function $f \sim GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$.
 In addition, the posterior distributions over individual components after conditioning on data are also analytically tractable.
 
 The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
@@ -109,9 +126,10 @@ and the covariance between the two components, conditioned on their sum is given
 \begin{align}
 \cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 \end{align}
-Derivations of these formulae are given in the supplementary material.
+Derivations are in the supplementary material.
 
-These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.  These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
+These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
+These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
 
 \TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
@@ -148,11 +166,15 @@ Hyperkernels \cite{ong2002hyperkernels}
 Support vector regression with ANOVA decomposition kernels \cite{stitson1999support}
 
 %\subsubsection{Smoothing spline ANOVA models}
-A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}. An SS-ANOVA model is estimated as a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.  Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
+A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
+An SS-ANOVA model is estimated as a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
+Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
 
 \paragraph{Hierarchical Kernel Learning}
 
-In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.  The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels.\footnote{In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.  For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
+In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
+The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels.\footnote{In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.
+For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
 Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
 % \subsubsection{All-subsets kernel with uniform weightings}
 In \cite{DBLP:journals/corr/abs-0909-0844}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
@@ -160,13 +182,17 @@ In \cite{DBLP:journals/corr/abs-0909-0844}, Bach also fixes the relative weighti
 \label{eqn:uniform}
 k_{a}({\bf x, x'}) = v_D^2 \prod_{d=1}^D \left(1 + \alpha k_{d}(x_{d}, x_{d}') \right)
 \end{equation}
-which has computational complexity $O(D)$.  However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
+which has computational complexity $O(D)$.
+However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
 
-The main difficulty with the approach of \cite{DBLP:journals/corr/abs-0909-0844} is that hyperparameters are hard to set other than by cross-validation.  In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
+The main difficulty with the approach of \cite{DBLP:journals/corr/abs-0909-0844} is that hyperparameters are hard to set other than by cross-validation. 
+In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
 
 Accuracy versus interpretability in flexible modeling: Implementing a tradeoff using Gaussian process models \cite{plate1999accuracy}
 
-A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs. However, the effect of a particular degree of interaction cannot be quantified by that approach. Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
+A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs.
+However, the effect of a particular degree of interaction cannot be quantified by that approach.
+Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
 
 \paragraph{Genetic Searches}
 
@@ -182,7 +208,8 @@ Discovering admissible model equations from observed data based on scale-types a
 
 \paragraph{Multiple Kernel Learning}
 
-\cite{christoudias2009bayesian} previously showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.  They call this \emph{Bayesian localized multiple kernel learning}.
+\cite{christoudias2009bayesian} previously showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.
+They call this \emph{Bayesian localized multiple kernel learning}.
 
 \paragraph{Using DBNs to learn a kernel function}
 
@@ -298,11 +325,16 @@ Some points for discussion
 \subsubsection{Notes on data sets / methods}
 
 \paragraph{Bach Synthetic Dataset}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.  We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.  This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
+In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
+We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
+This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
 
 This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
 
-If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.  GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.  However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.  In this example, the additive GP is able to recover the relevant structure.
+If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.
+GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
+However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.
+In this example, the additive GP is able to recover the relevant structure.
 
 \paragraph{Structure Search}
 All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
@@ -322,13 +354,17 @@ Machine learning can be more data-driven, analogous to the high-thoughput approa
 
 \paragraph{Bayes model averaging}
 
-A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.  This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
+A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
+This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
 
-In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.  However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
+In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.
+However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
 
 \paragraph{Parsimony}
 
-Integrating over kernel structures raises the problem of reporting interpretable structures to the user.  Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.  In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
+Integrating over kernel structures raises the problem of reporting interpretable structures to the user.
+Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
+In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
 
 \paragraph{Bayesian Optimization}
 
