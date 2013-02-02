@@ -24,7 +24,7 @@ linear & $\times$ & periodic & = & growing amplitude & & \\ \midrule
 \kernpic{lin_kernel} & \largeplus & \kernpicr{per_kernel} & \largeeq & \kernpic{lin_plus_per} & \kernpic{lin_plus_per_draws} & \kernpic{lin_plus_per_post} \\
 linear & + & periodic & = & periodic with trend & & \\
 \end{tabular}
-\caption{ Examples of prior structure that can be expressed by composing kernels.  A draw from a sum of kernels corresponds to a sum of draws from the base kernels.  A draw from a product kernel prior has weaker long-range dependencies, and less long-range structure.
+\caption{ Examples of prior structures that can be expressed by composing kernels.  The x-axis has the same scale for all plots.  The 3rd column shows the composite kernel function, the 4th column shows draws from a zero-mean GP with that kernel, and the right-most column shows a GP posterior after conditioning on two datapoints.
 }
 \label{fig:kernels}
 \end{figure*}

@@ -365,15 +365,28 @@ GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cann
 However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.
 In this example, the additive GP is able to recover the relevant structure.
 
-\paragraph{Structure Search}
-All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
+\subsection{Methods}
+
+\paragraph{Linear regression} was included as a baseline. A likelihood score was obtained by setting the noise variance to the empirical variance on the training set.
+
+\paragraph{Generalized Additive Models} are models for which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.  
+In our experiments, this model is implemented through a GP whose kernel is a sum of sq-exp kernels across dimensions.  
+This model, denoted GP GAM, was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
 
 \paragraph{Hierarchical Kernel Learning}	
 HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
 
-\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11}
+\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel imlicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
+However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
 
-\paragraph{GP-GAM and linear model?}
+\paragraph{Structure Search}
+All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
+
+
+
+
+
+
 
 \section{Discussion}
 
@@ -381,8 +394,10 @@ Machine learning can be more data-driven, analogous to the high-thoughput approa
 
 \section{Future Work}
 
-\paragraph{Bayes model averaging}
+\paragraph{Noise Models}
 
+
+\paragraph{Bayes model averaging}
 A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
 This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
 
