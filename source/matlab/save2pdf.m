@@ -39,6 +39,7 @@ if nargin<4
     crop = false;
 end
 
+if 1
 % Backup previous settings
 prePaperType = get(handle,'PaperType');
 prePaperUnits = get(handle,'PaperUnits');
@@ -58,17 +59,20 @@ paperPosition = get(handle,'PaperPosition');
 position = get(handle,'Position');
 set(handle,'PaperPosition',[0,0,position(3:4)]);
 set(handle,'PaperSize',position(3:4));
+end
+
+orient portrait
 
 % Save the pdf (this is the same method used by "saveas")
 print(handle,'-dpdf',pdfFileName,sprintf('-r%d',dpi))
-
+if 1
 % Restore the previous settings
 set(handle,'PaperType',prePaperType);
 set(handle,'PaperUnits',prePaperUnits);
 set(handle,'Units',preUnits);
 set(handle,'PaperPosition',prePaperPosition);
 set(handle,'PaperSize',prePaperSize);
-
+end
 if crop
     system(sprintf('pdfcrop %s %s', pdfFileName, pdfFileName));
 end

@@ -9,6 +9,7 @@
 \usepackage{color}
 \usepackage{wasysym}
 \usepackage{subfigure}
+\usepackage{tabularx}
 \usepackage{bm}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
@@ -17,7 +18,7 @@
     pdfauthor={},
     pdfsubject={},
     pdfkeywords={},
-    pdfborder=0 0 0,  
+    pdfborder=0 0 0,
     pdfpagemode=UseNone,
     colorlinks=true,
     linkcolor=mydarkblue,
@@ -25,6 +26,9 @@
     filecolor=mydarkblue,
     urlcolor=mydarkblue,
     pdfview=FitH}
+
+\newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}m{#1}}
+\newcommand{\tabbox}[1]{#1}
     
 \input{include/commenting.tex}
 \usepackage{format/icml2013}
@@ -57,7 +61,7 @@
 
 
 \begin{abstract}
-\TBD{Shift focus away from GPs?}
+%\TBD{Shift focus away from GPs?}
 Gaussian process (GP) models are used widely and successfully.
 However, their effictiveness depends critically on choosing an appropriate family of kernels.
 This aspect of GP modeling has been sorely underdeveloped.

@@ -1,12 +1,12 @@
 % Turns all figures in a directory into pdfs.
 
-topdir = '../../figures/decomposition';
+topdir = '../../figures/decomposition/';
 dirnames = dir(topdir);
 isub = [dirnames(:).isdir]; %# returns logical vector
 dirnames = {dirnames(isub).name}';
 dirnames(ismember(dirnames,{'.','..'})) = [];
 
-%dirnames = {'../../figures/decomposition/'};
+%dirnames = {'../../figures/decomposition/03-mauna2003_max_level_8'};
 
 for i = 1:length(dirnames)
     dirname = dirnames{i};
