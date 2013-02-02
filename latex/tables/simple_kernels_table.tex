@@ -1,13 +1,17 @@
-\newcommand{\fwb}{2.45cm}
-\newcommand{\fwh}{2cm}
+\newcommand{\fwb}{2.45cm}  % width
+\newcommand{\fwh}{1.8cm}     % height
 \begin{figure}
 \centering
-\begin{tabular}{c|c|c}
+\begin{tabular}{C{\fwb}C{\fwb}C{\fwb}}
+%kernel & draws from GP & GP posterior \\
 \rotatebox{90}{\includegraphics[width=\fwh,height=\fwb]{../figures/structure_examples/se_kernel}} &  \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/se_kernel_draws} & \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/se_kernel_post} \\
+squared-exp & locally smooth & little extrapolation \\ \midrule
 \rotatebox{90}{\includegraphics[width=\fwh,height=\fwb]{../figures/structure_examples/per_kernel}} &  \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/per_kernel_draws} & \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/per_kernel_post} \\
+periodic & repeated structure & long-range dependency \\ \midrule
 \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/lin_kernel} &  \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/lin_kernel_draws} & \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/lin_kernel_post} \\
+linear & linear & linear \\ \midrule
 \rotatebox{90}{\includegraphics[width=\fwh,height=\fwb]{../figures/structure_examples/longse_kernel}} &  \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/longse_kernel_draws} & \includegraphics[width=\fwb,height=\fwh]{../figures/structure_examples/longse_kernel_post} \\
-base kernel & draws from GP & GP posterior
+long-lengthscale squared-exp & slowly changing & moderate extrapolation
 \end{tabular}
 \caption{ Properties of basic kernels.}
 \label{fig:basic_kernels}

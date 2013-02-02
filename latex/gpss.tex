@@ -10,6 +10,7 @@
 \usepackage{wasysym}
 \usepackage{subfigure}
 \usepackage{tabularx}
+\usepackage{booktabs}
 \usepackage{bm}
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
@@ -61,30 +62,50 @@
 
 
 \begin{abstract}
-%\TBD{Shift focus away from GPs?}
-Gaussian process (GP) models are used widely and successfully.
-However, their effictiveness depends critically on choosing an appropriate family of kernels.
-This aspect of GP modeling has been sorely underdeveloped.
-In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
+%Gaussian process (GP) models are used widely and successfully.
+%However, their effictiveness depends critically on choosing an appropriate family of kernels.
+%This aspect of GP modeling has been sorely underdeveloped.
+%In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
+The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
+We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
+We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components.
+We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
 \end{abstract}
 
 \section{Introduction}
 
+Kernel-based nonparametric regression models have been widely and succesfully used over the last 20 years. [citations needed]
+As part of the development of this model class, a rich set of kernels have been developed for both continuous and structured data.
+Because different kernels reflect different properties of the function being modeled, the choice of kernel can have a large impact on the sorts of structure that can be expressed or discovered by the model.
+
+When approaching a new dataset, it is often not clear which kernel family is most appropriate, especially for non-experts.
+Often, a standard kernel family (typically squared-exponential) is chosen out of convenience, and kernel parameters are set by cross-validation or maximum marginal likelihood. [citations?]
+
+Sometimes the argument is made that since most kernels are universal (i.e. consistent in the limit), that the choice of kernel is not important[citation?].  However, our experiments demonstrate that for datasets of moderate size, predictive performance, extrapolation and interpretability all depend heavily on the choice of kernel.
+
+\paragraph{Main contribution}
+In this paper, we introduce an automated search over composite kernels.
+We define the search space through a simple grammar consisting of a set of one-dimensional base kernels (squared-exp, periodic, linear, etc.) and operations which combine those kernels (add and multiply).
+Our objective function is the marginal likelihood of a Gaussian process model with the given kernel, conditioned on the data.
+
+We examine the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrate that in some cases, the structured posterior can be automatically decomposed into a sum of interpretable components, e.g. in Figure \ref{fig:airline_decomp}.
+
+
+There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh], but relatively little on automatic structure discovery in supervised learning.  
 Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].
+%  This work respresents a step towards more data-based modeling, as opposed to proposing the model beforehand.
 In general, learning the model class from data seems superior proposing the model beforehand.
 In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.
-Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
+% Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
-[Zoubin says: There has been tons of work done on automatic structure discovery in unsupervised settings, but little done in supervised learning.]
 
 \section{Gaussian Processes Priors}
 
 Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
 The kind of structure which can be captured by a GP model is mainly determined by its \emph{kernel}: the covariance function.
 One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.
-For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
-
-\TBD{Note: The above paragraph is plagarized from my additive GP paper. -David} 
+%For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
+%\TBD{Note: The above paragraph is plagarized from my additive GP paper. -David} 
 
 [TODO: add GP math intro\TBD{ Really? Just cite?}]
 
@@ -101,6 +122,8 @@ Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range 
 \input{tables/simple_kernels_table.tex}
 
 \input{tables/example_structures_table.tex}
+
+The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  However, the main contribution of this paper is to automate the search over kernel structures.
 
 \subsection{Convenience Priors}
 
@@ -160,6 +183,8 @@ Expanding a kernel involves
 \end{itemize}
 
 \section{Related Work}
+
+The technique of constructing composite kernels using sums and products of existing kernels is not new, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.
 
 Compositional Model search for unsupervsied learning: \cite{grosse2012exploiting}
 
