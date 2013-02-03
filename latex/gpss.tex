@@ -131,17 +131,14 @@ One of the main difficulties in specifying a Gaussian process model is in choosi
 
 
 
-[Explain exactly how one can express structure on functions, with examples]
-
-Examples: Local linear structure, local periodicity.
-
-Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range trends with local variation, local periodicity, long-range trends 
-
+This section explains exactly how one can express structure on functions through composing kernels, and gives examples.  
+Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range trends with local variation, local periodicity, and long-range trends.
+%
 \input{tables/simple_kernels_table.tex}
-
 \input{tables/example_structures_table.tex}
-
-The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  However, the main contribution of this paper is to automate the search over kernel structures.
+%
+The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  
+However, the main contribution of this paper is to automate the search over kernel structures.
 
 
 \subsection{Decomposing the Signal}
@@ -160,7 +157,7 @@ and the covariance between the two components, conditioned on their sum is given
 \begin{align}
 \cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 \end{align}
-Derivations are in the supplementary material.
+Derivations can be found in the supplementary material.
 
 These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
@@ -170,7 +167,9 @@ These expressions allow us to decompose the posterior into a sum of interpretabl
 
 \section{Searching over structures}
 
-\TBD{Needs works e.g.~justification / cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?}
+\TBD{Justification}
+
+\TBD{cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?}
 
 Notes on the algorithm
 \begin{enumerate}
@@ -264,7 +263,9 @@ First, we examined the ability of our algorithm to discover useful structure in 
 \subsection{Decomposition}
 
 We demonstrate the decompositions produced by our method on two time series.
-For the search we used $k = 1$, $D = 8$ and four base kernels; SE, PE, RQ and LN (see table~\ref{tbl:kernel_descriptions}) \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure}.
+For the search we used $k = 1$, $D = 8$ and the kernels in Table~\ref{tbl:kernel_descriptions}.
+%These were chosen to minimally allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure.
+% \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure}.
 
 \input{"tables/kernel_descriptions.tex"}
 
@@ -273,7 +274,7 @@ For the search we used $k = 1$, $D = 8$ and four base kernels; SE, PE, RQ and LN
 As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
 Figures \ref{fig:mauna_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa dataset.
-Note in particular that whilst the interior of the data can be smoothed effectively with a single base kernel model, the extrapolations improve dramatically as the search descends.
+Note in particular that, while the data can be smoothly interpolated a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth $\gp$ regression model together with the additive components of the posterior.
 The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.
@@ -342,7 +343,7 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 \label{fig:airline_decomp}
 \end{figure}
 
-\subsection{Datasets}
+\subsection{Multidimensional datasets}
 
 \paragraph{Bach Synthetic Dataset}
 In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
@@ -355,6 +356,8 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 %GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
 %However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.
 %In this example, the additive GP is able to recover the relevant structure.
+
+[TODO: Describe concrete, pumadyn, servo and housing]
 
 \subsection{Methods}
 
