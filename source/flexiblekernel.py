@@ -16,6 +16,7 @@ except:
 
 import config
 from utils import psd_matrices
+import utils.misc
 
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
 #### MAGIC NUMBER - CAUTION
@@ -68,6 +69,11 @@ class BaseKernel(Kernel):
     def effective_params(self):
         '''This is true of all base kernels, hence definition here'''  
         return len(self.param_vector())
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Returns the parameter vector with any default values replaced with random Gaussian'''
+        return [np.random.normal(scale=sd) if p ==0 else p for p in self.param_vector()]
+        
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -173,8 +179,7 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
 
     @staticmethod    
     def params_description():
-        return "lengthscale, period"       
-    
+        return "lengthscale, period"  
     
 class SqExpPeriodicKernel(BaseKernel):
     def __init__(self, lengthscale, period, output_variance):
@@ -194,6 +199,20 @@ class SqExpPeriodicKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.period, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Overwrites base method, using min period to prevent Nyquist errors'''
+        result = self.param_vector()
+        if result[0] == 0:
+            result[0] = np.random.normal(scale=sd)
+        if result[1] == 0:
+            if min_period is None:
+                result[1] = utils.misc.sample_truncated_normal(scale=sd)
+            else:
+                result[1] = utils.misc.sample_truncated_normal(scale=sd, min_value=min_period)
+        if result[2] == 0:
+            result[2] = np.random.normal(scale=sd)
+        return result
 
     def copy(self):
         return SqExpPeriodicKernel(self.lengthscale, self.period, self.output_variance)
@@ -419,7 +438,7 @@ class LinKernelFamily(BaseKernelFamily):
         return "bias"
     
 class LinKernel(BaseKernel):
-    def __init__(self, offset, lengthscale):
+    def __init__(self, offset=0, lengthscale=0):
         self.offset = offset
         self.lengthscale = lengthscale
         
@@ -1080,6 +1099,16 @@ class MaskKernel(Kernel):
         
     def effective_params(self):
         return len(self.param_vector())
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Returns the parameter vector with any default values replaced with random Gaussian'''
+        if isinstance(min_period, (list, tuple)):
+            # Pick out relevant minimum period
+            min_period = min_period[self.active_dimension]
+        else:
+            # min_periods either one dimensional or None
+            min_period = min_period
+        return self.base_kernel.default_params_replaced(sd=sd, min_period=min_period)
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1158,6 +1187,10 @@ class SumKernel(Kernel):
         
     def effective_params(self):
         return len(self.param_vector())
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Returns the parameter vector with any default values replaced with random Gaussian'''
+        return np.concatenate([o.default_params_replaced(sd=sd, min_period=min_period) for o in self.operands])
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1244,6 +1277,10 @@ class ProductKernel(Kernel):
     def effective_params(self):
         '''The scale of a product of kernels is over parametrised'''
         return len(self.param_vector()) - (len(self.operands) - 1)
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Returns the parameter vector with any default values replaced with random Gaussian'''
+        return np.concatenate([o.default_params_replaced(sd=sd, min_period=min_period) for o in self.operands])
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1429,17 +1466,17 @@ class ScoredKernel:
         BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
         return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)	
 
-
 def replace_defaults(param_vector, sd):
     #### FIXME - remove dependence on special value of zero
     ####       - Caution - remember print, compare etc when making the change (e.g. just replacing 0 with None would cause problems later)
     '''Replaces zeros in a list with Gaussians'''
     return [np.random.normal(scale=sd) if p ==0 else p for p in param_vector]
 
-def add_random_restarts_single_kernel(kernel, n_rand, sd):
+def add_random_restarts_single_kernel(kernel, n_rand, sd, min_period=None):
     '''Returns a list of kernels with random restarts for default values'''
-    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
+    #return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
+    return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(kernel.default_params_replaced(sd=sd, min_period=min_period)), n_rand))
 
-def add_random_restarts(kernels, n_rand=1, sd=2):    
+def add_random_restarts(kernels, n_rand=1, sd=2, min_period=None):    
     '''Augments the list to include random restarts of all default value parameters'''
-    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd)]
+    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd, min_period)]
