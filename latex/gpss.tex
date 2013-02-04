@@ -81,7 +81,7 @@ Because different kernels reflect different properties of the function being mod
 When approaching a new dataset, it is often not clear which kernel family is most appropriate, especially for non-experts.
 Often, a standard kernel family (typically squared-exponential) is chosen out of convenience, and kernel parameters are set by cross-validation or maximum marginal likelihood. [citations?]
 
-Sometimes the argument is made that since most kernels are universal (i.e. consistent in the limit), that the choice of kernel is not important[citation?].  However, our experiments demonstrate that for datasets of moderate size, predictive performance, extrapolation and interpretability all depend heavily on the choice of kernel. \TBD{RBG: Do people actually say the choice of kernel isn't important?  This sounds like a straw man...}
+%Sometimes the argument is made that since most kernels are universal (i.e. consistent in the limit), that the choice of kernel is not important[citation?].  However, our experiments demonstrate that for datasets of moderate size, predictive performance, extrapolation and interpretability all depend heavily on the choice of kernel. \TBD{RBG: Do people actually say the choice of kernel isn't important?  This sounds like a straw man...}
 
 \paragraph{Main contribution}
 In this paper, we introduce an automated search over composite kernels.
@@ -90,9 +90,8 @@ Our objective function is the marginal likelihood of a Gaussian process model wi
 
 We examine the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrate that in some cases, the structured posterior can be automatically decomposed into a sum of interpretable components, e.g. in Figure \ref{fig:airline_decomp}. \TBD{RBG: Need to clarify that the contribution isn't that we can decompose it (that was in GPML), but that the decomposition is often interesting.}
 
-\section{Motivation}
-
-\TBD{RBG: Do we need a separate motivation section?  The introduction should motivate the work.}
+%\section{Motivation}
+%\TBD{RBG: Do we need a separate motivation section?  The introduction should motivate the work.}
 
 There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].
 However, relatively little attention has been paid to automatic structure discovery in supervised learning.
@@ -149,6 +148,11 @@ However, the main contribution of this paper is to automate the search over kern
 \TBD{RBG: We talk about sums of kernels, but I think we need more intuition about what products of kernels represent and why we want them. There are three
 examples of products in Figure 2, and it's not obvious what they have in common.}
 
+\TBD{DD: Some points we can make here:  Pointwise addition and multiplcation of Mercer kernels always results in a valid Mercer kernel.  Intuitively, if we think of a kernel as defining a similary metric, then a some of kernels implies an ``or'' relation:  Two points are similar if either kernel in a sum has a high value.  Products between kernels imply an ``and'' relation.}
+
+\paragraph{Products and Sums of Kernels}
+
+
 
 \subsection{Decomposing the Signal}
 
@@ -166,7 +170,7 @@ and the covariance between the two components, conditioned on their sum is given
 \begin{align}
 \cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 \end{align}
-Derivations can be found in the supplementary material. \TBD{RBG: What is the $\star$ notation?}
+Derivations can be found in the supplementary material. \TBD{RBG: What is the $\star$ notation? David:  It means it's at a test point.  This still needs to be explained somewhere.}
 
 These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
@@ -356,11 +360,12 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 \subsection{Multidimensional datasets}
 
 \paragraph{Bach Synthetic Dataset}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}: From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
-We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
+In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
+% From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
+%We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
 This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
 %
-This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over GP-ARD. 
+This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over a \gp{} with a SE-ARD kernel. 
 
 %If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.
 %GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
@@ -369,7 +374,7 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 
 [TODO: Describe concrete, pumadyn, servo and housing]
 
-\subsection{Methods}
+\subsection{Details of Methods Used}
 
 \paragraph{Linear regression} was included as a baseline. A likelihood score was obtained by setting the noise variance to the empirical variance on the training set.
 
@@ -419,12 +424,11 @@ Machine learning can be more data-driven, analogous to the high-thoughput approa
 
 However, it would be presumably quite difficult to learn the moderate number of kernel hyperparameters present in composite kernels using only cross-validation.
 
-\paragraph{Noise Models and Mean Functions}
-
-The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
-A more sophisticated approach might also define grammars over composite mean functions and noise models.
-However, in most cases, the covariance function can express structure that might be expressed in the mean function, and often in a more flexible way.
-The same can be said about noise models - for instance, a t-noise can be approximated by a sum of sq-exp kernels with very small lengthscales, but output variances which vary widely.
+%\paragraph{Noise Models and Mean Functions}
+%The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
+%A more sophisticated approach might also define grammars over composite mean functions and noise models.
+%However, in most cases, the covariance function can express structure that might be expressed in the mean function, and often in a more flexible way.
+%The same can be said about noise models - for instance, a t-noise can be approximated by a sum of sq-exp kernels with very small lengthscales, but output variances which vary widely.
 
 
 \paragraph{Bayes model averaging}
@@ -439,9 +443,9 @@ Integrating over kernel structures raises the problem of reporting interpretable
 Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
 In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
 
-\paragraph{Bayesian Optimization} 
-The greedy search strategy used in this paper is rudimentary.  A natural extension of this work would be a model-based search over composite kernels, where the results of previous searches are used to propose informative directions.  This would be an example of ``meta-learning''.
-\cite{snoek2012practical} [also cite Lizotte, de Frietas]
+%\paragraph{Bayesian Optimization} 
+%The greedy search strategy used in this paper is rudimentary.  A natural extension of this work would be a model-based search over composite kernels, where the results of previous searches are used to propose informative directions.  This would be an example of ``meta-learning''.
+%\cite{snoek2012practical} [also cite Lizotte, de Frietas]
 %
 %\paragraph{A Kernel between kernels}
 Placing a \gp{} model on the log-likelihood of different kernels would require constructing a kernel on kernels, as in \cite{ong2002hyperkernels}.
