@@ -16,5 +16,6 @@ for i = 1:length(dirnames)
         h = open(curfile);
         pdfname = strrep(curfile, '.fig', '.pdf')
         save2pdf( pdfname, gcf, 600, true );
+        close all
     end
 end

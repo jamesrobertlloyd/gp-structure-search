@@ -273,6 +273,11 @@ def make_all_1d_figures(folder=D1_RESULTS_PATH, max_level=None):
             if not os.path.exists(fig_folder):
                 os.makedirs(fig_folder)
             gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), noise=best_kernel.noise)
+            
+def make_all_1d_figures_all_depths(folder=D1_RESULTS_PATH, max_depth=8):
+    make_all_1d_figures()
+    for level in range(max_depth+1):
+        make_all_1d_figures(folder=folder, max_level=level)
 
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
