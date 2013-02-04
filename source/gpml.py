@@ -88,7 +88,11 @@ hyp.cov = %(kernel_params)s
 likfunc = @likGauss
 hyp.lik = %(noise)s
 
-[hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
+%% Two thirds of optimisation
+[hyp_opt, nlls_1] = minimize(hyp, @gp, -int32(%(iters)s * 2 / 3), @infExact, meanfunc, covfunc, likfunc, X, y);
+%% Final third of optimisation - hopefully restarting optimiser will make it more robust to scale issues
+[hyp_opt, nlls_2] = minimize(hyp_opt, @gp, -int32(%(iters)s * 1 / 3), @infExact, meanfunc, covfunc, likfunc, X, y);
+nlls = [nlls_1; nlls_2];
 best_nll = nlls(end)
 
 %% Compute Hessian numerically for laplace approx

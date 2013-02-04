@@ -88,6 +88,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
+        assert(len(new_results) > 0) # FIXME - Need correct control flow if this happens 
         # Sort the new results
         new_results = sorted(new_results, key=ScoredKernel.score, reverse=True)
         # Remove near duplicates from these results (top m results only for efficiency)
@@ -233,7 +234,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
         else:
             print 'Skipping file %s' % files
             
-def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=1):
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=2, sd=2, n_rand=2):
     data_sets = list(gen_all_1d_datasets())
 	#### FIXME - Comment / or make more elegant
     if random_walk:

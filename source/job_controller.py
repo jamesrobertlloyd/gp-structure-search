@@ -44,6 +44,7 @@ def covariance_distance(kernels, X, local_computation=True, verbose=True):
     Return:
      - A matrix of similarities between the input kernels
     '''
+    assert(len(kernels) > 0) #### FIXME - This sort of check should happen earlier
     # Make data into matrices in case they're unidimensional.
     if X.ndim == 1: X = X[:, nax]
     # Save temporary data file in standard temporary directory

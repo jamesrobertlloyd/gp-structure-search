@@ -207,9 +207,9 @@ class SqExpPeriodicKernel(BaseKernel):
             result[0] = np.random.normal(scale=sd)
         if result[1] == 0:
             if min_period is None:
-                result[1] = utils.misc.sample_truncated_normal(scale=sd)
+                result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd)
             else:
-                result[1] = utils.misc.sample_truncated_normal(scale=sd, min_value=min_period)
+                result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd, min_value=min_period)
         if result[2] == 0:
             result[2] = np.random.normal(scale=sd)
         return result
@@ -438,7 +438,8 @@ class LinKernelFamily(BaseKernelFamily):
         return "bias"
     
 class LinKernel(BaseKernel):
-    def __init__(self, offset=0, lengthscale=0):
+    # FIXME - Caution - magic numbers! This one means small offset and scale of 1
+    def __init__(self, offset=-100, lengthscale=0):
         self.offset = offset
         self.lengthscale = lengthscale
         
