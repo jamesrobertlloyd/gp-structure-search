@@ -219,7 +219,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_experiment(data_file, output_file, prediction_file, max_depth=12, k=1, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
+            perform_experiment(data_file, output_file, prediction_file, max_depth=12, k=1, description='SE, RQ, LN', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:

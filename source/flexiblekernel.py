@@ -1282,8 +1282,8 @@ def base_kernel_families():
     '''
     yield SqExpKernelFamily().default()
     #yield SqExpPeriodicKernelFamily().default()
-    #yield RQKernelFamily().default()
-    #yield LinKernelFamily().default()
+    yield RQKernelFamily().default()
+    yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
