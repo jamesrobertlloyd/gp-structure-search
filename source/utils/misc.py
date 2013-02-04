@@ -197,3 +197,5 @@ def resize(arr, size):
                          dtype=dtype)
 
     return result
+    
+ScoredKernel(k_opt=ProductKernel([ MaskKernel(ndim=8, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=0.0, period=0.0, output_variance=0.0)), MaskKernel(ndim=8, active_dimension=1, base_kernel=SqExpPeriodicKernel(lengthscale=0.0, period=0.0, output_variance=0.0)) ]), nll=7.937111, laplace_nle=26.053985, bic_nle=41.839007, noise=[-1.60068696])
