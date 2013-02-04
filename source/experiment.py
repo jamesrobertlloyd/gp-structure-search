@@ -23,6 +23,7 @@ import cblparallel
 from cblparallel.util import mkstemp_safe
 from config import *
 from job_controller import *   # This might be a good, if hacky, place to switch to an MIT controller.
+import utils.misc
 
        
 def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
@@ -59,7 +60,8 @@ def remove_nan_scored_kernels(scored_kernels):
     return [k for k in scored_kernels if not np.isnan(k.score())] 
     
 def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
-                          verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False, zip_files=False, max_jobs=500):
+                          verbose=True, description='No description', n_rand=1, sd=2, local_computation=False, debug=False, zip_files=False, max_jobs=500, \
+                          use_min_period=True):
     '''Recursively search for the best kernel, in parallel on fear or local machine.'''
 
     # Load data - input, output and number of input dimensions
@@ -69,13 +71,19 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         current_kernels = list(fk.test_kernels(4))
     else:
         current_kernels = list(fk.base_kernels(D))
+    # Initialise minimum period to prevent Nyquist problems
+    if use_min_period:
+        min_period = np.log([utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
+    else:
+        min_period = None
+    print min_period
     # Initialise list of results
     results = []              # All results.
     results_sequence = []     # Results sets indexed by level of expansion.
     # Perform search
     for depth in range(max_depth):   
         # Add random restarts to kernels
-        current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd)
+        current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd, min_period=min_period)
         # Score the kernels
         new_results = evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
@@ -230,6 +238,8 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
 	#### FIXME - Comment / or make more elegant
     if random_walk:
         random.shuffle(data_sets)
+    else:
+        data_sets.sort()
     for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(D1_RESULTS_PATH, files + "_result.txt")))):
@@ -237,7 +247,7 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             data_file = os.path.join(r,files + ".mat")
             output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
             
-            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='1 % Frobenius cut off', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:
