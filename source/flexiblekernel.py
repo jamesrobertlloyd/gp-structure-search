@@ -161,8 +161,9 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
     def pretty_print(self):
         return colored('PE', self.depth())
     
+    # FIXME - Caution - magic numbers!
     def default(self):
-        return SqExpPeriodicKernel(0., 0., 0.)
+        return SqExpPeriodicKernel(0., -2.0, 0.)
     
     def __cmp__(self, other):
         assert isinstance(other, KernelFamily)
@@ -417,8 +418,9 @@ class LinKernelFamily(BaseKernelFamily):
     def pretty_print(self):
         return colored('LN', self.depth())
     
+    # FIXME - Caution - magic numbers!
     def default(self):
-        return LinKernel(0., 0.)
+        return LinKernel(-1.0, 0.)
     
     def __cmp__(self, other):
         assert isinstance(other, KernelFamily)
@@ -439,7 +441,7 @@ class LinKernelFamily(BaseKernelFamily):
     
 class LinKernel(BaseKernel):
     # FIXME - Caution - magic numbers! This one means small offset and scale of 1
-    def __init__(self, offset=-100, lengthscale=0):
+    def __init__(self, offset=-1, lengthscale=0):
         self.offset = offset
         self.lengthscale = lengthscale
         
@@ -455,6 +457,15 @@ class LinKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.offset, self.lengthscale])
+        
+    def default_params_replaced(self, sd=1, min_period=None):
+        '''Overwrites base method, expects small offsets - i.e. assumes standardised inputs'''
+        result = self.param_vector()
+        if result[0] == 0:
+            result[0] = np.random.normal(loc=-1, scale=sd)
+        if result[1] == 0:
+            result[1] = np.random.normal(scale=sd)
+        return result
 
     def copy(self):
         return LinKernel(offset=self.offset, lengthscale=self.lengthscale)
