@@ -1,19 +1,36 @@
-\newcommand{\fw}{2.6cm}
+\newcommand{\fhbig}{2.35cm}
+\newcommand{\fwbig}{2.4cm}
+\newcommand{\kernpic}[1]{\includegraphics[height=\fhbig,width=\fwbig]{../figures/structure_examples/#1}}
+\newcommand{\kernpicr}[1]{\rotatebox{90}{\includegraphics[height=\fwbig,width=\fhbig]{../figures/structure_examples/#1}}}
+\newcommand{\largeplus}{\tabbox{{\Large+}}}
+\newcommand{\largeeq}{\tabbox{{\Large=}}}
+\newcommand{\largetimes}{\tabbox{{\Large$\times$}}}
 \begin{figure*}
 \centering
-\begin{tabular}{ccccc|c|c}
-%& & & & \includegraphics[width=\fw]{../figures/structure_examples/se_kernel} &  \includegraphics[width=\fw]{../figures/structure_examples/se_kernel_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_kernel_post} \\
-%& & & & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel} &  \includegraphics[width=\fw]{../figures/structure_examples/per_kernel_draws} & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel_post} \\
-%& & & & \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel} &  \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel_draws} & \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel_post} \\
- \includegraphics[width=\fw]{../figures/structure_examples/se_kernel} & $\times$ & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/se_times_per} & \includegraphics[width=\fw]{../figures/structure_examples/se_times_per_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_times_per_post} \\
-  \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel} & $\times$ & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/lin_times_per} & \includegraphics[width=\fw]{../figures/structure_examples/lin_times_per_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_times_lin_post} \\
-   \includegraphics[width=\fw]{../figures/structure_examples/se_kernel} & $+$ & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_per} & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_per_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_per_post} \\
-  \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel} & $+$ & \includegraphics[width=\fw]{../figures/structure_examples/per_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/lin_plus_per} & \includegraphics[width=\fw]{../figures/structure_examples/lin_plus_per_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_lin_post} \\
-   \includegraphics[width=\fw]{../figures/structure_examples/se_kernel} & $+$ & \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_lin} & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_lin_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_plus_lin_post} \\
-   \includegraphics[width=\fw]{../figures/structure_examples/se_kernel} & $\times$ & \includegraphics[width=\fw]{../figures/structure_examples/lin_kernel} & = & \includegraphics[width=\fw]{../figures/structure_examples/se_times_lin} & \includegraphics[width=\fw]{../figures/structure_examples/se_times_lin_draws} & \includegraphics[width=\fw]{../figures/structure_examples/se_times_lin_post} \\
-base kernel & & base kernel & & combined kernel & draws from GP & GP posterior
+\renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
+%\begin{tabularx}{\textwidth}{XXXXX|X|X}
+base kernel & & base kernel & & composite \newline kernel & draws from GP & GP posterior \\ \toprule
+\kernpicr{se_kernel} & \largetimes& \kernpicr{per_kernel} & \largeeq & \kernpicr{se_times_per} & \kernpic{se_times_per_draws} & \kernpic{se_times_per_post} \\
+sq-exp & $\times$ & periodic & = & locally periodic & & \\  \midrule
+\kernpicr{se_kernel} & \largeplus & \kernpicr{per_kernel} & \largeeq & \kernpicr{se_plus_per} & \kernpic{se_plus_per_draws} & \kernpic{se_plus_per_post} \\
+sq-exp & + & periodic & = & perdiodic with local noise & & \\ \midrule
+\kernpic{lin_kernel} & \largetimes & \kernpic{lin_kernel} & \largeeq & \kernpic{lin_times_lin} & \kernpic{lin_times_lin_draws} & \kernpic{lin_times_lin_post} \\
+linear & $\times$ & linear & = & quadratic & & \\ \midrule
+\kernpic{lin_kernel} & \largetimes & \kernpicr{se_kernel} & \largeeq & \kernpicr{se_times_lin} & \kernpic{se_times_lin_draws} & \kernpic{se_times_lin_post} \\
+linear & $\times$ & sq-exp & = & increasing local variation & & \\ \midrule
+\kernpic{lin_kernel} & \largetimes & \kernpicr{per_kernel} & \largeeq & \kernpic{lin_times_per} & \kernpic{lin_times_per_draws} & \kernpic{lin_times_per_post} \\
+linear & $\times$ & periodic & = & growing amplitude & & \\ \midrule
+\kernpic{lin_kernel} & \largeplus & \kernpicr{per_kernel} & \largeeq & \kernpic{lin_plus_per} & \kernpic{lin_plus_per_draws} & \kernpic{lin_plus_per_post} \\
+linear & + & periodic & = & periodic with trend & & \\
 \end{tabular}
-\caption{ A draw from a sum of kernels corresponds to a sum of draws from the base kernels.  A draw from a product kernel prior has weaker long-range dependencies, and less long-range structure.
+\caption{ Examples of prior structures that can be expressed by
+  composing kernels.  The x-axis has the same scale for all plots.
+  The 3rd column shows the composite kernel function, the 4th column
+  shows draws from a zero-mean GP with that kernel, and the right-most
+  column shows a GP posterior after conditioning on two
+  datapoints. \TBD{RBG: In row 3, last column, why doesn't the curve
+    pass through the points exactly, like in the other examples?}
 }
 \label{fig:kernels}
 \end{figure*}

@@ -279,6 +279,11 @@ def make_all_1d_figures_all_depths(folder=D1_RESULTS_PATH, max_depth=8):
     for level in range(max_depth+1):
         make_all_1d_figures(folder=folder, max_level=level)
 
+def make_all_1d_figures_all_levels():
+    make_all_1d_figures(max_level=None)
+    for max_level in range(1,9):
+        make_all_1d_figures(max_level=max_level)
+        
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
     entries = [];
