@@ -275,7 +275,7 @@ def make_all_1d_figures(folder=D1_RESULTS_PATH, max_level=None):
             gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), noise=best_kernel.noise)
             
 def make_all_1d_figures_all_depths(folder=D1_RESULTS_PATH, max_depth=8):
-    make_all_1d_figures()
+    make_all_1d_figures(folder=folder)
     for level in range(max_depth+1):
         make_all_1d_figures(folder=folder, max_level=level)
 
