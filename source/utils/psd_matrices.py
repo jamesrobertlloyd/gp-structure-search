@@ -655,7 +655,7 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
     ####       - Might be MATLAB though - test this code on some known integrals
     d = opt_hyper.size
     
-    if hessian != proj_psd(hessian):
+    if not np.allclose(hessian, proj_psd(hessian)):
         # Hessian not PSD - cannot use in Laplace approx
         #### TODO - Any job controller should attempt to re-try optimisation
         return np.nan
@@ -669,3 +669,48 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
 
     # multiply the two Gaussians and integrate the result
     return -(evidence + prior).integral()
+
+
+def laplace_approx_stable(nll, opt_hyper, hessian, prior_var=100):
+    H_eig, Q = scipy.linalg.eigh(hessian)
+
+    # in these cases, this function should still work, but an ill-conditioned
+    # or non-PSD Hessian is a sign there's a bug somewhere upstream
+    problems = []
+    if np.max(H_eig) > 1e10:
+        problems.append('ill-conditioned')
+    if np.min(H_eig) < 0.:
+        problems.append('not PSD')
+
+    # treat negative and very small values as zero
+    is_zero = (H_eig < 1e-10)
+
+    # determinant term
+    temp = np.where(is_zero, 1., (1. / H_eig) / (prior_var + 1. / H_eig))
+    total = 0.5 * np.sum(np.log(temp))
+
+    # term inside the exp
+    opt_hyper_orth = np.dot(Q.T, opt_hyper)
+    temp = np.where(is_zero, 0., opt_hyper_orth ** 2 / (prior_var + 1. / H_eig))
+    total += -0.5 * np.sum(temp)
+
+    total += -nll
+
+    return -total, problems
+
+
+def check_laplace_approx():
+    D = 5
+    nll = np.random.normal()
+    opt_hyper = np.random.normal(size=D)
+    A = np.random.normal(size=(10, 5))
+    hessian = np.dot(A.T, A)
+    prior_var = np.random.uniform(1., 2.)
+
+    ans1 = laplace_approx(nll, opt_hyper, hessian, prior_var)
+    ans2 = laplace_approx_stable(nll, opt_hyper, hessian, prior_var)[0]
+    assert np.allclose(ans1, ans2)
+                       
+
+
+
