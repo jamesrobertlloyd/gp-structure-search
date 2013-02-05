@@ -207,6 +207,7 @@ class SqExpPeriodicKernel(BaseKernel):
         if result[0] == 0:
             result[0] = np.random.normal(scale=sd)
         if result[1] == 0:
+            #### FIXME - Caution, magic numbers
             if min_period is None:
                 result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd)
             else:
@@ -409,18 +410,17 @@ class ConstKernel(BaseKernel):
 
 class LinKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
-        offset, lengthscale = params
-        return LinKernel(offset=offset, lengthscale=lengthscale)
+        offset, lengthscale, location = params
+        return LinKernel(offset=offset, lengthscale=lengthscale, location=location)
     
     def num_params(self):
-        return 2
+        return 3
     
     def pretty_print(self):
         return colored('LN', self.depth())
     
-    # FIXME - Caution - magic numbers!
     def default(self):
-        return LinKernel(-1.0, 0.)
+        return LinKernel(0., 0., 0.)
     
     def __cmp__(self, other):
         assert isinstance(other, KernelFamily)
@@ -440,42 +440,35 @@ class LinKernelFamily(BaseKernelFamily):
         return "bias"
     
 class LinKernel(BaseKernel):
-    # FIXME - Caution - magic numbers! This one means small offset and scale of 1
-    def __init__(self, offset=-1, lengthscale=0):
+    # FIXME - Caution - magic numbers! This one means offset of essentially zero and scale of 1
+    # FIXME - lengthscale is actually an inverse scale
+    def __init__(self, offset=-10, lengthscale=0, location=0):
         self.offset = offset
         self.lengthscale = lengthscale
+        self.location = location
         
     def family(self):
         return LinKernelFamily()
         
     def gpml_kernel_expression(self):
-        return '{@covSum, {@covConst, @covLINard}}'
+        return '{@covSum, {@covConst, @covLINscaleshift}}'
     
     def english_name(self):
         return 'LN'
     
     def param_vector(self):
         # order of args matches GPML
-        return np.array([self.offset, self.lengthscale])
-        
-    def default_params_replaced(self, sd=1, min_period=None):
-        '''Overwrites base method, expects small offsets - i.e. assumes standardised inputs'''
-        result = self.param_vector()
-        if result[0] == 0:
-            result[0] = np.random.normal(loc=-1, scale=sd)
-        if result[1] == 0:
-            result[1] = np.random.normal(scale=sd)
-        return result
+        return np.array([self.offset, self.lengthscale, self.location])
 
     def copy(self):
-        return LinKernel(offset=self.offset, lengthscale=self.lengthscale)
+        return LinKernel(offset=self.offset, lengthscale=self.lengthscale, location=self.location)
     
     def __repr__(self):
-        return 'LinKernel(offset=%f, lengthscale=%f)' % \
-            (self.offset, self.lengthscale)
+        return 'LinKernel(offset=%f, lengthscale=%f, location=%f)' % \
+            (self.offset, self.lengthscale, self.location)
     
     def pretty_print(self):
-        return colored('LN(off=%1.1f, ell=%1.1f)' % (self.offset, self.lengthscale),
+        return colored('LN(off=%1.1f, ell=%1.1f, loc=%1.1f)' % (self.offset, self.lengthscale, self.location),
                        self.depth())
         
     def latex_print(self):
@@ -485,7 +478,7 @@ class LinKernel(BaseKernel):
         assert isinstance(other, Kernel)
         if cmp(self.__class__, other.__class__):
             return cmp(self.__class__, other.__class__)
-        differences = [self.offset - other.offset, self.lengthscale - other.lengthscale]
+        differences = [self.offset - other.offset, self.lengthscale - other.lengthscale, self.location - other.location]
         differences = map(shrink_below_tolerance, differences)
         return cmp(differences, [0] * len(differences))
 #        max_diff = max(np.abs([self.lengthscale - other.lengthscale]))

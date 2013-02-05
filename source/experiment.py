@@ -73,7 +73,8 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         current_kernels = list(fk.base_kernels(D))
     # Initialise minimum period to prevent Nyquist problems
     if use_min_period:
-        min_period = np.log([utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
+        #### FIXME - Magic numbers!
+        min_period = np.log([5 * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
     else:
         min_period = None
     print min_period
@@ -234,7 +235,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
         else:
             print 'Skipping file %s' % files
             
-def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=3):
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=8, k=2, sd=2, n_rand=3):
     data_sets = list(gen_all_1d_datasets())
 	#### FIXME - Comment / or make more elegant
     if random_walk:
