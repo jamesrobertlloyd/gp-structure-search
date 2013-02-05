@@ -655,7 +655,10 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
     ####       - Might be MATLAB though - test this code on some known integrals
     d = opt_hyper.size
     
-    hessian = proj_psd(hessian)
+    if hessian != proj_psd(hessian):
+        # Hessian not PSD - cannot use in Laplace approx
+        #### TODO - Any job controller should attempt to re-try optimisation
+        return np.nan
 
     # quadratic centered at opt_hyper with maximum -nll
     evidence = gaussians.Potential(np.zeros(d), FullMatrix(hessian), -nll)
