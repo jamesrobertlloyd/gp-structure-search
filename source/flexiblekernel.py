@@ -17,6 +17,7 @@ except:
 import config
 from utils import psd_matrices
 import utils.misc
+import re
 
 PAREN_COLORS = ['red', 'green', 'blue', 'cyan', 'magenta', 'yellow']
 #### MAGIC NUMBER - CAUTION
@@ -1424,12 +1425,13 @@ def distribute_products(k):
     else:
         # Base case: A kernel that's just, like, a kernel, man.
         return k
+        
+from numpy import nan
 
 def repr_string_to_kernel(string):
     """This is defined in this module so that all the kernel class names
     don't have to have the module name in front of them."""
     return eval(string)
-
 
 class ScoredKernel:
     '''
