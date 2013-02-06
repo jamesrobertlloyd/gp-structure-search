@@ -65,6 +65,8 @@
 \def\InputVar{X}
 \def\InputSpace{\mathcal{X}}
 \def\outputVar{y}
+\def\OutputSpace{\mathcal{Y}}
+\def\function{f}
 \def\kernel{\kappa}
 \def\KernelMatrix{K}
 
@@ -94,7 +96,7 @@ TBD
 
 \section{Introduction}
 
-Supervised learning problems, such as classification and regression, learn a mapping from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
+Supervised learning problems, such as classification and regression, learn a function ${\function : \InputSpace \to \OutputSpace}$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
 Kernel based nonparametric models, such as support vector machine and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
 These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ that specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
@@ -161,9 +163,18 @@ Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be us
 \NA{In the case of Gaussian process regression} the kernel is used to define a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
 The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 
-\TBD{Give some examples of base PSD kernels and explain the structure they encode briefly.}
+Examples of PSD kernels include squared exponential (SE), periodic (PE) and linear kernels (LN) defined below
+\begin{eqnarray}
+\kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
+\kernel_\textrm{PE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+\kernel_\textrm{LN}(\inputVar, \inputVar') = & \sigma_1^2 + \sigma_2^2(\inputVar - \ell)(\inputVar' - \ell).
+\end{eqnarray}
 
-\TBD{Then state the appropriate theorem that PSD kernels are closed under addition and multiplication.}
+When used within the context of GP regression, these kernels define priors on functions which are smooth, smooth and periodic or linear respectively.
+\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing}
+
+PSD kernels are closed under addition and multiplication \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
+This allows one to create richly structured kernels from well understood base components.
 
 \fTBD{Can probably kill simple kernel table. Focus on one table.}
 \input{tables/simple_kernels_table.tex}
@@ -171,13 +182,21 @@ The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; 
 
 \paragraph{Summation}
 
-\TBD{
-Link function addition and kernel addition and mention that the posterior of components is analytic (maybe footnote?).
-Demonstrate multi dimension functions.
-Demonstrate multiple lengthscales.
-Demonstrate different types of independent signal (\eg SE + PE).}
+Summation of kernels corresponds to the summation of independent functions in the following sense.
+Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, and ${\function_2 \dist \GP(0, \kernel_2)}$ and are independent.
+Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2)}$\footnotemark.
+\footnotetext{Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section\TBD{ add reference} and give derivations in the supplementary material.}
+
+In one dimension, summing kernels can capture structures including multiple scales of variation\TBD{ reference a picture} or the sum of heterogeneous function types\TBD{ reference \eg SE + PE picture}.
+In higher dimensions summing kernels can correspond to decompositions of the form
+\begin{equation}
+\function((\inputVar_1, \inputVar_2)) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
+\end{equation}
+\ie `independent' variation in different dimensions\TBD{ reference a plot}.
 
 \paragraph{Multiplication}
+
+Multiplication of kernels does not correspond to a simple decomposition of functions, but allows for the construction of more complex structures.
 
 \TBD{
 Note that multiplying \eg SE across several dimensions corresponds to multi-$d$ SE (contrasting with additivity).
