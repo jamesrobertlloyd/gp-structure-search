@@ -460,6 +460,10 @@ class LinKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.offset, self.lengthscale, self.location])
+        
+    def effective_params(self):
+        '''It's linear regression'''  
+        return 2
 
     def copy(self):
         return LinKernel(offset=self.offset, lengthscale=self.lengthscale, location=self.location)
