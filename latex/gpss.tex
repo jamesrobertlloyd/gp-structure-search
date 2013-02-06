@@ -290,16 +290,9 @@ They call this \emph{Bayesian localized multiple kernel learning}.
 
 \TBD{Cite relevant work by Salkhutdinov and Hinton}
 
-\section{Experiments}
+\section{Decomposition}
 
-To evaluate the effectiveness of our method we performed two types of experiments.
-First, we examined the ability of our algorithm to discover useful structure in one-dimensional datasets.  Second, we examined the predictive performance of our model on multi-dimensional datasets.
-% testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
-%The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
-%The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}). 
-\TBD{RBG: Are we evaluating interpolation or extrapolation?  It seems like the latter would be a better test of the learned structure. It may be interesting to report both, actually, and show that for simple models, different structures do well for interpolation vs. extrapolation, whereas we learn complex structures that are good at both.}
-
-\subsection{Decomposition}
+\fTBD{This is a key part of the paper, so I think we should devote an entire section}
 
 We demonstrate the decompositions produced by our method on two time series.
 For the search we used $k = 1$, $D = 8$ and the kernels in Table~\ref{tbl:kernel_descriptions}.
@@ -402,6 +395,15 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 \caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
 \label{fig:airline_decomp}
 \end{figure}
+
+To evaluate the effectiveness of our method we performed two types of experiments.
+First, we examined the ability of our algorithm to discover useful structure in one-dimensional datasets.  Second, we examined the predictive performance of our model on multi-dimensional datasets.
+% testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
+%The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
+%The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
+
+\section{Numerical evaluation}
+\fTBD{Bad title name}
 
 \subsection{Multidimensional datasets}
 
