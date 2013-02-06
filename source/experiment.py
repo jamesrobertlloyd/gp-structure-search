@@ -74,7 +74,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     # Initialise minimum period to prevent Nyquist problems
     if use_min_period:
         #### FIXME - Magic numbers!
-        min_period = np.log([5 * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
+        min_period = np.log([10 * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
     else:
         min_period = None
     print min_period
@@ -235,7 +235,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
         else:
             print 'Skipping file %s' % files
             
-def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=7):
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9):
     data_sets = list(gen_all_1d_datasets())
 	#### FIXME - Comment / or make more elegant
     if random_walk:
@@ -249,7 +249,7 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             data_file = os.path.join(r,files + ".mat")
             output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
             
-            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=7', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=9', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
             
             print "Done one file!!!"  
         else:
