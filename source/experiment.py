@@ -115,6 +115,9 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         # Extract the best k kernels from the new all_results
         best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
         current_kernels = grammar.expand_kernels(D, best_kernels, verbose=verbose, debug=debug)
+        
+        if debug==True:
+            current_kernels = current_kernels[0:4]
 
     # Write all_results to a file.
     all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
@@ -202,6 +205,7 @@ def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1
     best_scored_kernel = parse_results(output_file)
     predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
+    os.system('reset')  # Stop terminal from going invisible.
    
 #### WARNING - Code duplication 
 def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
@@ -210,6 +214,7 @@ def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, desc
     assert(D==1)
     perform_kernel_search(X, y, 1, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
     best_scored_kernel = parse_results(output_file)
+    os.system('reset')  # Stop terminal from going invisible.
 
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
     data_sets = list(gen_all_kfold_datasets())
@@ -231,6 +236,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             print "Done one file!!!"  
         else:
             print 'Skipping file %s' % files
+    os.system('reset')  # Stop terminal from going invisible.        
             
 def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9):
     data_sets = list(gen_all_1d_datasets())
@@ -251,14 +257,17 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             print "Done one file!!!"  
         else:
             print 'Skipping file %s' % files
+    os.system('reset')  # Stop terminal from going invisible.        
     
   
 def run_test_kfold(local_computation = True, max_jobs=600):
-    #### TODO - Add description
+    """This is a quick test function."""
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
     perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
+    os.system('reset')  # Stop terminal from going invisible.
+    
 
 def make_figures():
     X, y, D = gpml.load_mat('../data/mauna2003.mat')

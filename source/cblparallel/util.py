@@ -38,7 +38,9 @@ class timeoutCommand(object):
             if self.verbose:
                 print 'Terminating process'
             try:
-                self.process.terminate()
+                #self.process.terminate()
+                proc.send_signal(signal.SIGINT)
+                proc.wait()                
                 thread.join()
                 if self.verbose:    
                     print self.process.returncode                
