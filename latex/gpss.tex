@@ -30,9 +30,13 @@
 
 \newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}m{#1}}
 \newcommand{\tabbox}[1]{#1}
-    
+
+
+\setlength{\marginparwidth}{0.6in}
 \input{include/commenting.tex}
+
 \usepackage{format/icml2013}
+%\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
 %\renewcommand{\LATER}[1]{}
@@ -43,63 +47,95 @@
 %\renewcommand{\fPROBLEM}[1]{}
 %\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
     
-%\subsection{How to use commenting}
-%\NA{Needs attention.}
-%\TBD{To be done.}
-%\PROBLEM{Problem.}
-%\fTBD{Margin to be done.}
-%\fPROBLEM{Margin problem.}
-    
 \begin{document}
 
+\def\ie{i.e.\ }
+\def\eg{e.g.\ }
+\def\iid{i.i.d.\ }
+\def\simiid{\sim_{\mbox{\tiny iid}}}
+\def\eqdist{\stackrel{\mbox{\tiny d}}{=}}
+
+\def\Reals{\mathbb{R}}
+
+\def\Uniform{\mbox{\rm Uniform}}
+\def\Bernoulli{\mbox{\rm Bernoulli}}
+\def\GP{\mathcal{GP}}
+
+\def\inputVar{x}
+\def\InputVar{X}
+\def\InputSpace{\mathcal{X}}
+\def\outputVar{y}
+\def\kernel{\kappa}
+\def\KernelMatrix{K}
+
 \twocolumn[
-\icmltitle{Kernel Structure Discovery}
+\icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
+Bayesian Structure Discovery for Regression OR \\
+Kernel Structure Discovery OR \\
+Discovering Structure in Kernels\ldots}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
+%%%%FIXME - Make sure to update this!
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML}
 \vskip 0.3in
 ]
-
 
 \begin{abstract}
 %Gaussian process (GP) models are used widely and successfully.
 %However, their effictiveness depends critically on choosing an appropriate family of kernels.
 %This aspect of GP modeling has been sorely underdeveloped.
 %In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
-The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
-We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
-We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components.
-We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
+%The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
+%We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
+%We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components.
+%We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
+TBD
 \end{abstract}
 
 \section{Introduction}
 
-Kernel-based nonparametric regression models have been widely and succesfully used over the last 20 years. [citations needed]
-As part of the development of this model class, a rich set of kernels have been developed for both continuous and structured data.
-Because different kernels reflect different properties of the function being modeled, the choice of kernel can have a large impact on the sorts of structure that can be expressed or discovered by the model.
+Supervised learning problems, such as classification and regression, learn a mapping from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
+Kernel based nonparametric models, such as support vector machine and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
+These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ that specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
-When approaching a new dataset, it is often not clear which kernel family is most appropriate, especially for non-experts.
-Often, a standard kernel family (typically squared-exponential) is chosen out of convenience, and kernel parameters are set by cross-validation or maximum marginal likelihood. [citations?]
+A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}.
+In this paper we pose the problem of kernel learning as a problem in structure discovery from data.
+Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (GP) regression.
+
+Traditionally, Gaussian process kernels have a few free hyperparameters which can be optimised (or inferred) from data.
+However, it is well known that one can form composite kernels via combinations of simple base kernels (\eg squared exponential / radial basis function, periodic, linear etc.) and operations that preserve positive definiteness (\eg summation and multiplication).
+We use this insight to define a simple grammar over composite kernels and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
+The search criterion is the marginal likelihood of the kernel for the given data, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning\TBD{cite \eg Heckerman}.
+
+Our experimental findings demonstrate that this structure discovery algorithm can automatically recover known kernel structure from data, and that on real data the learned structure of the kernel often corresponds to natural, interesting and interpretable decompositions of the unknown function.
+Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery\fTBD{maybe $\to$ conclusion}.
+
+%Kernel-based nonparametric regression models have been widely and succesfully used over the last 20 years. [citations needed]
+%As part of the development of this model class, a rich set of kernels have been developed for both continuous and structured data.
+%Because different kernels reflect different properties of the function being modeled, the choice of kernel can have a large impact on the sorts of structure that can be expressed or discovered by the model.
+
+%When approaching a new dataset, it is often not clear which kernel family is most appropriate, especially for non-experts.
+%Often, a standard kernel family (typically squared-exponential) is chosen out of convenience, and kernel parameters are set by cross-validation or maximum marginal likelihood. [citations?]
 
 %Sometimes the argument is made that since most kernels are universal (i.e. consistent in the limit), that the choice of kernel is not important[citation?].  However, our experiments demonstrate that for datasets of moderate size, predictive performance, extrapolation and interpretability all depend heavily on the choice of kernel. \TBD{RBG: Do people actually say the choice of kernel isn't important?  This sounds like a straw man...}
 
-\paragraph{Main contribution}
-In this paper, we introduce an automated search over composite kernels.
-We define the search space through a simple grammar consisting of a set of one-dimensional base kernels (squared-exp, periodic, linear, etc.) and operations which combine those kernels (add and multiply).
-Our objective function is the marginal likelihood of a Gaussian process model with the given kernel, conditioned on the data.
+%\paragraph{Main contribution}
+%In this paper, we introduce an automated search over composite kernels.
+%We define the search space through a simple grammar consisting of a set of one-dimensional base kernels (squared-exp, periodic, linear, etc.) and operations which combine those kernels (add and multiply).
+%Our objective function is the marginal likelihood of a Gaussian process model with the given kernel, conditioned on the data.
 
-We examine the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrate that in some cases, the structured posterior can be automatically decomposed into a sum of interpretable components, e.g. in Figure \ref{fig:airline_decomp}. \TBD{RBG: Need to clarify that the contribution isn't that we can decompose it (that was in GPML), but that the decomposition is often interesting.}
+%We examine the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrate that in some cases, the structured posterior can be automatically decomposed into a sum of interpretable components, e.g. in Figure \ref{fig:airline_decomp}. \TBD{RBG: Need to clarify that the contribution isn't that we can decompose it (that was in GPML), but that the decomposition is often interesting.}
 
 %\section{Motivation}
 %\TBD{RBG: Do we need a separate motivation section?  The introduction should motivate the work.}
 
-There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].
-However, relatively little attention has been paid to automatic structure discovery in supervised learning.
+%There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].
+%However, relatively little attention has been paid to automatic structure discovery in supervised learning.
 
-Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].
+%Similar searches over large model classes have been succesfully used in machine vision [cite Cox + Pinto].
 %  This work respresents a step towards more data-based modeling, as opposed to proposing the model beforehand.
-In general, learning the model class from data seems superior proposing the model beforehand.
-In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.
+%In general, learning the model class from data seems superior proposing the model beforehand.
+%In high dimensional problems, it is also hard for a practitioner to propose an appropriate model even after examining a dataset closely.
 % Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.
 
 %Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
@@ -109,73 +145,62 @@ In high dimensional problems, it is also hard for a practitioner to propose an a
 %However, in practice, GPs are typically used with only the squared-exp kernel.
 %[Apparently, this was one of Sholkopf's big dissapointment with GPs... is there a quote from him on this? -David]
 
-A frequent criticism of the Bayesian framework is that priors are often chosen purely for convenience. 
-Gaussian process priors may be a good examples of a model chosen for its tractability.
-However, specifying a compound kernel typically does not change the order of computational complexity of inference in Gaussian process models.
-The broad use of simple kernels may be simply due to the difficulty of determining which kinds of structure exist in the data.
-As well, even if one understands the structure present in a dataset, it is often non-obvious how to express that through a covariance function. 
-\TBD{RBG: Not sure we need this in the motivation. Is this basically just to answer the objection of why we don't consider the tradeoff between expressiveness and tractability?  Also, the prior can affect computational tractability if we're using approximate algorithms, so this makes it sound like we're only thinking about small datasets.}
+%A frequent criticism of the Bayesian framework is that priors are often chosen purely for convenience. 
+%Gaussian process priors may be a good examples of a model chosen for its tractability.
+%However, specifying a compound kernel typically does not change the order of computational complexity of inference in Gaussian process models.
+%The broad use of simple kernels may be simply due to the difficulty of determining which kinds of structure exist in the data.
+%As well, even if one understands the structure present in a dataset, it is often non-obvious how to express that through a covariance function. 
+%\TBD{RBG: Not sure we need this in the motivation. Is this basically just to answer the objection of why we don't consider the tradeoff between expressiveness and tractability?  Also, the prior can affect computational tractability if we're using approximate algorithms, so this makes it sound like we're only thinking about small datasets.}
 
-Automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
-Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
+%Automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
+%Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
 
+\section{Expressing structure through kernels}
 
-\section{Gaussian Processes Priors}
+Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
+\NA{In the case of Gaussian process regression} the kernel is used to define a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
+The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 
-Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
-The kind of structure which can be captured by a GP model is mainly determined by its \emph{kernel}: the covariance function.
-One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.
+\TBD{Give some examples of base PSD kernels and explain the structure they encode briefly.}
+
+\TBD{Then state the appropriate theorem that PSD kernels are closed under addition and multiplication.}
+
+\fTBD{Can probably kill simple kernel table. Focus on one table.}
+\input{tables/simple_kernels_table.tex}
+\input{tables/example_structures_table.tex}
+
+\paragraph{Summation}
+
+\TBD{
+Link function addition and kernel addition and mention that the posterior of components is analytic (maybe footnote?).
+Demonstrate multi dimension functions.
+Demonstrate multiple lengthscales.
+Demonstrate different types of independent signal (\eg SE + PE).}
+
+\paragraph{Multiplication}
+
+\TBD{
+Note that multiplying \eg SE across several dimensions corresponds to multi-$d$ SE (contrasting with additivity).
+Corresponds to an `AND' operation when thought of in terms of similarity.
+In 1-$d$ things are more interesting.
+Multiplying by linear makes other structures grow / shrink with the linear trend.
+Multiplying by periodic adds wiggles to any other structure.
+Multiplying by SE / RQ makes any other structure smoothly vary across the dimension.
+Can we say much more than demonstrating these examples?
+}
+
+%\section{Gaussian Processes Priors}
+
+%Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
+%The kind of structure which can be captured by a GP model is mainly determined by its \emph{kernel}: the covariance function.
+%One of the main difficulties in specifying a Gaussian process model is in choosing a kernel which can represent the structure present in the data.
 %For small to medium-sized datasets, the kernel has a large impact on modeling efficacy.
 %\TBD{Note: The above paragraph is plagarized from my additive GP paper. -David} 
 
-[TODO: add GP math intro\TBD{ Really? Just cite?}]
-
-\TBD{RBG: We basically want to make the point that kernels are preserved by addition and multiplication, so the space is compositional.}
-
-\section{Expressing Structure through Kernels}
-
-
-
-This section explains exactly how one can express structure on functions through composing kernels, and gives examples.  
-Figure \ref{fig:kernels} shows how to construct such structures as:  Long-range trends with local variation, local periodicity, and long-range trends.
 %
-\input{tables/simple_kernels_table.tex}
-\input{tables/example_structures_table.tex}
-%
-The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  
-However, the main contribution of this paper is to automate the search over kernel structures.
+%The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  
+%However, the main contribution of this paper is to automate the search over kernel structures.
 
-\TBD{RBG: We talk about sums of kernels, but I think we need more intuition about what products of kernels represent and why we want them. There are three
-examples of products in Figure 2, and it's not obvious what they have in common.}
-
-\TBD{DD: Some points we can make here:  Pointwise addition and multiplcation of Mercer kernels always results in a valid Mercer kernel.  Intuitively, if we think of a kernel as defining a similary metric, then a some of kernels implies an ``or'' relation:  Two points are similar if either kernel in a sum has a high value.  Products between kernels imply an ``and'' relation.}
-
-\paragraph{Products and Sums of Kernels}
-
-
-
-\subsection{Decomposing the Signal}
-
-The sorts of structure implied by complex kernel might not be immediately interpretable.
-However, there is one property of GPs that allows us to break down the signal into interpretable parts.
-Specifically, a function $f \sim GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$.
-In addition, the posterior distributions over individual components after conditioning on data are also analytically tractable.
-
-The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
-\begin{align}
-\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
-\end{align}
-and the covariance between the two components, conditioned on their sum is given by:
-\begin{align}
-\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-\end{align}
-Derivations can be found in the supplementary material. \TBD{RBG: What is the $\star$ notation? David:  It means it's at a test point.  This still needs to be explained somewhere.}
-
-These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
-These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
-
-\TBD{Check that the notation for stars and kernel matrices is explained somewhere.}
 \TBD{Smooth the flow of the previous subsection.}
 
 \section{Searching over structures}
@@ -282,6 +307,27 @@ For the search we used $k = 1$, $D = 8$ and the kernels in Table~\ref{tbl:kernel
 % \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure}.
 
 \input{"tables/kernel_descriptions.tex"}
+
+The sorts of structure implied by complex kernel might not be immediately interpretable.
+However, there is one property of GPs that allows us to break down the signal into interpretable parts.
+Specifically, a function $f \sim GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$.
+In addition, the posterior distributions over individual components after conditioning on data are also analytically tractable.
+
+\fTBD{Move all maths to supplementary?}
+The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
+\begin{align}
+\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
+\end{align}
+and the covariance between the two components, conditioned on their sum is given by:
+\begin{align}
+\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\end{align}
+Derivations can be found in the supplementary material.
+\fTBD{We can drop the star notation without losing much}
+
+%These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
+These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
 
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
@@ -411,18 +457,21 @@ Our method outperforms the other methods in all tests.
 %\item Need to discuss design choices e.g.~$k$, depth of search, base kernels.
 %\end{itemize}
 
-
 \section{Discussion}
 
 Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
 
-\section{Future Work}
+In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
-\TBD{RBG: Do we need this section?  Bill hates future work sections since they basically just give the reviewers a list of things to complain about.}
+We examined the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
 
-\paragraph{Support Vector Machines} Structure search could be used to select kernels for support vector machines, using cross-validated prediction error as an objective function.
+%\section{Future Work}
 
-However, it would be presumably quite difficult to learn the moderate number of kernel hyperparameters present in composite kernels using only cross-validation.
+%\TBD{RBG: Do we need this section?  Bill hates future work sections since they basically just give the reviewers a list of things to complain about.}
+
+%\paragraph{Support Vector Machines} Structure search could be used to select kernels for support vector machines, using cross-validated prediction error as an objective function.
+
+%However, it would be presumably quite difficult to learn the moderate number of kernel hyperparameters present in composite kernels using only cross-validation.
 
 %\paragraph{Noise Models and Mean Functions}
 %The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
@@ -431,30 +480,24 @@ However, it would be presumably quite difficult to learn the moderate number of 
 %The same can be said about noise models - for instance, a t-noise can be approximated by a sum of sq-exp kernels with very small lengthscales, but output variances which vary widely.
 
 
-\paragraph{Bayes model averaging}
-A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
-This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
+%\paragraph{Bayes model averaging}
+%A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
+%This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
 
-In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.
-However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
+%In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.
+%However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
 
-\paragraph{Parsimony}
-Integrating over kernel structures raises the problem of reporting interpretable structures to the user.
-Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
-In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
+%\paragraph{Parsimony}
+%Integrating over kernel structures raises the problem of reporting interpretable structures to the user.
+%Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
+%In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
 
 %\paragraph{Bayesian Optimization} 
 %The greedy search strategy used in this paper is rudimentary.  A natural extension of this work would be a model-based search over composite kernels, where the results of previous searches are used to propose informative directions.  This would be an example of ``meta-learning''.
 %\cite{snoek2012practical} [also cite Lizotte, de Frietas]
 %
 %\paragraph{A Kernel between kernels}
-Placing a \gp{} model on the log-likelihood of different kernels would require constructing a kernel on kernels, as in \cite{ong2002hyperkernels}.
-
-\section{Conclusion}
-
-In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
-
-We examined the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
+%Placing a \gp{} model on the log-likelihood of different kernels would require constructing a kernel on kernels, as in \cite{ong2002hyperkernels}.
 
 \subsubsection*{Acknowledgements}
 
