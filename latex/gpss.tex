@@ -72,9 +72,9 @@
 
 \twocolumn[
 \icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
-Bayesian Structure Discovery for Regression OR \\
+Bayesian Structure Discovery for Regression / Extrapolation OR \\
 Kernel Structure Discovery OR \\
-Discovering Structure in Kernels\ldots}
+Discovering Structure in Kernels \ldots}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 %%%%FIXME - Make sure to update this!
@@ -170,8 +170,8 @@ Examples of PSD kernels include squared exponential (SE), periodic (PE) and line
 \kernel_\textrm{LN}(\inputVar, \inputVar') = & \sigma_1^2 + \sigma_2^2(\inputVar - \ell)(\inputVar' - \ell).
 \end{eqnarray}
 
-When used within the context of GP regression, these kernels define priors on functions which are smooth, smooth and periodic or linear respectively.
-\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing}
+When used within the context of GP regression, these kernels define priors on functions which are smooth, periodic or linear respectively.
+\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing.}
 
 PSD kernels are closed under addition and multiplication \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured kernels from well understood base components.
@@ -188,7 +188,7 @@ Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2
 \footnotetext{Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section\TBD{ add reference} and give derivations in the supplementary material.}
 
 In one dimension, summing kernels can capture structures including multiple scales of variation\TBD{ reference a picture} or the sum of heterogeneous function types\TBD{ reference \eg SE + PE picture}.
-In higher dimensions summing kernels can correspond to decompositions of the form
+In higher dimensions, summing kernels can correspond to decompositions of the form
 \begin{equation}
 \function((\inputVar_1, \inputVar_2)) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
 \end{equation}
@@ -196,17 +196,22 @@ In higher dimensions summing kernels can correspond to decompositions of the for
 
 \paragraph{Multiplication}
 
-Multiplication of kernels does not correspond to a simple decomposition of functions, but allows for the construction of more complex structures.
+Multiplication of kernels does not correspond to a simple decomposition of functions, but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
 
-\TBD{
-Note that multiplying \eg SE across several dimensions corresponds to multi-$d$ SE (contrasting with additivity).
-Corresponds to an `AND' operation when thought of in terms of similarity.
-In 1-$d$ things are more interesting.
-Multiplying by linear makes other structures grow / shrink with the linear trend.
-Multiplying by periodic adds wiggles to any other structure.
-Multiplying by SE / RQ makes any other structure smoothly vary across the dimension.
-Can we say much more than demonstrating these examples?
-}
+For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN.\footnotemark
+
+Multiplying kernels of the same form in one dimension is often redundant \eg for SE kernels this just produces SE kernels with different parameters.
+\TBD{What is PE $\times$ PE?}
+However, multiplying kernels of different forms can give rise to interesting structures.
+
+Multiplying a kernel, $\kernel$, by SE allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel\TBD{ reference a picture}.
+Multiplying a kernel by LN results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly\TBD{ reference a picture}.
+\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
+
+\fTBD{Can we do more than just give examples}
+
+In general, multiplying kernels can be thought of as an `AND' operation when viewing kernels as a measure of similarity.
+This arises since two points, $\inputVar,\inputVar'$, can only be considered similar by a product kernel function (\ie $\kernel_\textrm{prod}(\inputVar,\inputVar')$ is relatively large) if the points are considered similar by each component kernel function.
 
 %\section{Gaussian Processes Priors}
 
@@ -220,15 +225,14 @@ Can we say much more than demonstrating these examples?
 %The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  
 %However, the main contribution of this paper is to automate the search over kernel structures.
 
-\TBD{Smooth the flow of the previous subsection.}
-
 \section{Searching over structures}
 
 The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
 We therefore consider searching over all kernel structures that can be expressed as sums and products of an alphabet of base kernels.
 
+Formally\fTBD{Maybe Roger is well placed to write this?}, we consider base kernels that act upon a single input dimension, denoted $\kernel$
+
 \TBD{
-Formally we define a grammar with some rules.
 We then search in a greedy fashion, using BIC to score models (footnote that Laplace is brittle).
 Draw a picture to show what our model includes \ie polynomial regression, nonparametric fourier decomposition, GAM, additive kernels.
 Cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?
