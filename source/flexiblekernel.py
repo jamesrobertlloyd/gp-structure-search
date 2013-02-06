@@ -1315,7 +1315,7 @@ def base_kernels(ndim=1):
     Generator of all base kernels for a certain dimensionality of data
     '''
     for dim in range(ndim):
-        for k in base_kernel_families():
+        for k in base_kernel_families(ndim):
             yield MaskKernel(ndim, dim, k)
             #### Need OneDGrammar to be operational to use this
             #if ndim > 1:
@@ -1323,14 +1323,15 @@ def base_kernels(ndim=1):
             #else:
             #    yield k
  
-def base_kernel_families():
+def base_kernel_families(ndim):
     '''
     Generator of all base kernel families
     '''
-    yield SqExpKernelFamily().default()
-    yield SqExpPeriodicKernelFamily().default()
-    yield RQKernelFamily().default()
-    yield LinKernelFamily().default()
+    if True:#ndim==1
+        yield SqExpKernelFamily().default()
+        yield SqExpPeriodicKernelFamily().default()
+        yield RQKernelFamily().default()
+        yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
