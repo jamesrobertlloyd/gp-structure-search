@@ -205,11 +205,17 @@ Can we say much more than demonstrating these examples?
 
 \section{Searching over structures}
 
-\TBD{Justification}
+The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
+We therefore consider searching over all kernel structures that can be expressed as sums and products of an alphabet of base kernels.
 
-\TBD{cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?}
+\TBD{
+Formally we define a grammar with some rules.
+We then search in a greedy fashion, using BIC to score models (footnote that Laplace is brittle).
+Draw a picture to show what our model includes \ie polynomial regression, nonparametric fourier decomposition, GAM, additive kernels.
+Cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?
+}
 
-Notes on the algorithm
+\fTBD{Merge the below into the above}
 \begin{enumerate}
 \item Initial set of kernels $\mathcal{K}$ = all base kernels $\times$ applied to all single input dimensions $\times$ random kernel parameter initialisations
 \item For each $\kappa \in \mathcal{K}$ optimise parameters by optimising nll on training data; record nll and BIC \TBD{RBG: not Laplace?}
@@ -228,7 +234,7 @@ Expanding a kernel involves
 
 \section{Related Work}
 
-The technique of constructing composite kernels using sums and products of existing kernels is not new, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.
+The technique of constructing composite kernels using sums and products of existing kernels is not new\fTBD{weak language}, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not\fTBD{worth highlighting?}.
 
 Compositional Model search for unsupervised learning: \cite{grosse2012exploiting}
 
