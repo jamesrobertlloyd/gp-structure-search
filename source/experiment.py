@@ -209,6 +209,7 @@ def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1
    
 #### WARNING - Code duplication 
 def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
+    # This version doesn't have xtext and ytest
     X, y, D = gpml.load_mat(data_file, y_dim=1)
     assert(D==1)
     perform_kernel_search(X, y, 1, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)

@@ -231,7 +231,7 @@ class SqExpPeriodicKernel(BaseKernel):
     def latex_print(self):
         # return 'PE(\\ell=%1.1f, p=%1.1f, \\sigma=%1.1f)' % (self.lengthscale, self.period, self.output_variance)
         #return 'PE(p=%1.1f)' % self.period          
-        return 'PE'
+        return 'Per'
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -477,7 +477,7 @@ class LinKernel(BaseKernel):
                        self.depth())
         
     def latex_print(self):
-        return 'LN'           
+        return 'Lin'           
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1314,24 +1314,24 @@ def base_kernels(ndim=1):
     '''
     Generator of all base kernels for a certain dimensionality of data
     '''
-    for dim in range(ndim):
-        for k in base_kernel_families(ndim):
-            yield MaskKernel(ndim, dim, k)
-            #### Need OneDGrammar to be operational to use this
-            #if ndim > 1:
-            #    yield MaskKernel(ndim, dim, k)
-            #else:
-            #    yield k
+    if ndim == 1:
+        for dim in range(ndim):
+            for k in base_kernel_families():
+                yield MaskKernel(ndim, dim, k)
+    else:
+        for k in base_kernel_families():
+            yield MaskKernel(ndim, 1, k)
+            # Todo: fix 1D kernels to work without MaskKernels. 
+            # yield k
  
-def base_kernel_families(ndim):
+def base_kernel_families():
     '''
-    Generator of all base kernel families
+    Generator of all base kernel families.
     '''
-    if True:#ndim==1
-        yield SqExpKernelFamily().default()
-        yield SqExpPeriodicKernelFamily().default()
-        yield RQKernelFamily().default()
-        yield LinKernelFamily().default()
+    yield SqExpKernelFamily().default()
+    yield SqExpPeriodicKernelFamily().default()
+    yield RQKernelFamily().default()
+    yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
@@ -1339,7 +1339,14 @@ def base_kernel_families(ndim):
     #yield PP2KernelFamily().default()
     #yield PP3KernelFamily().default()
     #yield MaternKernelFamily().default()       
+
+def multi_d_kernel_families():
+    '''
+    Generator of all base kernel families for multidimensional problems.
+    '''
+    yield SqExpKernelFamily().default()
     
+        
 def test_kernels(ndim=1):
     '''
     Generator of a subset of base kernels for testing
