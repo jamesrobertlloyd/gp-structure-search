@@ -1319,7 +1319,7 @@ def base_kernels(ndim=1):
             for k in base_kernel_families():
                 yield MaskKernel(ndim, dim, k)
     else:
-        for k in base_kernel_families():
+        for k in multi_d_kernel_families():
             yield MaskKernel(ndim, 1, k)
             # Todo: fix 1D kernels to work without MaskKernels. 
             # yield k
