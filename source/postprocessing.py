@@ -19,7 +19,7 @@ import experiment as exp
 import flexiblekernel as fk
 import gpml
 import utils.latex
-
+import re
 
 
 def parse_all_results(folder=config.D1_RESULTS_PATH, save_file='kernels.tex', one_d=False):
@@ -54,7 +54,7 @@ def gen_all_results(folder=config.RESULTS_PATH):
                 
 
 def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
-    data_sets = list(exp.gen_all_1d_datasets())
+    data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
     for r, file in data_sets:
         results_file = os.path.join(folder, file + "_result.txt")
         # Is the experiment complete
