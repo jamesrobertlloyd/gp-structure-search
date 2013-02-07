@@ -118,6 +118,26 @@ The covariance between the two components, conditioned on their sum is given by:
 These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
 
 
+\section{Details of Search Algorithm}
+
+Formally\fTBD{Maybe Roger is well placed to write this?}, we start with a collection of base kernels applied to each input dimension individually; $\kernel_i$ denotes a kernel applied to input dimension $i$.
+We denote sums and products of kernels as $\SumKernel(\expression,\ldots)$ and $\ProductKernel(\expression,\ldots)$ where $\expression$ represents an arbitrary kernel expression.
+We then generate new expressions by repeatedly applying the following production rules to base kernels, sum kernels and product kernel within an expression.
+\begin{center}
+\begin{tabular}{rccc}
+\textrm{Replacement} & $\kernel_i$ & $\to$ & $\kernel'_i$\\% & $\forall\, \kernel' $\\
+\textrm{Addition} & $\kernel_i$ & $\to$ & $\kernel_i + \kernel'_j$\\% & $\forall\, j,\kernel' $\\
+& $\SumKernel(e,\ldots)$ & $\to$ & $\SumKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+& $\ProductKernel(e,\ldots)$ & $\to$ & $\SumKernel(\ProductKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+\textrm{Multiplication} & $\kernel_i$ &  $\to$ & $\kernel_i \times \kernel'_j$\\% & $\forall\, j,\kernel'$\\
+& $\SumKernel(e,\ldots)$ & $\to$ & $\ProductKernel(\SumKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+& $\ProductKernel(e,\ldots)$ & $\to$ & $\ProductKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+\end{tabular}
+\end{center}
+For example, applying the multiplication production rule to the sum in the expression $\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE})$ could result in the new expression $\ProductKernel(\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE}),\kernel_\textrm{PE})$ \ie a kernel representing a smooth function with two characteristic scales of variation is transformed into a kernel representing a locally periodic function with two scales of variation.
+
+\paragraph{Remark on notation} The $\SumKernel,\ProductKernel$ notation is useful algorithmically and to describe the production rules but elsewhere we will use more conventional algebraic notation \ie the two kernels above would be written as $\kernel_\textrm{SE} + \kernel_\textrm{SE}$ and ${(\kernel_\textrm{SE} + \kernel_\textrm{SE}) \times \kernel_\textrm{PE}}$.
+
 
 %\section{Decompositions}
 

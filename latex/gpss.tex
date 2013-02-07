@@ -49,35 +49,13 @@
     
 \begin{document}
 
-\def\ie{i.e.\ }
-\def\eg{e.g.\ }
-\def\iid{i.i.d.\ }
-\def\simiid{\sim_{\mbox{\tiny iid}}}
-\def\eqdist{\stackrel{\mbox{\tiny d}}{=}}
 
-\def\Reals{\mathbb{R}}
-
-\def\Uniform{\mbox{\rm Uniform}}
-\def\Bernoulli{\mbox{\rm Bernoulli}}
-\def\GP{\mathcal{GP}}
-
-\def\inputVar{x}
-\def\InputVar{X}
-\def\InputSpace{\mathcal{X}}
-\def\outputVar{y}
-\def\OutputSpace{\mathcal{Y}}
-\def\function{f}
-\def\kernel{\kappa}
-\def\KernelMatrix{K}
-\def\SumKernel{\sum}
-\def\ProductKernel{\prod}
-\def\expression{e}
 
 \twocolumn[
 \icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
-Bayesian Structure Discovery for Regression / Extrapolation OR \\
+Bayesian Structure Discovery for Regression\\
 Kernel Structure Discovery OR \\
-Discovering Structure in Kernels \ldots}
+Discovering Structure in Kernels}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 %%%%FIXME - Make sure to update this!
@@ -90,11 +68,10 @@ Discovering Structure in Kernels \ldots}
 %However, their effictiveness depends critically on choosing an appropriate family of kernels.
 %This aspect of GP modeling has been sorely underdeveloped.
 %In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
-%The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
-%We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
-%We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components.
-%We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
-TBD
+The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
+We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
+We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components, and in some cases allows long-range extrapolation.
+We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
 \end{abstract}
 
 \section{Introduction}
@@ -164,21 +141,22 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 \label{sec:Structure}
 
 Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
-\NA{In the case of Gaussian process regression} the kernel is used to define a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
-The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
+In the case of Gaussian process regression, the kernel defines a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
+%The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 
-Examples of PSD kernels include squared exponential (SE), periodic (PE) and linear kernels (LN) defined below\fTBD{If we add RQ then we have everything in one place}
+Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
 \begin{eqnarray}
 \kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 \kernel_\textrm{PE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
 \kernel_\textrm{LN}(\inputVar, \inputVar') = & \sigma_1^2 + \sigma_2^2(\inputVar - \ell)(\inputVar' - \ell).
 \end{eqnarray}
 
-When used within the context of GP regression, these kernels define priors on functions which are smooth, periodic or linear respectively.
+When used within the context of GP regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
 \TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing.}
 
-PSD kernels are closed under addition and multiplication \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
-This allows one to create richly structured kernels from well understood base components.
+Valid kernels are closed under addition and multiplication with other valid kernels;
+% \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
+this allows one to create richly structured kernels from well understood base components.
 
 \fTBD{Can probably kill simple kernel table. Focus on one table.}
 %\input{tables/simple_kernels_table.tex}
@@ -191,7 +169,8 @@ Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, and ${\function_2 \dist \GP(0, 
 Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2)}$\footnotemark.
 \footnotetext{Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section\TBD{ add reference} and give derivations in the supplementary material.}
 
-In one dimension, summing kernels can capture structures including multiple scales of variation\TBD{ reference a picture} or the sum of heterogeneous function types\TBD{ reference \eg SE + PE picture}.
+In one dimension, sums of kernels can express structure such as variational at multiple scales, or of summation of different function types.  Some examples can be found in Figure \ref{fig:kernels}.
+
 In higher dimensions, summing kernels can correspond to decompositions of the form
 \begin{equation}
 \function((\inputVar_1, \inputVar_2)) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
@@ -199,41 +178,37 @@ In higher dimensions, summing kernels can correspond to decompositions of the fo
 \ie `independent' variation in different dimensions.
 %
 \input{tables/multi_d_additive_fig}
-
+%
 Figure \ref{fig:multi_d_additivity} demonstrates the decomposition across dimensions.
-%
-\begin{figure*}[h]
-\centering
-\begin{tabular}{ccc}
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
-\end{tabular}
-\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
-\label{fig:interpretable functions}
-\end{figure*}
-%
-Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
 
+\paragraph{Interpretation}
+Loosely speaking, a sum of kernels can be understood as an 'OR' operation: two points are considered similar if either kernel has a high value.
+More precisely, we can interpret a sum of kernels as a concatenation of their features in the corresponding RKHS.
 
 \paragraph{Multiplication}
 
-Multiplication of kernels does not correspond to a simple decomposition of functions, but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
+Multiplication of kernels does not correspond to a simple composition of functions; here, we give some examples of the properties that arise from multiplication of kernels.
 
-For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
+%but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
+%
+%For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
+%
+%Multiplying kernels of the same form in one dimension is often redundant \eg for SE kernels this just produces SE kernels with different parameters.
+%\TBD{What is PE $\times$ PE?}
+%However, multiplying kernels of different forms can give rise to interesting structures.
 
-Multiplying kernels of the same form in one dimension is often redundant \eg for SE kernels this just produces SE kernels with different parameters.
-\TBD{What is PE $\times$ PE?}
-However, multiplying kernels of different forms can give rise to interesting structures.
+Multiplying a kernel $\kernel$ by the SE kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel.  This is shown in row 2 of Figure \ref{kernels}.
+Multiplying a kernel by LN results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly. This is shown in rows 4 and 5 of Figure \ref{kernels}.
+%\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
+%
+%\fTBD{Can we do more than just give examples}
 
-Multiplying a kernel, $\kernel$, by SE allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel\TBD{ reference a picture}.
-Multiplying a kernel by LN results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly\TBD{ reference a picture}.
-\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
-
-\fTBD{Can we do more than just give examples}
-
-In general, multiplying kernels can be thought of as an `AND' operation when viewing kernels as a measure of similarity.
+%In general, multiplying kernels can be thought of as an `AND' operation when viewing kernels as a measure of similarity.
 This arises since two points, $\inputVar,\inputVar'$, can only be considered similar by a product kernel function (\ie $\kernel_\textrm{prod}(\inputVar,\inputVar')$ is relatively large) if the points are considered similar by each component kernel function.
+
+\paragraph{Interpretation}
+Loosely speaking, multiplying kernels can be understood as an 'AND' operation: two points are considered similar only if both kernels have a high value.
+More precisely, we can interpret a sum of kernels as a sum of the cartesian product of both kernels' features in the corresponding RKHS.
 
 %\section{Gaussian Processes Priors}
 
@@ -254,26 +229,18 @@ This arises since two points, $\inputVar,\inputVar'$, can only be considered sim
 The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
 We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels.
 
-Formally\fTBD{Maybe Roger is well placed to write this?}, we start with a collection of base kernels applied to each input dimension individually; $\kernel_i$ denotes a kernel applied to input dimension $i$.
-We denote sums and products of kernels as $\SumKernel(\expression,\ldots)$ and $\ProductKernel(\expression,\ldots)$ where $\expression$ represents an arbitrary kernel expression.
-We then generate new expressions by repeatedly applying the following production rules to base kernels, sum kernels and product kernel within an expression.
 \begin{center}
 \begin{tabular}{rccc}
 \textrm{Replacement} & $\kernel_i$ & $\to$ & $\kernel'_i$\\% & $\forall\, \kernel' $\\
 \textrm{Addition} & $\kernel_i$ & $\to$ & $\kernel_i + \kernel'_j$\\% & $\forall\, j,\kernel' $\\
-& $\SumKernel(e,\ldots)$ & $\to$ & $\SumKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
-& $\ProductKernel(e,\ldots)$ & $\to$ & $\SumKernel(\ProductKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
 \textrm{Multiplication} & $\kernel_i$ &  $\to$ & $\kernel_i \times \kernel'_j$\\% & $\forall\, j,\kernel'$\\
-& $\SumKernel(e,\ldots)$ & $\to$ & $\ProductKernel(\SumKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
-& $\ProductKernel(e,\ldots)$ & $\to$ & $\ProductKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
 \end{tabular}
 \end{center}
-For example, applying the multiplication production rule to the sum in the expression $\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE})$ could result in the new expression $\ProductKernel(\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE}),\kernel_\textrm{PE})$ \ie a kernel representing a smooth function with two characteristic scales of variation is transformed into a kernel representing a locally periodic function with two scales of variation.
 
-\paragraph{Remark on notation} The $\SumKernel,\ProductKernel$ notation is useful algorithmically and to describe the production rules but elsewhere we will use more conventional algebraic notation \ie the two kernels above would be written as $\kernel_\textrm{SE} + \kernel_\textrm{SE}$ and ${(\kernel_\textrm{SE} + \kernel_\textrm{SE}) \times \kernel_\textrm{PE}}$.
+Details of the search algorithm are given in the supplementary material \TBD{For now}.
 
 \paragraph{A greedy search algorithm}
-The base kernels and production rules generate a tree structure over kernel expressions and we follow a greedy search to traverse this tree.
+In order to find the model with highest marginal likelihood, the base kernels and production rules generate a graph structure over kernel expressions and we follow a greedy search to traverse this graph.
 This requires a method of scoring a kernel expression, which we achieve by using the Bayesian Information Criterion (BIC)\TBD{ cite me} as an estimate of the marginal likelihood of some data given the kernel expression\footnotemark.
 \footnotetext{We also experimented with using a Laplace approximation to the marginal likelihood\TBD{ cite} but this was found to be less numerically stable and could not be computed if an optimiser failed to find a true optimum.}
 Specifically, we optimise the marginal likelihood of the data given specific kernel parameters\TBD{ using LBFGS - cite?}, randomly restarting previously unoptimised kernel parameters.
@@ -472,13 +439,37 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 %The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
+\subsection{Multidimensional decomposition}
+
+\begin{figure*}[h]
+\centering
+\begin{tabular}{ccc}
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
+\end{tabular}
+\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
+\label{fig:interpretable functions}
+\end{figure*}
+%
+Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
+
+
 \section{Empirical evaluation}
 
 In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
-\TBD{Experiments ongoing}
+\begin{figure}[h!]
+\centering
+\begin{tabular}{c}
+\includegraphics[width=\columnwidth]{../figures/extrapolation_curves/01-airline-s-ex-curve.pdf}
+\end{tabular}
+\caption{Extrapolation performance.}
+\end{figure}
+
+Figure \ref{extrapolation} shows the learning curves of our method compared against simple linear regression and \gp{} regression with a SE kernel.  The amount of data in the 1D airline timeseries was increased by increments of 10\%. Both linear and SE regression plateau, while unbounded complexity of our method allows the model to continue to capture structure. 
 
 \subsection{Interpolation}
 
@@ -495,9 +486,9 @@ Our method outperforms the other methods in all tests.
 
 \subsubsection{Data sets}
 
-\fTBD{Too much text? Move to supplementary}
 
 \paragraph{Bach Synthetic Dataset}
+\fTBD{Too much text? Move to supplementary}
 In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
 % From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
 %We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
@@ -540,7 +531,11 @@ All of the experiments in this paper were performed using the standard GPML tool
 
 \section{Discussion}
 
-\TBD{Needs work.}
+Blessing of abstraction, doing lots with a small amount of data.
+
+Extrapolation
+
+\section{Conclusion}
 
 In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
