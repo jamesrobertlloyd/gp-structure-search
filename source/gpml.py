@@ -74,6 +74,8 @@ def run_matlab_code(code, verbose=False, jvm=True):
 OPTIMIZE_KERNEL_CODE = r"""
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
+X = double(X)
+y = double(y)
 
 %% Load GPML
 addpath(genpath('%(gpml_path)s'));
@@ -176,6 +178,7 @@ def read_outputs(write_file):
 GENERATE_NOISELESS_DATA_CODE = r"""
 %% Load the data, it should contain X
 load '%(datafile)s'
+X = double(X)
 
 addpath(genpath('%(gpml_path)s'));
 
@@ -224,6 +227,8 @@ def sample_from_gp_prior(kernel, X):
 EVAL_KERNEL_CODE = r"""
 %% Load the data, it should contain X and x0.
 load '%(datafile)s'
+X = double(X)
+x0 = double(x0)
 
 a='Load GPML'
 addpath(genpath('%(gpml_path)s'));
@@ -268,6 +273,9 @@ def plot_kernel(kernel, X):
 MEAN_FUNCTION_CODE = r"""
 %% Load the data, it should contain X, y, X_test
 load '%(datafile)s'
+X = double(X)
+y = double(y)
+Xtest = double(Xtest)
 
 addpath(genpath('%(gpml_path)s'));
 
@@ -349,6 +357,10 @@ def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, ite
 PREDICT_AND_SAVE_CODE = r"""
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
+X = double(X)
+y = double(y)
+Xtest = double(Xtest)
+ytest = double(ytest)
 
 %% Load GPML
 addpath(genpath('%(gpml_path)s'));
@@ -402,6 +414,7 @@ def make_predictions(kernel_expression, kernel_init_params, data_file, write_fil
 DISTANCE_CODE_HEADER = r"""
 fprintf('Load the data, it should contain inputs X')
 load '%(datafile)s'
+X = double(X)
 
 %% Load GPML
 addpath(genpath('%(gpml_path)s'));
@@ -463,6 +476,8 @@ save( '%(writefile)s', 'sim_matrix' );
 # Matlab code to decompose posterior into additive parts.
 MATLAB_PLOT_DECOMP_CALLER_CODE = r"""
 load '%(datafile)s'  %% Load the data, it should contain X and y.
+X = double(X)
+y = double(y)
 
 addpath(genpath('%(gpml_path)s'));
 addpath(genpath('%(matlab_script_path)s'));
@@ -525,6 +540,7 @@ def load_mat(data_file, y_dim=1):
 COMPUTE_K_CODE_HEADER = r"""
 fprintf('Load the data, it should contain inputs X');
 load '%(datafile)s';
+X = double(X)
 
 %% Load GPML
 addpath(genpath('%(gpml_path)s'));
