@@ -28,7 +28,7 @@ import utils.misc
 PERIOD_HEURISTIC = 10;   # How many multiples of the smallest interval between points to initialize periods to.
 FROBENIUS_CUTOFF = 0.01; # How different two matrices have to be to be considered different.
 
-def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
+def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=True):
     '''
     Test the top n_eval performing kernels for equivalence, in terms of their covariance matrix evaluated on training inputs
     Assumes kernels is a list of ScoredKernel objects
@@ -40,7 +40,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
     
     # Find covariance distance for top n_eval
     n_eval = min(n_eval, len(kernels))
-    distance_matrix = jc.covariance_distance(kernels[:n_eval], X, local_computation=local_computation)
+    distance_matrix = jc.covariance_distance(kernels[:n_eval], X, local_computation=local_computation, verbose=verbose)
     
     # Remove similar kernels
     #### TODO - What is a good heuristic for determining equivalence?
@@ -56,7 +56,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True):
                 kernels[j] = None
 
     kernels = [k for k in kernels if k is not None]
-    kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
+    kernels = sorted(kernels, key=Sc oredKernel.score, reverse=True)
     return kernels
  
 def remove_nan_scored_kernels(scored_kernels):    
@@ -101,7 +101,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
             print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
             
         # Remove near duplicates from these all_results (top m all_results only for efficiency)
-        new_results = remove_duplicates(new_results, X, local_computation=local_computation)
+        new_results = remove_duplicates(new_results, X, local_computation=local_computation, verbose=verbose)
 
         print 'All new results after duplicate removal:'
         for result in new_results:
@@ -166,12 +166,12 @@ def gen_all_datasets(dir):
     return file_list
 
 
-def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
+def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500, verbose=True):
     #### FIXME - D is redundant
     X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
-    perform_kernel_search(X, y, D, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+    perform_kernel_search(X, y, D, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs, verbose=verbose)
     best_scored_kernel = parse_results(output_file)
-    predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs)
+    predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs, verbose=verbose)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
     os.system('reset')  # Stop terminal from going invisible.
    
@@ -225,6 +225,7 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             print 'Skipping file %s' % files
     os.system('reset')  # Stop terminal from going invisible.        
     
+
 def run_all_1d_extrap(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=4, k=1, sd=2, n_rand=3):
     data_sets = list(gen_all_datasets("../data/1d_extrap_folds/"))
     #### FIXME - Comment / or make more elegant
@@ -246,11 +247,12 @@ def run_all_1d_extrap(local_computation=False, skip_complete=True, zip_files=Fal
             print 'Skipping file %s' % files
     os.system('reset')  # Stop terminal from going invisible.      
   
-def run_debug_kfold(local_computation = True, max_jobs=600):
+
+def run_debug_kfold(local_computation = True, max_jobs=600, verbose=True):
     """This is a quick debugging function."""
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
-    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='Debug', debug=True, local_computation=local_computation, max_jobs=max_jobs)
+    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='Debug', debug=True, local_computation=local_computation, max_jobs=max_jobs, verbose=verbose)
     os.system('reset')  # Stop terminal from going invisible.
     

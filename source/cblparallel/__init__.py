@@ -220,8 +220,9 @@ quit()
         else:
             temp_dir = HOME_TEMP_PATH
 
+        if verbose:
+            print 'Writing temporary files locally'
         for (i, code) in enumerate(scripts):
-            print 'Writing temp files for job %d of %d' % (i + 1, len(scripts))
             if language == 'python':
                 script_files[i] = mkstemp_safe(temp_dir, '.py')
             elif language == 'matlab':
@@ -252,7 +253,8 @@ quit()
         # Zip and send files
 
         if zip_files:
-            print 'Zipping files'
+            if verbose:
+                print 'Zipping files'
             zip_file_name = mkstemp_safe(temp_dir, '.zip')
             zf = zipfile.ZipFile(zip_file_name, mode='w')
             for script in script_files:
@@ -260,12 +262,15 @@ quit()
             for shell in shell_files:
                 zf.write(shell, arcname=(os.path.split(shell)[-1]), compress_type=zipfile.ZIP_DEFLATED)
             zf.close()
-            print 'Sending zip file to fear'
+            if verbose:
+                print 'Sending zip file to fear'
             fear.copy_to_temp(zip_file_name)
-            print 'Unzipping on fear'
+            if verbose:
+                print 'Unzipping on fear'
             fear.command('cd %(temp_path)s ; unzip %(zip_file)s ; rm %(zip_file)s' % {'temp_path' : REMOTE_TEMP_PATH, 'zip_file' : os.path.split(zip_file_name)[-1]})
 
         # Loop through jobs, submitting jobs whenever fear usage low enough, re-submitting failed jobs
+        print 'Submitting %d jobs' % len(scripts)
         while not fear_finished:
             # Update knowledge of fear - trying to limit communication
             fear.qstat()
@@ -284,7 +289,8 @@ quit()
                         fear.copy_to_temp(script_files[i])
                         fear.copy_to_temp(shell_files[i])
                     # Submit the job to fear
-                    print 'Submitting job %d of %d' % (i + 1, len(scripts))
+                    if verbose:
+                        print 'Submitting job %d of %d' % (i + 1, len(scripts)),
                     job_ids[i] = fear.qsub(os.path.join(REMOTE_TEMP_PATH, os.path.split(shell_files[i])[-1]), verbose=verbose) # Hide path constant
                     # Increment job count
                     jobs_alive += 1
@@ -382,18 +388,19 @@ quit()
             if all(job_finished):
                 fear_finished = True    
             elif should_sleep:
+                print '%d of %d jobs complete' % (sum(job_finished), len(job_finished))
                 if verbose:
                     #fear.qstat()
-                    print '%d of %d jobs complete' % (sum(job_finished), len(job_finished))
                     print '%d jobs running' % fear.jobs_running(update=False)
                     print '%d jobs loading' % fear.jobs_loading(update=False)
                     print '%d jobs queued' % fear.jobs_queued(update=False)
-                    print 'Sleeping for %d seconds' % job_check_sleep
-                    time.sleep(job_check_sleep)
+                    #print 'Sleeping for %d seconds' % job_check_sleep
+                time.sleep(job_check_sleep)
 
     # Tidy up temporary directory
+    if verbose:
+        print 'Removing temporary files'
     for i in range(len(scripts)):
-        print 'Removing temp files for job %d of %d' % (i + 1, len(scripts))
         os.remove(script_files[i])
         os.remove(shell_files[i])
         os.remove(flag_files[i])
