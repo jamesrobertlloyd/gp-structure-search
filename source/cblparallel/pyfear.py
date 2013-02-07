@@ -173,7 +173,8 @@ class fear(object):
                                 'cd ..'])
     
         if verbose:
-            print 'Submitting : %s' % fear_string
+            #print 'Submitting : %s' % fear_string
+            print os.path.split(shell_file)[-1]
             
         output_text = self.command(fear_string)
         # Return the job id
