@@ -106,13 +106,13 @@ By the formula for Gaussian conditionals:
 \end{align}
 we get that the conditional variance of a Gaussian conditioned on its sum with another Gaussian is given by
 \begin{align}
-\vf_1^\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
-{\vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star }.
+\vf_1^\star | \vf \sim \Nt{\vmu_1^\star + \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right) }
+{\vk_1^{\star\star} - \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_1^\star }.
 \end{align}
 
 The covariance between the two components, conditioned on their sum is given by:
 \begin{align}
-\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+\cov(\vf_1^\star, \vf_2^\star) | \vf = - \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 \end{align}
 
 These formulae express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
