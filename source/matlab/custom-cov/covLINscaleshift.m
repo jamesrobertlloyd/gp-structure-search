@@ -65,7 +65,7 @@ if nargin>3                                                        % derivatives
       if xeqz
         K = (- (repmat(x_old(:,i-D), 1, n) + repmat(x_old(:,i-D)', n, 1)) + 2 * shifts(i-D)) / (ell * ell);
       else
-        K = (- (repmat(x_old(:,i-D), 1, length(z_old(:,i-D))) + repmat(z(:,i-D)', n, 1)) + 2 * shifts(i-D)) /(ell * ell);
+        K = (- (repmat(x_old(:,i-D), 1, length(z_old(:,i-D))) + repmat(z_old(:,i-D)', n, 1)) + 2 * shifts(i-D)) /(ell * ell);
       end
     end
   else

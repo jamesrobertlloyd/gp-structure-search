@@ -24,6 +24,7 @@ from cblparallel.util import mkstemp_safe
 from config import *
 import job_controller as jc   # This might be a good, if hacky, place to switch to an MIT controller.
 import utils.misc
+import re
 
 PERIOD_HEURISTIC = 10;   # How many multiples of the smallest interval between points to initialize periods to.
 FROBENIUS_CUTOFF = 0.01; # How different two matrices have to be to be considered different.
@@ -184,7 +185,7 @@ def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, desc
     best_scored_kernel = parse_results(output_file)
     os.system('reset')  # Stop terminal from going invisible.
 
-def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_order=False):
+def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_order=False, verbose=True):
     data_sets = list(gen_all_datasets("../data/kfold_data/"))
 	#### FIXME - Comment / or make more elegant
     if random_order:
@@ -198,7 +199,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             output_file = os.path.join(RESULTS_PATH, files + "_result.txt")
             prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
             
-            perform_experiment(data_file, output_file, prediction_file, max_depth=12, k=1, description='SE, RQ, LN', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs)
+            perform_experiment(data_file, output_file, prediction_file, max_depth=12, k=1, description='SE, RQ, LN', debug=False, local_computation=local_computation, n_rand=1, sd=2, max_jobs=max_jobs, verbose=verbose)
             
             print "Done one file!!!"  
         else:
