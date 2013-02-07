@@ -1315,14 +1315,13 @@ def base_kernels(ndim=1):
     Generator of all base kernels for a certain dimensionality of data
     '''
     if ndim == 1:
-        for dim in range(ndim):
-            for k in base_kernel_families():
-                yield MaskKernel(ndim, dim, k)
-    else:
-        for k in multi_d_kernel_families():
+        for k in base_kernel_families():
             yield MaskKernel(ndim, 1, k)
-            # Todo: fix 1D kernels to work without MaskKernels. 
-            # yield k
+            # Todo: fix 1D kernels to work without MaskKernels.
+    else:
+        for dim in range(ndim):
+            for k in multi_d_kernel_families():
+                yield MaskKernel(ndim, dim, k)
  
 def base_kernel_families():
     '''
@@ -1345,6 +1344,8 @@ def multi_d_kernel_families():
     Generator of all base kernel families for multidimensional problems.
     '''
     yield SqExpKernelFamily().default()
+    yield RQKernelFamily().default()
+    yield LinKernelFamily().default()
     
         
 def test_kernels(ndim=1):
