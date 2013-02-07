@@ -177,11 +177,11 @@ def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1
     os.system('reset')  # Stop terminal from going invisible.
    
 #### WARNING - Code duplication 
-def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
+def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500, verbose=True):
     # This version doesn't have xtext and ytest
     X, y, D = gpml.load_mat(data_file, y_dim=1)
     assert(D==1)
-    perform_kernel_search(X, y, 1, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+    perform_kernel_search(X, y, 1, data_file, output_file, max_depth=max_depth, k=k, description=description, debug=debug, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs, verbose=verbose)
     best_scored_kernel = parse_results(output_file)
     os.system('reset')  # Stop terminal from going invisible.
 
@@ -206,7 +206,7 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
             print 'Skipping file %s' % files
     os.system('reset')  # Stop terminal from going invisible.        
             
-def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9):
+def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9, verbose=True):
     data_sets = list(gen_all_datasets("../data/1d_data/"))
 	#### FIXME - Comment / or make more elegant
     if random_walk:
@@ -219,7 +219,27 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             data_file = os.path.join(r,files + ".mat")
             output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
             
-            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=9', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=9', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs, verbose=verbose)
+            
+            print "Done one file!!!"  
+        else:
+            print 'Skipping file %s' % files
+    os.system('reset')  # Stop terminal from going invisible.       
+            
+def run_all_1d_rescaled(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9, verbose=True):
+    data_sets = list(gen_all_datasets("../data/1d_data_rescaled/"))
+	#### FIXME - Comment / or make more elegant
+    if random_walk:
+        random.shuffle(data_sets)
+
+    for r, files in data_sets:
+        # Do we need to run this test?
+        if not(skip_complete and (os.path.isfile(os.path.join(D1_RESULTS_PATH, files + "_result.txt")))):
+            print 'Experiment %s' % files
+            data_file = os.path.join(r,files + ".mat")
+            output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
+            
+            perform_experiment_no_test_1d(data_file, output_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=9', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs, verbose=verbose)
             
             print "Done one file!!!"  
         else:
