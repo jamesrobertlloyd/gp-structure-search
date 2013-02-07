@@ -1108,7 +1108,7 @@ class MaskKernel(Kernel):
         return self.base_kernel.param_vector()
         
     def effective_params(self):
-        return len(self.param_vector())
+        return self.base_kernel.effective_params()
         
     def default_params_replaced(self, sd=1, min_period=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
@@ -1196,7 +1196,7 @@ class SumKernel(Kernel):
         return np.concatenate([e.param_vector() for e in self.operands])
         
     def effective_params(self):
-        return len(self.param_vector())
+        return sum([o.effective_params() for o in self.operands])
         
     def default_params_replaced(self, sd=1, min_period=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
@@ -1286,7 +1286,7 @@ class ProductKernel(Kernel):
         
     def effective_params(self):
         '''The scale of a product of kernels is over parametrised'''
-        return len(self.param_vector()) - (len(self.operands) - 1)
+        return sum([o.effective_params() for o in self.operands]) - (len(self.operands) - 1)
         
     def default_params_replaced(self, sd=1, min_period=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
