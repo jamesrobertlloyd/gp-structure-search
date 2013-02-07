@@ -294,7 +294,7 @@ The production rules are then applied to the highest scoring kernel expression a
 
 \cite{plate1999accuracy} constructs a GP with a composite kernel, adding a SE kernel along each dimension, and a SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
 
-\paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.
+\paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.  Earlier work in unsupervised Bayseian structure discovery was done in \cite{kemp2008discovery}.
 
 \paragraph{ANOVA Kernels}
 
@@ -368,18 +368,18 @@ By splitting kernel expressions found by our search algorithm into additive comp
 This potentially allows us to separate causally independent processes that gave rise to data\TBD{ cite something / say nicely}.
 
 Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
-\fTBD{If kept here, make notation consistent through paper}
-The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$ is given by
+%\fTBD{If kept here, make notation consistent through paper}
+The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$ is given by
 \begin{align}
-\vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
+\vf_1 | \vf \sim \mathcal{N} \big( & \vmu_1 + \vk_1^\star\tra (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
 \end{align}
 %and the covariance between the two components, conditioned on their sum is given by:
 %\begin{align}
 %\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 %\end{align}
 %Derivations can be found in the supplementary material.
-\fTBD{Drop star notation - be careful that it is still true!}
+
 
 We demonstrate the decompositions produced by our method on two time series.
 We ran the search to a depth of 10 and use SE, PE, LN and RQ kernels\fTBD{make sure these are all defined}.
@@ -518,7 +518,7 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 
 \paragraph{Generalized Additive Models} are models for which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.  
 In our experiments, this model is implemented through a GP whose kernel is a sum of sq-exp kernels across dimensions.  
-This model, denoted GP GAM, was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
+This model, denoted GP GAM, was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.  \cite{hastie1990generalized}
 
 \paragraph{Hierarchical Kernel Learning}	
 HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
@@ -527,7 +527,7 @@ HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciiti
 However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
 
 \paragraph{Structure Search}
-All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
+All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
