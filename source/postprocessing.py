@@ -49,29 +49,9 @@ def gen_all_results(folder=config.RESULTS_PATH):
     for files in file_list:
         if files.endswith(".txt"):
             results_filename = os.path.join(folder,files)#r
-            best_tuple = parse_results( results_filename )
+            best_tuple = exp.parse_results( results_filename )
             yield files.split('.')[-2], best_tuple
                 
-
-def parse_results( results_filename, max_level=None ):
-    """
-    Returns the best kernel in an experiment output file as a ScoredKernel
-    """
-    # Read in scored kernels.
-    lines = []
-    with open(results_filename) as results_file:
-        for line in results_file:
-            if line.startswith("ScoredKernel"):
-                lines.append(line)
-            elif (not max_level is None) and (len(re.findall('Level [0-9]+', line)) > 0):
-                level = int(line.split(' ')[2])
-                if level > max_level:
-                    break
-    #result_tuples = [fk.repr_string_to_kernel(line.strip()) for line in open(results_filename) if line.startswith("ScoredKernel")]
-    result_tuples = [fk.repr_string_to_kernel(line.strip()) for line in lines]
-    best_tuple = sorted(result_tuples, key=fk.ScoredKernel.score)[0]
-    return best_tuple
-
 
 def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
     data_sets = list(exp.gen_all_1d_datasets())
@@ -81,7 +61,7 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
         if os.path.isfile(results_file):
             # Find best kernel and produce plots
             X, y, D = gpml.load_mat(os.path.join(r,file + ".mat"))
-            best_kernel = parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
+            best_kernel = exp.parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
             stripped_kernel = fk.strip_masks(best_kernel.k_opt)
             if not max_level is None:
                 fig_folder = os.path.join('../figures/decomposition/', (file + '_max_level_%d' % max_level))

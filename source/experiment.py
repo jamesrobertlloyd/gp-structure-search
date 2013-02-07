@@ -81,7 +81,11 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     results_sequence = []     # List of lists of results, indexed by level of expansion.
     
     # Perform search
-    for depth in range(max_depth):   
+    for depth in range(max_depth):
+        
+        if debug==True:
+            current_kernels = current_kernels[0:4]
+             
         # Add random restarts to kernels
         current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd, min_period=min_period)
         # Score the kernels
@@ -130,36 +134,6 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                 print >> outfile, result  
 
 
-def parse_all_results(folder=D1_RESULTS_PATH, save_file='kernels.tex', one_d=False):
-    '''
-    Creates a list of results, then sends them to be formatted into latex.
-    '''
-    entries = [];
-    rownames = [];
-    
-    colnames = ['Dataset', 'NLL', 'Kernel' ]
-    for rt in gen_all_results(folder):
-        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        if not one_d:
-            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
-        else:
-            # Remove any underscored dimensions
-            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % re.sub('_{[0-9]+}', '', rt[-1].latex_print())])
-        rownames.append(rt[0])
-    
-    utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
-
-
-def gen_all_results(folder=RESULTS_PATH):
-    '''Look through all the files in the results directory'''
-    file_list = sorted([f for (r,d,f) in os.walk(folder)][0])
-    #for r,d,f in os.walk(folder):
-    for files in file_list:
-        if files.endswith(".txt"):
-            results_filename = os.path.join(folder,files)#r
-            best_tuple = parse_results( results_filename )
-            yield files.split('.')[-2], best_tuple
-                
 
 def parse_results( results_filename, max_level=None ):
     '''
@@ -216,10 +190,10 @@ def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, desc
     best_scored_kernel = parse_results(output_file)
     os.system('reset')  # Stop terminal from going invisible.
 
-def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
+def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_order=False):
     data_sets = list(gen_all_kfold_datasets())
 	#### FIXME - Comment / or make more elegant
-    if random_walk:
+    if random_order:
         random.shuffle(data_sets)
     else:
         data_sets.sort()
@@ -260,11 +234,11 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
     os.system('reset')  # Stop terminal from going invisible.        
     
   
-def run_test_kfold(local_computation = True, max_jobs=600):
-    """This is a quick test function."""
+def run_debug_kfold(local_computation = True, max_jobs=600):
+    """This is a quick debugging function."""
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
-    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs)
+    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='Debug', debug=True, local_computation=local_computation, max_jobs=max_jobs)
     os.system('reset')  # Stop terminal from going invisible.
     
