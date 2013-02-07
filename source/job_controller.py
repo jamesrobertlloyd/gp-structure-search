@@ -196,9 +196,9 @@ def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=F
     code = re.sub('% ', '%% ', code) # HACK - cblparallel currently does not like % signs
     # Evaluate code - potentially on cluster
     if local_computation:   
-        temp_results_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1)[0]
+        temp_results_file = cblparallel.run_batch_locally([code], language='matlab', max_cpu=1.1, max_mem=1.1, verbose=verbose)[0]
     else:
-        temp_results_file = cblparallel.run_batch_on_fear([code], language='matlab', max_jobs=max_jobs)[0]
+        temp_results_file = cblparallel.run_batch_on_fear([code], language='matlab', max_jobs=max_jobs, verbose=verbose)[0]
     results = scipy.io.loadmat(temp_results_file)
     # Remove temporary files (perhaps on the cluster server)
     cblparallel.remove_temp_file(temp_results_file, local_computation)

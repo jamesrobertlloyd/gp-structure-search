@@ -56,7 +56,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=Tr
                 kernels[j] = None
 
     kernels = [k for k in kernels if k is not None]
-    kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
+    kernels = sorted(kernels, key=Sc oredKernel.score, reverse=True)
     return kernels
  
 def remove_nan_scored_kernels(scored_kernels):    
@@ -81,7 +81,11 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     results_sequence = []     # List of lists of results, indexed by level of expansion.
     
     # Perform search
-    for depth in range(max_depth):   
+    for depth in range(max_depth):
+        
+        if debug==True:
+            current_kernels = current_kernels[0:4]
+             
         # Add random restarts to kernels
         current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd, min_period=min_period)
         # Score the kernels
@@ -130,36 +134,6 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                 print >> outfile, result  
 
 
-def parse_all_results(folder=D1_RESULTS_PATH, save_file='kernels.tex', one_d=False):
-    '''
-    Creates a list of results, then sends them to be formatted into latex.
-    '''
-    entries = [];
-    rownames = [];
-    
-    colnames = ['Dataset', 'NLL', 'Kernel' ]
-    for rt in gen_all_results(folder):
-        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        if not one_d:
-            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
-        else:
-            # Remove any underscored dimensions
-            entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % re.sub('_{[0-9]+}', '', rt[-1].latex_print())])
-        rownames.append(rt[0])
-    
-    utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
-
-
-def gen_all_results(folder=RESULTS_PATH):
-    '''Look through all the files in the results directory'''
-    file_list = sorted([f for (r,d,f) in os.walk(folder)][0])
-    #for r,d,f in os.walk(folder):
-    for files in file_list:
-        if files.endswith(".txt"):
-            results_filename = os.path.join(folder,files)#r
-            best_tuple = parse_results( results_filename )
-            yield files.split('.')[-2], best_tuple
-                
 
 def parse_results( results_filename, max_level=None ):
     '''
@@ -216,10 +190,10 @@ def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, desc
     best_scored_kernel = parse_results(output_file)
     os.system('reset')  # Stop terminal from going invisible.
 
-def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_walk=False):
+def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_order=False):
     data_sets = list(gen_all_kfold_datasets())
 	#### FIXME - Comment / or make more elegant
-    if random_walk:
+    if random_order:
         random.shuffle(data_sets)
     else:
         data_sets.sort()
@@ -259,53 +233,11 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             print 'Skipping file %s' % files
     os.system('reset')  # Stop terminal from going invisible.        
     
-  
-def run_test_kfold(local_computation = True, max_jobs=600, verbose=True):
-    """This is a quick test function."""
+def run_debug_kfold(local_computation = True, max_jobs=600, verbose=True):
+    """This is a quick debugging function."""
     data_file = '../data/kfold_data/r_pumadyn512_fold_3_of_10.mat'
     output_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_result.txt'
     prediction_file = '../test_results' + '/r_pumadyn512_fold_3_of_10_predictions.mat'
-    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='DaDu test', debug=True, local_computation=local_computation, max_jobs=max_jobs, verbose=verbose)
+    perform_experiment(data_file, output_file, prediction_file, max_depth=1, k=1, description='Debug', debug=True, local_computation=local_computation, max_jobs=max_jobs, verbose=verbose)
     os.system('reset')  # Stop terminal from going invisible.
     
-
-def make_figures():
-    X, y, D = gpml.load_mat('../data/mauna2003.mat')
-    k = fk.Carls_Mauna_kernel()
-    gpml.plot_decomposition(k, X, y, '../figures/decomposition/mauna_test', noise=-100000.0)
-
-def make_all_1d_figures(folder=D1_RESULTS_PATH, max_level=None):
-    data_sets = list(gen_all_1d_datasets())
-    for r, file in data_sets:
-        results_file = os.path.join(folder, file + "_result.txt")
-        # Is the experiment complete
-        if os.path.isfile(results_file):
-            # Find best kernel and produce plots
-            X, y, D = gpml.load_mat(os.path.join(r,file + ".mat"))
-            best_kernel = parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
-            stripped_kernel = fk.strip_masks(best_kernel.k_opt)
-            if not max_level is None:
-                fig_folder = os.path.join('../figures/decomposition/', (file + '_max_level_%d' % max_level))
-            else:
-                fig_folder = os.path.join('../figures/decomposition/', file)
-            if not os.path.exists(fig_folder):
-                os.makedirs(fig_folder)
-            gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), noise=best_kernel.noise)
-            
-def make_all_1d_figures_all_depths(folder=D1_RESULTS_PATH, max_depth=8):
-    make_all_1d_figures(folder=folder)
-    for level in range(max_depth+1):
-        make_all_1d_figures(folder=folder, max_level=level)
-        
-def make_kernel_description_table():
-    '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
-    entries = [];
-    rownames = [];
-    
-    colnames = ['', 'Description', 'Parameters' ]
-    for k in fk.base_kernel_families(1):
-        # print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
-        rownames.append( k.latex_print() )
-        entries.append([ k.family().description(), k.family().params_description()])
-    
-    utils.latex.table('../latex/tables/kernel_descriptions.tex', rownames, colnames, entries, 'kernel_descriptions')
