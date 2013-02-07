@@ -303,7 +303,7 @@ def make_kernel_description_table():
     rownames = [];
     
     colnames = ['', 'Description', 'Parameters' ]
-    for k in fk.base_kernel_families():
+    for k in fk.base_kernel_families(1):
         # print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
         rownames.append( k.latex_print() )
         entries.append([ k.family().description(), k.family().params_description()])

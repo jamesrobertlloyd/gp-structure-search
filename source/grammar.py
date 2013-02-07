@@ -83,14 +83,14 @@ class MultiDGrammar:
             if self.debug:
                 return list(fk.test_kernel_families())
             else:
-                return list(fk.base_kernel_families())
+                return list(fk.base_kernel_families(self.ndim))
         elif tp == 'mask':
             result = []
             for d in range(self.ndim):
                 if self.debug:
                     result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.test_kernel_families()]
                 else:
-                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families()]
+                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families(self.ndim)]
             return result
         else:
             raise RuntimeError('Unknown type: %s' % tp)
