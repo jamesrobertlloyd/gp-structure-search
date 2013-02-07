@@ -11,6 +11,8 @@ for i = 1:length(experiments)
     MSEs.gpse = zeros(folds-1,1);
     MSEs.lin = zeros(folds-1,1);
     MSEs.gpper = zeros(folds-1,1);
+    MSEs.gpadd = zeros(folds-1,1);
+    MSEs.gpprod = zeros(folds-1,1);
     for fold = 1:(folds-1)
         % Load data
         fold_file = [fold_data_directory experiments{i} '-ex-fold-' ...
@@ -58,7 +60,7 @@ for i = 1:length(experiments)
         % Fit and score pure periodic
         %%%% Random restarts + averaging?
         covfunc = {@covPeriodic};
-        hyp.cov = [0; 0; 0];
+        hyp.cov = [0; -1.2; 0];
         likfunc = @likGauss;
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
@@ -70,16 +72,48 @@ for i = 1:length(experiments)
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
         MSEs.gpper(fold) = mean((ytest - m) .^ 2);
+        % Fit and score pure periodic
+        %%%% Random restarts + averaging?
+        covfunc = {@covSum, {@covSEiso, @covPeriodic}};
+        hyp.cov = [0; 0; 0; -1.2; 0];
+        likfunc = @likGauss;
+        hyp.lik = log(std(y));
+        meanfunc = {@meanConst};
+        hyp.mean = mean(y);
+        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+                   meanfunc, covfunc, likfunc, X, y);
+        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+                   meanfunc, covfunc, likfunc, X, y);
+        [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
+                    X, y, Xtest);
+        MSEs.gpadd(fold) = mean((ytest - m) .^ 2);
+        % Fit and score pure periodic
+        %%%% Random restarts + averaging?
+        covfunc = {@covProd, {@covSEiso, @covPeriodic}};
+        hyp.cov = [0; 0; 0; -1.2; 0];
+        likfunc = @likGauss;
+        hyp.lik = log(std(y));
+        meanfunc = {@meanConst};
+        hyp.mean = mean(y);
+        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+                   meanfunc, covfunc, likfunc, X, y);
+        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+                   meanfunc, covfunc, likfunc, X, y);
+        [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
+                    X, y, Xtest);
+        MSEs.gpprod(fold) = mean((ytest - m) .^ 2);
     end
     
     semilogy(percentiles, MSEs.gpss, 'LineWidth', 2);
     hold on
     semilogy(percentiles, MSEs.gpse, 'g', 'LineWidth', 2);
     semilogy(percentiles, MSEs.lin, 'r', 'LineWidth', 2);
+    semilogy(percentiles, MSEs.gpper, 'y', 'LineWidth', 2);
+    semilogy(percentiles, MSEs.gpadd, 'c', 'LineWidth', 2);
+    semilogy(percentiles, MSEs.gpprod, 'm', 'LineWidth', 2);
     xlabel('Proportion training data (%)');
     ylabel('MSE');
-    %semilogy(MSEs.gpper, 'y');
-    legend('Structure search', 'Sq-exp GP', 'Linear');
+    legend('Structure search', 'Sq-exp GP', 'Linear', 'Periodic GP', 'SE + PE GP', 'SE x PE GP', 'location', 'best');
     hold off
     saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
     save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
