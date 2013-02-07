@@ -56,7 +56,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=Tr
                 kernels[j] = None
 
     kernels = [k for k in kernels if k is not None]
-    kernels = sorted(kernels, key=Sc oredKernel.score, reverse=True)
+    kernels = sorted(kernels, key=ScoredKernel.score, reverse=True)
     return kernels
  
 def remove_nan_scored_kernels(scored_kernels):    
