@@ -100,7 +100,7 @@ TBD
 \section{Introduction}
 
 Supervised learning problems, such as classification and regression, learn a function ${\function : \InputSpace \to \OutputSpace}$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
-Kernel based nonparametric models, such as support vector machine and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
+Kernel based nonparametric models, such as support vector machines and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
 These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ that specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
 A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}.
@@ -110,7 +110,7 @@ Specifically, we focus on a Bayesian setting where the kernel specifies a covari
 Traditionally, Gaussian process kernels have a few free hyperparameters which can be optimised (or inferred) from data.
 However, it is well known that one can form composite kernels via combinations of simple base kernels (\eg squared exponential / radial basis function, periodic, linear etc.) and operations that preserve positive definiteness (\eg summation and multiplication).
 We use this insight to define a simple grammar over composite kernels and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
-The search criterion is the marginal likelihood of the kernel for the given data, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning\TBD{cite \eg Heckerman}.
+The search criterion is the marginal likelihood of the data for a given kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning\TBD{cite \eg Heckerman}.
 
 Our experimental findings demonstrate that this structure discovery algorithm can automatically recover known kernel structure from data, and that on real data the learned structure of the kernel often corresponds to natural, interesting and interpretable decompositions of the unknown function.
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery\fTBD{maybe $\to$ conclusion}.
@@ -167,7 +167,7 @@ Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be us
 \NA{In the case of Gaussian process regression} the kernel is used to define a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
 The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 
-Examples of PSD kernels include squared exponential (SE), periodic (PE) and linear kernels (LN) defined below
+Examples of PSD kernels include squared exponential (SE), periodic (PE) and linear kernels (LN) defined below\fTBD{If we add RQ then we have everything in one place}
 \begin{eqnarray}
 \kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 \kernel_\textrm{PE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
