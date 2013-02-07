@@ -69,6 +69,9 @@
 \def\function{f}
 \def\kernel{\kappa}
 \def\KernelMatrix{K}
+\def\SumKernel{\sum}
+\def\ProductKernel{\prod}
+\def\expression{e}
 
 \twocolumn[
 \icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
@@ -158,6 +161,7 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 %Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
 
 \section{Expressing structure through kernels}
+\label{sec:Structure}
 
 Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
 \NA{In the case of Gaussian process regression} the kernel is used to define a covariance function ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
@@ -177,7 +181,7 @@ PSD kernels are closed under addition and multiplication \ie any algebraic compo
 This allows one to create richly structured kernels from well understood base components.
 
 \fTBD{Can probably kill simple kernel table. Focus on one table.}
-\input{tables/simple_kernels_table.tex}
+%\input{tables/simple_kernels_table.tex}
 \input{tables/example_structures_table.tex}
 
 \paragraph{Summation}
@@ -198,7 +202,7 @@ In higher dimensions, summing kernels can correspond to decompositions of the fo
 
 Multiplication of kernels does not correspond to a simple decomposition of functions, but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
 
-For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN.\footnotemark
+For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
 
 Multiplying kernels of the same form in one dimension is often redundant \eg for SE kernels this just produces SE kernels with different parameters.
 \TBD{What is PE $\times$ PE?}
@@ -227,35 +231,48 @@ This arises since two points, $\inputVar,\inputVar'$, can only be considered sim
 
 \section{Searching over structures}
 
+\paragraph{A grammar for kernels}
+
 The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
-We therefore consider searching over all kernel structures that can be expressed as sums and products of an alphabet of base kernels.
+We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels.
 
-Formally\fTBD{Maybe Roger is well placed to write this?}, we consider base kernels that act upon a single input dimension, denoted $\kernel$
+Formally\fTBD{Maybe Roger is well placed to write this?}, we start with a collection of base kernels applied to each input dimension individually; $\kernel_i$ denotes a kernel applied to input dimension $i$.
+We denote sums and products of kernels as $\SumKernel(\expression,\ldots)$ and $\ProductKernel(\expression,\ldots)$ where $\expression$ represents an arbitrary kernel expression.
+We then generate new expressions by repeatedly applying the following production rules to base kernels, sum kernels and product kernel within an expression.
+\begin{center}
+\begin{tabular}{rccc}
+\textrm{Replacement} & $\kernel_i$ & $\to$ & $\kernel'_i$\\% & $\forall\, \kernel' $\\
+\textrm{Addition} & $\kernel_i$ & $\to$ & $\kernel_i + \kernel'_j$\\% & $\forall\, j,\kernel' $\\
+& $\SumKernel(e,\ldots)$ & $\to$ & $\SumKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+& $\ProductKernel(e,\ldots)$ & $\to$ & $\SumKernel(\ProductKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+\textrm{Multiplication} & $\kernel_i$ &  $\to$ & $\kernel_i \times \kernel'_j$\\% & $\forall\, j,\kernel'$\\
+& $\SumKernel(e,\ldots)$ & $\to$ & $\ProductKernel(\SumKernel(e,\ldots),\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+& $\ProductKernel(e,\ldots)$ & $\to$ & $\ProductKernel(e,\ldots,\kernel'_j)$\\% & $\forall\, j,\kernel' $\\
+\end{tabular}
+\end{center}
+For example, applying the multiplication production rule to the sum in the expression $\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE})$ could result in the new expression $\ProductKernel(\SumKernel(\kernel_\textrm{SE},\kernel_\textrm{SE}),\kernel_\textrm{PE})$ \ie a kernel representing a smooth function with two characteristic scales of variation is transformed into a kernel representing a locally periodic function with two scales of variation.
 
-\TBD{
-We then search in a greedy fashion, using BIC to score models (footnote that Laplace is brittle).
-Draw a picture to show what our model includes \ie polynomial regression, nonparametric fourier decomposition, GAM, additive kernels.
-Cite Roger and other grammar based search papers. Is there a canonical paper for forward variable selection in linear models?
-}
+\paragraph{Remark on notation} The $\SumKernel,\ProductKernel$ notation is useful algorithmically and to describe the production rules but elsewhere we will use more conventional algebraic notation \ie the two kernels above would be written as $\kernel_\textrm{SE} + \kernel_\textrm{SE}$ and ${(\kernel_\textrm{SE} + \kernel_\textrm{SE}) \times \kernel_\textrm{PE}}$.
 
-\fTBD{Merge the below into the above}
-\begin{enumerate}
-\item Initial set of kernels $\mathcal{K}$ = all base kernels $\times$ applied to all single input dimensions $\times$ random kernel parameter initialisations
-\item For each $\kappa \in \mathcal{K}$ optimise parameters by optimising nll on training data; record nll and BIC \TBD{RBG: not Laplace?}
-\item Remove approximately duplicate `kernels' by standardising forms, detecting equivalent parameters and examining Frobenius norm between covariance matrices (\TBD{this heuristic to be examined - currently not used in results presented since $k = 1$ - see below}).
-\item Set $\mathcal{K}^*$ = best $k$ kernels as determined by BIC \TBD{RBG: Maybe use sub/superscripts instead?  This looks like a dual space.}
-\item Set $\mathcal{K}$ = expansion of all kernels in $\mathcal{K}^*$ with some random initialisations of new kernel parameters (keeping previously learned parameters - practically this is quite important)
-\item Return to step 2, repeating until some fixed depth $D$ (\TBD{this could be replaced with stopping when no kernel is an improvement})
-\end{enumerate}
+\paragraph{A greedy search algorithm}
+The base kernels and production rules generate a tree structure over kernel expressions and we follow a greedy search to traverse this tree.
+This requires a method of scoring a kernel expression, which we achieve by using the Bayesian Information Criterion (BIC)\TBD{ cite me} as an estimate of the marginal likelihood of some data given the kernel expression\footnotemark.
+\footnotetext{We also experimented with using a Laplace approximation to the marginal likelihood\TBD{ cite} but this was found to be less numerically stable and could not be computed if an optimiser failed to find a true optimum.}
+Specifically, we optimise the marginal likelihood of the data given specific kernel parameters\TBD{ using LBFGS - cite?}, randomly restarting previously unoptimised kernel parameters.
+This is then adjusted by the number of parameters optimised\footnotemark to compute the BIC\fTBD{formula?}.
+\footnotetext{Adjustments were made for obvious parameter redundancy \eg multiplicative terms in products of kernels.}
 
-Expanding a kernel involves
-\begin{itemize}
-\item For each kernel component (i.e.~any product, sum or base kernel)
-\item Either add by, multiply by or replace with (only base kernels) all base kernels $\times$ applied to all single input dimensions
-\item \TBD{Experiments suggest that pruning `expansions' may be beneficial when the base kernel space is large - not yet implemented}
-\end{itemize}
+The search then proceeds by scoring all base kernels applied to all input dimensions.
+The highest scoring kernel is then expanded by applying all production rules, and these kernel expressions are scored.
+The production rules are then applied to the highest scoring kernel expression and the search continues iteratively until some fixed depth.
+
+\paragraph{Example expressions}
+
+\TBD{Draw a picture to show what our model includes \ie polynomial regression, nonparametric `Fourier' decomposition, GAM, additive kernels.}
 
 \section{Related Work}
+
+\TBD{Needs work.}
 
 The technique of constructing composite kernels using sums and products of existing kernels is not new\fTBD{weak language}, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not\fTBD{worth highlighting?}.
 
@@ -319,46 +336,44 @@ They call this \emph{Bayesian localized multiple kernel learning}.
 
 \TBD{Cite relevant work by Salkhutdinov and Hinton}
 
-\section{Decomposition}
+\section{Decomposing a function}
 
-\fTBD{This is a key part of the paper, so I think we should devote an entire section}
+Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent function.
+By splitting kernel expressions found by our search algorithm into additive components we can decompose a learned regression function.
+This potentially allows us to separate causally independent processes that gave rise to data\TBD{ cite something / say nicely}.
 
-We demonstrate the decompositions produced by our method on two time series.
-For the search we used $k = 1$, $D = 8$ and the kernels in Table~\ref{tbl:kernel_descriptions}.
-%These were chosen to minimally allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure.
-% \TBD{these were chosen to minimally (without parameter degeneracy e.g.~RQ could approximate SE and LN) allow the discovery of smooth functions, smooth periodic functions, rough functions and linear structure}.
-
-\input{"tables/kernel_descriptions.tex"}
-
-The sorts of structure implied by complex kernel might not be immediately interpretable.
-However, there is one property of GPs that allows us to break down the signal into interpretable parts.
-Specifically, a function $f \sim GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$.
-In addition, the posterior distributions over individual components after conditioning on data are also analytically tractable.
-
-\fTBD{Move all maths to supplementary?}
-The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \gp( \vmu_1, k_1)$ and $\vf_2 \sim \gp( \vmu_2, k_2)$ is given by
+Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
+\fTBD{If kept here, make notation consistent through paper}
+The conditional distribution of a Gaussian $\vf_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$ is given by
 \begin{align}
 \vf_1^\star | \vf \sim \mathcal{N} \big( & \vmu_1^\star + \vk_1^\star (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
 & \vk_1^{\star\star} - \vk_1^\star (\vK_1 + \vK_2)\inv \vk_1^\star \big).
 \end{align}
-and the covariance between the two components, conditioned on their sum is given by:
-\begin{align}
-\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-\end{align}
-Derivations can be found in the supplementary material.
-\fTBD{We can drop the star notation without losing much}
+%and the covariance between the two components, conditioned on their sum is given by:
+%\begin{align}
+%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+%\end{align}
+%Derivations can be found in the supplementary material.
+\fTBD{Drop star notation - be careful that it is still true!}
 
-%These distributions express the posterior model uncertainty about different components of the signal, integrating over the possible configurations of the other components.
-These expressions allow us to decompose the posterior into a sum of interpretable parts, and examine each one in turn.
+We demonstrate the decompositions produced by our method on two time series.
+We ran the search to a depth of 10 and use SE, PE, LN and RQ kernels\fTBD{make sure these are all defined}.
+
+% \input{"tables/kernel_descriptions.tex"}
+
+%The sorts of structure implied by complex kernel might not be immediately interpretable.
+%However, there is one property of GPs that allows us to break down the signal into interpretable parts.
+%Specifically, a function $f \sim \GP(0, k_1(x, x') + k_2(x,x')$, whose kernel is a sum of kernels, has the same distribution as a sum of two functions $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$.
+%In addition, the posterior distributions over individual components after conditioning on data are also analytically tractable.
 
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-As an example of a GP modeling problem where choosing an appropriate structure is critical, we revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+We revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
-Figures \ref{fig:mauna_grow} show the posterior's increasingly appropriate model as the search depth increases on the Mauna Loa dataset.
-Note in particular that, while the data can be smoothly interpolated a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Figures \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
+Note in particular that, while the data can be smoothly interpolated by simple kernels a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
-Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth $\gp$ regression model together with the additive components of the posterior.
+Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth model together with the posteriors of the additive components.
 The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.
 
 \begin{figure}[h!]
@@ -390,6 +405,7 @@ The plot shows a very plausible extrapolation and highly interpretable component
 
 \paragraph{Airline passenger data}
 
+\TBD{Give an intro to this dataset.}
 Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
 \TBD{Make similar observations of good performance and perhaps draw attention to the selection of a linear kernel}.
 
@@ -425,16 +441,36 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 \label{fig:airline_decomp}
 \end{figure}
 
-To evaluate the effectiveness of our method we performed two types of experiments.
-First, we examined the ability of our algorithm to discover useful structure in one-dimensional datasets.  Second, we examined the predictive performance of our model on multi-dimensional datasets.
+%To evaluate the effectiveness of our method we performed two types of experiments.
+%First, we examined the ability of our algorithm to discover useful structure in one-dimensional datasets.  Second, we examined the predictive performance of our model on multi-dimensional datasets.
 % testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
 %The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
-\section{Numerical evaluation}
-\fTBD{Bad title name}
+\section{Empirical evaluation}
 
-\subsection{Multidimensional datasets}
+In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
+
+\subsection{Extrapolation}
+
+\TBD{Experiments ongoing}
+
+\subsection{Interpolation}
+
+To demonstrate the interpolation accuracy of our method we extend the comparison of \cite{duvenaud2011additive11} to include our method.
+5 comparsion algorithms were evaluated on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood using 10 fold cross validation.
+Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.
+%
+\input{tables/regression_results_mse.tex}
+\input{tables/regression_results_nll.tex}
+%
+Our method outperforms the other methods in all tests.
+
+\TBD{Other versions of tests / learning curves}
+
+\subsubsection{Data sets}
+
+\fTBD{Too much text? Move to supplementary}
 
 \paragraph{Bach Synthetic Dataset}
 In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
@@ -451,7 +487,7 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 
 [TODO: Describe concrete, pumadyn, servo and housing]
 
-\subsection{Details of Methods Used}
+\subsection{Details of comparison methods}
 
 \paragraph{Linear regression} was included as a baseline. A likelihood score was obtained by setting the noise variance to the empirical variance on the training set.
 
@@ -462,26 +498,15 @@ This model, denoted GP GAM, was included to demonstrate that the gain in predict
 \paragraph{Hierarchical Kernel Learning}	
 HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
 
-\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel imlicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
+\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
 However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
 
 \paragraph{Structure Search}
 All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available at the authors' website.\TBD{How true will this be?}
 
-
-\subsection{Results}
-
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
-%5 data sets were split into 10 equally sized folds.
-Datasets were evaluated on both mean-squared error and predictive likelihood on random 10-fold splits.
-%For each fold of each data set we trained each method on the other 9 folds, and then computed predictive mean squared error (MSE) and mean negative predictive log likelihood on the held out fold (data missing at random \TBD{we could likely do much better by creating folds that remove continuous regions if extrapolation ability carries over to high dimensional data}.
-Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.
-%
-\input{tables/regression_results_mse.tex}
-\input{tables/regression_results_nll.tex}
-%
-Our method outperforms the other methods in all tests. 
+
 %Some points for discussion
 %\begin{itemize}
 %\item Experiments just using SE kernel can outperform additive kernel surprisingly. This is presumably a regularisation effect of using a finite depth search and/or BIC. We could make this a more Bayesian result (i.e.~more a property of the model) by placing a prior on kernels that depends on the number of components.
@@ -490,11 +515,13 @@ Our method outperforms the other methods in all tests.
 
 \section{Discussion}
 
-Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
+\TBD{Needs work.}
 
 In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
 We examined the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
+
+\NA{Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology.}
 
 %\section{Future Work}
 
