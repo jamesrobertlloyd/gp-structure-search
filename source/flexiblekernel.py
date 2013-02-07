@@ -1317,7 +1317,7 @@ def base_kernels(ndim=1):
     #### FIXME - Redundant at the moment
     if ndim == 1:
         for k in base_kernel_families(ndim):
-            yield MaskKernel(ndim, 1, k)
+            yield MaskKernel(ndim, 0, k)
             # Todo: fix 1D kernels to work without MaskKernels.
     else:
         for dim in range(ndim):

@@ -155,22 +155,16 @@ def parse_results( results_filename, max_level=None ):
     best_tuple = sorted(result_tuples, key=ScoredKernel.score)[0]
     return best_tuple
 
-def gen_all_kfold_datasets():
-    '''Look through all the files in the k fold data directory'''
-    for r,d,f in os.walk("../data/kfold_data/"):
-        for files in f:
-            if files.endswith(".mat"):
-                yield r, files.split('.')[-2]
-
-def gen_all_1d_datasets():
+def gen_all_datasets(dir):
     '''Look through all the files in the 1d data directory'''
     file_list = []
-    for r,d,f in os.walk("../data/1d_data/"):
+    for r,d,f in os.walk(dir):
         for files in f:
             if files.endswith(".mat"):
                 file_list.append((r, files.split('.')[-2]))
     file_list.sort()
     return file_list
+
 
 def perform_experiment(data_file, output_file, prediction_file, max_depth=8, k=1, description='Describe me!', debug=False, local_computation=True, n_rand=1, sd=2, max_jobs=500):
     #### FIXME - D is redundant
@@ -191,12 +185,11 @@ def perform_experiment_no_test_1d(data_file, output_file, max_depth=8, k=1, desc
     os.system('reset')  # Stop terminal from going invisible.
 
 def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False, max_jobs=500, random_order=False):
-    data_sets = list(gen_all_kfold_datasets())
+    data_sets = list(gen_all_datasets("../data/kfold_data/"))
 	#### FIXME - Comment / or make more elegant
     if random_order:
         random.shuffle(data_sets)
-    else:
-        data_sets.sort()
+
     for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(RESULTS_PATH, files + "_result.txt")))):
@@ -213,12 +206,11 @@ def run_all_kfold(local_computation = True, skip_complete=False, zip_files=False
     os.system('reset')  # Stop terminal from going invisible.        
             
 def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=10, k=1, sd=2, n_rand=9):
-    data_sets = list(gen_all_1d_datasets())
+    data_sets = list(gen_all_datasets("../data/1d_data/"))
 	#### FIXME - Comment / or make more elegant
     if random_walk:
         random.shuffle(data_sets)
-    else:
-        data_sets.sort()
+
     for r, files in data_sets:
         # Do we need to run this test?
         if not(skip_complete and (os.path.isfile(os.path.join(D1_RESULTS_PATH, files + "_result.txt")))):
@@ -233,6 +225,26 @@ def run_all_1d(local_computation=False, skip_complete=True, zip_files=False, max
             print 'Skipping file %s' % files
     os.system('reset')  # Stop terminal from going invisible.        
     
+def run_all_1d_extrap(local_computation=False, skip_complete=True, zip_files=False, max_jobs=500, random_walk=False, max_depth=4, k=1, sd=2, n_rand=3):
+    data_sets = list(gen_all_datasets("../data/1d_extrap_folds/"))
+    #### FIXME - Comment / or make more elegant
+    if random_walk:
+        random.shuffle(data_sets)
+
+    for r, files in data_sets:
+        # Do we need to run this test?
+        if not(skip_complete and (os.path.isfile(os.path.join(D1_RESULTS_PATH, files + "_result.txt")))):
+            print 'Experiment %s' % files
+            data_file = os.path.join(r,files + ".mat")
+            output_file = os.path.join(D1_RESULTS_PATH, files + "_result.txt")
+            prediction_file = os.path.join(RESULTS_PATH, files + "_predictions.mat")
+            
+            perform_experiment(data_file, output_file, prediction_file, max_depth=max_depth, k=k, description='SE, PE, RQ, LN n_rand=3 max_depth=4', debug=False, local_computation=local_computation, n_rand=n_rand, sd=sd, max_jobs=max_jobs)
+            
+            print "Done one file!!!"  
+        else:
+            print 'Skipping file %s' % files
+    os.system('reset')  # Stop terminal from going invisible.      
   
 def run_debug_kfold(local_computation = True, max_jobs=600):
     """This is a quick debugging function."""
