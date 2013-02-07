@@ -49,29 +49,7 @@
     
 \begin{document}
 
-\def\ie{i.e.\ }
-\def\eg{e.g.\ }
-\def\iid{i.i.d.\ }
-\def\simiid{\sim_{\mbox{\tiny iid}}}
-\def\eqdist{\stackrel{\mbox{\tiny d}}{=}}
 
-\def\Reals{\mathbb{R}}
-
-\def\Uniform{\mbox{\rm Uniform}}
-\def\Bernoulli{\mbox{\rm Bernoulli}}
-\def\GP{\mathcal{GP}}
-
-\def\inputVar{x}
-\def\InputVar{X}
-\def\InputSpace{\mathcal{X}}
-\def\outputVar{y}
-\def\OutputSpace{\mathcal{Y}}
-\def\function{f}
-\def\kernel{\kappa}
-\def\KernelMatrix{K}
-\def\SumKernel{\sum}
-\def\ProductKernel{\prod}
-\def\expression{e}
 
 \twocolumn[
 \icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
@@ -262,7 +240,7 @@ We therefore consider searching over all kernel structures that can be expressed
 Details of the search algorithm are given in the supplementary material \TBD{For now}.
 
 \paragraph{A greedy search algorithm}
-The base kernels and production rules generate a graph structure over kernel expressions and we follow a greedy search to traverse this graph.
+In order to find the model with highest marginal likelihood, the base kernels and production rules generate a graph structure over kernel expressions and we follow a greedy search to traverse this graph.
 This requires a method of scoring a kernel expression, which we achieve by using the Bayesian Information Criterion (BIC)\TBD{ cite me} as an estimate of the marginal likelihood of some data given the kernel expression\footnotemark.
 \footnotetext{We also experimented with using a Laplace approximation to the marginal likelihood\TBD{ cite} but this was found to be less numerically stable and could not be computed if an optimiser failed to find a true optimum.}
 Specifically, we optimise the marginal likelihood of the data given specific kernel parameters\TBD{ using LBFGS - cite?}, randomly restarting previously unoptimised kernel parameters.
@@ -483,7 +461,15 @@ In addition to producing highly interpretable decompositions of regression funct
 
 \subsection{Extrapolation}
 
-\TBD{Experiments ongoing}
+\begin{figure}[h!]
+\centering
+\begin{tabular}{c}
+\includegraphics[width=\columnwidth]{../figures/extrapolation_curves/01-airline-s-ex-curve.pdf}
+\end{tabular}
+\caption{Extrapolation performance.}
+\end{figure}
+
+Figure \ref{extrapolation} shows the learning curves of our method compared against simple linear regression and \gp{} regression with a SE kernel.  The amount of data in the 1D airline timeseries was increased by increments of 10\%. Both linear and SE regression plateau, while unbounded complexity of our method allows the model to continue to capture structure. 
 
 \subsection{Interpolation}
 
@@ -500,9 +486,9 @@ Our method outperforms the other methods in all tests.
 
 \subsubsection{Data sets}
 
-\fTBD{Too much text? Move to supplementary}
 
 \paragraph{Bach Synthetic Dataset}
+\fTBD{Too much text? Move to supplementary}
 In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
 % From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
 %We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
