@@ -196,7 +196,25 @@ In higher dimensions, summing kernels can correspond to decompositions of the fo
 \begin{equation}
 \function((\inputVar_1, \inputVar_2)) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
 \end{equation}
-\ie `independent' variation in different dimensions\TBD{ reference a plot}.
+\ie `independent' variation in different dimensions.
+%
+\input{tables/multi_d_additive_fig}
+
+Figure \ref{fig:multi_d_additivity} demonstrates the decomposition across dimensions.
+%
+\begin{figure*}[h]
+\centering
+\begin{tabular}{ccc}
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
+\end{tabular}
+\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
+\label{fig:interpretable functions}
+\end{figure*}
+%
+Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
+
 
 \paragraph{Multiplication}
 
@@ -272,13 +290,11 @@ The production rules are then applied to the highest scoring kernel expression a
 
 \section{Related Work}
 
-\TBD{Needs work.}
+\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels is not new\fTBD{weak language}, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not\fTBD{worth highlighting?}.
 
-The technique of constructing composite kernels using sums and products of existing kernels is not new\fTBD{weak language}, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not\fTBD{worth highlighting?}.
+\cite{plate1999accuracy} constructs a GP with a composite kernel, adding a SE kernel along each dimension, and a SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
 
-Compositional Model search for unsupervised learning: \cite{grosse2012exploiting}
-
-Hyperkernels \cite{ong2002hyperkernels}
+\paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.
 
 \paragraph{ANOVA Kernels}
 
@@ -293,9 +309,10 @@ Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fix
 
 \paragraph{Hierarchical Kernel Learning}
 
-In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
-The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels.\footnote{In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.
-For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
+%In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach
+\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
+The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels. In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.
+For details, see \cite{DBLP:journals/corr/abs-0909-0844}.
 %Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
 % \subsubsection{All-subsets kernel with uniform weightings}
 %In \cite{DBLP:journals/corr/abs-0909-0844}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
@@ -305,11 +322,11 @@ For details, see \cite{DBLP:journals/corr/abs-0909-0844}.}
 %\end{equation}
 %which has computational complexity $O(D)$.
 %However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
-
+%
 The main difficulty with the approach of \cite{DBLP:journals/corr/abs-0909-0844} is that hyperparameters are hard to set other than by cross-validation. 
 %In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
 
-Accuracy versus interpretability in flexible modeling: Implementing a tradeoff using Gaussian process models \cite{plate1999accuracy}
+
 
 %A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs.
 %However, the effect of a particular degree of interaction cannot be quantified by that approach.
@@ -335,6 +352,8 @@ They call this \emph{Bayesian localized multiple kernel learning}.
 \paragraph{Using DBNs to learn a kernel function}
 
 \TBD{Cite relevant work by Salkhutdinov and Hinton}
+
+Hyperkernels \cite{ong2002hyperkernels}
 
 \section{Decomposing a function}
 

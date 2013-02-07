@@ -31,7 +31,7 @@ def parse_all_results(folder=config.D1_RESULTS_PATH, save_file='kernels.tex', on
     
     colnames = ['Dataset', 'NLL', 'Kernel' ]
     for rt in gen_all_results(folder):
-        print "dataset: %s kernel: %s\n" % (rt[0], rt[import grammar-1].pretty_print())
+        print "dataset: %s kernel: %s\n" % (rt[0], rt[-1].pretty_print())
         if not one_d:
             entries.append([' %4.1f' % rt[-1].nll, ' $ %s $ ' % rt[-1].latex_print()])
         else:
