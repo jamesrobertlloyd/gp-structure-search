@@ -476,8 +476,8 @@ save( '%(writefile)s', 'sim_matrix' );
 # Matlab code to decompose posterior into additive parts.
 MATLAB_PLOT_DECOMP_CALLER_CODE = r"""
 load '%(datafile)s'  %% Load the data, it should contain X and y.
-X = double(X)
-y = double(y)
+X = double(X);
+y = double(y);
 
 addpath(genpath('%(gpml_path)s'));
 addpath(genpath('%(matlab_script_path)s'));

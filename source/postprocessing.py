@@ -53,7 +53,11 @@ def gen_all_results(folder=config.RESULTS_PATH):
             yield files.split('.')[-2], best_tuple
                 
 
-def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
+def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None, prefix=''):
+    """Crawls the results directory, and makes decomposition plots for each file.
+    
+    prefix is an optional string prepended to the output directory
+    """
     #### Quick fix to axis scaling
     rescale = True
     data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
@@ -74,12 +78,14 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
             best_kernel = exp.parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
             stripped_kernel = fk.strip_masks(best_kernel.k_opt)
             if not max_level is None:
-                fig_folder = os.path.join('../figures/decomposition/', (file + '_max_level_%d' % max_level))
+                fig_folder = os.path.join('../figures/decomposition/', (prefix + file + '_max_level_%d' % max_level))
             else:
-                fig_folder = os.path.join('../figures/decomposition/', file)
+                fig_folder = os.path.join('../figures/decomposition/', (prefix + file))
             if not os.path.exists(fig_folder):
                 os.makedirs(fig_folder)
             gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), best_kernel.noise, X_mean, X_scale, y_mean, y_scale)
+        else:
+            print "Cannnot find file %s" % results_file
             
 def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10):
     make_all_1d_figures(folder=folder)
