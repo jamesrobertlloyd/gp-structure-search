@@ -1,4 +1,4 @@
-results_directory = '../../sexy_results/';
+results_directory = '/scratch/Dropbox/results/feb 7 1d sexy extrapolation/';
 full_data_directory = '../../data/1d_data_rescaled/';
 fold_data_directory = '../../data/1d_extrap_folds/';
 figure_directory = '../../figures/extrapolation_curves/';
@@ -7,6 +7,9 @@ experiments{2} = '02-solar-s';
 experiments{3} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
+
+max_iters = 300; % Max iterations for GP training.
+lw = 2;        % Line width.
 
 for i = 1:length(experiments)
     MSEs.gpss = zeros(folds-1,1);
@@ -38,9 +41,9 @@ for i = 1:length(experiments)
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
         hyp.mean = mean(y);
-        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
-        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp_opt, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
@@ -53,9 +56,9 @@ for i = 1:length(experiments)
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
         hyp.mean = mean(y);
-        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
-        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp_opt, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
@@ -68,9 +71,9 @@ for i = 1:length(experiments)
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
         hyp.mean = mean(y);
-        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
-        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp_opt, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
@@ -83,9 +86,9 @@ for i = 1:length(experiments)
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
         hyp.mean = mean(y);
-        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
-        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp_opt, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
@@ -98,26 +101,30 @@ for i = 1:length(experiments)
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
         hyp.mean = mean(y);
-        hyp_opt = minimize(hyp, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
-        hyp_opt = minimize(hyp_opt, @gp, -300, @infExact, ...
+        hyp_opt = minimize(hyp_opt, @gp, -max_iters, @infExact, ...
                    meanfunc, covfunc, likfunc, X, y);
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
         MSEs.gpprod(fold) = mean((ytest - m) .^ 2);
     end
     
-    semilogy(percentiles, MSEs.gpss, 'LineWidth', 2);
+    %hold on
+    semilogy(percentiles, MSEs.lin, '-', 'Color', colorbrew(3), 'LineWidth', lw);
     hold on
-    semilogy(percentiles, MSEs.gpse, 'g', 'LineWidth', 2);
-    semilogy(percentiles, MSEs.lin, 'r', 'LineWidth', 2);
-    semilogy(percentiles, MSEs.gpper, 'y', 'LineWidth', 2);
-    semilogy(percentiles, MSEs.gpadd, 'c', 'LineWidth', 2);
-    semilogy(percentiles, MSEs.gpprod, 'm', 'LineWidth', 2);
-    xlabel('Proportion training data (%)');
+    semilogy(percentiles, MSEs.gpse, '-', 'Color', colorbrew(2), 'LineWidth', lw);
+    semilogy(percentiles, MSEs.gpper, '-', 'Color', colorbrew(4), 'LineWidth', lw);
+    semilogy(percentiles, MSEs.gpadd, '-', 'Color', colorbrew(5), 'LineWidth', lw);
+    semilogy(percentiles, MSEs.gpprod, '-', 'Color', colorbrew(10), 'LineWidth', lw);
+    semilogy(percentiles, MSEs.gpss, '-', 'Color', colorbrew(1), 'LineWidth', lw);  
+
+    xlabel('Proportion of training data (%)');
     ylabel('MSE');
-    legend('Structure search', 'SE GP', 'Linear', 'Per GP', 'SE + Per GP', 'SE x Per GP', 'location', 'best');
+    legend('Linear', 'SE GP', 'Periodic GP', 'SE + Per GP', 'SE x Per GP', 'Structure search', 'location', 'best');
     hold off
+    xlim([10,90]);
+    set_fig_units_cm( 12,12 );
     saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
     save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
 end

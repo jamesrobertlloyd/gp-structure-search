@@ -53,14 +53,16 @@ def gen_all_results(folder=config.RESULTS_PATH):
             yield files.split('.')[-2], best_tuple
                 
 
-def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None, prefix=''):
+def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None, prefix='', rescale=True):
     """Crawls the results directory, and makes decomposition plots for each file.
     
     prefix is an optional string prepended to the output directory
     """
     #### Quick fix to axis scaling
-    rescale = True
-    data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
+    if rescale:
+        data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
+    else:
+        data_sets = list(exp.gen_all_datasets("../data/1d_data/"))
     for r, file in data_sets:
         results_file = os.path.join(folder, file + "_result.txt")
         # Is the experiment complete

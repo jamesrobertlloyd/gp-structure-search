@@ -208,7 +208,7 @@ This arises since two points, $\inputVar,\inputVar'$, can only be considered sim
 
 \paragraph{Interpretation}
 Loosely speaking, multiplying kernels can be understood as an 'AND' operation: two points are considered similar only if both kernels have a high value.
-More precisely, we can interpret a sum of kernels as a sum of the cartesian product of both kernels' features in the corresponding RKHS.
+More precisely, we can interpret a product of kernels as a concatenation of the cartesian product of both kernels' features in the corresponding RKHS.
 
 %\section{Gaussian Processes Priors}
 
@@ -422,13 +422,15 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 \newcommand{\wagd}{9cm}  % width airline growth decomp
 \newcommand{\hagd}{4cm}  % height airline growth decomp
 \begin{tabular}{c}
-\includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s_max_level_8/01-airline-s_all} \\ 
+\includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s/01-airline-s_all} \\ 
  = \\ 
- \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s_max_level_8/01-airline-s_1} \\
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s/01-airline-s_3} \\
  + \\
- \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s_max_level_8/01-airline-s_2} \\
+ \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s/01-airline-s_1} \\
  + \\
- \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s_max_level_8/01-airline-s_3}
+  \includegraphics[width=\wagd,height=\hagd]{../figures/decomposition/01-airline-s/01-airline-s_2} \\
+ + \\
+ \includegraphics[width=8cm,height=\hagd]{../figures/decomposition/01-airline-s/01-airline-s_resid}
 \end{tabular}
 \caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
 \label{fig:airline_decomp}
