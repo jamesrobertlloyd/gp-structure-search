@@ -3,6 +3,8 @@ full_data_directory = '../../data/1d_data_rescaled/';
 fold_data_directory = '../../data/1d_extrap_folds/';
 figure_directory = '../../figures/extrapolation_curves/';
 experiments{1} = '01-airline-s';
+experiments{2} = '02-solar-s';
+experiments{3} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
 
@@ -14,6 +16,7 @@ for i = 1:length(experiments)
     MSEs.gpadd = zeros(folds-1,1);
     MSEs.gpprod = zeros(folds-1,1);
     for fold = 1:(folds-1)
+        fold
         % Load data
         fold_file = [fold_data_directory experiments{i} '-ex-fold-' ...
                      int2str(fold) 'of' int2str(folds) '.mat'];
@@ -60,7 +63,7 @@ for i = 1:length(experiments)
         % Fit and score pure periodic
         %%%% Random restarts + averaging?
         covfunc = {@covPeriodic};
-        hyp.cov = [0; -1.2; 0];
+        hyp.cov = [0; -2; 0];
         likfunc = @likGauss;
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
@@ -75,7 +78,7 @@ for i = 1:length(experiments)
         % Fit and score pure periodic
         %%%% Random restarts + averaging?
         covfunc = {@covSum, {@covSEiso, @covPeriodic}};
-        hyp.cov = [0; 0; 0; -1.2; 0];
+        hyp.cov = [0; 0; 0; -2; 0];
         likfunc = @likGauss;
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
@@ -90,7 +93,7 @@ for i = 1:length(experiments)
         % Fit and score pure periodic
         %%%% Random restarts + averaging?
         covfunc = {@covProd, {@covSEiso, @covPeriodic}};
-        hyp.cov = [0; 0; 0; -1.2; 0];
+        hyp.cov = [0; 0; 0; -2; 0];
         likfunc = @likGauss;
         hyp.lik = log(std(y));
         meanfunc = {@meanConst};
@@ -113,7 +116,7 @@ for i = 1:length(experiments)
     semilogy(percentiles, MSEs.gpprod, 'm', 'LineWidth', 2);
     xlabel('Proportion training data (%)');
     ylabel('MSE');
-    legend('Structure search', 'Sq-exp GP', 'Linear', 'Periodic GP', 'SE + PE GP', 'SE x PE GP', 'location', 'best');
+    legend('Structure search', 'SE GP', 'Linear', 'Per GP', 'SE + Per GP', 'SE x Per GP', 'location', 'best');
     hold off
     saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
     save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
