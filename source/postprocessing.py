@@ -54,6 +54,8 @@ def gen_all_results(folder=config.RESULTS_PATH):
                 
 
 def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
+    #### Quick fix to axis scaling
+    rescale = True
     data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
     for r, file in data_sets:
         results_file = os.path.join(folder, file + "_result.txt")
@@ -61,6 +63,14 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
         if os.path.isfile(results_file):
             # Find best kernel and produce plots
             X, y, D = gpml.load_mat(os.path.join(r,file + ".mat"))
+            if rescale:
+                # Load unscaled data to remove scaling later
+                data = gpml.load_mat(os.path.join('../data/1d_data/', re.sub('-s$', '', file) + '.mat'))
+                (X_unscaled, y_unscaled) = (data[0], data[1])
+                (X_mean, X_scale) = (X_unscaled.mean(), X_unscaled.std())
+                (y_mean, y_scale) = (y_unscaled.mean(), y_unscaled.std())
+            else:
+                (X_mean, X_scale, y_mean, y_scale) = (0,1,0,1)
             best_kernel = exp.parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
             stripped_kernel = fk.strip_masks(best_kernel.k_opt)
             if not max_level is None:
@@ -69,9 +79,9 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None):
                 fig_folder = os.path.join('../figures/decomposition/', file)
             if not os.path.exists(fig_folder):
                 os.makedirs(fig_folder)
-            gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), noise=best_kernel.noise)
+            gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), best_kernel.noise, X_mean, X_scale, y_mean, y_scale)
             
-def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=8):
+def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10):
     make_all_1d_figures(folder=folder)
     for level in range(max_depth+1):
         make_all_1d_figures(folder=folder, max_level=level)

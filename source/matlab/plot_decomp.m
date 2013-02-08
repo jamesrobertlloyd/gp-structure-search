@@ -1,6 +1,6 @@
 function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, ...
                      decomp_hypers, log_noise, figname, latex_names, ...
-                     full_name)
+                     full_name, X_mean, X_scale, y_mean, y_scale)
 
 % TODO: Assert that the sum of all kernels is the same as the complete kernel.
 
@@ -26,8 +26,8 @@ complete_mean = complete_sigmastar' / complete_sigma * y;
 complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sigma * complete_sigmastar);
     
 figure(1); clf; hold on;
-plot( X, y, '.' ); hold on; 
-mean_var_plot(xrange, complete_mean, 2.*sqrt(complete_var));
+plot( X*X_scale+X_mean, y*y_scale+y_mean, '.' ); hold on; 
+mean_var_plot(xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, 2.*sqrt(complete_var)*y_scale);
 full_name = strrep(full_name, '\left', '');
 full_name = strrep(full_name, '\right', '');
 title(full_name);
@@ -52,8 +52,8 @@ for i = 1:numel(decomp_list)
     removed_mean = y - (complete_sigma - decomp_sigma)' / complete_sigma * y;
     
     figure(i + 1); clf; hold on;
-    plot( X, removed_mean, '.' ); hold on; 
-    mean_var_plot(xrange, decomp_mean, 2.*sqrt(decomp_var));
+    plot( X*X_scale+X_mean, removed_mean*y_scale, '.' ); hold on; 
+    mean_var_plot(xrange*X_scale+X_mean, decomp_mean*y_scale, 2.*sqrt(decomp_var)*y_scale);
     latex_names{i} = strrep(latex_names{i}, '\left', '');
     latex_names{i} = strrep(latex_names{i}, '\right', '');
     title(latex_names{i});

@@ -482,11 +482,11 @@ y = double(y)
 addpath(genpath('%(gpml_path)s'));
 addpath(genpath('%(matlab_script_path)s'));
 
-plot_decomp(X, y, %(kernel_family)s, %(kernel_params)s, %(kernel_family_list)s, %(kernel_params_list)s, %(noise)s, '%(figname)s', %(latex_names)s, %(full_kernel_name)s)
+plot_decomp(X, y, %(kernel_family)s, %(kernel_params)s, %(kernel_family_list)s, %(kernel_params_list)s, %(noise)s, '%(figname)s', %(latex_names)s, %(full_kernel_name)s, %(X_mean)f, %(X_scale)f, %(y_mean)f, %(y_scale)f)
 exit();"""
 
 
-def plot_decomposition(kernel, X, y, figname, noise=None):
+def plot_decomposition(kernel, X, y, figname, noise=None, X_mean=0, X_scale=1, y_mean=0, y_scale=1):
     matlab_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'matlab'))
     figname = os.path.abspath(os.path.join(os.path.dirname(__file__), figname))
     print 'Plotting to: %s' % figname
@@ -513,7 +513,11 @@ def plot_decomposition(kernel, X, y, figname, noise=None):
         'noise': str(noise),
         'latex_names': "{ ' %s ' }" % "','".join(latex_names),
         'full_kernel_name': "{ '%s' }" % kernel.latex_print().strip(), 
-        'figname': figname}
+        'figname': figname,
+        'X_mean' : X_mean,
+        'X_scale' : X_scale,
+        'y_mean' : y_mean,
+        'y_scale' : y_scale}
     
     run_matlab_code(code, verbose=True, jvm=True)
     os.close(fd1)
