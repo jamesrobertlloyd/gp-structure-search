@@ -1504,6 +1504,6 @@ def add_random_restarts_single_kernel(kernel, n_rand, sd, min_period=None):
     #return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
     return [kernel] + list(map(lambda unused : kernel.family().from_param_vector(kernel.default_params_replaced(sd=sd, min_period=min_period)), [None] * n_rand))
 
-def add_random_restarts(kernels, n_rand=1, sd=2, min_period=None):    
+def add_random_restarts(kernels, n_rand=1, sd=4, min_period=None):    
     '''Augments the list to include random restarts of all default value parameters'''
     return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd, min_period)]
