@@ -7,7 +7,7 @@ function K = covChange(hyp, x, z, i)
 %
 % The hyperparameters are:
 %
-% hyp = [ log(sqrt(sf2)
+% hyp = [ log(sf2)
 %         log(ell)
 %         shifts ]
 %
@@ -21,12 +21,15 @@ xeqz = numel(z)==0;
 dg = strcmp(z,'diag') && numel(z)>0;                            % determine mode
 
 [n,D] = size(x);
+[nz,Dz] = size(z);
 sf2 = exp(hyp(1));
 ell = exp(hyp(2:D+1));
 shifts = hyp((D+2):(2*D+1));
 
-x = sum((x-repmat(shifts',n,1))*diag(1./ell));        % x is now one-dimensional
-z = sum((z-repmat(shifts',n,1))*diag(1./ell));        % z is now one-dimensional
+x = sum((x-repmat(shifts',n,1))*diag(1./ell), 2);        % x is now one-dimensional
+if nz > 0
+    z = sum((z-repmat(shifts',nz,1))*diag(1./ell), 2);        % z is now one-dimensional
+end
 
 sx = 1 ./ (1 + exp(-x));   % sigmoid
 sz = 1 ./ (1 + exp(-z));   % sigmoid
@@ -45,17 +48,17 @@ if nargin<4                                                        % covariances
   K = sf2*K;
 else                                                               % derivatives
   if i==1                                                          % magnitude
-    V = K;
-  elseif i<=D+1  % ell
+    K = sf2*K;
+  elseif i<=D+1                                                    % ell
     i = i - D;
-    if dg  % derivative of vector kxx w.r.t. lengthscales
-      V = sf2 * -2*K.*x./ell(i);
+    if dg                    % derivative of vector kxx w.r.t. lengthscales
+      K = sf2 * -2*sx*K*sx'./ell(i);
     else
-      V = sf2 * -2*K.*x./ell(i);
+      K = sf2 * -(sx.*(1-sx))*(sx.*(1-sx))'./(ell(i)^2);
     end
   elseif i<=2*D+1                                             % shifts
     i = i - D*2;
-    K = sf2*K./ell(i);
+    K = sf2 * (sx.*(1-sx))*(sx.*(1-sx))'./(ell(i));
   else
     error('Unknown hyperparameter')
   end
