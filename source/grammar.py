@@ -29,7 +29,6 @@ class OneDGrammar:
             raise RuntimeError("Can't expand the 'any' type")
         elif tp == 'base':
             return list(fk.base_kernel_families())
-            #return list(fk.test_kernel_families())
         else:
             raise RuntimeError('Unknown type: %s' % tp)
         
@@ -80,17 +79,11 @@ class MultiDGrammar:
         if tp in ['1d', 'multi']:
             raise RuntimeError("Can't expand the '%s' type" % tp)
         elif tp == 'base':
-            if self.debug:
-                return list(fk.test_kernel_families())
-            else:
-                return list(fk.base_kernel_families(self.ndim))
+            return list(fk.base_kernel_families(self.ndim))
         elif tp == 'mask':
             result = []
             for d in range(self.ndim):
-                if self.debug:
-                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.test_kernel_families()]
-                else:
-                    result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families(self.ndim)]
+                result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families(self.ndim)]
             return result
         else:
             raise RuntimeError('Unknown type: %s' % tp)
