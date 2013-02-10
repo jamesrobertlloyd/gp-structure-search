@@ -1,16 +1,16 @@
 function K = covChange(hyp, x, z, i)
 
-% 1D changepoint covariance function with inverse smoothness alpha,
+% 1D changepoint covariance function with steepness and center
 % and input space shift. The covariance function is parameterized as:
 %
-% k(x,x') = sigmoid(sum((x - shift)*alpha))*sigmoid(sum((x - shift)*alpha))
+% k(x,x') = sigmoid(sum(x - shift)*steepness)*sigmoid(sum(x - shift)*steepness)
 %
 % Sigmoid ranges from 0 to 1.
 %
 % The hyperparameters are:
 %
-% hyp = [ alpha
-%         shift ]
+% hyp = [ steepness
+%         center    ]
 %
 % David Duvenaud
 % February 2013
@@ -22,16 +22,16 @@ xeqz = numel(z)==0;
 dg = strcmp(z,'diag') && numel(z)>0;                            % determine mode
 
 [n,D] = size(x);
-alpha = hyp(1);
-shift = hyp(2);
+steepness = hyp(1);
+center = hyp(2);
 
-sumx = sum(x-shift,2);
-x = sumx*alpha;        % x is now one-dimensional
+sumx = sum(x-center,2);
+x = sumx*steepness;        % x is now one-dimensional
 if xeqz                % This is the slow way.
     z = x;
 else
-    sumz = sum(z-shift,2);
-    z = sumz*alpha;
+    sumz = sum(z-center,2);
+    z = sumz*steepness;
 end 
 
 sx = 1 ./ (1 + exp(-x));   % sigmoid
@@ -51,8 +51,8 @@ if nargin>3                                                        % covariances
       K = K .* bsxfun(@plus,(1 - sx).*sumx, (1 - sz').*sumz');
     end
   elseif i==2                                          % shifts
-      % Todo: replace D with sum over shifts
-    K = -D*alpha * K .* ( 2 - bsxfun(@plus,sx, sz') );
+      % Todo: replace D with sum over centers
+    K = -D*steepness * K .* ( 2 - bsxfun(@plus,sx, sz') );
   else
     error('Unknown hyperparameter')
   end

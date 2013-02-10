@@ -52,10 +52,7 @@
 
 
 \twocolumn[
-\icmltitle{Bayesian Structure Discovery for Supervised Learning OR \\
-Bayesian Structure Discovery for Regression\\
-Kernel Structure Discovery OR \\
-Discovering Structure in Kernels}
+\icmltitle{Nonparametric Structure Discovery in Supervised Regression through Compositional Kernel Search}
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 %%%%FIXME - Make sure to update this!
@@ -77,17 +74,21 @@ We demonstrate this technique on several real datasets, and achieve state-of-the
 \section{Introduction}
 
 Supervised learning problems, such as classification and regression, learn a function ${\function : \InputSpace \to \OutputSpace}$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
-Kernel based nonparametric models, such as support vector machines and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
-These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ that specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
+Kernel-based nonparametric models, such as support vector machines and Gaussian processes, have been one of the dominant paradigms for supervised machine learning over the last 20 years.
+These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
 A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}.
-In this paper we pose the problem of kernel learning as a problem in structure discovery from data.
+In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
 Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (GP) regression.
 
-Traditionally, Gaussian process kernels have a few free hyperparameters which can be optimised (or inferred) from data.
-However, it is well known that one can form composite kernels via combinations of simple base kernels (\eg squared exponential / radial basis function, periodic, linear etc.) and operations that preserve positive definiteness (\eg summation and multiplication).
-We use this insight to define a simple grammar over composite kernels and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
-The search criterion is the marginal likelihood of the data for a given kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning\TBD{cite \eg Heckerman}.
+Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
+However, one can also straightforwardly form composite kernels by combining simple base kernels through operations that such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
+We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
+The search criterion is the marginal likelihood of the data for a given kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
+
+\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
+For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
+Our approach can be seen as a general way to learn functions like this, where the product of kernels can be used to capture richer causal proceses (e.g., nonlinear rather simply linear, amplifying perioidic (as in the second layer of the airline example) rather than simply periodic) and the sum of kernels corresponds to the superposition of these causal processes.
 
 Our experimental findings demonstrate that this structure discovery algorithm can automatically recover known kernel structure from data, and that on real data the learned structure of the kernel often corresponds to natural, interesting and interpretable decompositions of the unknown function.
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery\fTBD{maybe $\to$ conclusion}.
@@ -257,9 +258,11 @@ The production rules are then applied to the highest scoring kernel expression a
 
 \section{Related Work}
 
-\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels is not new\fTBD{weak language}, and was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not\fTBD{worth highlighting?}.
+\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  Our work can be viewed as an extension and automation of this approach.
 
-\cite{plate1999accuracy} constructs a GP with a composite kernel, adding a SE kernel along each dimension, and a SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
+\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models for which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.  These models have a limited compositional form, but one which is very interpretable.  We compare against this model in our multi-dimensional experiments.
+
+\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
 
 \paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.  Earlier work in unsupervised Bayseian structure discovery was done in \cite{kemp2008discovery}.
 
@@ -269,10 +272,12 @@ Support vector regression with ANOVA decomposition kernels \cite{stitson1999supp
 
 %\subsubsection{Smoothing spline ANOVA models}
 A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
-An SS-ANOVA model is estimated as a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
-Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
+This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
-\TBD{We need to discuss how our model relates to this one - it's very similar!}
+Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  This model is similar to ours, if we were to restict our attention to spline kernels
+
+\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
+However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
 
 \paragraph{Hierarchical Kernel Learning}
 
@@ -368,9 +373,9 @@ Note in particular that, while the data can be smoothly interpolated by simple k
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth model together with the posteriors of the additive components.
 The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.
 
-\begin{figure}[h!]
+\begin{figure*}[h!]
 \centering
-\newcommand{\wmg}{2.66cm}  % width maunu growth
+\newcommand{\wmg}{5.5cm}  % width maunu growth
 \newcommand{\hmg}{4cm}  % height maunu growth
 \begin{tabular}{c}
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
@@ -379,18 +384,18 @@ The plot shows a very plausible extrapolation and highly interpretable component
 \end{tabular}
 \caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. \TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?  In the second model, is the SE capturing part of the periodic component, forcing us to move to a locally periodic model?  (3) In general, in these figures, shouldn't we report the original form of the kernel rather than the expanded form?  It's not obvious how to get from 2 to 3 in one step.}}
 \label{fig:mauna_grow}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[h!]
 \newcommand{\wmgd}{9cm}  % width mauna growth decomp
 \newcommand{\hmgd}{3cm}  % height mauna growth decomp
 \begin{tabular}{c}
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_all} \\ = \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_2} \\ + \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_3} \\ + \\
-% \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_4_zoom} \\ + \\
- \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_1} \\ + \\
- \includegraphics[width=8cm,height=\hmgd]{../figures/decomposition/03-mauna2003-s_max_level_8/03-mauna2003-s_resid}
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_all} \\ = \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_2} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_3} \\ + \\
+% \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_4_zoom} \\ + \\
+ \includegraphics[width=\wmgd,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_1} \\ + \\
+ \includegraphics[width=8cm,height=\hmgd]{../figures/decomposition/03-mauna2003-s/03-mauna2003-s_resid}
 \end{tabular}
 \caption{First row: The posterior on the Mauna Loa dataset after a search of depth 8.  Subsequent rows: automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, yearly periodic, medium-term anomaly and short-term noise components, respectively.}
 \end{figure}
@@ -402,19 +407,19 @@ The plot shows a very plausible extrapolation and highly interpretable component
 Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
 \TBD{Make similar observations of good performance and perhaps draw attention to the selection of a linear kernel}.
 
-\begin{figure}[h!]
+\begin{figure*}[h!]
 \centering
 \newcommand{\wag}{4cm}  % width airline growth
 \newcommand{\hag}{4cm}  % height airline growth
 \begin{tabular}{c}
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
- \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
+ \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small}
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
  \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
 \end{tabular}
 \caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
 \label{fig:airline_grow}
-\end{figure}
+\end{figure*}
 
 
 \begin{figure}[h!]
@@ -441,6 +446,9 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 % testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
 %The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
+
+\paragraph{Solar Irradiance Data}
+\cite{lean1995reconstruction}
 
 \subsection{Multidimensional decomposition}
 
@@ -506,22 +514,20 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 
 [TODO: Describe concrete, pumadyn, servo and housing]
 
-\subsection{Details of comparison methods}
+\subsection{Details of methods}
 
-\paragraph{Linear regression} was included as a baseline. A likelihood score was obtained by setting the noise variance to the empirical variance on the training set.
+Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
+%
+Generalized Additive Models (GP GAM) were implemented through a \gp{} whose kernel is a sum of sq-exp kernels across dimensions.
+This model was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
+%
+Hierarchical Kernel Learning (HKL)
+%\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} 
+was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
 
-\paragraph{Generalized Additive Models} are models for which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.  
-In our experiments, this model is implemented through a GP whose kernel is a sum of sq-exp kernels across dimensions.  
-This model, denoted GP GAM, was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.  \cite{hastie1990generalized}
+Additive Gaussian Processes was run using SE as a base kernel, and at most ten degrees of interaction.
 
-\paragraph{Hierarchical Kernel Learning}	
-HKL\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive GP with a squared-exp base kernel.
-
-\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
-However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
-
-\paragraph{Structure Search}
-All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
+\paragraph{source code}All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
@@ -534,9 +540,23 @@ All of the experiments in this paper were performed using the standard GPML tool
 
 \section{Discussion}
 
-Blessing of abstraction, doing lots with a small amount of data.
+There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].  However, relatively little attention has been paid to automatic structure discovery in supervised learning.
 
-Extrapolation
+Similar searches over large model classes have been succesfully used in machine vision \cite{pinto2009high}
+This work respresents a step towards more data-based modeling, as opposed to proposing the model beforehand.
+
+
+Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
+
+[Blessing of abstraction, doing lots with a small amount of data.]
+
+[Extrapolation]
+
+Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.  Automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
+
+%Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
+
+
 
 \section{Conclusion}
 

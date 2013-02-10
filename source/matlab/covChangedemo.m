@@ -18,12 +18,13 @@ hypers = randn(1, num_hypers)
 K = feval( covfunc{:}, hypers, x, x);
 
 figure(1); clf; imagesc(K)
+title('Covariance matrix');
 
 L = chol(K + eye(n).*max(K(:)).*1e-6);
 
 y = L*randn(n,1);
 figure(2); clf; plot(x,y)
-
+title('Random draw');
 end
 
 function ng = numerical_grad( f, x, i, delta )

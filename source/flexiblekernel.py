@@ -1043,6 +1043,82 @@ class MaternKernel(BaseKernel):
     def depth(self):
         return 0 
     
+class ChangeKernelFamily(BaseKernelFamily):
+    def from_param_vector(self, params):
+        steepness, location = params
+        return ChangeKernel(steepness, location)
+    
+    def num_params(self):
+        return 2
+    
+    def pretty_print(self):
+        return colored('CH', self.depth())
+    
+    def default(self):
+        # A steepness of exactly zero will result in no gradient.
+        # We might consider reparameterizing at some point.
+        # The parameters aren't in log space.
+        return ChangeKernel(1., 0.)
+    
+    def __cmp__(self, other):
+        assert isinstance(other, KernelFamily)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        return 0
+    
+    def depth(self):
+        return 0
+    
+    @staticmethod    
+    def description():
+        return "Changepoint"
+
+    @staticmethod    
+    def params_description():
+        return "steepness, location"    
+
+class ChangeKernel(BaseKernel):
+    def __init__(self, steepness, location):
+        self.steepness = steepness
+        self.location = location
+        
+    def family(self):
+        return ChangeKernelFamily()
+        
+    def gpml_kernel_expression(self):
+        return '{@covChange}'
+    
+    def english_name(self):
+        return 'CH'
+    
+    def param_vector(self):
+        # order of args matches GPML
+        return np.array([self.steepness, self.location])
+
+    def copy(self):
+        return ChangeKernel(self.steepness, self.location)
+    
+    def __repr__(self):
+        return 'ChangeKernel(steepness=%f, location=%f)' % (self.steepness, self.location)
+    
+    def pretty_print(self):
+        return colored('CH(steep=%1.1f, loc=%1.1f)' % (self.steepness, self.location), self.depth())
+    
+    def latex_print(self):
+        return 'Change'
+        
+    def __cmp__(self, other):
+        assert isinstance(other, Kernel)
+        if cmp(self.__class__, other.__class__):
+            return cmp(self.__class__, other.__class__)
+        differences = [self.steepness - other.steepness, self.location - other.location]
+        differences = map(shrink_below_tolerance, differences)
+        return cmp(differences, [0] * len(differences))
+    
+    def depth(self):
+        return 0 
+    
+        
 class MaskKernelFamily(KernelFamily):
     def __init__(self, ndim, active_dimension, base_kernel_family):
         assert 0 <= active_dimension < ndim

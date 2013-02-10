@@ -20,6 +20,11 @@ def test_kernel_eval():
     k = fk.repr_string_to_kernel(result_string)
     k.pretty_print()
     
+def test_change_kernel_eval():
+    '''Tests whether we can take a string of a changepoint kernel.'''
+    result_string = '''ChangeKernel(steepness=2.0, location=-1.2)'''
+    k = fk.repr_string_to_kernel(result_string)
+    k.pretty_print()
     
 def test_kernel_expand():
     k = fk.Carls_Mauna_kernel()
