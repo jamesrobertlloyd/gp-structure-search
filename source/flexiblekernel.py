@@ -206,7 +206,11 @@ class SqExpPeriodicKernel(BaseKernel):
         '''Overwrites base method, using min period to prevent Nyquist errors'''
         result = self.param_vector()
         if result[0] == 0:
-            result[0] = np.random.normal(scale=sd)
+            # Min period represents a minimum sensible scale - use it for lengthscale as well
+            if min_period is None:
+                result[0] = utils.misc.sample_truncated_normal(loc=0, scale=sd)
+            else:
+                result[0] = utils.misc.sample_truncated_normal(loc=0, scale=sd, min_value=min_period)
         if result[1] == 0:
             #### FIXME - Caution, magic numbers
             if min_period is None:
