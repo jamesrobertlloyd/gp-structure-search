@@ -12,4 +12,6 @@ Experiment(description='An example experiment for debugging',
            max_jobs=500, 
            verbose=False,
            make_predictions=True,
-           skip_complete=True)
+           skip_complete=True,
+           results_dir='../results/debug_results/',
+           iters=10)

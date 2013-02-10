@@ -65,9 +65,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=Tr
 def remove_nan_scored_kernels(scored_kernels):    
     return [k for k in scored_kernels if not np.isnan(k.score())] 
     
-def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, y_dim=1, subset=None, max_depth=2, k=2, \
-                          verbose=True, description='No description', n_rand=1, sd=4, debug=False, local_computation=False, zip_files=False, max_jobs=500, \
-                          use_min_period=True):
+def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, exp, use_min_period=True):
     '''Search for the best kernel, in parallel on fear or local machine.'''
 
     # Initialise kernels to be all base kernels along all dimensions.
@@ -84,15 +82,16 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     results_sequence = []     # List of lists of results, indexed by level of expansion.
     
     # Perform search
-    for depth in range(max_depth):
+    for depth in range(exp.max_depth):
         
-        if debug==True:
+        if exp.debug==True:
             current_kernels = current_kernels[0:4]
              
         # Add random restarts to kernels
-        current_kernels = fk.add_random_restarts(current_kernels, n_rand, sd, min_period=min_period)
+        current_kernels = fk.add_random_restarts(current_kernels, exp.n_rand, exp.sd, min_period=min_period)
         # Score the kernels
-        new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=verbose, local_computation=local_computation, zip_files=zip_files, max_jobs=max_jobs)
+        new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=exp.verbose, local_computation=exp.local_computation,
+                                          zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters)
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
         assert(len(new_results) > 0) # FIXME - Need correct control flow if this happens 
@@ -104,7 +103,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
             print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
             
         # Remove near duplicates from these all_results (top m all_results only for efficiency)
-        new_results = remove_duplicates(new_results, X, local_computation=local_computation, verbose=verbose)
+        new_results = remove_duplicates(new_results, X, local_computation=exp.local_computation, verbose=exp.verbose)
 
         print 'All new results after duplicate removal:'
         for result in new_results:
@@ -114,23 +113,23 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
 
         results_sequence.append(all_results)
-        if verbose:
+        if exp.verbose:
             print 'Printing all results'
             for result in all_results:
                 print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
         
         # Extract the best k kernels from the new all_results
-        best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:k]]
-        current_kernels = grammar.expand_kernels(D, best_kernels, verbose=verbose, debug=debug)
+        best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:exp.k]]
+        current_kernels = grammar.expand_kernels(D, best_kernels, verbose=exp.verbose, debug=exp.debug)
         
-        if debug==True:
+        if exp.debug==True:
             current_kernels = current_kernels[0:4]
 
     # Write all_results to a file.
     all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
     with open(results_filename, 'w') as outfile:
-        outfile.write('Experiment all_results for\n datafile = %s\n y_dim = %d\n subset = %s\n max_depth = %f\n k = %f\n Description = %s\n\n' \
-                      % (experiment_data_file_name, y_dim, subset, max_depth, k, description)) 
+        outfile.write('Experiment all_results for\n datafile = %s\n\n %s \n\n' \
+                      % (experiment_data_file_name, experiment_fields_to_str(exp)))
         for (i, all_results) in enumerate(results_sequence):
             outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
             for result in all_results:
@@ -161,7 +160,8 @@ def gen_all_datasets(dir):
     """Looks through all .mat files in a directory, or just returns that file if it's only one."""
     if dir.endswith(".mat"):
         (r, f) = os.path.split(dir)
-        return [(r, f.split('.')[-2])]
+        (f, e) = os.path.splitext(f)
+        return [(r, f)]
     
     file_list = []
     for r,d,f in os.walk(dir):
@@ -173,7 +173,7 @@ def gen_all_datasets(dir):
 
 
 
-# Define a class that keeps track of all the options for an experiment.
+# Defines a class that keeps track of all the options for an experiment.
 Experiment = namedtuple("Experiment",
                         'description,'
                         'data_dir,'
@@ -187,18 +187,25 @@ Experiment = namedtuple("Experiment",
                         'max_jobs, ' 
                         'verbose, '
                         'make_predictions, '
-                        'skip_complete'
+                        'skip_complete,'
+                        'results_dir,'
+                        'iters'
                         );
 
-def run_experiment_file(filename):       
+def experiment_fields_to_str(exp):
+    str = "Running experiment:\n"
+    for field, val in izip(exp._fields, exp):
+        str += "%s = %s,\n" % (field, val)
+    return str
+
+def run_experiment_file(filename):
+    """
+    This is intended to be the function that's called to initiate a series of experiments.
+    """       
     expstring = open(filename, 'r').read()
     exp = eval(expstring)
+    print experiment_fields_to_str(exp)
     
-    print "Running experiment:"
-    for field, val in izip(exp._fields, exp):
-        print field, '=', val, ','
-    
-def other():
     data_sets = list(gen_all_datasets(exp.data_dir))
 
     if exp.random_order:
@@ -206,39 +213,39 @@ def other():
 
     for r, file in data_sets:
         # Check if this experiment has already been done.
-        if not(exp.skip_complete and (os.path.isfile(os.path.join(RESULTS_PATH, file + "_result.txt")))):
+        output_file = os.path.join(exp.results_dir, file + "_result.txt")
+        if not(exp.skip_complete and (os.path.isfile(output_file))):
             print 'Experiment %s' % file
+            print 'Output to: %s' % output_file
             data_file = os.path.join(r, file + ".mat")
 
-            perform_experiment(data_file, exp )
+            perform_experiment(data_file, output_file, exp )
             print "Finished file %s" % file
         else:
             print 'Skipping file %s' % file
 
     os.system('reset')  # Stop terminal from going invisible.   
     
-def perform_experiment(data_file, exp):
-    output_file = os.path.join(RESULTS_PATH, data_file + "_result.txt")
+def perform_experiment(data_file, output_file, exp):
     
     if exp.make_predictions:        
         X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
-        prediction_file = os.path.join(RESULTS_PATH, data_file + "_predictions.mat")
+        prediction_file = os.path.join(exp.results_dir, data_file + "_predictions.mat")
     else:
         X, y, D = gpml.load_mat(data_file, y_dim=1)
         
-    perform_kernel_search(X, y, D, data_file, output_file, max_depth=exp.max_depth, k=exp.k,
-                          description=exp.description, debug=exp.debug, local_computation=exp.local_computation,
-                          n_rand=exp.n_rand, sd=exp.sd, max_jobs=exp.max_jobs, verbose=exp.verbose)
+    perform_kernel_search(X, y, D, data_file, output_file, exp)
     best_scored_kernel = parse_results(output_file)
     
     if exp.make_predictions:
-        predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=local_computation, max_jobs=max_jobs, verbose=verbose)
+        predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
+                                          max_jobs=exp.max_jobs, verbose=exp.verbose)
         scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.
    
 
-def run_debug_kfold(local_computation = True, max_jobs=600, verbose=True):
+def run_debug_kfold():
     """This is a quick debugging function."""
     run_experiment_file('../experiments/debug_example.py')
     
