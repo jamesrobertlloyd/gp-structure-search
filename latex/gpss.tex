@@ -86,9 +86,9 @@ However, one can also straightforwardly form composite kernels by combining simp
 We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
 The search criterion is the marginal likelihood of the data for a given kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
 
-\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
-For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
-Our approach can be seen as a general way to learn functions like this, where the product of kernels can be used to capture richer causal proceses (e.g., nonlinear rather simply linear, amplifying perioidic (as in the second layer of the airline example) rather than simply periodic) and the sum of kernels corresponds to the superposition of these causal processes.
+%\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
+%For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
+%Our approach can be seen as a general way to learn functions like this, where the product of kernels can be used to capture richer causal proceses (e.g., nonlinear rather simply linear, amplifying perioidic (as in the second layer of the airline example) rather than simply periodic) and the sum of kernels corresponds to the superposition of these causal processes.
 
 Our experimental findings demonstrate that this structure discovery algorithm can automatically recover known kernel structure from data, and that on real data the learned structure of the kernel often corresponds to natural, interesting and interpretable decompositions of the unknown function.
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery\fTBD{maybe $\to$ conclusion}.
@@ -210,6 +210,8 @@ This arises since two points, $\inputVar,\inputVar'$, can only be considered sim
 \paragraph{Interpretation}
 Loosely speaking, multiplying kernels can be understood as an 'AND' operation: two points are considered similar only if both kernels have a high value.
 More precisely, we can interpret a product of kernels as a concatenation of the cartesian product of both kernels' features in the corresponding RKHS.
+
+To develop an intuition for the effect of multiplying two stationary kernels, we can note that the posterior mean function must be a weight sum of kernel functions.  Thus the third column of rows 1-2 of Figure \ref{kernels} show the functions that can be combined linearly to produce the posterior means in the 5th column.
 
 %\section{Gaussian Processes Priors}
 
@@ -336,8 +338,8 @@ Since the complexity of our kernel is bounded only by the search depth, we could
 \section{Decomposing a function}
 
 Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent function.
-By splitting kernel expressions found by our search algorithm into additive components we can decompose a learned regression function.
-This potentially allows us to separate causally independent processes that gave rise to data\TBD{ cite something / say nicely}.
+By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
+This potentially allows us to probabilistically separate causally the independent processes that give rise to the data.
 
 Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
 %\fTBD{If kept here, make notation consistent through paper}
@@ -354,7 +356,7 @@ The conditional distribution of a Gaussian $\function_1$ conditioned on its sum 
 
 
 We demonstrate the decompositions produced by our method on two time series.
-We ran the search to a depth of 10 and use SE, PE, LN and RQ kernels\fTBD{make sure these are all defined}.
+We ran the search to a depth of 10 and used sq-exp, periodic, linear and rational quadratic kernels.
 
 % \input{"tables/kernel_descriptions.tex"}
 
@@ -365,7 +367,7 @@ We ran the search to a depth of 10 and use SE, PE, LN and RQ kernels\fTBD{make s
 
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-We revisit a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+We revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
 Figures \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
 Note in particular that, while the data can be smoothly interpolated by simple kernels a single base kernel model, the extrapolations improve dramatically as the search depth increases.
@@ -538,6 +540,8 @@ Additive Gaussian Processes was run using SE as a base kernel, and at most ten d
 %\item Need to discuss design choices e.g.~$k$, depth of search, base kernels.
 %\end{itemize}
 
+
+
 \section{Discussion}
 
 There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].  However, relatively little attention has been paid to automatic structure discovery in supervised learning.
@@ -563,8 +567,6 @@ Choosing a kernel family is also a stumbling block for non-experts who wish to u
 In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
 We examined the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
-
-\NA{Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology.}
 
 %\section{Future Work}
 
