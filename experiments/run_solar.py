@@ -1,10 +1,10 @@
 # Runs all 1d datasets.
 
-Experiment(description='Run all 1D datasets',
-           data_dir='../data/1d_data/',
+Experiment(description='Run solar dataset.',
+           data_dir='../data/1d_data/02-solar.mat',
            max_depth=8, 
            random_order=False,
-           k=2,
+           k=1,
            debug=True, 
            local_computation=False, 
            n_rand=3,
@@ -13,8 +13,8 @@ Experiment(description='Run all 1D datasets',
            verbose=False,
            make_predictions=False,
            skip_complete=True,
-           results_dir='../results/Feb 10 1D results/',
-           iters=200)
+           results_dir='../results/solar_results/',
+           iters=10)
            
 
            

@@ -125,15 +125,15 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         if exp.debug==True:
             current_kernels = current_kernels[0:4]
 
-    # Write all_results to a file.
-    all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
-    with open(results_filename, 'w') as outfile:
-        outfile.write('Experiment all_results for\n datafile = %s\n\n %s \n\n' \
-                      % (experiment_data_file_name, experiment_fields_to_str(exp)))
-        for (i, all_results) in enumerate(results_sequence):
-            outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
-            for result in all_results:
-                print >> outfile, result  
+        # Write all_results to a file at each level.
+        all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
+        with open(results_filename, 'w') as outfile:
+            outfile.write('Experiment all_results for\n datafile = %s\n\n %s \n\n' \
+                          % (experiment_data_file_name, experiment_fields_to_str(exp)))
+            for (i, all_results) in enumerate(results_sequence):
+                outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
+                for result in all_results:
+                    print >> outfile, result  
 
 
 

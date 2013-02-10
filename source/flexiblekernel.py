@@ -1410,10 +1410,11 @@ def base_kernel_families(ndim):
     '''
     #### FIXME - This should not happen here!
     if ndim == 1:
-        yield SqExpKernelFamily().default()
+        #yield SqExpKernelFamily().default()
         yield SqExpPeriodicKernelFamily().default()
         yield RQKernelFamily().default()
         yield LinKernelFamily().default()
+        yield ChangeKernelFamily().default()
     else:
         yield SqExpKernelFamily().default()
         yield RQKernelFamily().default()
