@@ -345,15 +345,15 @@ Since the complexity of our kernel is bounded only by the search depth, we could
 
 \section{Decomposing a function}
 
-Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent function.
+Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
 By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
 This potentially allows us to probabilistically separate causally the independent processes that give rise to the data.
 
 Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
 %\fTBD{If kept here, make notation consistent through paper}
-The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$ is given by
+The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian\fTBD{Make sure notation strictly correct and defined} $\vf = \vf_1 + \vf_2$ where $\vf_1 \sim \GP( \vmu_1, k_1)$ and $\vf_2 \sim \GP( \vmu_2, k_2)$ is given by
 \begin{align}
-\vf_1 | \vf \sim \mathcal{N} \big( & \vmu_1 + \vk_1^\star\tra (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
+\vf_1 | \vf \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \vmu_1 - \vmu_2 \right), \nonumber \\
 & \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
 \end{align}
 %and the covariance between the two components, conditioned on their sum is given by:
@@ -378,10 +378,10 @@ We ran the search to a depth of 10 and used sq-exp, periodic, linear and rationa
 We revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
 
 Figures \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
-Note in particular that, while the data can be smoothly interpolated by simple kernels a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the maximum depth model together with the posteriors of the additive components.
-The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.
+The plot shows a very plausible extrapolation and highly interpretable components i.e.~a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.\fTBD{Remember to update}
 
 \begin{figure*}[h!]
 \centering
@@ -459,6 +459,7 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 
 \paragraph{Solar Irradiance Data}
 \cite{lean1995reconstruction}
+\TBD{Discuss failure mode}
 
 \subsection{Multidimensional decomposition}
 
