@@ -1,0 +1,100 @@
+This is a description of all experiments up to date 11 Feb. Experiments post this date have more standardised information attached to them - but they can still be included if useful.
+
+09-Jan-k_essentially_1-Matern_And_PP1_Bugs
+
+A buggy first try - should be ignored unless you are confident you know what you're doing.
+
+18-Jan
+
+First implementation of Frobenius cut off - low depth so results not of much use
+
+22-Jan
+
+Just used SE to depth 8, k = 1, n_rand=1
+
+Almost first successful version of multi d interpolation but made a wrong turn on one Bach fold due to low number of restarts
+
+28-Jan
+
+#### In use ####
+
+Depth 8, k = 1, n_rand = 1
+SE, RQ
+
+First successful experiments for multi d interpolation
+
+30-Jan-1d
+
+First 1d experiments
+
+Depth 8, k = 1
+
+31-Jan-1d
+
+First 1d experiments
+
+Depth 8, k = 2
+
+4-Feb
+
+#### To be used potentially ####
+
+k = 1, depth = 8, just using SE - a baseline comparison to other methods that only use SE as a baseline
+
+4-Feb-1d
+
+Further 1d attempts
+
+5-Feb-1d-OldLin
+
+Depth 8, k = 1
+
+5-Feb-1d-NewLin
+
+Depth 8, k = 2
+
+Using new version of linear kernel
+
+6-Feb-1d-More-Restarts
+
+Depth 10, k=1, n_rand = 7
+
+6-Feb-1d-Even-More-Restarts
+
+Depth 10, k=1, n_rand = 9
+
+8-Feb-1d-collated
+
+Collation of best results on rescaled data up to 8 Feb
+
+7-Feb-1d-ex
+
+First extrapolation experiments. Low depth and restarts - results were ok
+
+9-Feb 1d learning curves
+
+Next attempt at extrapolation - depth 8, n_rand 9 - results better so far
+
+9-Feb-1d
+
+Airline and Solar with k = 1, depth 10, n_rand=9, sd = 4
+
+10-Feb-1d
+
+Airline and Mauna with k = 4, depth 10, n_rand=2, sd = 4
+
+Solar has k = 1 and n_rand=9
+
+11-Feb
+
+Depth = 12, k = 1
+SE, RQ, LN
+
+Seeing if linear kernel increases predictive performance for interpolation
+
+11-Feb-1d
+
+Collation of best 1d results
+
+
+

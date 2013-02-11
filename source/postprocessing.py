@@ -53,7 +53,7 @@ def gen_all_results(folder=config.RESULTS_PATH):
             yield files.split('.')[-2], best_tuple
                 
 
-def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None, prefix='', rescale=True):
+def make_all_1d_figures(folder=config.D1_RESULTS_PATH, save_folder='../figures/decomposition/', max_level=None, prefix='', rescale=True):
     """Crawls the results directory, and makes decomposition plots for each file.
     
     prefix is an optional string prepended to the output directory
@@ -80,9 +80,9 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, max_level=None, prefix=''
             best_kernel = exp.parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
             stripped_kernel = fk.strip_masks(best_kernel.k_opt)
             if not max_level is None:
-                fig_folder = os.path.join('../figures/decomposition/', (prefix + file + '_max_level_%d' % max_level))
+                fig_folder = os.path.join(save_folder, (prefix + file + '_max_level_%d' % max_level))
             else:
-                fig_folder = os.path.join('../figures/decomposition/', (prefix + file))
+                fig_folder = os.path.join(save_folder, (prefix + file))
             if not os.path.exists(fig_folder):
                 os.makedirs(fig_folder)
             gpml.plot_decomposition(stripped_kernel, X, y, os.path.join(fig_folder, file), best_kernel.noise, X_mean, X_scale, y_mean, y_scale)
@@ -93,6 +93,19 @@ def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10):
     make_all_1d_figures(folder=folder)
     for level in range(max_depth+1):
         make_all_1d_figures(folder=folder, max_level=level)
+        
+def compare_1d_decompositions():
+    '''Produces the decomposition for all the files in the listed directories - to see which one to pick'''
+    folders = ['../results/4-Feb-1d', 
+               '../results/5-Feb-1d-NewLin', 
+               '../results/5-Feb-1d-OldLin', 
+               '../results/6-Feb-1d-More-Restarts', 
+               '../results/6-Feb-1d-Even-More-Restarts', 
+               '../results/8-Feb-1d-collated', 
+               '../results/9-Feb-1d', 
+               '../results/10-Feb-1d']
+    for folder in folders:
+        make_all_1d_figures(folder=folder, save_folder='../temp_figures/' + folder.split('/')[-1])
         
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''

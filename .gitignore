@@ -60,9 +60,6 @@ latex/*.pdf
 
 config.py
 temp/
-
-results/
-1d_results/
 sexy_results/
 sandpit/
 saved_results/
@@ -73,6 +70,7 @@ source/.metadata/
 .metadata/
 Link to source
 test_results/
+temp_figures/
 
 
 
