@@ -61,7 +61,6 @@ latex/*.pdf
 config.py
 temp/
 
-results/
 1d_results/
 sexy_results/
 sandpit/
