@@ -426,21 +426,22 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 
 \begin{figure}[h!]
 \centering
-\newcommand{\wagd}{9.5cm}  % width airline growth decomp
-\newcommand{\hagd}{3.19cm}  % height airline growth decomp
-\newcommand{\ard}{../figures/decomposition/11-Feb-01-airline-s}  % airline results dir
+\newcommand{\wagd}{9.5cm}  % width airline decomp
+\newcommand{\hagd}{3.5cm}  % height airline decomp
+%\newcommand{\ard}{../figures/decomposition/11-Feb-01-airline-s}  % airline results dir
+\newcommand{\ard}{../figures/decomposition/31-Jan-v201-airline-months}  % airline results dir
 \begin{tabular}{c}
-\hspace{-1cm}\includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_all} \\
-% = \\ 
-\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_4} \\
+\hspace{-1cm}\includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_all} \\
+ = \\ 
+%\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_4} \\
 % + \\
-\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_3} \\
-% + \\
-\hspace{-1cm}  \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_2} \\
-% + \\
-\hspace{-1cm}   \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_1} \\
-% + \\
-\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_resid}
+\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_1} \\
+ + \\
+\hspace{-1cm}  \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_2} \\
+ + \\
+\hspace{-1cm}   \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_3} \\
+ + \\
+\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_resid}
 \end{tabular}
 \caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model.}
 \label{fig:airline_decomp}
