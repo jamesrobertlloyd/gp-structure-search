@@ -75,6 +75,10 @@ First extrapolation experiments. Low depth and restarts - results were ok
 
 Next attempt at extrapolation - depth 8, n_rand 9 - results better so far
 
+9-Feb-1d
+
+Airline and Solar with k = 1, depth 10, n_rand=9, sd = 4
+
 10-Feb-1d
 
 Airline and Mauna with k = 4, depth 10, n_rand=2, sd = 4
@@ -87,6 +91,10 @@ Depth = 12, k = 1
 SE, RQ, LN
 
 Seeing if linear kernel increases predictive performance for interpolation
+
+11-Feb-1d
+
+Collation of best 1d results
 
 
 
