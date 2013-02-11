@@ -6,7 +6,10 @@ isub = [dirnames(:).isdir]; %# returns logical vector
 dirnames = {dirnames(isub).name}';
 dirnames(ismember(dirnames,{'.','..'})) = [];
 
-dirnames = {'../../figures/decomposition/01-airline-s_max_level_8'};
+dirnames = [];
+%dirnames{1} = '../../figures/decomposition/11-Feb-01-airline-s';
+%dirnames{2} = '../../figures/decomposition/11-Feb-02-solar-s';
+dirnames{1} = '../../figures/decomposition/11-Feb-03-mauna2003-s';
 
 for i = 1:length(dirnames)
     dirname = dirnames{i};

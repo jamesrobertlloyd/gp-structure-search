@@ -16,8 +16,9 @@ x_left = min(X) - (max(X) - min(X))*left_extend;
 x_right = max(X) + (max(X) - min(X))*right_extend;
 xrange = linspace(x_left, x_right, 2000)';
 
-% TODO: check if noise formula is correct.
-complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*(2*exp(log_noise));
+
+noise_var = exp(2*log_noise);
+complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*noise_var;
 complete_sigmastar = feval(complete_covfunc{:}, complete_hypers, X, xrange);
 complete_sigmastarstart = feval(complete_covfunc{:}, complete_hypers, xrange, xrange);
 
@@ -27,9 +28,15 @@ complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sig
     
 figure(1); clf; hold on;
 mean_var_plot(xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, 2.*sqrt(complete_var)*y_scale);
-plot( X*X_scale+X_mean, y*y_scale+y_mean, 'k.' ); hold on; 
+plot( X*X_scale+X_mean, y*y_scale+y_mean, 'k.' ); hold on;
+
+% Remove outer brackets and extra latex markup from name.
+if iscell(full_name); full_name = full_name{1}; end
 full_name = strrep(full_name, '\left', '');
 full_name = strrep(full_name, '\right', '');
+full_name = strtrim(full_name);
+if full_name(1) == '('; full_name(1) = ''; end
+if full_name(end) == ')'; full_name(end) = ''; end
 title(full_name);
 filename = sprintf('%s_all.fig', figname);
 saveas( gcf, filename );
@@ -52,14 +59,15 @@ saveas( gcf, filename );
 % Plot residuals.
 figure(1000); clf; hold on;
 data_complete_mean = feval(complete_covfunc{:}, complete_hypers, X, X)' / complete_sigma * y;
-%mean_var_plot(xrange*X_scale+X_mean, y-complete_mean*y_scale, 2.*sqrt(complete_var)*y_scale);
+mean_var_plot(xrange*X_scale+X_mean, zeros(size(xrange)), ...
+              2.*sqrt(noise_var).*ones(size(xrange)).*y_scale);
 % Make plot prettier.
-set(gcf, 'color', 'white');
-set(gca, 'TickDir', 'out');
+%set(gcf, 'color', 'white');
+%set(gca, 'TickDir', 'out');
 plot( X*X_scale+X_mean, (y-data_complete_mean)*y_scale, 'k.' ); hold on; 
-xlim([min(xrange*X_scale), max(xrange*X_scale)] + X_mean);
+%xlim([min(xrange*X_scale), max(xrange*X_scale)] + X_mean);
 title('Residuals');
-set_fig_units_cm( 16,8 );  
+%set_fig_units_cm( 16,8 );  
 filename = sprintf('%s_resid.fig', figname);
 saveas( gcf, filename );
 
