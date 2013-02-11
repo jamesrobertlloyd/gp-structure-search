@@ -1,10 +1,10 @@
-results_directory = '/scratch/Dropbox/results/feb 7 1d sexy extrapolation/';
+results_directory = '../../results/9-Feb 1d learning curves/';
 full_data_directory = '../../data/1d_data_rescaled/';
 fold_data_directory = '../../data/1d_extrap_folds/';
 figure_directory = '../../figures/extrapolation_curves/';
 experiments{1} = '01-airline-s';
-experiments{2} = '02-solar-s';
-experiments{3} = '03-mauna2003-s';
+%experiments{2} = '02-solar-s';
+%experiments{3} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
 
@@ -78,7 +78,7 @@ for i = 1:length(experiments)
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
         MSEs.gpper(fold) = mean((ytest - m) .^ 2);
-        % Fit and score pure periodic
+        % Fit and score pSE + Per
         %%%% Random restarts + averaging?
         covfunc = {@covSum, {@covSEiso, @covPeriodic}};
         hyp.cov = [0; 0; 0; -2; 0];
@@ -93,7 +93,7 @@ for i = 1:length(experiments)
         [m s2] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc,...
                     X, y, Xtest);
         MSEs.gpadd(fold) = mean((ytest - m) .^ 2);
-        % Fit and score pure periodic
+        % Fit and score SE * Per
         %%%% Random restarts + averaging?
         covfunc = {@covProd, {@covSEiso, @covPeriodic}};
         hyp.cov = [0; 0; 0; -2; 0];
