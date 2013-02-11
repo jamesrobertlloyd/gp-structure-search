@@ -125,17 +125,18 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         if exp.debug==True:
             current_kernels = current_kernels[0:4]
 
-        # Write all_results to a file at each level.
+        # Write all_results to a temporary file at each level.
         all_results = sorted(all_results, key=ScoredKernel.score, reverse=True)
-        with open(results_filename, 'w') as outfile:
+        with open(results_filename + '.unfinished', 'w') as outfile:
             outfile.write('Experiment all_results for\n datafile = %s\n\n %s \n\n' \
                           % (experiment_data_file_name, experiment_fields_to_str(exp)))
             for (i, all_results) in enumerate(results_sequence):
                 outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
                 for result in all_results:
                     print >> outfile, result  
-
-
+    
+    # Rename temporary results file to actual results file                
+    os.rename(results_filename + '.unfinished', results_filename)
 
 def parse_results( results_filename, max_level=None ):
     '''
@@ -230,7 +231,7 @@ def perform_experiment(data_file, output_file, exp):
     
     if exp.make_predictions:        
         X, y, D, Xtest, ytest = gpml.load_mat(data_file, y_dim=1)
-        prediction_file = os.path.join(exp.results_dir, data_file + "_predictions.mat")
+        prediction_file = os.path.join(exp.results_dir, os.path.splitext(os.path.split(data_file)[-1])[0] + "_predictions.mat")
     else:
         X, y, D = gpml.load_mat(data_file, y_dim=1)
         
