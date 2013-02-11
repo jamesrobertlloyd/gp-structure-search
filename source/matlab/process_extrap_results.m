@@ -122,9 +122,10 @@ for i = 1:length(experiments)
     xlabel('Proportion of training data (%)');
     ylabel('MSE');
     legend('Linear', 'SE GP', 'Periodic GP', 'SE + Per GP', 'SE x Per GP', 'Structure search', 'location', 'best');
+    legend('boxoff')
     hold off
     xlim([10,90]);
-    set_fig_units_cm( 12,12 );
+    set_fig_units_cm( 12,11 );
     saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
     save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
 end
