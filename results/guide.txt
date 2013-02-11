@@ -75,6 +75,12 @@ First extrapolation experiments. Low depth and restarts - results were ok
 
 Next attempt at extrapolation - depth 8, n_rand 9 - results better so far
 
+10-Feb-1d
+
+Airline and Mauna with k = 4, depth 10, n_rand=2, sd = 4
+
+Solar has k = 1 and n_rand=9
+
 11-Feb
 
 Depth = 12, k = 1
