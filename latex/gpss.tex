@@ -478,9 +478,16 @@ In addition to producing highly interpretable decompositions of regression funct
 \hspace{-0.5cm} \includegraphics[width=\columnwidth]{../figures/extrapolation_curves/01-airline-s-ex-curve.pdf}
 \end{tabular}
 \caption{Extrapolation performance.  Here, we show the average test set MSE as a function of the fraction of the dataset used for training. \TBD{RBG: Are we using a fixed test set, or the complement of the training set?  It seems like we should do the former, so that the results are less noisy.}}
+\label{fig:extrapolation}
 \end{figure}
 
-Figure \ref{extrapolation} shows the learning curves of our method compared against simple linear regression and \gp{} regression with a SE kernel.  The amount of data in the 1D airline timeseries was increased by increments of 10\%. Both linear and SE regression plateau, while unbounded complexity of our method allows the model to continue to capture structure. 
+To test the extrapolation capabilities of our model against standard baselines, we computed predictive mean-squared-error as a function of the proportion of data used for training.
+Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{{} models.  
+
+Linear regression models have fixed capacity, and quickly plateau in their predictive performance.  In contrast, a \gp{} with an SE kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
+
+\TBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.} \TBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
+
 
 \subsection{Interpolation}
 
@@ -495,24 +502,7 @@ Our method outperforms the other methods in all tests.
 
 \TBD{Other versions of tests / learning curves}
 
-\subsubsection{Data sets}
 
-
-\paragraph{Bach Synthetic Dataset}
-\fTBD{Too much text? Move to supplementary}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
-% From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
-%We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
-This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
-%
-This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over a \gp{} with a SE-ARD kernel. 
-
-%If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.
-%GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
-%However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.
-%In this example, the additive GP is able to recover the relevant structure.
-
-[TODO: Describe concrete, pumadyn, servo and housing]
 
 \subsection{Details of methods}
 
@@ -527,7 +517,7 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 
 Additive Gaussian Processes was run using SE as a base kernel, and at most ten degrees of interaction. \fTBD{RBG: What does boldface mean?  Statistical significance?}
 
-\paragraph{source code}All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
+\paragraph{Source code}All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{http://www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
 
 
 
@@ -544,29 +534,41 @@ Additive Gaussian Processes was run using SE as a base kernel, and at most ten d
 
 \section{Discussion}
 
-There is a large and mature literature on automatic structure discovery in unsupervised settings [citations including Josh].  However, relatively little attention has been paid to automatic structure discovery in supervised learning. \TBD{RBG: I don't think we need separate Discussion and Conclusion sections. I vote for getting rid of Discussion, since most of this is covered in the related work section anyway.}
+\begin{quotation}
+``It would be very nice to have a formal apparatus that gives us some ‘optimal’ way of recognizing unusual phenomena and inventing new classes of hypotheses that are most likely to contain the true one; but this remains an art for the creative human mind.''
+% In trying to practice this art, the Bayesian has the advantage because his formal apparatus already developed gives him a clearer picture of what to expect, and therefore a sharper perception for recognizing the unexpected.
 
-Similar searches over large model classes have been succesfully used in machine vision \cite{pinto2009high}
-This work respresents a step towards more data-based modeling, as opposed to proposing the model beforehand.
+
+\emph{ E.T. Jaynes  from the last paragraph (p. 351) of his 1985 paper, “Highly Informative Priors.”}
+\end{quotation}
+
+There has developed a large and mature literature on automatic structure discovery in unsupervised settings \fTBD{citations including Josh}.  
+For example, searches over large model classes have been succesfully used in machine vision \cite{pinto2009high}, analogous to high-throughput methods used in biology.
+
+However, relatively little attention has been paid to automatic structure discovery in supervised learning. %\TBD{RBG: I don't think we need separate Discussion and Conclusion sections. I vote for getting rid of Discussion, since most of this is covered in the related work section anyway.}
+%
+Our work respresents a step towards automated structure discover in supervised settings.
+% data-based modeling, as opposed to proposing the model beforehand.
+
+In particular, this work removes the need for an expert to propose a kernel family in order to effectively use a Gaussian process model.  
+Choosing a kernel family is a stumbling block even for experts.
+Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
 
 
-Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
+%Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
 
-[Blessing of abstraction, doing lots with a small amount of data.] \TBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
 
-[Extrapolation]
 
-Choosing a kernel family is also a stumbling block for non-experts who wish to use Gaussian Process models.  Automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
 
 %Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
 
 
 
-\section{Conclusion}
+\paragraph{Conclusion}
 
 In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
-We examined the composite kernels discovered by this search on several datasets, and demonstrate that they can recover known structure, and result in state-of-the-art predictive performance.  We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
+We demonstrated that the composite structure search recovered interpretable\fTBD{Change to 'known' if we add those experiments} structure, and resulted in state-of-the-art predictive performance.  %We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
 
 %\section{Future Work}
 
@@ -657,3 +659,22 @@ We examined the composite kernels discovered by this search on several datasets,
 %Automating the search over kernel structures should be especially useful in allowing pracitioners from a wide variety of backgrounds to use appropriate models for their data.
 %Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
 
+
+
+\subsubsection{Data sets}
+
+\paragraph{Bach Synthetic Dataset}
+\fTBD{Too much text? Move to supplementary}
+In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
+% From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
+%We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
+This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
+%
+This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over a \gp{} with a SE-ARD kernel. 
+
+%If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.
+%GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
+%However, a GP with an additive kernel can learn both to ignore irrelevant variables, and to ignore certain orders of interaction.
+%In this example, the additive GP is able to recover the relevant structure.
+
+[TODO: Describe concrete, pumadyn, servo and housing]
