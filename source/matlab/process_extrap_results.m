@@ -3,9 +3,9 @@ full_data_directory = '../../data/1d_data_rescaled/';
 fold_data_directory = '../../data/1d_extrap_folds/';
 figure_directory = '../../figures/extrapolation_curves/';
 clear experiments
-%experiments{1} = '01-airline-s';
+experiments{1} = '01-airline-s';
 %experiments{2} = '02-solar-s';
-experiments{1} = '03-mauna2003-s';
+%experiments{1} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
 
@@ -14,7 +14,7 @@ quick_test_mode = false;
 restart_sd = 4;
 restarts = 10;
 
-max_iters = 300; % Max iterations for GP training.
+max_iters = 200; % Max iterations for GP training.
 lw = 2;        % Line width.
 
 for i = 1:length(experiments)
