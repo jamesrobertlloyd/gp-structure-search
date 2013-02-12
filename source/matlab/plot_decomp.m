@@ -34,9 +34,9 @@ plot( X*X_scale+X_mean, y*y_scale+y_mean, 'k.' ); hold on;
 if iscell(full_name); full_name = full_name{1}; end
 full_name = strrep(full_name, '\left', '');
 full_name = strrep(full_name, '\right', '');
-full_name = strtrim(full_name);
-if full_name(1) == '('; full_name(1) = ''; end
-if full_name(end) == ')'; full_name(end) = ''; end
+%full_name = strtrim(full_name);
+%if full_name(1) == '('; full_name(1) = ''; end
+%if full_name(end) == ')'; full_name(end) = ''; end
 title(full_name);
 filename = sprintf('%s_all.fig', figname);
 saveas( gcf, filename );

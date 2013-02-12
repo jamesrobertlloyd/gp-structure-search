@@ -173,9 +173,10 @@ for i = 1:length(experiments)
     else
         legend('Linear', 'SE GP', 'Periodic GP', 'SE + Per GP', 'SE x Per GP', 'Structure search', 'location', 'best');
     end
+    legend('boxoff')
     hold off
     xlim([10,90]);
-    set_fig_units_cm( 12,12 );
+    set_fig_units_cm( 12,11 );
     if ~quick_test_mode
         saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
         save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
