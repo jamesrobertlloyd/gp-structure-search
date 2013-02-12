@@ -1,0 +1,33 @@
+Experiment all_results for
+ datafile = ../data/1d_extrap_folds/04-methane-500-s-ex-fold-1of10.mat
+
+ Running experiment:
+description = Run all 1D datasets,
+data_dir = ../data/1d_extrap_folds/,
+max_depth = 8,
+random_order = False,
+k = 1,
+debug = False,
+local_computation = False,
+n_rand = 9,
+sd = 4,
+max_jobs = 500,
+verbose = False,
+make_predictions = True,
+skip_complete = True,
+results_dir = ../results/9-Feb 1d learning curves/,
+iters = 200,
+ 
+
+
+%%%%% Level 0 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.569323, period=-2.079195, output_variance=5.192570)), nll=95.812734, laplace_nle=nan, bic_nle=203.361537, noise=[-2.04546856])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-12.331937, output_variance=-0.872438)), nll=14.649667, laplace_nle=21.657613, bic_nle=37.123380, noise=[-1.56857041])
+
+%%%%% Level 1 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=11.103642, lengthscale=1.064814, location=-0.642554)), nll=10832.104494, laplace_nle=nan, bic_nle=21672.033035, noise=[-3.79491462])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.569323, period=-2.079195, output_variance=5.192570)), nll=95.812734, laplace_nle=nan, bic_nle=203.361537, noise=[-2.04546856])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-14.552460, output_variance=-0.871583)), nll=14.727512, laplace_nle=113.277378, bic_nle=37.279071, noise=[-1.56840394])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-12.331937, output_variance=-0.872438)), nll=14.649667, laplace_nle=21.657613, bic_nle=37.123380, noise=[-1.56857041])
