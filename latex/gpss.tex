@@ -104,6 +104,7 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
 In the case of Gaussian process regression, the kernel defines a covariance function: ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$. \fTBD{RBG: Why $\kappa$ rather than $k$?}
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
+\fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
 
 Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
 \begin{eqnarray}
@@ -176,6 +177,26 @@ More precisely, we can express a product of kernels as a concatenation of the ca
 
 Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.  For example, many vision models combine pooling and detection layers \TBD{cite}. In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
 
+
+\paragraph{Example expressions}
+
+A number of standard model forms can be expressed as \gp s with composite kernels:
+
+\begin{tabular}{l|l}
+Bayesian linear regression & Lin \\
+Bayesian quadratric regression & Lin $\times$ Lin \\
+Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
+generalized Fourier decomposition & Per + Per + \dots \\
+generalized additive models & $\sum_{d=1}^D SE_d$ \\
+GP-ARD & $\prod_{d=1}^D SE_d$ \\
+long-term trend & Lin + SE \\
+growing amplitude & Lin $\times$ SE
+\end{tabular}
+
+In these expresssions, $SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
+We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
+
+
 %\section{Gaussian Processes Priors}
 
 %Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
@@ -192,8 +213,22 @@ Combining multiple layers of AND and OR-like operators to construct complex func
 
 \paragraph{A grammar for kernels}
 
-The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
-We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels. \TBD{RBG: need (1) 1-2 sentences about what a CFG is, what production rules are; (2) an example derivation, e.g. for Mauna; (3) say that production rules are supposed to correspond to motifs of probabilistic modeling}
+As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels. In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ). Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose hyperparaters are the concatenation of the hyperparameters for the base kernel families. 
+
+We allow the following search operators over our set of expressions:
+\begin{itemize}
+\item Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
+\item Any subexpression $\subexpr$ can be replaced with $\subexpr \times \baseker$, where $\baseker$ is any base kernel family.
+\item Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
+\end{itemize}
+
+We note that these operators can generate all possible algebraic expressions. To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions. However, the more general versions of these rules allow more flexibility in the search procedure, since the CGF derivation may not be the most straightforward way to arrive at the kernel.
+
+
+
+
+%The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
+%We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels. \TBD{RBG: need (1) 1-2 sentences about what a CFG is, what production rules are; (2) an example derivation, e.g. for Mauna; (3) say that production rules are supposed to correspond to motifs of probabilistic modeling}
 
 %\begin{center}
 %\begin{tabular}{rccc}
@@ -233,20 +268,6 @@ We also experimented with using the Laplace approximation to the marginal likeli
 \end{itemize}
 }
 
-\paragraph{Example expressions}
-
-A number of standard and/or interesting model forms can be expressed as composite kernels, including
-\begin{itemize}
-\item \eg Lin, Lin $\times$ Lin, \ldots is Bayesian polynomial regression.
-\item linear
-\item generalized fourier decomposition is per + per
-\item quadratric lin * lin
-\item GAM se1 + se2
-\item ARD se1 * se2
-\item detrending: lin + se or lin*se
-\end{itemize}
-
-\TBD{Draw a picture to show what our model includes \ie polynomial regression, nonparametric `Fourier' decomposition, GAM, additive kernels.}
 
 \section{Related Work}
 
@@ -360,10 +381,31 @@ $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 +
 
 \section{Time Series Extrapolation}
 
-In Section \ref{sec:extrapolation}, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
+In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 We then also plot that same kernel and posterior decomposed into additive components.
 
-In cases where the kernel expression contains any product with a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
+%\section{Decomposing a function}
+
+%Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
+%By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
+%This potentially allows us to probabilistically separate causally the independent processes that give rise to the data. 
+
+%\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
+
+\label{sec:decomposing}
+We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
+The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian $\function = \function_1 + \function_2$ where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$ is given by
+\begin{align}
+\function_1 | \function \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
+\end{align}
+%and the covariance between the two components, conditioned on their sum is given by:
+%\begin{align}
+%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+%\end{align}
+%Derivations can be found in the supplementary material.
+
+In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
 
 In these experiments, the search depth was set to 10 and the SE, Per, Lin and RQ kernels were used.
 
@@ -560,26 +602,7 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 %\end{itemize}
 
 
-\section{Decomposing a function}
-\label{sec:decomposing}
-Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
-By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
-This potentially allows us to probabilistically separate causally the independent processes that give rise to the data. 
 
-%\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
-
-Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
-%\fTBD{If kept here, make notation consistent through paper}
-The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian\fTBD{Make sure notation strictly correct and defined} $\function = \function_1 + \function_2$ where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$ is given by
-\begin{align}
-\function_1 | \function \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
-\end{align}
-%and the covariance between the two components, conditioned on their sum is given by:
-%\begin{align}
-%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-%\end{align}
-%Derivations can be found in the supplementary material.
 
 \section{Discussion}
 
