@@ -176,6 +176,26 @@ More precisely, we can express a product of kernels as a concatenation of the ca
 
 Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.  For example, many vision models combine pooling and detection layers \TBD{cite}. In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
 
+
+\paragraph{Example expressions}
+
+A number of standard model forms can be expressed as \gp s with composite kernels:
+
+\begin{tabular}{l|l}
+Bayesian linear regression & Lin \\
+Bayesian quadratric regression & Lin $\times$ Lin \\
+Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
+generalized Fourier decomposition & Per + Per + \dots \\
+generalized additive models & $\sum_{d=1}^D SE_d$ \\
+GP-ARD & $\prod_{d=1}^D SE_d$ \\
+long-term trend & Lin + SE \\
+growing amplitude & Lin $\times$ SE
+\end{tabular}
+
+In these expresssions, $SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
+We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
+
+
 %\section{Gaussian Processes Priors}
 
 %Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
@@ -233,22 +253,7 @@ We also experimented with using the Laplace approximation to the marginal likeli
 \end{itemize}
 }
 
-\paragraph{Example expressions}
 
-A number of standard model forms can be expressed as \gp s with composite kernels:
-
-\begin{tabular}{l|l}
-Bayesian linear regression & Lin \\
-Bayesian quadratric regression & Lin $\times$ Lin \\
-Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
-generalized Fourier decomposition & Per + Per + \dots \\
-generalized additive models & $\sum_{d=1}^D SE_d$ \\
-GP-ARD & $\prod_{d=1}^D SE_d$ \\
-long-term trend & Lin + SE \\
-growing amplitude & Lin $\times$ SE
-\end{tabular}
-
-In these expresssions, $SE_d$ denotes a squared-exponential kernel along the $d$th dimension.  We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
 \section{Related Work}
 
 \paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  Our work can be viewed as an extension and automation of this approach.
