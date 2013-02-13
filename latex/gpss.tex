@@ -104,6 +104,7 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
 In the case of Gaussian process regression, the kernel defines a covariance function: ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$. \fTBD{RBG: Why $\kappa$ rather than $k$?}
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
+\fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
 
 Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
 \begin{eqnarray}
@@ -192,8 +193,22 @@ Combining multiple layers of AND and OR-like operators to construct complex func
 
 \paragraph{A grammar for kernels}
 
-The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
-We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels. \TBD{RBG: need (1) 1-2 sentences about what a CFG is, what production rules are; (2) an example derivation, e.g. for Mauna; (3) say that production rules are supposed to correspond to motifs of probabilistic modeling}
+As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels. In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ). Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose hyperparaters are the concatenation of the hyperparameters for the base kernel families. 
+
+We allow the following search operators over our set of expressions:
+\begin{itemize}
+\item Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
+\item Any subexpression $\subexpr$ can be replaced with $\subexpr \times \baseker$, where $\baseker$ is any base kernel family.
+\item Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
+\end{itemize}
+
+We note that these operators can generate all possible algebraic expressions. To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions. However, the more general versions of these rules allow more flexibility in the search procedure, since the CGF derivation may not be the most straightforward way to arrive at the kernel.
+
+
+
+
+%The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
+%We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels. \TBD{RBG: need (1) 1-2 sentences about what a CFG is, what production rules are; (2) an example derivation, e.g. for Mauna; (3) say that production rules are supposed to correspond to motifs of probabilistic modeling}
 
 %\begin{center}
 %\begin{tabular}{rccc}
