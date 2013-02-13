@@ -1,0 +1,31 @@
+Experiment all_results for
+ datafile = ../data/synthetic-SNR-1/Lin1_t_Per1.mat
+
+ Running experiment:
+description = Run all synthetic datasets,
+data_dir = ../data/synthetic-SNR-1/,
+max_depth = 8,
+random_order = False,
+k = 1,
+debug = False,
+local_computation = False,
+n_rand = 19,
+sd = 4,
+max_jobs = 500,
+verbose = False,
+make_predictions = False,
+skip_complete = True,
+results_dir = ../results/13-Feb-synthetic-SNR-1/,
+iters = 100,
+ 
+
+
+%%%%% Level 0 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=-0.353237, period=-1.969616, output_variance=2.744970)), nll=574.265113, laplace_nle=nan, bic_nle=1165.641574, noise=[ 0.2121434])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=0.647163, period=-1.985949, output_variance=4.758256)), nll=571.262020, laplace_nle=nan, bic_nle=1159.635387, noise=[ 0.40544152])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=1.963435, period=-1.395214, output_variance=2.845118)), nll=549.796944, laplace_nle=nan, bic_nle=1116.705235, noise=[ 0.37413349])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=5.017313, period=-2.088855, output_variance=3.418075)), nll=545.954748, laplace_nle=562.709545, bic_nle=1109.020844, noise=[ 0.41380385])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=3.282533, output_variance=2.386247, alpha=4.977915)), nll=530.925014, laplace_nle=534.281181, bic_nle=1078.961375, noise=[ 0.32710338])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-4.908711, output_variance=5.691261, alpha=-13.774853)), nll=498.413787, laplace_nle=nan, bic_nle=1013.938921, noise=[-11.52269021])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-2.503444, output_variance=0.104115)), nll=477.378717, laplace_nle=485.797568, bic_nle=966.164998, noise=[ 0.03560341])

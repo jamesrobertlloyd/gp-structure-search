@@ -4,7 +4,7 @@ rand('state',seed);
 
 n = 300;
 x_max = 2;
-data_folder = '../../data/synthetic/';
+data_folder = '../../data/synthetic-SNR-1/';
 
 covs{1} = {@covSum, {...
                     {@covMask, {[1 0], {@covSEiso}}}, ...
@@ -84,6 +84,14 @@ covs{7} = {@covSum,{...
 cov_params{7} = [0 0 1 0 -1 0 0 0];
 dims{7} = 4;
 names{7} = 'SE1_t_SE2_p_SE2_t_SE3.mat';
+covs{8} = {@covSum, {...
+                    {@covSEiso}, ...
+                    {@covRQiso} ...
+                    } ...
+                    };
+cov_params{8} = [0 0 -1 0 -2];
+dims{8} = 1;
+names{8} = 'SE1_p_RQ1.mat';
 
 for i = 1:length(covs)
     X = (rand(n,dims{i})-0.5)*2*x_max;
@@ -92,6 +100,6 @@ for i = 1:length(covs)
     y = chol(K)' * randn(n,1);
     y = y - mean(y);
     y = y / std(y);
-    y = y + randn(size(y)) / 10;
+    y = y + randn(size(y)) / 1;
     save([data_folder names{i}], 'X', 'y');
 end
