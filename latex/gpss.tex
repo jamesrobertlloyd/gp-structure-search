@@ -88,7 +88,7 @@ Specifically, we focus on a Bayesian setting where the kernel specifies a covari
 Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
 However, one can also straightforwardly form composite kernels by combining simple base kernels through operations that such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
 We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
-The search criterion is the marginal likelihood of the data for a given kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}. \fTBD{RBG: Bayesian purists would say it's the marginal likelihood of the model, not of the data. }
+The search criterion is the marginal likelihood of the model given a kernel and data, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
 
 %\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
 %For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
@@ -177,6 +177,26 @@ More precisely, we can express a product of kernels as a concatenation of the ca
 
 Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.  For example, many vision models combine pooling and detection layers \TBD{cite}. In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
 
+
+\paragraph{Example expressions}
+
+A number of standard model forms can be expressed as \gp s with composite kernels:
+
+\begin{tabular}{l|l}
+Bayesian linear regression & Lin \\
+Bayesian quadratric regression & Lin $\times$ Lin \\
+Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
+generalized Fourier decomposition & Per + Per + \dots \\
+generalized additive models & $\sum_{d=1}^D SE_d$ \\
+GP-ARD & $\prod_{d=1}^D SE_d$ \\
+long-term trend & Lin + SE \\
+growing amplitude & Lin $\times$ SE
+\end{tabular}
+
+In these expresssions, $SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
+We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
+
+
 %\section{Gaussian Processes Priors}
 
 %Gaussian processes are a flexible and tractable prior over functions, useful for solving regression and classification tasks\cite{rasmussen38gaussian}.
@@ -224,7 +244,7 @@ Details of the search algorithm are given in the supplementary material \TBD{For
 Our search starts by first proposing all base kernels applied to all input dimensions.  We then choose the kernel with the highest approximate marginal likelihood, apply all expansions to this kernel, and repeat this process for a fixed number of steps.
 
 We optimized kernel hyperparameters at each step using conjugate gradients, randomly restarting any newly introduced kernel hyperparameters.  To approximate the marginal likelihood of a kernel without integrating over hyperparameters, used the Bayesian Information Criterion (BIC)\footnotemark \TBD{cite}.
-We also experimented with using the Laplace approximation to the marginal likelihood, but this was found to be less numerically stable and was not meaningful in cases when the optimiser failed to reach a optimum.
+We also experimented with using the Laplace approximation to the marginal likelihood, but this was found to be less numerically stable and was not meaningful in cases when the optimiser failed to reach an optimum.
 \footnotetext{Because BIC is a function of the number of parameters in a model, we adjusted for cases where two parameters were only serving the role of one.  \eg when two kernels are multiplied, one of the variance parameters becomes redundant.}
 
 \TBD{RBG: For this section, it seems like we want both a precise statement of the procedure (e.g. in an algorithm box) and motivations for the important steps. Some motivations:
@@ -248,9 +268,6 @@ We also experimented with using the Laplace approximation to the marginal likeli
 \end{itemize}
 }
 
-\paragraph{Example expressions}
-
-\TBD{Draw a picture to show what our model includes \ie polynomial regression, nonparametric `Fourier' decomposition, GAM, additive kernels.}
 
 \section{Related Work}
 
@@ -332,10 +349,31 @@ Since the complexity of our kernel is bounded only by the search depth, we could
 
 \section{Time Series Extrapolation}
 
-In Section \ref{sec:extrapolation}, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
+In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 We then also plot that same kernel and posterior decomposed into additive components.
 
-In cases where the kernel expression contains any product with a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
+%\section{Decomposing a function}
+
+%Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
+%By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
+%This potentially allows us to probabilistically separate causally the independent processes that give rise to the data. 
+
+%\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
+
+\label{sec:decomposing}
+We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
+The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian $\function = \function_1 + \function_2$ where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$ is given by
+\begin{align}
+\function_1 | \function \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
+\end{align}
+%and the covariance between the two components, conditioned on their sum is given by:
+%\begin{align}
+%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+%\end{align}
+%Derivations can be found in the supplementary material.
+
+In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
 
 In these experiments, the search depth was set to 10 and the SE, Per, Lin and RQ kernels were used.
 
@@ -532,26 +570,7 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 %\end{itemize}
 
 
-\section{Decomposing a function}
-\label{sec:decomposing}
-Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
-By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
-This potentially allows us to probabilistically separate causally the independent processes that give rise to the data. 
 
-%\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
-
-Moreover, the posterior distribution over additive components is analytically tractable, allowing us to plot the individual components.
-%\fTBD{If kept here, make notation consistent through paper}
-The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian\fTBD{Make sure notation strictly correct and defined} $\function = \function_1 + \function_2$ where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$ is given by
-\begin{align}
-\function_1 | \function \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
-\end{align}
-%and the covariance between the two components, conditioned on their sum is given by:
-%\begin{align}
-%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-%\end{align}
-%Derivations can be found in the supplementary material.
 
 \section{Discussion}
 
