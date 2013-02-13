@@ -211,18 +211,41 @@ We use the term 'generalized Fourier decomposition' to express the fact that the
 
 \section{Searching over structures}
 
-\paragraph{A grammar for kernels}
 
 As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels. In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ). Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose hyperparaters are the concatenation of the hyperparameters for the base kernel families. 
 
+Our search procedure begins by proposing all base kernels applied to all input dimensions. 
+
 We allow the following search operators over our set of expressions:
 \begin{itemize}
-\item Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
-\item Any subexpression $\subexpr$ can be replaced with $\subexpr \times \baseker$, where $\baseker$ is any base kernel family.
-\item Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
+\item[(1)] Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
+\item[(2)] Any subexpression $\subexpr$ can be replaced with $\subexpr \times \baseker$, where $\baseker$ is any base kernel family.
+\item[(3)] Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
 \end{itemize}
 
 We note that these operators can generate all possible algebraic expressions. To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions. However, the more general versions of these rules allow more flexibility in the search procedure, since the CGF derivation may not be the most straightforward way to arrive at the kernel.
+
+We search over this space using a greedy search: in each stage, we choose the $\numWinners$ highest scoring kernels and expand them by applying all possible operators.
+
+Our search operators are motivated by strategies researchers often use in constructing kernels. In particular,
+\begin{itemize}
+\item We look for structure such as periodicity in the residuals of a model, and then extend the model to capture that structure. This corresponds to applying rule (1).
+\item We start with structure (such as periodicity) which is supposed to hold globally, but find that it only holds locally. This corresponds to applying rule (2) to obtain the structure shown in row 1 of Figure \ref{fig:kernels}.
+\item We add features incrementally using algorithms like boosting, backfitting, or forward selection. These correspond to applying rules (1) or (2) to new dimensions not yet included in the model.
+\end{itemize}
+
+\paragraph{Scoring kernel families}
+
+Choosing kernel structures requires a criterion for evaluating the structures. We choose marginal likelihood as our criterion, because it tests both interpolation and extrapolation and because it directly penalizes the complexity of the prior over functions \cite{rasmussen2001occam}.  In a fully Bayesian approach, we would put priors over the hyperparameters and compute the marginal likelihood of the models with all the hyperparameters integrated out. However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \TBD{If true, say we got similar results using Laplace} We note that other model selection criteria could be used with our search procedure. For instance, random cross-validation could be used when the goal is interpolation.
+
+Unfortunately, optimizing over hyperparameters is not a convex optimization problem, and the space can have many local optima. For instance, for the example in Figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones. Similarly, in data with periodic structure, integer multiples of the true period are often local optima. 
+
+To deal with this, we take advantage of our greedy search procedure in order to get smart initializations: all of the hyperparameters which were part of the previous model are initialized to their previous values. The hyperparameters are then optimized using conjugate gradients, randomly restarting the newly introduced hyperparameters. While this procedure isn't guaranteed to find the global optimum, we offer some heuristic motivations:
+\begin{itemize}
+\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old hyperparameters fixed.
+\item If a simple structure includes a periodic kernel, the learned period is likely to be approximately correct even if the true structure turns out to be more complex.
+\end{itemize}
+
 
 
 
@@ -238,38 +261,20 @@ We note that these operators can generate all possible algebraic expressions. To
 %\end{tabular}
 %\end{center}
 
-Details of the search algorithm are given in the supplementary material \TBD{For now}.
+%Details of the search algorithm are given in the supplementary material \TBD{For now}.
 
-\paragraph{A greedy search algorithm}
-Our search starts by first proposing all base kernels applied to all input dimensions.  We then choose the kernel with the highest approximate marginal likelihood, apply all expansions to this kernel, and repeat this process for a fixed number of steps.
+%\paragraph{A greedy search algorithm}
+%Our search starts by first proposing all base kernels applied to all input dimensions.  We then choose the kernel with the highest approximate marginal likelihood, apply all expansions to this kernel, and repeat this process for a fixed number of steps.
 
-We optimized kernel hyperparameters at each step using conjugate gradients, randomly restarting any newly introduced kernel hyperparameters.  To approximate the marginal likelihood of a kernel without integrating over hyperparameters, used the Bayesian Information Criterion (BIC)\footnotemark \TBD{cite}.
-We also experimented with using the Laplace approximation to the marginal likelihood, but this was found to be less numerically stable and was not meaningful in cases when the optimiser failed to reach an optimum.
-\footnotetext{Because BIC is a function of the number of parameters in a model, we adjusted for cases where two parameters were only serving the role of one.  \eg when two kernels are multiplied, one of the variance parameters becomes redundant.}
+%We optimized kernel hyperparameters at each step using conjugate gradients, randomly restarting any newly introduced kernel hyperparameters.  To approximate the marginal likelihood of a kernel without integrating over hyperparameters, used the Bayesian Information Criterion (BIC)\footnotemark \TBD{cite}.
+%We also experimented with using the Laplace approximation to the marginal likelihood, but this was found to be less numerically stable and was not meaningful in cases when the optimiser failed to reach an optimum.
+%\footnotetext{Because BIC is a function of the number of parameters in a model, we adjusted for cases where two parameters were only serving the role of one.  \eg when two kernels are multiplied, one of the variance parameters becomes redundant.}
 
-\TBD{RBG: For this section, it seems like we want both a precise statement of the procedure (e.g. in an algorithm box) and motivations for the important steps. Some motivations:
-\begin{itemize}
-\item greedy search
-\begin{itemize}
-\item we build probabilistic models incrementally by looking for structure in the current model
-\item analogy to boosting, backfitting, forward selection
-\end{itemize}
-\item hyperparameter initialization
-\begin{itemize}
-\item we try to model structure in residuals; this corresponds to keeping current parameters and adding another kernel
-\item we hypothesize that certain structure (e.g. periodicity) is local rather than global; this corresponds to keeping current parameters but multiplying by a SE
-\end{itemize}
-\item marginal likelihood
-\begin{itemize}
-\item tests both interpolation and extrapolation (tradeoff is arbitrary, but a good structure should be able to do both)
-\item Occam's razor
-\item uses all available evidence
-\end{itemize}
-\end{itemize}
-}
+
 
 
 \section{Related Work}
+\label{sec:related_work}
 
 \paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  Our work can be viewed as an extension and automation of this approach.
 
