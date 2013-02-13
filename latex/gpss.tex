@@ -235,18 +235,18 @@ We also experimented with using the Laplace approximation to the marginal likeli
 
 \paragraph{Example expressions}
 
-A number of standard and/or interesting model forms can be expressed as composite kernels, including
-\begin{itemize}
-\item \eg Lin, Lin $\times$ Lin, \ldots is Bayesian polynomial regression.
-\item linear
-\item generalized fourier decomposition is per + per
-\item quadratric lin * lin
-\item GAM se1 + se2
-\item ARD se1 * se2
-\item detrending: lin + se or lin*se
-\end{itemize}
+A number of standard model forms can be expressed as composite kernels.
 
-\TBD{Draw a picture to show what our model includes \ie polynomial regression, nonparametric `Fourier' decomposition, GAM, additive kernels.}
+\begin{tabular}{l|l}
+Bayesian linear regression & Lin \\
+Bayesian quadratric regression & Lin $\times$ Lin \\
+Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
+generalized fourier decomposition & Per + Per + \dots \\
+Generalized Additive Models & $SE_1$ + $SE_2$ + \dots + $SE_D$\\
+GP-ARD & $SE_1$ $\times$ $SE_2$ $\times$ \dots $\times$ $SE_D$ \\
+Long-term trends: & Lin + SE or Lin $\times$ SE
+\end{tabular}
+
 
 \section{Related Work}
 
