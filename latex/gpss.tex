@@ -110,7 +110,7 @@ Examples of commonly used kernels include squared exponential (SE), periodic (Pe
 \begin{eqnarray}
 \kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 \kernel_\textrm{Per}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
-\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_1^2 + \sigma_2^2(\inputVar - \ell)(\inputVar' - \ell).
+\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 \end{eqnarray}
 
 When used within the context of GP regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
@@ -121,8 +121,8 @@ Positive semidefinite kernels (\ie those which define valid covariance functions
 This allows one to create richly structured kernels from well understood base components.  Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 
 %\fTBD{Can probably kill simple kernel table. Focus on one table.}
-%\input{tables/simple_kernels_table.tex}
-\input{tables/example_structures_table.tex}
+\input{tables/simple_kernels_table.tex}
+\input{tables/example_structures_table_v2.tex}
 
 \paragraph{Summation}
 
@@ -141,7 +141,7 @@ In higher dimensions, summing kernels can correspond to decompositions of the fo
 \end{equation}
 \ie `independent' variation in different dimensions.
 %
-\input{tables/multi_d_additive_fig}
+\input{tables/multi_d_additive_fig_v2}
 %
 Figure \ref{fig:multi_d_additivity} demonstrates a decomposition across dimensions.
 
@@ -429,7 +429,8 @@ The plot shows a very plausible extrapolation and highly interpretable component
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
  \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. \TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}}
+\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+}
 \label{fig:mauna_grow}
 \end{figure*}
 
@@ -456,19 +457,19 @@ Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the correspondi
 
 Note that the linear kernel allows an element of heteroskedasticity in our model - the posterior marginal variance grows with the increase in the number of passengers over time.
 
-\begin{figure*}[h!]
+\begin{figure}[h!]
 \centering
 \newcommand{\wag}{4.8cm}  % width airline growth
 \newcommand{\hag}{4cm}  % height airline growth
-\begin{tabular}{c}
+\begin{tabular}{cc}
 \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small}
+\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
 \end{tabular}
 \caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
 \label{fig:airline_grow}
-\end{figure*}
+\end{figure}
 
 
 \begin{figure}[h!]
@@ -522,21 +523,7 @@ We examined the ability of our model to capture structure present in the time se
 %
 Figure \ref{fig:solar_decomp} shows the posterior and residuals of our model on this dataset.  This dataset contains structure not easily model-able using the base kernels included in our experiments, and represents a failure mode of the model.  Specifically, the timespan from 1645 to 1715 contains no periodicity, and much lower variance than the rest of the dataset.  Because the base kernels included in our grammar are mostly stationary, it was not possible to model the non-stationarity present in the data, and the residuals clearly show structure that was not captured by our method.  However, because the BIC controlled overfitting fairly conservatively, the resulting fit failed fairly gracefully. \fTBD{I'm not crazy about my writing here.}
 
-\subsection{Multidimensional decomposition}
-
-\begin{figure*}[h!]
-\centering
-\begin{tabular}{ccc}
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
-\end{tabular}
-\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
-\label{fig:interpretable functions}
-\end{figure*}
-%
-Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
-
+\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
 \section{Quantitative evaluation}
 
@@ -752,3 +739,19 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 %In this example, the additive GP is able to recover the relevant structure.
 
 [TODO: Describe concrete, pumadyn, servo and housing]
+
+
+\subsection{Multidimensional decomposition}
+
+\begin{figure*}[h!]
+\centering
+\begin{tabular}{ccc}
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
+\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
+\end{tabular}
+\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
+\label{fig:interpretable functions}
+\end{figure*}
+%
+Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
