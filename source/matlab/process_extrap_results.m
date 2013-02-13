@@ -5,7 +5,7 @@ figure_directory = '../../figures/extrapolation_curves/';
 clear experiments
 experiments{1} = '01-airline-s';
 %experiments{2} = '02-solar-s';
-%experiments{1} = '03-mauna2003-s';
+experiments{2} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
 
@@ -181,4 +181,5 @@ for i = 1:length(experiments)
         saveas( gcf, [figure_directory experiments{i} '-ex-curve.fig'] );
         save2pdf( [figure_directory experiments{i} '-ex-curve.pdf'], gcf, 600, true );
     end
+    save([figure_directory experiments{i} '-MSEs.mat']);
 end
