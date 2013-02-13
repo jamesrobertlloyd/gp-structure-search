@@ -1571,7 +1571,7 @@ class ScoredKernel:
     @staticmethod	
     def from_matlab_output(output, kernel_family, ndata):
         '''Computes Laplace marginal lik approx and BIC - returns scored Kernel'''
-        laplace_nle = psd_matrices.laplace_approx(output.nll, output.kernel_hypers, output.hessian)
+        laplace_nle, problems = psd_matrices.laplace_approx_stable(output.nll, output.kernel_hypers, output.hessian)
         k_opt = kernel_family.from_param_vector(output.kernel_hypers)
         BIC = 2 * output.nll + k_opt.effective_params() * np.log(ndata)
         return ScoredKernel(k_opt, output.nll, laplace_nle, BIC, output.noise_hyp)	
