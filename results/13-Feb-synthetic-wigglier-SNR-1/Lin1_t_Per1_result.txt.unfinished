@@ -1,0 +1,28 @@
+Experiment all_results for
+ datafile = ../data/synthetic-wigglier-SNR-1/Lin1_t_Per1.mat
+
+ Running experiment:
+description = Run all synthetic datasets - but the wigglier ones with shorter lengthscales,
+data_dir = ../data/synthetic-wigglier-SNR-1/,
+max_depth = 8,
+random_order = False,
+k = 1,
+debug = False,
+local_computation = False,
+n_rand = 19,
+sd = 4,
+max_jobs = 500,
+verbose = False,
+make_predictions = False,
+skip_complete = True,
+results_dir = ../results/13-Feb-synthetic-wigglier-SNR-1/,
+iters = 100,
+ 
+
+
+%%%%% Level 0 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=0.994021, period=-1.969563, output_variance=6.989594)), nll=582.158011, laplace_nle=nan, bic_nle=1181.427370, noise=[ 0.29151152])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=4.018817, period=-1.462097, output_variance=6.575497)), nll=559.753824, laplace_nle=570.858289, bic_nle=1136.618995, noise=[ 0.37365484])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=5.457181, output_variance=6.092046)), nll=536.092297, laplace_nle=nan, bic_nle=1083.592160, noise=[ 0.30979601])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpKernel(lengthscale=-2.503444, output_variance=0.104115)), nll=477.378717, laplace_nle=485.797568, bic_nle=966.164998, noise=[ 0.03560342])

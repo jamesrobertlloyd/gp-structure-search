@@ -1,0 +1,44 @@
+Experiment all_results for
+ datafile = ../data/synthetic/SE1_p_RQ1.mat
+
+ Running experiment:
+description = Run all synthetic datasets,
+data_dir = ../data/synthetic/,
+max_depth = 8,
+random_order = False,
+k = 1,
+debug = False,
+local_computation = False,
+n_rand = 19,
+sd = 4,
+max_jobs = 500,
+verbose = False,
+make_predictions = False,
+skip_complete = True,
+results_dir = ../results/13-Feb-synthetic/,
+iters = 100,
+ 
+
+
+%%%%% Level 0 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=-1.356730, lengthscale=-12.448060, location=-3.515482)), nll=383.225596, laplace_nle=nan, bic_nle=777.858756, noise=[-0.24970272])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
+
+%%%%% Level 1 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=-1.356730, lengthscale=-12.448060, location=-3.515482)), nll=383.225596, laplace_nle=nan, bic_nle=777.858756, noise=[-0.24970272])
+ScoredKernel(k_opt=SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-0.931334, output_variance=10.230240, alpha=9.206466)) ]), nll=9.425095, laplace_nle=nan, bic_nle=53.072885, noise=[-2.2952073])
+ScoredKernel(k_opt=SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=-2.916321, lengthscale=-11.061652, location=2.327515)), MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.357893, output_variance=0.222537, alpha=-0.467462)) ]), nll=-174.313961, laplace_nle=nan, bic_nle=-320.109010, noise=[-2.33919467])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
+
+%%%%% Level 2 %%%%%
+
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=-1.356730, lengthscale=-12.448060, location=-3.515482)), nll=383.225596, laplace_nle=nan, bic_nle=777.858756, noise=[-0.24970272])
+ScoredKernel(k_opt=SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-0.931334, output_variance=10.230240, alpha=9.206466)) ]), nll=9.425095, laplace_nle=nan, bic_nle=53.072885, noise=[-2.2952073])
+ScoredKernel(k_opt=SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=SqExpPeriodicKernel(lengthscale=4.905270, period=-1.979086, output_variance=10.966031)), MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.358164, output_variance=0.226373, alpha=-0.466825)) ]), nll=-145.342180, laplace_nle=nan, bic_nle=-256.461666, noise=[-2.35058144])
+ScoredKernel(k_opt=SumKernel([ MaskKernel(ndim=1, active_dimension=0, base_kernel=LinKernel(offset=-2.916321, lengthscale=-11.061652, location=2.327515)), MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.357893, output_variance=0.222537, alpha=-0.467462)) ]), nll=-174.313961, laplace_nle=nan, bic_nle=-320.109010, noise=[-2.33919467])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
+ScoredKernel(k_opt=MaskKernel(ndim=1, active_dimension=0, base_kernel=RQKernel(lengthscale=-1.362799, output_variance=0.224548, alpha=-0.467413)), nll=-185.933289, laplace_nle=-174.664610, bic_nle=-354.755230, noise=[-2.34024917])
