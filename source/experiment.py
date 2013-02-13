@@ -208,6 +208,10 @@ def run_experiment_file(filename):
     print experiment_fields_to_str(exp)
     
     data_sets = list(gen_all_datasets(exp.data_dir))
+    
+    # Create results directory if it doesn't exist.
+    if not os.path.isdir(exp.results_dir):
+        os.makedirs(exp.results_dir)
 
     if exp.random_order:
         random.shuffle(data_sets)

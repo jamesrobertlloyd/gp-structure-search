@@ -1,4 +1,4 @@
-\newcommand{\fhbig}{2.25cm}
+\newcommand{\fhbig}{1.8cm}
 \newcommand{\fwbig}{2.4cm}
 \newcommand{\kernpic}[1]{\includegraphics[height=\fhbig,width=\fwbig]{../figures/structure_examples/#1}}
 \newcommand{\kernpicr}[1]{\rotatebox{90}{\includegraphics[height=\fwbig,width=\fhbig]{../figures/structure_examples/#1}}}
@@ -9,27 +9,26 @@
 \centering
 \renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
 %\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
-\begin{tabular}{m{\fwbig}m{\fwbig}m{\fwbig}}
+\begin{tabular}{ccc}%{m{\fwbig}m{\fwbig}m{\fwbig}}
 %\begin{tabularx}{\textwidth}{XXXXX|X|X}
-composite \newline kernel & draws from GP & GP posterior \\ \toprule
+%Composite & Draws from \gp{} & \gp{} posterior \\ \toprule
 \kernpicr{se_times_per} & \kernpic{se_times_per_draws} & \kernpic{se_times_per_post} \\
-SE $\times$ Per & locally periodic & \\  \midrule
- \kernpicr{se_plus_per} & \kernpic{se_plus_per_draws} & \kernpic{se_plus_per_post} \\
-SE + Per & perdiodic with \newline local noise &  \\ \midrule
+SE $\times$ Per & \multicolumn{2}{c}{locally periodic} \\  \midrule
+% \kernpicr{se_plus_per} & \kernpic{se_plus_per_draws} & \kernpic{se_plus_per_post} \\
+% SE + Per & perdiodic with \newline local noise &  \\ \midrule
 \kernpic{lin_times_lin} & \kernpic{lin_times_lin_draws} & \kernpic{lin_times_lin_post} \\
-Lin $\times$ Lin  & quadratic &  \\ \midrule
- \kernpicr{se_times_lin} & \kernpic{se_times_lin_draws} & \kernpic{se_times_lin_post} \\
-%Lin $\times$ SE  & increasing \newline local variation &  \\ \midrule
-% \kernpic{lin_times_per} & \kernpic{lin_times_per_draws} & \kernpic{lin_times_per_post} \\
-Lin $\times$ Per  & growing \newline amplitude &  \\ \midrule
+Lin $\times$ Lin  & \multicolumn{2}{c}{quadratic functions} \\ \midrule
+% \kernpicr{se_times_lin} & \kernpic{se_times_lin_draws} & \kernpic{se_times_lin_post} \\
+% Lin $\times$ SE  & increasing \newline local variation &  \\ \midrule
+ \kernpic{lin_times_per} & \kernpic{lin_times_per_draws} & \kernpic{lin_times_per_post} \\
+Lin $\times$ Per  & \multicolumn{2}{c}{growing amplitude}  \\ \midrule
  \kernpic{lin_plus_per} & \kernpic{lin_plus_per_draws} & \kernpic{lin_plus_per_post} \\
-Lin + Per & Per with trend &  \\
+Lin + Per & \multicolumn{2}{c}{periodic with trend}  \\
 \end{tabular}
-\caption{ Examples of prior structures that can be expressed by
-  composing kernels.  The x-axis has the same scale for all plots.
-  The 3rd column shows the composite kernel function, the 4th column
-  shows draws from a zero-mean GP with that kernel, and the right-most
-  column shows a GP posterior after conditioning on two
+\caption{ Examples of structures expressible by
+  composite kernels.  
+%The x-axis has the same scale for all plots.
+  Left column: the composite kernel  Center: draws from a \gp{} with that kernel.  Right: \gp{} posterior after conditioning on three
   datapoints.
 }
 \label{fig:kernels}
