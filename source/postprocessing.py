@@ -68,15 +68,25 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, save_folder='../figures/d
         # Is the experiment complete
         if os.path.isfile(results_file):
             # Find best kernel and produce plots
-            X, y, D = gpml.load_mat(os.path.join(r,file + ".mat"))
+            datafile = os.path.join(r,file + ".mat")
+            X, y, D = gpml.load_mat(datafile)
             if rescale:
                 # Load unscaled data to remove scaling later
-                data = gpml.load_mat(os.path.join('../data/1d_data/', re.sub('-s$', '', file) + '.mat'))
+                unscaled_file = os.path.join('../data/1d_data/', re.sub('-s$', '', file) + '.mat')
+                data = gpml.load_mat(unscaled_file)
                 (X_unscaled, y_unscaled) = (data[0], data[1])
                 (X_mean, X_scale) = (X_unscaled.mean(), X_unscaled.std())
                 (y_mean, y_scale) = (y_unscaled.mean(), y_unscaled.std())
             else:
                 (X_mean, X_scale, y_mean, y_scale) = (0,1,0,1)
+                
+            # A shunt to deal with a legacy issue.
+            if datafile == '../data/1d_data/01-airline-months.mat':
+                # Scaling should turn months starting at zero into years starting at 1949
+                print "Special rescaling for airline months data"
+                X_mean = X_mean + 1949
+                X_scale = 1.0/12.0
+                                
             best_kernel = exp.parse_results(os.path.join(folder, file + "_result.txt"), max_level=max_level)
             stripped_kernel = fk.strip_masks(best_kernel.k_opt)
             if not max_level is None:

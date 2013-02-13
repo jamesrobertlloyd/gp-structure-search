@@ -27,8 +27,9 @@ complete_mean = complete_sigmastar' / complete_sigma * y;
 complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sigma * complete_sigmastar);
     
 figure(1); clf; hold on;
-mean_var_plot(xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, 2.*sqrt(complete_var)*y_scale);
-plot( X*X_scale+X_mean, y*y_scale+y_mean, 'k.' ); hold on;
+mean_var_plot( X*X_scale+X_mean, y*y_scale+y_mean, ...
+               xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, ...
+               2.*sqrt(complete_var)*y_scale);
 
 % Remove outer brackets and extra latex markup from name.
 if iscell(full_name); full_name = full_name{1}; end
@@ -48,8 +49,7 @@ complete_mean = complete_sigmastar' / complete_sigma * y;
 complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sigma * complete_sigmastar);
     
 figure(100); clf; hold on;
-small_plot(xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, 2.*sqrt(complete_var)*y_scale);
-plot( X*X_scale+X_mean, y*y_scale+y_mean, 'k.' ); hold on; 
+mean_var_plot(X*X_scale+X_mean, y*y_scale+y_mean, xrange*X_scale+X_mean, complete_mean*y_scale+y_mean, 2.*sqrt(complete_var)*y_scale, true);
 title(full_name);
 filename = sprintf('%s_all_small.fig', figname);
 saveas( gcf, filename );
@@ -59,15 +59,10 @@ saveas( gcf, filename );
 % Plot residuals.
 figure(1000); clf; hold on;
 data_complete_mean = feval(complete_covfunc{:}, complete_hypers, X, X)' / complete_sigma * y;
-mean_var_plot(xrange*X_scale+X_mean, zeros(size(xrange)), ...
+mean_var_plot(X*X_scale+X_mean, (y-data_complete_mean)*y_scale, ...
+              xrange*X_scale+X_mean, zeros(size(xrange)), ...
               2.*sqrt(noise_var).*ones(size(xrange)).*y_scale);
-% Make plot prettier.
-%set(gcf, 'color', 'white');
-%set(gca, 'TickDir', 'out');
-plot( X*X_scale+X_mean, (y-data_complete_mean)*y_scale, 'k.' ); hold on; 
-%xlim([min(xrange*X_scale), max(xrange*X_scale)] + X_mean);
 title('Residuals');
-%set_fig_units_cm( 16,8 );  
 filename = sprintf('%s_resid.fig', figname);
 saveas( gcf, filename );
 
@@ -87,8 +82,11 @@ for i = 1:numel(decomp_list)
     removed_mean = y - (complete_sigma - decomp_sigma)' / complete_sigma * y;
     
     figure(i + 1); clf; hold on;
-    mean_var_plot(xrange*X_scale+X_mean, decomp_mean*y_scale, 2.*sqrt(decomp_var)*y_scale);
-    plot( X*X_scale+X_mean, removed_mean*y_scale, 'k.' ); hold on; 
+    mean_var_plot( X*X_scale+X_mean, removed_mean*y_scale, ...
+                   xrange*X_scale+X_mean, ...
+                   decomp_mean*y_scale, 2.*sqrt(decomp_var)*y_scale);
+    
+    %set(gca, 'Children', [h_bars, h_mean, h_dots] );
     latex_names{i} = strrep(latex_names{i}, '\left', '');
     latex_names{i} = strrep(latex_names{i}, '\right', '');
     title(latex_names{i});
@@ -101,18 +99,35 @@ end
 end
 
 
-function mean_var_plot( xrange, forecast_mu, forecast_scale )
+function mean_var_plot( xdata, ydata, xrange, forecast_mu, forecast_scale, small_plot )
+
+    if nargin < 6; small_plot = false; end
+
     % Figure settings.
     lw = 1.2;
     opacity = 0.14;
  
+    % Plot mean function.
     plot(xrange, forecast_mu, 'Color', colorbrew(2), 'LineWidth', lw); hold on;
-    
+        
     % Plot confidence bears.
     jbfill( xrange', ...
-            forecast_mu' + forecast_scale', ...
-            forecast_mu' - forecast_scale', ...
-            colorbrew(2), 'none', 1, opacity); hold on;
+        forecast_mu' + forecast_scale', ...
+        forecast_mu' - forecast_scale', ...
+        colorbrew(2), 'none', 1, opacity); hold on;   
+
+    % Plot data.
+    %plot( xdata, ydata, 'ko', 'MarkerSize', 2.1, 'MarkerFaceColor', facecol, 'MarkerEdgeColor', facecol ); hold on;    
+    %h_dots = line( xdata, ydata, 'Marker', '.', 'MarkerSize', 2, 'MarkerEdgeColor',  [0 0 0], 'MarkerFaceColor', [0 0 0], 'Linestyle', 'none' ); hold on;    
+    plot( xdata, ydata, 'k.');
+    
+    %set(gca, 'Children', [h_dots, h_bars, h_mean ] );
+    %e1 = (max(xrange) - min(xrange))/300;
+    %for i = 1:length(xdata)
+    %   line( [xdata(i) - e1, xdata(i) + e1], [ydata(i) + e1, ydata(i) + e1], 'Color', [0 0 0 ], 'LineWidth', 2 );
+    %end
+    %set_fig_units_cm( 12,6 );   
+    %ag_plot_little_circles_no_alpha(xdata, ydata, 0.02, [0 0 0])
     
     % Make plot prettier.
     set(gcf, 'color', 'white');
@@ -120,36 +135,24 @@ function mean_var_plot( xrange, forecast_mu, forecast_scale )
     
     xlim([min(xrange), max(xrange)]);
     
-    %set(get(gca,'XLabel'),'Rotation',0,'Interpreter','latex', 'Fontsize', fontsize);
-    %set(get(gca,'YLabel'),'Rotation',90,'Interpreter','latex', 'Fontsize', fontsize);
-    %set(gca, 'TickDir', 'out')
-    
-    set_fig_units_cm( 16,8 );    
-end
-
-
-function small_plot( xrange, forecast_mu, forecast_scale )
-    % Figure settings.
-    lw = 1.2;
-    opacity = 0.14;
- 
-    plot(xrange, forecast_mu, 'Color', colorbrew(2), 'LineWidth', lw); hold on;
-    
-    % Plot confidence bears.
-    jbfill( xrange', ...
-            forecast_mu' + forecast_scale', ...
-            forecast_mu' - forecast_scale', ...
-            colorbrew(2), 'none', 1, opacity); hold on;
-    
-    % Make plot prettier.
-    set(gcf, 'color', 'white');
-    set(gca, 'TickDir', 'out');
-    
-    xlim([min(xrange) + (max(xrange) - min(xrange))*0.6, max(xrange)]);
+    % Plot a vertical bar to indicate the start of extrapolation.
+    if ~all(forecast_mu == 0)  % Don't put extrapolation line on residuals plot.
+        y_lim = get(gca,'ylim');
+        line( [xdata(end), xdata(end)], y_lim, 'Linestyle', '--', 'Color', [0.3 0.3 0.3 ]);
+    end 
     
     %set(get(gca,'XLabel'),'Rotation',0,'Interpreter','latex', 'Fontsize', fontsize);
     %set(get(gca,'YLabel'),'Rotation',90,'Interpreter','latex', 'Fontsize', fontsize);
     %set(gca, 'TickDir', 'out')
     
-    set_fig_units_cm( 8,8 );    
+    set_fig_units_cm( 16,8 );
+    
+   
+    
+    if small_plot
+        xlim([min(xrange) + (max(xrange) - min(xrange))*0.6, max(xrange)]);
+        set_fig_units_cm( 5,5 );
+    end
 end
+
+
