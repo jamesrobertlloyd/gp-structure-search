@@ -13,39 +13,39 @@ rand('state',seed);
 savefigs = true;
 figpath = '../../figures/structure_examples/';
 
+addpath(genpath('/scratch/Dropbox/code/gpml/'))
+
 % Make up some data
 %X = [ -2 -1 0 1 2 ]' .* 2;
 %y = [ -1 1 1 -0.8 1.1  ]';
-X = [ 1 2 3 ]' .* 2;
-y = [ 1 2 4 ]';
-y = y - mean(y);
+X = [ -4 -2 -1 ]' .* 2;
+y = [ -1 0 2 ]';
 N = length(X);
 
 n_samples = 2;
 
 n_xstar = 200;
 xrange = linspace(-10, 10, n_xstar)';
-post_xrange = linspace(-3, 10, n_xstar)';
 x0 = 0;
 numerical_noise = 1e-5;
-model_noise = 2;
+model_noise = 0.01;
 
 se_length_scale = 2.5;
 se_outout_var = 2;
-se_kernel = @(x,y) se_outout_var*exp( - 0.5 * ( ( x - y ) .^ 2 ) ./ se_length_scale^2 );
-
+%se_kernel = @(x,y) se_outout_var*exp( - 0.5 * ( ( x - y ) .^ 2 ) ./ se_length_scale^2 );
+se_hyp.cov = 
 
 lin_output_var = 0.5;
-lin_kernel = @(x,y) lin_output_var*( (x + 1) .* (y + 1) );
+%lin_kernel = @(x,y) lin_output_var*( (x + 1) .* (y + 1) );
 
 longse_length_scale = 20;
 longse_output_var = 20;
-longse_kernel = @(x,y) longse_output_var*exp( - 0.5 * ( ( x - y ) .^ 2 ) ./ longse_length_scale^2 );
+%longse_kernel = @(x,y) longse_output_var*exp( - 0.5 * ( ( x - y ) .^ 2 ) ./ longse_length_scale^2 );
 
 per_length_scale = 1;
 per_period = 4;
 per_outout_var = 1.1;
-per_kernel = @(x,y) per_outout_var*exp( - 2 * ( sin(pi*( x - y )./per_period) .^ 2 ) ./ per_length_scale^2 );
+%per_kernel = @(x,y) per_outout_var*exp( - 2 * ( sin(pi*( x - y )./per_period) .^ 2 ) ./ per_length_scale^2 );
 
 se_plus_lin = @(x,y) se_kernel(x, y) + lin_kernel(x, y);
 se_plus_per = @(x,y) se_kernel(x, y) + per_kernel(x, y);
@@ -91,7 +91,6 @@ for k = 1:numel(kernels)
     K = bsxfun(kernels{k}, xrange', xrange ) + eye(n_xstar).*numerical_noise; % Evaluate prior.
     %L = chol(K);
     samples = mvnrnd( zeros(size(xrange)), K, n_samples)';
-    samples = samples + repmat((1:n_samples) * 5 - 10, n_xstar, 1);
     samples_plot( xrange, samples, [1:n_samples] );
 
     if savefigs
@@ -108,9 +107,9 @@ for k = 1:numel(kernels)
     cur_kernel = kernels{k};
     K = bsxfun(cur_kernel, X, X' ) + eye(N).*model_noise; % Evaluate prior.
     weights = K \ y;
-    posterior = @(x)(bsxfun(cur_kernel, post_xrange, X') * weights); % Construct posterior function.
-    posterior_variance = @(x)diag(bsxfun(cur_kernel, post_xrange', post_xrange) - (bsxfun(cur_kernel, X', xrange) / K * bsxfun(cur_kernel, xrange', X)));
-    posterior_plot( post_xrange, posterior(post_xrange), posterior_variance(post_xrange), X, y );
+    posterior = @(x)(bsxfun(cur_kernel, xrange, X') * weights); % Construct posterior function.
+    posterior_variance = @(x)diag(bsxfun(cur_kernel, xrange', xrange) - (bsxfun(cur_kernel, X', xrange) / K * bsxfun(cur_kernel, xrange', X)));
+    posterior_plot( xrange, posterior(xrange), posterior_variance(xrange), X, y );
 
     if savefigs
         save2pdf([ figpath, kernel_names{k} '_post.pdf'], gcf, 600, true);
