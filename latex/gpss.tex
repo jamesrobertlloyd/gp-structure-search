@@ -106,12 +106,16 @@ In the case of Gaussian process regression, the kernel defines a covariance func
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 \fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
 
-Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
-\begin{eqnarray}
-\kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
-\kernel_\textrm{Per}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
-\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
-\end{eqnarray}
+%Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
+%\begin{eqnarray}
+%\kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
+%\kernel_\textrm{Per}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+%\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
+%\end{eqnarray}
+
+Examples of commonly used kernels are given in Figure \ref{fig:basic_kernels}.
+%
+\input{tables/simple_kernels_table_v2.tex}
 
 When used within the context of GP regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
 %\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing.}
@@ -119,9 +123,7 @@ When used within the context of GP regression, these kernels define priors on fu
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured kernels from well understood base components.  Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
-
-%\fTBD{Can probably kill simple kernel table. Focus on one table.}
-\input{tables/simple_kernels_table.tex}
+%
 \input{tables/example_structures_table_v2.tex}
 
 \paragraph{Summation}
@@ -187,13 +189,13 @@ Bayesian linear regression & Lin \\
 Bayesian quadratric regression & Lin $\times$ Lin \\
 Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
 generalized Fourier decomposition & Per + Per + \dots \\
-generalized additive models & $\sum_{d=1}^D SE_d$ \\
-\gp{} with ARD kernel & $\prod_{d=1}^D SE_d$ \\
+generalized additive models & $\sum_{d=1}^D \textrm{SE}_d$ \\
+\gp{} with ARD kernel & $\prod_{d=1}^D \textrm{SE}_d$ \\
 long-term trend & Lin + SE \\
 growing amplitude & Lin $\times$ SE
 \end{tabular}
 
-In these expresssions, $SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
+In these expresssions, SE$_d$ denotes a squared-exponential kernel along the $d$th dimension.
 We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
 
 
@@ -323,7 +325,7 @@ In \cite{bing2010gp}, a genetic programming construction and optimization method
 
 \paragraph{Equation Learning}
 A related body of work with similar goals are the various approaches to equation learning.  
-For example, \cite{schmidt2009distilling}, \cite{dzeroski1999equation} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities.  The advantage of a \gp{}-based approach is that non-parametric structure can be represented even within an interpretable decomposition.  For example, while equation-learning methods could recover a function with a sine-wave component composed with other structure, our procedure can represent \emph{any} periodic function composed with other structure.
+For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities.  The advantage of a \gp{}-based approach is that non-parametric structure can be represented even within an interpretable decomposition.  For example, while equation-learning methods could recover a function with a sine-wave component composed with other structure, our procedure can represent \emph{any} periodic function composed with other structure.
 
 \paragraph{Semiparametric Regression}
 Semiparametric regression \TBD{add cites} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
