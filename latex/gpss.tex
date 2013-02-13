@@ -346,6 +346,38 @@ Since the complexity of our kernel is bounded only by the search depth, we could
 
 %Hyperkernels \cite{ong2002hyperkernels}
 
+\section{Validation via synthetic data}
+
+We validate our method by constructing synthetic data sets to check that we can infer known structure.
+For several composite kernel expression we construct synthetic data by uniformly sampling 300 input points in a symmetric hyper cube of and then sample a Gaussian process over these data points.
+We then add \iid Gaussian noise to the output data with variance chosen to achieve a particular signal to noise ratio (SNR\footnotemark).
+\footnotetext{We define the signal to noise ratio to be the standard deviation of the function divided by the standard deviation of the noise.}
+
+Table~\ref{tbl:synthetic} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the diemsionality, $d$, of the input space, together with those inferred by our search.
+When SNR is highest, the model correctly infers the structure of the kernel; in fact it also discovers unintentionally introduced linear structure\footnotemark!\fTBD{Currently re-running experiments with shorter lengthscales to check we are not kidding ourselves}.
+\TBD{Comment about higher noise regimes when data in.}
+
+\footnotetext{Random samples from SE kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
+
+\begin{table*}[ht!]
+\caption{{\small
+Kernels used to generate synthetic data together, dimensionality, $d$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
+}}
+\label{tbl:synthetic}
+\begin{center}
+\begin{tabular}{c c | c c c}
+Kernel & $d$ & SNR = 10 & SNR = 2 & SNR = 1 \\
+\hline
+$\SE + \RQ$                               & 1 & \ldots \\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ \\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ \\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ \\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ \\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & \ldots\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$\\
+\end{tabular}
+\end{center}
+\end{table*}
 
 \section{Time Series Extrapolation}
 
