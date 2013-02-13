@@ -58,15 +58,22 @@
 ]
 
 \begin{abstract}
-%Gaussian process (GP) models are used widely and successfully.
-%However, their effictiveness depends critically on choosing an appropriate family of kernels.
-%This aspect of GP modeling has been sorely underdeveloped.
-%In this paper, we introduce a procedure for automatically and efficiently searching through a large space of GP models.
-The effectiveness of nonparametric regression models depends heavily on the choice of kernel.
-We introduce a marginal-likelihood-based search over composite kernel structures which automatically constructs a structured Gaussian process model appropriate for the dataset.
-We further demonstrate that such kernels often allow the posterior to be automatically decomposed into a sum of interpretable components, and in some cases allows long-range extrapolation.
-We demonstrate this technique on several real datasets, and achieve state-of-the-art predictive performance.
+Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
+In particular, Gaussian processes (\gp{}) require the specification of a kernel, and data-driven techniques to select an appropriate kernel are underdeveloped.
+\NA{As a solution}, we develop a marginal-likelihood based search over composite kernel structures.
+%The composite kernels in our search space are highly interpretable and can express abstract properties of a function.
+%Specifically, composite kernels allow for the automatic decompositon of a function into diverse and interpetable components, and in some cases allow for long-range extrapolation.
+The composite kernels in our search space can express \NA{abstract} properties of a function, and allow for the automatic decompositon of functions into diverse and interpetable components. 
+This discovery of structure can also allow for long-range extrapolation, which we demonstrate on several time-series datasets.
+Furthermore, our search space is sufficently rich that we achieve state-of-the-art predictive performance on interpolation tasks.
 \end{abstract}
+
+%Nonparametric regression methods are used widely and successfully but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
+%In particular, Gaussian processes (\gp{}) require the specification of a kernel and data driven techniques to select an appropriate kernel are underdeveloped.
+%As a solution we introduce a marginal-likelihood based search over composite kernel structures.
+%The composite kernels in our search space are highly interpretable and can express abstract properties of a regression function.
+%Specifically, the kernels allow for the automatic decompositon of a regression function into qualitatively heterogenous and interpetable components, and in some cases they allow for long-range extrapolation.
+%Furthermore, our search space is sufficently rich that we achieve state-of-the-art predictive performance on interpolation tasks.
 
 \section{Introduction}
 
