@@ -169,7 +169,7 @@ Positive semidefinite kernels (\ie those which define valid covariance functions
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 All of the base kernels we use are one-dimensional; kernels over multidimensional inputs can be constructed by adding and multiplying kernels over individual dimensions.
-These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \kSE kernel over the second dimension of $\inputVar$.
+These dimensions are represented using subscripts, e.g. \kSE$_2$ represents an \kSE{} kernel over the second dimension of $\inputVar$.
 %
 \input{tables/example_structures_table_v4.tex}
 
@@ -187,9 +187,9 @@ These two kinds of structure are demonstrated in rows 4 and 6 of Figure~\ref{fig
 \paragraph{Multiplication}
 
 Multiplying kernels allows us to account for interactions between different input dimensions or different notions of similarity. 
-For instance, in multidimensional data, the multiplicative kernel $\SE_1 \times \SE_3$ represents a smoothly varying function of dimensions 1 and 3 which is not constrained to be additive.
-In univariate data, multiplying a kernel by \kSE gives a way of converting global structure to local structure. 
-For instance, $\Per$ corresponds to globally periodic structure, whereas $\Per \times \SE$ corresponds to locally periodic structure, as shown in Figure~\ref{fig:kernels}.
+For instance, in multidimensional data, the multiplicative kernel {\kSE$_1$ $\times$ \kSE$_3$} represents a smoothly varying function of dimensions 1 and 3 which is not constrained to be additive.
+In univariate data, multiplying a kernel by \kSE{} gives a way of converting global structure to local structure. 
+For instance, $\Per$ corresponds to globally periodic structure, whereas {\kPer $\times$ \kSE} corresponds to locally periodic structure, as shown in Figure~\ref{fig:kernels}.
 
 Many architectures for learning complex functions, such as convolutional networks \TBD{cite} and sum-product networks \TBD{cite}, include units which 
 compute AND-like and OR-like operations. Composite kernels can be viewed in this way too. A sum of kernels can be understood as an OR-like operation:
@@ -319,9 +319,9 @@ This procedure is not guaranteed to find the global optimum, but is inspired by 
 One sort of structure is additive structure. Generalized additive models \cite{hastie1990generalized} are models in which the function is modeled as a sum of functions defined on the individual dimensions: $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable and often generalizes well. In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
 
 It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
-Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
+Additive Gaussian processes \cite{duvenaud2011additive11} are a \gp{} model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
 \cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel on all dimensions.
-A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
+A closely related procedure is smoothing-splines ANOVA \cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
@@ -619,33 +619,36 @@ It is likely that our framework could be extended to capture nonstationary struc
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
+
+
+
 \section{Quantitative evaluation}
 \label{sec:quantitative}
 
-%In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
 In addition to the qualitative evaluation in the previous section, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
+\fTBD{I like Roger's experiment idea of hold out last 0.1 and train on $0.9 - \alpha$ to 0.9? Will be implemented if time.}
+%
+To test the extrapolation capabilities of our model against standard baselines, we trained different models and ran our method on increasing continuous proportions of the airline data starting at the first time point.
+Predictive mean-squared-error was then computed for the complement of the training set.
+%
 \begin{figure}[h!]
 \centering
 \begin{tabular}{c}
-\hspace{-0.5cm} \includegraphics[width=0.95\columnwidth]{../figures/extrapolation_curves/01-airline-s-ex-curve_hint.pdf}
+\hspace{-0.5cm} \includegraphics[width=0.95\columnwidth,height=7cm]{../figures/extrapolation_curves/01-airline-s-ex-curve_hint.pdf}
 \end{tabular}
 \caption{Extrapolation performance on the airline dataset.  Here, we show average test-set MSE as a function of the fraction of the dataset used for training. 
 %\TBD{RBG: Are we using a fixed test set, or the complement of the training set?  It seems like we should do the former, so that the results are less noisy.}
 }
 \label{fig:extrapolation}
 \end{figure}
-
-\fTBD{I like Roger's experiment idea of hold out last 0.1 and train on $0.9 - \alpha$ to 0.9? Will be implemented if time.}
-
-To test the extrapolation capabilities of our model against standard baselines, we trained different models and ran our method on increasing continuous proportions of the airline data starting at the first time point.
-Predictive mean-squared-error was then computed for the complement of the training set.
+%
 Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{} models.  
 
 Linear regression models have fixed capacity, and quickly plateau in their predictive performance.
-In contrast, a \gp{} with an \kSE{} kernel never extrapolates on this data, since the best parameter values in terms of marginal likelihood only capture short term structure.
+In contrast, a \gp{} with an \kSE{} kernel never extrapolates on this data, since the best parameter values, in terms of marginal likelihood, are those which short-term rather than long-term structure.
 %In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
 
 \fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
@@ -681,7 +684,7 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 %Because HKL does not produce a probabilistic prediction, it could not be included in Table \ref{tbl:Regression Negative Log Likelihood}.
 %
 
-\paragraph{Source code}All \gp{} related computation were performed using the standard GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github\fTBD{Include?}.
+\paragraph{Source code} All \gp{} model-fitting was performed by automated calls to the standard GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; code to perform the structure search and to reproduce all experiments is available on github\footnote{A link will be included upon publication}\fTBD{Include?}.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
