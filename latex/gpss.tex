@@ -59,13 +59,14 @@
 
 \begin{abstract}
 Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
-In particular, Gaussian processes (\gp{} s) require the specification of a kernel, and data-driven techniques to select an appropriate kernel are underdeveloped.
-\NA{As a solution}, we develop a marginal-likelihood based search over composite kernel structures.
+In particular, Gaussian processes require the specification of a kernel.
+While there are effective data-driven techniques for learning kernel hyperparameters, choosing the structural form of the kernel remains a black art.
+We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
+We present a method for searching over this space of structures which mirrors the scientific discovery process.
+The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
 %The composite kernels in our search space are highly interpretable and can express abstract properties of a function.
 %Specifically, composite kernels allow for the automatic decompositon of a function into diverse and interpetable components, and in some cases allow for long-range extrapolation.
-The composite kernels in our search space can express \NA{abstract} properties of a function, and allow for the automatic decompositon of functions into diverse and interpetable components. 
-This discovery of structure can also allow for long-range extrapolation, which we demonstrate on several time-series datasets.
-Furthermore, our search space is sufficently rich that we achieve state-of-the-art predictive performance on interpolation tasks.
+Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
 \end{abstract}
 
 %Nonparametric regression methods are used widely and successfully but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
@@ -474,7 +475,7 @@ Note that the linear kernel allows an element of heteroskedasticity in our model
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
+\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
 \label{fig:airline_grow}
 \end{figure}
 
