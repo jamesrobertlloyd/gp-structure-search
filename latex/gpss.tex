@@ -84,7 +84,7 @@ These methods depend on defining a kernel or covariance function, $\kernel : \In
 
 A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}. \TBD{RBG: sounds like another approach to the same problem; want it to be an underexplored \emph{aspect} of the problem}
 In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
-Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (GP) regression. \TBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
+Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (\gp) regression. \TBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
 
 Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
 However, one can also straightforwardly form composite kernels by combining simple base kernels through operations that such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
@@ -118,7 +118,7 @@ Examples of commonly used kernels are given in Figure \ref{fig:basic_kernels}.
 %
 \input{tables/simple_kernels_table_v2.tex}
 
-When used within the context of GP regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
+When used within the context of \gp{} regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
 %\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing.}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
@@ -435,7 +435,7 @@ All of the kernels in our search space can be written as sums of products of bas
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
 %Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
 %Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
@@ -796,7 +796,7 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 \includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
 \includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
 \end{tabular}
-\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
+\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a \gp{} with only one term in its kernel.  Right:  The posterior mean of a \gp{} with only one second-order term in its kernel.}
 \label{fig:interpretable functions}
 \end{figure*}
 %
