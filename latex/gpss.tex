@@ -86,9 +86,9 @@ In this paper, we pose the problem of kernel learning as a problem of structure 
 Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (GP) regression. \TBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
 
 Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
-However, one can also straightforwardly form composite kernels by combining simple base kernels through operations that such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
+However, one can also straightforwardly form composite kernels by combining simple base kernels through operations such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
 We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
-The search criterion is the marginal likelihood of the model given a kernel and data, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
+The search criterion is the marginal likelihood of the kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
 
 %\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
 %For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
@@ -133,7 +133,7 @@ Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, and ${\function_2 \dist \GP(0, 
 Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2)}$.
 % \footnotemark.
 %\footnotetext{
-Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section \ref{sec:decomposing} and give derivations in the supplementary material.
+Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section \ref{sec:decomposing} to decompose a learned kernel into interpretable components
 
 In one dimension, sums of kernels can express structure such as variation at multiple scales, or of superposition of different function types.  Some examples can be found in Figure \ref{fig:kernels}.
 
@@ -278,7 +278,7 @@ To deal with this, we take advantage of our greedy search procedure in order to 
 \section{Related Work}
 \label{sec:related_work}
 
-\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  Our work can be viewed as an extension and automation of this approach.
+\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
 
 \paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is very interpretable.  We compare against this model in our multi-dimensional experiments.
 
@@ -286,15 +286,11 @@ To deal with this, we take advantage of our greedy search procedure in order to 
 
 \paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.  Earlier work in unsupervised Bayseian structure discovery was done in \cite{kemp2008discovery}.
 
-\paragraph{ANOVA Kernels}
-
-Support vector regression with ANOVA decomposition kernels \cite{stitson1999support}
-
-%\subsubsection{Smoothing spline ANOVA models}
-A closely related procedure from the statistics literature is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
+\paragraph{Smoothing-Spline ANOVA}  A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
-Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.  This model is similar to ours, if we were to restict our attention to spline kernels
+Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
+This model is similar to ours, if we were to restict our attention to spline kernels.
 
 \paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
 However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
@@ -349,7 +345,7 @@ However, these methods typically construct all kernels in advance, and simply re
 
 \paragraph{Nonparametric kernel functions}
 
-Since the complexity of our kernel is bounded only by the search depth, we could consider the structure search to be a non-parametric kernel model - in a sense, a doubly nonparametric model.  However, there has been some similar work along these lines in \cite{salakhutdinov2008using}, where a deep neural network was use to learn the kernel of a \gp{}.
+Since the complexity of our kernel is bounded only by the search depth, we could consider the structure search to be a non-parametric kernel model - in a sense, a doubly nonparametric model.  There has been some similar work along these lines in \cite{salakhutdinov2008using}, where a deep neural network was use to learn the kernel of a \gp{}.  This is a very interesting approach to kernel learning, but potentially less interpretable.
 
 %Hyperkernels \cite{ong2002hyperkernels}
 
