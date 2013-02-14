@@ -14,9 +14,13 @@ dirnames(ismember(dirnames,{'.','..'})) = [];
 
 dirnames = [];
 %dirnames{1} = '../../figures/decomposition/11-Feb-02-solar-s';
-
 %dirnames{2} = '../../figures/decomposition/11-Feb-03-mauna2003-s';
-dirnames{1} = '../../figures/decomposition/31-Jan-v301-airline-months';
+%dirnames{1} = '../../figures/decomposition/31-Jan-v301-airline-months';
+
+dirnames{1} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_0';
+dirnames{2} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1';
+dirnames{3} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2';
+dirnames{4} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_3';
 
 for i = 1:length(dirnames)
     dirname = dirnames{i};
