@@ -114,6 +114,8 @@ Moreover, we demonstrate that the automatically discovered kernels outperform fi
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
 
 
+
+
 \section{Expressing structure through kernels} 
 \label{sec:Structure}
 
@@ -134,14 +136,14 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
 %When used within the context of \gp{} regression, 
 These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
-\input{tables/simple_kernels_table_v2.tex}
+%\input{tables/simple_kernels_table_v2.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 %
-\input{tables/example_structures_table_v2.tex}
+\input{tables/example_structures_table_v3.tex}
 
 \paragraph{Summation}
 
@@ -162,9 +164,9 @@ In multiple dimensions, summing kernels can correspond to decompositions of the 
 \ie `independent' variation in different dimensions.
 \NA{Structure of this form is referred to as generalised additive modeling}~\citep{hastie1990generalized}.
 %
-\input{tables/multi_d_additive_fig_v2}
+%\input{tables/multi_d_additive_fig_v2}
 %
-This is demonstrated visually in the first row of figure~\ref{fig:multi_d_additivity}.
+This is demonstrated visually in the bottom row of figure~\ref{fig:kernels}.
 %demonstrates a decomposition across dimensions.
 
 

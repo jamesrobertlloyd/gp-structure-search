@@ -1,0 +1,57 @@
+\newcommand{\fhbig}{1.6cm}
+\newcommand{\fwbig}{1.8cm}
+\newcommand{\kernpic}[1]{\includegraphics[height=\fhbig,width=\fwbig]{../figures/structure_examples/#1}}
+\newcommand{\kernpicr}[1]{\rotatebox{90}{\includegraphics[height=\fwbig,width=\fhbig]{../figures/structure_examples/#1}}}
+\newcommand{\addkernpic}[1]{{\includegraphics[height=\fhbig,width=\fwbig]{../figures/additive_multi_d/#1}}}
+\newcommand{\largeplus}{\tabbox{{\Large+}}}
+\newcommand{\largeeq}{\tabbox{{\Large=}}}
+\newcommand{\largetimes}{\tabbox{{\Large$\times$}}}
+\begin{figure}
+\centering
+\renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+%\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
+%\begin{tabular}{C{\fwbig}C{\fwbig}C{\fwbig}C{\fwbig}}%{m{\fwbig}m{\fwbig}m{\fwbig}}
+\begin{tabularx}{\columnwidth}{XX}
+%Composite & Draws from \gp{} & \gp{} posterior \\ \toprule
+  \kernpicr{se_kernel} \kernpic{se_kernel_draws}
+& \kernpicr{per_kernel} \kernpic{per_kernel_draws}
+\\
+  {\small Squared-exp (SE): local variation} 
+& {\small Periodic (Per): repeating structure}
+\\
+\midrule
+  \kernpicr{se_times_per} \kernpic{se_times_per_draws}
+& \kernpic{lin_times_lin} \kernpic{lin_times_lin_draws} 
+\\
+  {\small SE  $\times$ Per: local periodic} 
+& {\small Lin $\times$ Lin: quadratic functions}
+\\
+\midrule
+  \kernpicr{se_plus_per} \kernpic{se_plus_per_draws}
+& \kernpic{lin_plus_per} \kernpic{lin_plus_per_draws}
+\\
+  {\small SE + Per : } 
+& {\small Lin + Per: }
+\\
+\midrule
+  \kernpicr{se_times_lin} \kernpic{se_times_lin_draws}
+& \kernpic{lin_times_per} \kernpic{lin_times_per_draws}
+\\
+  {\small Lin $\times$ SE: increasing variation}
+& {\small Lin $\times$ Per: growing amplitude}
+\\
+\midrule
+  \addkernpic{additive_kernel} \addkernpic{additive_kernel_draw_sum}
+& \addkernpic{sqexp_kernel}  \addkernpic{sqexp_draw}
+\\
+  {\small $SE_1 + SE_2$: $f_1(x_1) + f_2(x_2)$}
+& {\small $SE_1 \times SE_2$: $f(x_1, x_2)$}
+\end{tabularx}
+\caption{ Examples of structures expressible by
+  composite kernels.  
+%The x-axis has the same scale for all plots.
+  Left column and third columns: base and composite kernels.  Second and fourth columns: draws from a \gp{} with each repective kernel.  The x-axis has the same range on all plots.}
+\label{fig:kernels}
+\end{figure}
+
+
