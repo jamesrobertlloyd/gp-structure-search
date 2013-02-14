@@ -537,7 +537,8 @@ Figure \ref{fig:solar_decomp} shows the posterior and residuals of our model on 
 
 \section{Quantitative evaluation}
 
-In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
+%In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
+In addition to the qualitative evaluation in the previous section, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
@@ -552,6 +553,8 @@ In addition to producing highly interpretable decompositions of regression funct
 \label{fig:extrapolation}
 \end{figure}
 
+\TBD{RBG: It's not clear what the procedure is. Are we doing the thing I suggested, where we hold out the last 0.1 and train on $0.9 - \alpha$ to 0.9?}
+
 To test the extrapolation capabilities of our model against standard baselines, we computed predictive mean-squared-error as a function of the proportion of data used for training.
 Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{{} models.  
 
@@ -562,6 +565,8 @@ Linear regression models have fixed capacity, and quickly plateau in their predi
 
 \subsection{Interpolation}
 
+\TBD{RBG: Zoubin made the comment that in high dimensions, all prediction is extrapolation. Would it be better to title this section something like ``high-dimensional prediction?''}
+
 To demonstrate the interpolation accuracy of our method, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
 We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
 Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.  All bolded results are not significantly different from the best-performing method in each experiment in a paired t-test.
@@ -569,7 +574,8 @@ Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref
 \input{tables/regression_results_mse.tex}
 \input{tables/regression_results_nll.tex}
 %
-Our method outperforms the other methods in all tests.
+Our method outperforms the other methods in all tests. \fTBD{Is it worth including the learned structures in the table?}
+\TBD{RBG: Can we provide any information about the datasets, e.g. number of data points and number of dimensions?}
 
 \paragraph{Details of methods}
 
