@@ -776,55 +776,6 @@ We found that the learned structures are often capable of accurate extrapolation
 The learned kernels often yield decompositions of a signal into diverse and interpretable components, which provides an additional degree of reassurance that the learned structure reflects the world.
 We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
-%Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
-
-
-
-
-%Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
-
-
-
-%\paragraph{Conclusion}
-
-%In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
-
-%We demonstrated that the composite structure search recovered interpretable\fTBD{Change to 'known' if we add those experiments} structure, and resulted in state-of-the-art predictive performance.  %We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
-
-%\section{Future Work}
-
-%\TBD{RBG: Do we need this section?  Bill hates future work sections since they basically just give the reviewers a list of things to complain about.}
-
-%\paragraph{Support Vector Machines} Structure search could be used to select kernels for support vector machines, using cross-validated prediction error as an objective function.
-
-%However, it would be presumably quite difficult to learn the moderate number of kernel parameters present in composite kernels using only cross-validation.
-
-%\paragraph{Noise Models and Mean Functions}
-%The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
-%A more sophisticated approach might also define grammars over composite mean functions and noise models.
-%However, in most cases, the covariance function can express structure that might be expressed in the mean function, and often in a more flexible way.
-%The same can be said about noise models - for instance, a t-noise can be approximated by a sum of sq-exp kernels with very small lengthscales, but output variances which vary widely.
-
-
-%\paragraph{Bayes model averaging}
-%A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
-%This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
-
-%In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.
-%However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
-
-%\paragraph{Parsimony}
-%Integrating over kernel structures raises the problem of reporting interpretable structures to the user.
-%Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
-%In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
-
-%\paragraph{Bayesian Optimization} 
-%The greedy search strategy used in this paper is rudimentary.  A natural extension of this work would be a model-based search over composite kernels, where the results of previous searches are used to propose informative directions.  This would be an example of ``meta-learning''.
-%\cite{snoek2012practical} [also cite Lizotte, de Frietas]
-%
-%\paragraph{A Kernel between kernels}
-%Placing a \gp{} model on the log-likelihood of different kernels would require constructing a kernel on kernels, as in \cite{ong2002hyperkernels}.
-
 \subsubsection*{Acknowledgements}
 
 \bibliographystyle{format/icml2013}
@@ -915,3 +866,47 @@ This dataset was designed by \cite{Bach_HKL} to demonstrate the advantages of HK
 \end{figure*}
 %
 Figure \ref{fig:interpretable functions} demonstrates that an additive posterior can be decomposed into a sum of functions across dimensions.
+
+%Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
+
+%Indeed, the authors were sometimes surprised by the kernels chosen by the automated search, and the elegant ways in which complex structure was expressed through simple combination of kernels.
+
+%\paragraph{Conclusion}
+
+%In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
+
+%We demonstrated that the composite structure search recovered interpretable\fTBD{Change to 'known' if we add those experiments} structure, and resulted in state-of-the-art predictive performance.  %We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
+
+%\section{Future Work}
+
+%\TBD{RBG: Do we need this section?  Bill hates future work sections since they basically just give the reviewers a list of things to complain about.}
+
+%\paragraph{Support Vector Machines} Structure search could be used to select kernels for support vector machines, using cross-validated prediction error as an objective function.
+
+%However, it would be presumably quite difficult to learn the moderate number of kernel parameters present in composite kernels using only cross-validation.
+
+%\paragraph{Noise Models and Mean Functions}
+%The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
+%A more sophisticated approach might also define grammars over composite mean functions and noise models.
+%However, in most cases, the covariance function can express structure that might be expressed in the mean function, and often in a more flexible way.
+%The same can be said about noise models - for instance, a t-noise can be approximated by a sum of sq-exp kernels with very small lengthscales, but output variances which vary widely.
+
+
+%\paragraph{Bayes model averaging}
+%A natural extension of this work is to average over models in the grammar with a Bayes model averaging approach.
+%This would mean augmenting our grammar with a prior over kernel structures, and approximately integrating over both structures and kernels.  
+
+%In the first few levels of the search, where the difference between likelihoods of different kernel structures is usually high, model averaging might not make a substantial difference in terms of prediction.
+%However, at deeper levels of the kernel search, integrating over structures and parameters would address overfitting concerns.
+
+%\paragraph{Parsimony}
+%Integrating over kernel structures raises the problem of reporting interpretable structures to the user.
+%Currently, this is achieved through the use of the BIC complexity penalty, and reporting only the highest-scoring structure found.
+%In experiments which used the more sophisticated Laplace approximation as a complexity penalty, the kernels found were more complicated.
+
+%\paragraph{Bayesian Optimization} 
+%The greedy search strategy used in this paper is rudimentary.  A natural extension of this work would be a model-based search over composite kernels, where the results of previous searches are used to propose informative directions.  This would be an example of ``meta-learning''.
+%\cite{snoek2012practical} [also cite Lizotte, de Frietas]
+%
+%\paragraph{A Kernel between kernels}
+%Placing a \gp{} model on the log-likelihood of different kernels would require constructing a kernel on kernels, as in \cite{ong2002hyperkernels}.
