@@ -173,15 +173,15 @@ This is demonstrated visually in the bottom row of figure~\ref{fig:kernels}.
 \paragraph{Multiplication}
 
 Multiplication of kernels does not correspond to a simple composition of functions; here, we give some examples of the properties that arise from multiplication of kernels.
-
 %but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
 %
 %For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
 %
 
-
-Multiplying a kernel $\kernel$ by the SE kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel.  This is shown in row 2 of Figure \ref{fig:kernels}.
-Multiplying a kernel by LN results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly. This is shown in rows 4 and 5 of Figure \ref{fig:kernels}.
+Multiplying a kernel $\kernel$ by the SE kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel.
+This is shown in row 1 of Figure \ref{fig:kernels}.
+Multiplying $\kernel$ by Lin results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly.
+This is shown in rows 2 and 3 of Figure \ref{fig:kernels}.
 %\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
 %
 %\fTBD{Can we do more than just give examples}
@@ -191,30 +191,36 @@ Multiplying a kernel by LN results in the amplitude of structures implied by $\k
 
 \paragraph{Interpretation}
 
-To develop an intuition for the effect of combining two stationary kernels, we can note that the posterior mean function must be a weighted sum of kernel functions.  Thus, the third column of rows 1-2 of Figure \ref{fig:kernels} show the functions that can be combined linearly to produce the posterior means in the 5th column.
+\fTBD{Killed linear combination sentence - pictures should be giving intuition? Or should we say something extra?}
+%To develop an intuition for the effect of combining two stationary kernels, we can note that the posterior mean function must be a weighted sum of kernel functions.  Thus, the third column of rows 1-2 of Figure \ref{fig:kernels} show the functions that can be combined linearly to produce the posterior means in the 5th column.
 
 Loosely speaking, a sum of kernels can be understood as an `OR' operation: two points are considered similar if either kernel has a high value.
-More precisely, we can express a sum of kernels as a concatenation of their features in the corresponding RKHS.
+Similarly multiplying kernels can be loosely understood as an `AND' operation: two points are considered similar only if both kernels have a high value.
 
-Complementarily, multiplying kernels can be loosely understood as an `AND' operation: two points are considered similar only if both kernels have a high value.
-More precisely, we can express a product of kernels as a concatenation of the cartesian product of both kernels' features in the corresponding RKHS.
+\fTBD{Move to related work?}Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.
+For example, many vision models combine pooling and detection layers \TBD{cite}.
+In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
 
-Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.  For example, many vision models combine pooling and detection layers \TBD{cite}. In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
+Kernel functions can also be represented an an inner product in a feature space.
+\NA{
+When viewed this way, sums of kernels can be expressed as a concatenation of their features and products correspond to a cartesian product of their features.
+}
 
+%More precisely, we can express a product of kernels as a concatenation of the cartesian product of both kernels' features in the corresponding RKHS.
 
 \paragraph{Example expressions}
 
-A number of standard model forms and interesting structures can be expressed as \gp s with composite kernels:
+A number of standard model forms and other interesting structures can be expressed as \gp{}s with composite kernels:
 
 \begin{tabular}{l|l}
-Bayesian linear regression & Lin \\
-Bayesian quadratric regression & Lin $\times$ Lin \\
-Bayesian polynomial regression & Lin $\times$ Lin $\times$ \dots\\
-generalized Fourier decomposition & Per + Per + \dots \\
-generalized additive models & $\sum_{d=1}^D \textrm{SE}_d$ \\
-\gp{} with ARD kernel & $\prod_{d=1}^D \textrm{SE}_d$ \\
-long-term trend & Lin + SE \\
-growing amplitude & Lin $\times$ SE
+Bayesian linear regression & $\Lin$ \\
+%Bayesian quadratric regression & $\Lin \times \Lin$ \\
+Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
+Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
+Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
+Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
+Linear trend with deviations & $\Lin + \SE$ \\
+Quadratically varying amplitude & $\Lin \times \Lin \times \SE$
 \end{tabular}
 
 In these expresssions, SE$_d$ denotes a squared-exponential kernel along the $d$th dimension.
@@ -235,8 +241,10 @@ We use the term 'generalized Fourier decomposition' to express the fact that the
 
 \section{Searching over structures}
 
-
-As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels. In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ). Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose hyperparaters are the concatenation of the hyperparameters for the base kernel families. 
+\fTBD{Remember to be consistent about kernel (families) if desired\dots}
+As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels.
+In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ).
+Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose parameters are the concatenation of the parameters for the base kernel families. 
 
 Our search procedure begins by proposing all base kernels applied to all input dimensions. 
 
@@ -247,25 +255,32 @@ We allow the following search operators over our set of expressions:
 \item[(3)] Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
 \end{itemize}
 
-We note that these operators can generate all possible algebraic expressions. To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions. However, the more general versions of these rules allow more flexibility in the search procedure, since the CGF derivation may not be the most straightforward way to arrive at the kernel.
+These operators can generate all possible algebraic expressions.
+To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions.
+However, the more general versions of these rules allow more flexibility in the search procedure, since the CFG derivation may not be the most straightforward way to arrive at the kernel.
 
-We search over this space using a greedy search: in each stage, we choose the $\numWinners$ highest scoring kernels and expand them by applying all possible operators.
+We search over this space using a greedy search: in each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
 
-Our search operators are motivated by strategies researchers often use in constructing kernels. In particular,
+Our search operators are motivated by strategies researchers often use to construct kernels.
+In particular,
 \begin{itemize}
-\item We look for structure such as periodicity in the residuals of a model, and then extend the model to capture that structure. This corresponds to applying rule (1).
-\item We start with structure (such as periodicity) which is supposed to hold globally, but find that it only holds locally. This corresponds to applying rule (2) to obtain the structure shown in row 1 of Figure \ref{fig:kernels}.
-\item We add features incrementally using algorithms like boosting, backfitting, or forward selection. These correspond to applying rules (1) or (2) to new dimensions not yet included in the model.
+\item We look for structure, \eg periodicity, in the residuals of a model, and then extend the model to capture that structure.
+This corresponds to applying rule (1).
+\item We start with structure, \eg Linearity, which is supposed to hold globally, but find that it only holds locally.
+This corresponds to applying rule (2) to obtain the structure shown in row \fTBD{FIXME when figure stable}.
+\item We add features incrementally, analgous to algorithms like boosting, backfitting, or forward selection.
+These correspond to applying rules (1) or (2) to new dimensions not yet included in the model.
 \end{itemize}
 
 \paragraph{Scoring kernel families}
 
 Choosing kernel structures requires a criterion for evaluating the structures.
-We choose marginal likelihood as our criterion, because it tests both interpolation and extrapolation and because it directly penalizes the complexity of the prior over functions \cite{rasmussen2001occam}.
-In a fully Bayesian approach, we would put priors over the hyperparameters and compute the marginal likelihood of the models with all the hyperparameters integrated out.
-However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \fTBD{If true, say we got similar results using Laplace}
-We note that other model selection criteria could be used with our search procedure.
-For instance, random cross-validation could be used when the goal is interpolation.
+We choose marginal likelihood as our criterion, because it tests both interpolation and extrapolation\fTBD{what does this mean?} and because it directly penalizes the complexity of the prior over functions \citep[e.g.][]{rasmussen2001occam}.
+%In a fully Bayesian approach, we would put priors over the hyperparameters and compute the marginal likelihood of the models with all the hyperparameters integrated out.
+%However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \fTBD{If true, say we got similar results using Laplace}
+To avoid an expensive integration over kernel hyperparameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
+%We note that other model selection criteria could be used with our search procedure.
+%For instance, random cross-validation could be used when the goal is interpolation.
 
 Unfortunately, optimizing over hyperparameters is not a convex optimization problem, and the space can have many local optima.
 For instance, for the example in Figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
@@ -390,10 +405,19 @@ We then add \iid Gaussian noise to the output data with variance chosen to achie
 \footnotetext{We define the signal to noise ratio to be the standard deviation of the function divided by the standard deviation of the noise.}
 
 Table~\ref{tbl:synthetic} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the diemsionality, $d$, of the input space, together with those inferred by our search.
-When SNR is highest, the model correctly infers the structure of the kernel; in fact it also discovers unintentionally introduced linear structure\footnotemark!\fTBD{Currently re-running experiments with shorter lengthscales to check we are not kidding ourselves}.
-\TBD{Comment about higher noise regimes when data in.}
+When SNR is highest, the model correctly infers the structure of the kernel in all but one test; in fact it also discovers unintentionally introduced linear structure\footnotemark!
+The one failure mode
 
 \footnotetext{Random samples from SE kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
+
+\NA{
+In general, as the SNR is decreased, the learned kernel structures become simpler as terms are removed or replaced by Lin kernels.
+However, we also observe spurious Per kernels appearing.
+The parameters of these spurious kernels were extreme and only resulted in minor modifications of the composite kernel near the origin (\ie only affecting short term structure).
+Fortunately these unusual additions to the kernel only significantly affect their visual presentation; their small modifications to the composite kernel result in imperceptible changes to predictions or decompositions of functions.
+These terms could have been prevented by limiting the range of certain parameters.
+A more elegant solution would be to place priors upon kernel parameters or introduce a new base kernel that expresses the short term structure represented by a Per kernel with extreme parameters.
+}
 
 \begin{table*}[ht!]
 \caption{{\small
@@ -401,17 +425,34 @@ Kernels used to generate synthetic data together, dimensionality, $d$, of the in
 }}
 \label{tbl:synthetic}
 \begin{center}
+{\tiny
 \begin{tabular}{c c | c c c}
-Kernel & $d$ & SNR = 10 & SNR = 2 & SNR = 1 \\
+
+Kernel & $d$ & SNR = 10 & SNR = 1 & SNR = 0.1 \\
 \hline
-$\SE + \RQ$                               & 1 & \ldots \\
-$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ \\
-$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ \\
-$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ \\
-$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ \\
-$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & \ldots\\
-$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$\\
+$\SE + \RQ$                               & 1 & $\RQ$
+                                              & $\SE \times \Per$
+                                              & $\Lin$ \\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ 
+                                              & $\Lin \times (\Per + \SE)$
+                                              & $\SE$ \\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$
+                                              & $\SE_2 \times \Lin_2$ 
+                                              & $\Lin_1 \times \Per_2$\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$
+                                              & $\Lin_2 \times \Per_1 + \SE_3$
+                                              & $\SE_2$ \\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$
+                                              & $\SE_1 \times \SE_2 \times \Per_3$
+                                              & \dots\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$
+                                              & \dots
+                                              & \dots \\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$
+                                              & $(\SE_1 + \SE_2) \times \SE_3 \times \Lin_4 \times \Lin_4$
+                                              & \dots \\
 \end{tabular}
+}
 \end{center}
 \end{table*}
 
@@ -454,9 +495,10 @@ The conditional distribution of the component $\function_1$ conditioned on $\fun
 %Derivations can be found in the supplementary material.
 
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
-All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity. For example,
-\[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
-These equivalent forms are often more interpretableleads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
+All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
+For example,
+\[{\SE \times (\RQ + \Lin) \equiv \SE \times \RQ + \SE \times \Lin}.\]
+By decomposing a kernel into a sum we are able to apply the result above which  are often more interpretableleads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
 
 
 
