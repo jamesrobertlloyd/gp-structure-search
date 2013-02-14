@@ -154,84 +154,53 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
 %
-Commonly used kernels include the squared exponential (\kSE), periodic (\kPer) and linear (\kLin) kernels (see figure~\ref{fig:basic_kernels}).
-%When used within the context of \gp{} regression, 
-These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
+Commonly used kernels include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels. 
+For scalar-valued inputs, these kernels are defined as follows (also see Figure~\ref{fig:kernels}):\fTBD{Equations necessary?}
+\begin{align}
+\kernel_\textrm{SE}(\inputVar, \inputVar') &= \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
+\kernel_\textrm{Per}(\inputVar, \inputVar') &= \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+\kernel_\textrm{Lin}(\inputVar, \inputVar') &= \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
+\kernel_\textrm{RQ}(\inputVar, \inputVar') &= \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
+\end{align}
 \input{tables/simple_kernels_table_v3.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
+All of the base kernels we use are one-dimensional; kernels over multidimensional inputs can be constructed by adding and multiplying kernels over individual dimensions.
+These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \kSE kernel over the second dimension of $\inputVar$.
 %
 \input{tables/example_structures_table_v4.tex}
 
 \paragraph{Summation}
 
-Summation of kernels corresponds to the superposition of independent functions.
+By summing kernels, we can model the data as superpositions of independent functions, possibly representing different structure.
 Suppose ${\function_1 \dist \GP(\mu_1, \kernel_1)}$, ${\function_2 \dist \GP(\mu_2, \kernel_2)}$ independently.
 Then ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
-Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable.
-We make use of this in section \ref{sec:decomposing} to decompose learned kernels into interpretable components.
 
-
-In one dimension, sums of kernels can express structure such as variation at multiple scales, or of the superposition of different function types.
-For example, row 4 of figure~\ref{fig:kernels} shows the superposition of linear and periodic kernels/functions.
-
-In multiple dimensions, summing kernels can correspond to decompositions of the form
-\begin{equation}
-\function(\inputVar_1, \inputVar_2) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
-\end{equation}
-\ie `independent' variation in different dimensions.
-\NA{Structure of this form is referred to as generalised additive modeling}~\citep{hastie1990generalized}.
-%
-%\input{tables/multi_d_additive_fig_v2}
-%
-This is demonstrated visually in the bottom row of figure~\ref{fig:kernels}.
-%demonstrates a decomposition across dimensions.
+In time series models, sums of kernels can express superposition of different processes, possibly operating at different scales.
+In multiple dimensions, summing kernels gives additive structure over different dimensions, similar to generalized additive models~\citep{hastie1990generalized}.
+These two kinds of structure are demonstrated in rows 4 and 6 of Figure~\ref{fig:kernels}, respectively.
 
 
 \paragraph{Multiplication}
 
-Multiplication of kernels does not correspond to a simple composition of functions; here, we give some examples of the properties that arise from multiplication of kernels.
-%but allows for the construction of different structures and is best understood on a case by case basis\fTBD{Better language?}.
-%
-%For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
-%
+Multiplying kernels allows us to account for interactions between different input dimensions or different notions of similarity. 
+For instance, in multidimensional data, the multiplicative kernel $\SE_1 \times \SE_3$ represents a smoothly varying function of dimensions 1 and 3 which is not constrained to be additive.
+In univariate data, multiplying a kernel by \kSE gives a way of converting global structure to local structure. 
+For instance, $\Per$ corresponds to globally periodic structure, whereas $\Per \times \SE$ corresponds to locally periodic structure, as shown in Figure~\ref{fig:kernels}.
 
-Multiplying a kernel $\kernel$ by the \kSE{} kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the \kSE{} kernel.
-This is shown in row 1 of Figure \ref{fig:kernels}.
-Multiplying $\kernel$ by \kLin{} results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly.
-This is shown in rows 2 and 3 of Figure \ref{fig:kernels}.
-%\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
-%
-%\fTBD{Can we do more than just give examples}
+Many architectures for learning complex functions, such as convolutional networks \TBD{cite} and sum-product networks \TBD{cite}, include units which 
+compute AND-like and OR-like operations. Composite kernels can be viewed in this way too. A sum of kernels can be understood as an OR-like operation:
+two points are considered similar if either kernel has a high value. Similarly, multiplying kernels is an AND-like operation, since two points are considered
+similar only if both kernels have high values. Because we are applying these operations to the similarity functions rather than the regression functions themselves,
+compositions of even a few base kernels are able to capture complex relationships in data which don't have a simple parametric form.
 
-%In general, multiplying kernels can be thought of as an `AND' operation when viewing kernels as a measure of similarity.
-%This arises since two points, $\inputVar,\inputVar'$, can only be considered similar by a product kernel function (\ie $\kernel_\textrm{prod}(\inputVar,\inputVar')$ is relatively large) if the points are considered similar by each component kernel function.
-
-\paragraph{Interpretation}
-
-\fTBD{Killed linear combination sentence - pictures should be giving intuition? Or should we say something extra?}
-%To develop an intuition for the effect of combining two stationary kernels, we can note that the posterior mean function must be a weighted sum of kernel functions.  Thus, the third column of rows 1-2 of Figure \ref{fig:kernels} show the functions that can be combined linearly to produce the posterior means in the 5th column.
-
-Loosely speaking, a sum of kernels can be understood as an `OR' operation: two points are considered similar if either kernel has a high value.
-Similarly multiplying kernels can be loosely understood as an `AND' operation: two points are considered similar only if both kernels have a high value.
-
-\fTBD{Move to related work?}Combining multiple layers of AND and OR-like operators to construct complex functions is a common strategy.
-For example, many vision models combine pooling and detection layers \TBD{cite}.
-In addition, AND/OR graphs \TBD{cite} and sum-product networks \TBD{cite} demonstrate the same compositional strategy.
-
-Kernel functions can also be represented an an inner product in a feature space.
-\NA{
-When viewed this way, sums of kernels can be expressed as a concatenation of their features and products correspond to a cartesian product of their features.
-}
-
-%More precisely, we can express a product of kernels as a concatenation of the cartesian product of both kernels' features in the corresponding RKHS.
 
 \paragraph{Example expressions}
 
-A number of standard model forms and other interesting structures can be expressed as \gp{}s with composite kernels:
+In addition to the examples given in Figure~\ref{fig:kernels}, many common motifs of supervised learning can be captured using sums and products of one-dimensional base kernels:
 
 \begin{tabular}{l|l}
 Bayesian linear regression & $\Lin$ \\
@@ -244,7 +213,6 @@ Linear trend with deviations & $\Lin + \SE$ \\
 Quadratically varying amplitude & $\Lin \times \Lin \times \SE$
 \end{tabular}
 
-In these expresssions, $\SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
 We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
 
 
@@ -382,54 +350,6 @@ There have been several attempts to uncover the structural form of a dataset by 
 \citet{kemp2008discovery} learned what structural form of a graph to use to model human similarity judgments. Examples of graphs included planes, trees, and cylinders. Some of their (discrete) graph structures have continous analogues in our own space; for instance, $SE_1 \times SE_2$ and $SE_1 \times Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
 
 \citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
-
-
-
-
-%In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach
-%For details, see \cite{Bach_HKL}.
-%Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
-% \subsubsection{All-subsets kernel with uniform weightings}
-%In \cite{Bach_HKL}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
-%\begin{equation}
-%\label{eqn:uniform}
-%k_{a}({\bf x, x'}) = v_D^2 \prod_{d=1}^D \left(1 + \alpha k_{d}(x_{d}, x_{d}') \right)
-%\end{equation}
-%which has computational complexity $O(D)$.
-%However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
-%
-%<<<<<<< HEAD
-%The main difficulty with this approach is that parameters are hard to set other than by cross-validation. 
-%In contrast, our method optimizes the parameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
-%=======
-
-%In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
-%>>>>>>> f7282fc84bfe2932b77db84d1bb996187f3ddaa1
-
-
-
-%A related functional ANOVA GP model\cite{kaufman2010bayesian} decomposes the \emph{mean} function into a weighted sum of GPs.
-%However, the effect of a particular degree of interaction cannot be quantified by that approach.
-%Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
-
-
-
-
-
-%<<<<<<< HEAD
-%\paragraph{Multiple Kernel Learning}
-%There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
-%\cite{christoudias2009bayesian}
-%\TBD{cite more} 
-%However, these methods typically construct all kernels in advance, and simply reweight them.  This sort of approach would be inapplicable in our case, since our search space is exponential in our search depth, and we also must estimate the parameters of each kernel.%One could imagine expanding our search for some fixed depth, instantiating a sum of all
-%In the \gp{} framework,  showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.
-%They call this \emph{Bayesian localized multiple kernel learning}.
-%=======
-%>>>>>>> f7282fc84bfe2932b77db84d1bb996187f3ddaa1
-
-
-
-%Hyperkernels \cite{ong2002hyperkernels}
 
 \section{Validation on synthetic data}
 \label{sec:synthetic}
