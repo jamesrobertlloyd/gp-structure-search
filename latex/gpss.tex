@@ -5,8 +5,8 @@
 \usepackage{graphicx}
 \usepackage{preamble}
 \usepackage{natbib}
-%\usepackage[draft]{hyperref}
-\usepackage{hyperref}
+\usepackage[draft]{hyperref}
+%\usepackage{hyperref}
 \usepackage{color}
 \usepackage{wasysym}
 \usepackage{subfigure}
@@ -550,21 +550,12 @@ We also plot the residuals, demonstrating that there is little obvious structure
 
 \begin{figure*}[h!]
 \centering
-%<<<<<<< HEAD
-%\newcommand{\wmg}{5.5cm}  % width maunu growth
-%\newcommand{\hmg}{4cm}  % height maunu growth
-%\begin{tabular}{c}
-% \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
-% \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
-% \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
-%=======
 \newcommand{\wmg}{0.39\columnwidth}  % width maunu growth
 \newcommand{\hmg}{3.2cm}  % height maunu growth
 \begin{tabular}{c}
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
-%>>>>>>> f7282fc84bfe2932b77db84d1bb996187f3ddaa1
 \end{tabular}
 \caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
@@ -588,11 +579,18 @@ We also plot the residuals, demonstrating that there is little obvious structure
 
 \paragraph{Airline passenger data}
 
-\TBD{Give an intro to this dataset.}
-Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
-\TBD{Make similar observations of good performance}
+Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
+We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
+In addition, the composite kernel discovered captures the near linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
 
-Note that the linear kernel allows an element of heteroskedasticity in our model - the posterior marginal variance grows with the increase in the number of passengers over time.
+Discovering this linearity results in very plausible extrapolations of the data.
+Figure~\ref{fig:airline_grow} demonstrates this by ploting the full posterior of the kernel discovered at sequential levels of the search.
+The first plot shows that the first kernel has discovered onyl short term continuity.
+The second kernel discovers periodicity that varies with time.
+The third kernel has discovered that the periodicity is growing approximately linearly.
+Finally, the fourth kernel has split the data into an approximately linear trend and growing oscillations.
+
+\fTBD{Good way to mention heteroskedasticity?}
 
 \begin{figure}[h!]
 \centering
@@ -663,11 +661,11 @@ We next analyzed a time series of annual solar irradiation data from 1610 to 201
 Figure \ref{fig:solar_decomp} shows the posterior and residuals of the learned kernel on this dataset.
 While our model captures the periodic trend in the data, it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
 This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
-None of the models in our search space are capable of representing this structure, since all of the base kernels apart from Lin are stationary, and it is hard to see how Lin would help in modeling this structure.
-Despite the inability to model the Maunder minimum, our approach fails gracefully: the learned kernel still captures the overall periodic structure and longer term trends, and makes plausible extrapolations.
+None of the models in our search space are capable of representing this structure, since all of the base kernels apart from Lin are stationary%., and it is hard to see how Lin would help in modeling this structure.
+Despite the inability to model the Maunder minimum, our approach fails gracefully: the learned kernel still captures the overall periodic structure and longer term trends, and the extrapolation is honest about its uncertainty.
 It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
-\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
+%\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
 \section{Quantitative evaluation}
 
@@ -687,23 +685,27 @@ In addition to the qualitative evaluation in the previous section, we also inves
 \label{fig:extrapolation}
 \end{figure}
 
-\TBD{RBG: It's not clear what the procedure is. Are we doing the thing I suggested, where we hold out the last 0.1 and train on $0.9 - \alpha$ to 0.9?}
+\fTBD{I like Roger's experiment idea of hold out last 0.1 and train on $0.9 - \alpha$ to 0.9? Will be implemented if time.}
 
-To test the extrapolation capabilities of our model against standard baselines, we computed predictive mean-squared-error as a function of the proportion of data used for training.
-Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{{} models.  
+To test the extrapolation capabilities of our model against standard baselines, we trained different models and ran our method on increasing continuous proportions of the airline data starting at the first time point.
+Predictive mean-squared-error was then computed for the complement of the training set.
+Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{} models.  
 
-Linear regression models have fixed capacity, and quickly plateau in their predictive performance.  In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
+Linear regression models have fixed capacity, and quickly plateau in their predictive performance.
+In contrast, a \gp{} with an SE kernel never extrapolates on this data, since the best parameter values in terms of marginal likelihood only capture short term structure.
+The 
+%In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
 
-\TBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.} \TBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
+\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
+\fTBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
 
 
-\subsection{Interpolation}
+\subsection{High-dimensional prediction}
 
-\TBD{RBG: Zoubin made the comment that in high dimensions, all prediction is extrapolation. Would it be better to title this section something like ``high-dimensional prediction?''}
-
-To demonstrate the interpolation accuracy of our method, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
+To demonstrate the predictive accuracy of our method within a standard cross validation experiment, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
 We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
-Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.  All bolded results are not significantly different from the best-performing method in each experiment in a paired t-test.
+Results are presented in table \ref{tbl:Regression Mean Squared Error}.
+All bolded results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
 %
 %\input{tables/regression_results_mse.tex}
 %\input{tables/regression_results_nll.tex}
@@ -716,19 +718,17 @@ Our method outperforms the other methods in all tests. \fTBD{Is it worth includi
 
 Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
 %
-Generalized Additive Models (GP GAM) were implemented through a \gp{} whose kernel is a sum of SE kernels across dimensions.
-This model was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
+Generalized Additive Models (GP GAM) were implemented using with a \gp{} whose kernel is the 
 %
 Additive \gp{} was run using SE as a base kernel, with at most ten degrees of interaction.
 %
 Hierarchical Kernel Learning (HKL)
 %\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} 
-was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive \gp{} with a squared-exp base kernel.  Because HKL does not produce a probabilistic prediction, it could not be included in Table \ref{tbl:Regression Negative Log Likelihood}.
+was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive \gp{} with a squared-exp base kernel.
+%Because HKL does not produce a probabilistic prediction, it could not be included in Table \ref{tbl:Regression Negative Log Likelihood}.
 %
 
-\paragraph{Source code}All of the experiments in this paper were performed using the standard GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github.
-
-
+\paragraph{Source code}All \gp{} related computation were performed using the standard GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github\fTBD{Include?}.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
@@ -738,9 +738,6 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 %\item Experiments just using SE kernel can outperform additive kernel surprisingly. This is presumably a regularisation effect of using a finite depth search and/or BIC. We could make this a more Bayesian result (i.e.~more a property of the model) by placing a prior on kernels that depends on the number of components.
 %\item Need to discuss design choices e.g.~$k$, depth of search, base kernels.
 %\end{itemize}
-
-
-
 
 \section{Discussion}
 
