@@ -97,7 +97,7 @@ This provides a more expressive modeling language, allows us to exploit efficien
 We demonstrate \NA{our method} in a Bayesian setting where the kernel specifies a covariance function for \gp{} regression.
 This framework is also applicable to other probabilistic supervised learning problems \eg classification\TBD{ ref}, ordinal regression\TBD{ ref}, and ranking\TBD{ ref}.
 
-Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
+Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free parameters which can be optimised (or inferred) from data.
 However, one can also straightforwardly form composite kernels by combining simple base kernels through operations such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
 
 We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
@@ -112,9 +112,6 @@ Our experimental findings demonstrate that this structure discovery algorithm ca
 Moreover, we demonstrate that the automatically discovered kernels outperform fixed kernel forms and other kernel construction algorithms on both interpolation and extrapolation tasks.
 }
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
-
-
-
 
 \section{Expressing structure through kernels} 
 \label{sec:Structure}
@@ -136,14 +133,14 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
 %When used within the context of \gp{} regression, 
 These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
-\input{tables/simple_kernels_table_v3.tex}
+%\input{tables/simple_kernels_table_v2.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 %
-\input{tables/example_structures_table_v4.tex}
+\input{tables/example_structures_table_v3.tex}
 
 \paragraph{Summation}
 
@@ -275,28 +272,24 @@ These correspond to applying rules (1) or (2) to new dimensions not yet included
 \paragraph{Scoring kernel families}
 
 Choosing kernel structures requires a criterion for evaluating the structures.
-We choose marginal likelihood as our criterion, because it tests both interpolation and extrapolation\fTBD{what does this mean?} and because it directly penalizes the complexity of the prior over functions \citep[e.g.][]{rasmussen2001occam}.
-%In a fully Bayesian approach, we would put priors over the hyperparameters and compute the marginal likelihood of the models with all the hyperparameters integrated out.
+We choose marginal likelihood as our criterion since it balances the fit and complexity of a structure \citep[e.g.][]{rasmussen2001occam}.
+%In a fully Bayesian approach, we would put priors over the parameters and compute the marginal likelihood of the models with all the parameters integrated out.
 %However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \fTBD{If true, say we got similar results using Laplace}
-To avoid an expensive integration over kernel hyperparameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
+To avoid an expensive integration over kernel parameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
 %We note that other model selection criteria could be used with our search procedure.
 %For instance, random cross-validation could be used when the goal is interpolation.
 
-Unfortunately, optimizing over hyperparameters is not a convex optimization problem, and the space can have many local optima.
-For instance, for the example in Figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
-Similarly, in data with periodic structure, integer multiples of the true period are often local optima. 
+Unfortunately, optimizing over parameters is not a convex optimization problem, and the space can have many local optima.
+The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
+Similarly, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
 
-To deal with this, we take advantage of our greedy search procedure in order to get smart initializations: all of the hyperparameters which were part of the previous model are initialized to their previous values.
-The hyperparameters are then optimized using conjugate gradients, randomly restarting the newly introduced hyperparameters.
-While this procedure isn't guaranteed to find the global optimum, we offer some heuristic motivations:
-\begin{itemize}
-\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old hyperparameters fixed.
-\item If a simple structure includes a periodic kernel, the learned period is likely to be approximately correct even if the true structure turns out to be more complex.
-\end{itemize}
-
-
-
-
+To alleviate this difficulty we take advantage of our search procedure in to get smart initializations: all of the parameters which were part of the previous model are initialized to their previous values.
+The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
+This procedure is not guaranteed to find the global optimum, but is inspired by the same heuristic of extending models by examining residual mentioned above.
+%\begin{itemize}
+%\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old parameters fixed.
+%\item If a simple structure includes a periodic kernel, the learned period is likely to be approximately correct even if the true structure turns out to be more complex.
+%\end{itemize}
 
 %The discussion above demonstrates that rich structure can be captured with summation and multiplication of simple base kernels.
 %We therefore consider searching over all kernel structures that can be expressed as sums and products of base kernels. \TBD{RBG: need (1) 1-2 sentences about what a CFG is, what production rules are; (2) an example derivation, e.g. for Mauna; (3) say that production rules are supposed to correspond to motifs of probabilistic modeling}
@@ -314,7 +307,7 @@ While this procedure isn't guaranteed to find the global optimum, we offer some 
 %\paragraph{A greedy search algorithm}
 %Our search starts by first proposing all base kernels applied to all input dimensions.  We then choose the kernel with the highest approximate marginal likelihood, apply all expansions to this kernel, and repeat this process for a fixed number of steps.
 
-%We optimized kernel hyperparameters at each step using conjugate gradients, randomly restarting any newly introduced kernel hyperparameters.  To approximate the marginal likelihood of a kernel without integrating over hyperparameters, used the Bayesian Information Criterion (BIC)\footnotemark \TBD{cite}.
+%We optimized kernel parameters at each step using conjugate gradients, randomly restarting any newly introduced kernel parameters.  To approximate the marginal likelihood of a kernel without integrating over parameters, used the Bayesian Information Criterion (BIC)\footnotemark \TBD{cite}.
 %We also experimented with using the Laplace approximation to the marginal likelihood, but this was found to be less numerically stable and was not meaningful in cases when the optimiser failed to reach an optimum.
 %\footnotetext{Because BIC is a function of the number of parameters in a model, we adjusted for cases where two parameters were only serving the role of one.  \eg when two kernels are multiplied, one of the variance parameters becomes redundant.}
 
@@ -357,8 +350,8 @@ The subsets of kernels considered by this method are restricted to be a \textit{
 %which has computational complexity $O(D)$.
 %However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
 %
-The main difficulty with this approach is that hyperparameters are hard to set other than by cross-validation. 
-%In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
+The main difficulty with this approach is that parameters are hard to set other than by cross-validation. 
+%In contrast, our method optimizes the parameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
 
 
 
@@ -385,7 +378,7 @@ Second, by automatically searching over components, we remove the limitation tha
 There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
 \cite{christoudias2009bayesian}
 \TBD{cite more} 
-However, these methods typically construct all kernels in advance, and simply reweight them.  This sort of approach would be inapplicable in our case, since our search space is exponential in our search depth, and we also must estimate the hyperparameters of each kernel.%One could imagine expanding our search for some fixed depth, instantiating a sum of all
+However, these methods typically construct all kernels in advance, and simply reweight them.  This sort of approach would be inapplicable in our case, since our search space is exponential in our search depth, and we also must estimate the parameters of each kernel.%One could imagine expanding our search for some fixed depth, instantiating a sum of all
 %In the \gp{} framework,  showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.
 %They call this \emph{Bayesian localized multiple kernel learning}.
 
@@ -500,15 +493,16 @@ In these experiments, the search was run up to depth 10, and all of the base ker
 
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
 
-\paragraph{Decomposing a sum kernel}
+\paragraph{Decomposing a superposition}
 \label{sec:decomposing}
 %We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
-Given a composite kernel consisting of a sum of several simpler kernels, we can analytically infer a decomposition of a function into a sum of the components.
-For simplicity, consider the case of a sum of two kernels.
-Let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.
-The conditional distribution of the component $\function_1$ conditioned on $\function$ is given by:
+Given a composite kernel consisting of a sum of several simpler kernels, we can analytically infer a decomposition of a function into a superposition of component functions.
+Formally,
+%For simplicity, consider the case of a sum of two kernels.
+let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.
+The conditional distribution of a vector of component values $\vf_1$ conditioned on observations $\vf$ is given by:
 \begin{align}
-\function_1 | \function \sim \mathcal{N} \Big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
+\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
 & \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
 \end{align}
 \fTBD{Explain/clean vector notation}
@@ -522,35 +516,33 @@ The conditional distribution of the component $\function_1$ conditioned on $\fun
 All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
 For example,
 \[{\SE \times (\RQ + \Lin) \equiv \SE \times \RQ + \SE \times \Lin}.\]
-By decomposing a kernel into a sum we are able to apply the result above which  are often more interpretableleads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
-
-
+By decomposing a kernel into a sum we are able to apply the result above which  are often leads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
 
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
 First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
-Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
-Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolation improves dramatically as the search depth increases.  One may ask why the lengthscale of the base kernel was not chosen to be long enough to capture the long-term trend; the answer is that a \gp{} model assigns much higher marginal likelihood to kernels which capture the short frequencies of the data.
-
+%Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
+%Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen by our method, together with the posteriors of the additive components.
-The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
+The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
+We also plot the residuals, demonstrating that there is little obvious structure left in the data.
 
-\begin{figure}[h!]
+\begin{figure*}[h!]
 \centering
-\newcommand{\wmg}{0.41\columnwidth}  % width maunu growth
-\newcommand{\hmg}{3.5cm}  % height maunu growth
+\newcommand{\wmg}{5.5cm}  % width maunu growth
+\newcommand{\hmg}{4cm}  % height maunu growth
 \begin{tabular}{c}
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
+ \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search on the Mauna dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
-\end{figure}
+\end{figure*}
 
 \begin{figure}[h!]
 \newcommand{\wmgd}{9.5cm}  % width mauna decomp
@@ -570,24 +562,24 @@ The plot shows a plausible extrapolation and interpretable components: a long-te
 \paragraph{Airline passenger data}
 
 \TBD{Give an intro to this dataset.}
-Figure \ref{fig:airline_decomp} shows the model discovered by our method on the airline dataset, as well as the corresponding decomposition.
+Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
 \TBD{Make similar observations of good performance}
 
 Note that the linear kernel allows an element of heteroskedasticity in our model - the posterior marginal variance grows with the increase in the number of passengers over time.
 
-%\begin{figure}[h!]
-%\centering
-%\newcommand{\wag}{4.8cm}  % width airline growth
-%\newcommand{\hag}{4cm}  % height airline growth
-%\begin{tabular}{cc}
-%\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
-%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
-%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
-%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
-%\end{tabular}
-%\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
-%\label{fig:airline_grow}
-%\end{figure}
+\begin{figure}[h!]
+\centering
+\newcommand{\wag}{4.8cm}  % width airline growth
+\newcommand{\hag}{4cm}  % height airline growth
+\begin{tabular}{cc}
+\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
+\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
+\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
+\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
+\end{tabular}
+\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
+\label{fig:airline_grow}
+\end{figure}
 
 % Created by the command:
 % postprocessing.make_all_1d_figures(folder='../results/31-Jan-1d/', prefix='31-Jan-v3', rescale=False)
@@ -748,7 +740,7 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 %Choosing a kernel family is a stumbling block even for experts.
 %Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
 
-The ability to learn kernel hyperparameters and combination weights automatically has been an important factor enabling the widespread use of kernel methods.
+The ability to learn kernel parameters and combination weights automatically has been an important factor enabling the widespread use of kernel methods.
 For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
 
 Towards the goal of automating this process, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
@@ -779,7 +771,7 @@ We believe that a data-driven approach to choosing kernel structures automatical
 
 %\paragraph{Support Vector Machines} Structure search could be used to select kernels for support vector machines, using cross-validated prediction error as an objective function.
 
-%However, it would be presumably quite difficult to learn the moderate number of kernel hyperparameters present in composite kernels using only cross-validation.
+%However, it would be presumably quite difficult to learn the moderate number of kernel parameters present in composite kernels using only cross-validation.
 
 %\paragraph{Noise Models and Mean Functions}
 %The models used in this paper all assumed Gaussian noise, as well a constant mean function for the Gaussian process.
