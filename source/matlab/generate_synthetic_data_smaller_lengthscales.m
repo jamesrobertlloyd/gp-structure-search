@@ -4,7 +4,7 @@ rand('state',seed);
 
 n = 300;
 x_max = 2;
-data_folder = '../../data/synthetic-wigglier-SNR-1/';
+data_folder = '../../data/synthetic-wigglier-SNR-tenth/';
 
 covs{1} = {@covSum, {...
                     {@covMask, {[1 0], {@covSEiso}}}, ...
@@ -91,6 +91,6 @@ for i = 1:length(covs)
     y = chol(K)' * randn(n,1);
     y = y - mean(y);
     y = y / std(y);
-    y = y + randn(size(y)) / 1;
+    y = y + randn(size(y)) * 10;
     save([data_folder names{i}], 'X', 'y');
 end
