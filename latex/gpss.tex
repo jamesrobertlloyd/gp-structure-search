@@ -40,13 +40,13 @@
 %\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
-%\renewcommand{\LATER}[1]{}
-%\renewcommand{\fLATER}[1]{}
-%\renewcommand{\TBD}[1]{}
-%\renewcommand{\fTBD}[1]{}
-%\renewcommand{\PROBLEM}[1]{}
-%\renewcommand{\fPROBLEM}[1]{}
-%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+\renewcommand{\LATER}[1]{}
+\renewcommand{\fLATER}[1]{}
+\renewcommand{\TBD}[1]{}
+\renewcommand{\fTBD}[1]{}
+\renewcommand{\PROBLEM}[1]{}
+\renewcommand{\fPROBLEM}[1]{}
+\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
     
 \begin{document}
 
@@ -614,9 +614,9 @@ The composite kernel captures the periodic structure in the data, but does not c
 
 None of the models in our search space are capable of representing this structure, since all of the base kernels apart from \kLin{} are stationary.
 %, and it is hard to see how Lin would help in modeling this structure.
-Despite this, our approach fails gracefully: the learned kernel still captures the overall periodic structure
-% and longer term trends
-, and the extrapolation is honest about its uncertainty.\fTBD{Add changepoint citation or do not include to prevent blocking other work}
+Despite this, our approach fails gracefully: the learned kernel still captures the periodic structure, and the model reports high uncertainty about the long-term structure.
+%
+\fTBD{Add changepoint citation or do not include to prevent blocking other work}
 
 %It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
