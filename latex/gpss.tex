@@ -58,14 +58,18 @@
 ]
 
 \begin{abstract}
-Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
-In particular, Gaussian processes (\gp{} s) require the specification of a kernel, and data-driven techniques to select an appropriate kernel are underdeveloped.
-\NA{As a solution}, we develop a marginal-likelihood based search over composite kernel structures.
+Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.%\NA{, often expressed as a kernel function}.
+%\fTBD{Mention \gp{}s? Or generic kernel statement?}
+\NA{
+In particular, Gaussian processes require the specification of a kernel.
+}
+While there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
+We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
+We present a method for searching over this space of structures which mirrors the scientific discovery process.
+The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
 %The composite kernels in our search space are highly interpretable and can express abstract properties of a function.
 %Specifically, composite kernels allow for the automatic decompositon of a function into diverse and interpetable components, and in some cases allow for long-range extrapolation.
-The composite kernels in our search space can express \NA{abstract} properties of a function, and allow for the automatic decompositon of functions into diverse and interpetable components. 
-This discovery of structure can also allow for long-range extrapolation, which we demonstrate on several time-series datasets.
-Furthermore, our search space is sufficently rich that we achieve state-of-the-art predictive performance on interpolation tasks.
+Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
 \end{abstract}
 
 %Nonparametric regression methods are used widely and successfully but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
@@ -77,16 +81,22 @@ Furthermore, our search space is sufficently rich that we achieve state-of-the-a
 
 \section{Introduction}
 
-Supervised learning problems, such as classification and regression, learn a function ${\function : \InputSpace \to \OutputSpace}$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
+Supervised learning problems, such as classification and regression, learn a function $\function$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
 Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
-These methods depend on defining a kernel or covariance function, $\kernel : \InputSpace \times \InputSpace \to \Reals$ which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
+These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
-A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}. \TBD{RBG: sounds like another approach to the same problem; want it to be an underexplored \emph{aspect} of the problem}
-In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
-Specifically, we focus on a Bayesian setting where the kernel specifies a covariance function for Gaussian process (GP) regression. \TBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
+Kernel learning has been an important topic in machine learning \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,DBLP:journals/corr/abs-0909-0844} since the kernel essentially determines the pattern of inductive generalisation.
+In this paper, we pose the problem of kernel learning in a radically new way, as one of structure discovery from data.
+%A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}. \TBD{RBG: sounds like another approach to the same problem; want it to be an underexplored \emph{aspect} of the problem}
+%In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
+\fTBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
+
+We demonstrate \NA{our method} in a Bayesian setting where the kernel specifies a covariance function for \gp{} regression.
+This framework is also applicable to other probabilistic supervised learning problems \eg classification\TBD{ ref}, ordinal regression\TBD{ ref}, and ranking\TBD{ ref}.
 
 Traditionally, Gaussian process kernels have simple forms, such as squared-exponential or Matern, which depend on few free hyperparameters which can be optimised (or inferred) from data.
 However, one can also straightforwardly form composite kernels by combining simple base kernels through operations such as summation, multiplication, and change of coordinates, which all preserve positive definiteness.
+
 We use this insight to define a simple grammar over composite kernels, and we develop an automated search algorithm over the (exponentially large) space of kernels that can be derived from this grammar.
 The search criterion is the marginal likelihood of the kernel, which is the driving term for Bayesian model comparison and selection in analogous structure discovery tasks such as graphical model learning \cite{heckerman1995learning}.
 
@@ -95,14 +105,18 @@ The search criterion is the marginal likelihood of the kernel, which is the driv
 %Our approach can be seen as a general way to learn functions like this, where the product of kernels can be used to capture richer causal proceses (e.g., nonlinear rather simply linear, amplifying perioidic (as in the second layer of the airline example) rather than simply periodic) and the sum of kernels corresponds to the superposition of these causal processes.
 
 Our experimental findings demonstrate that this structure discovery algorithm can automatically recover known kernel structure from data, and that on real data the learned structure of the kernel often corresponds to natural, interesting and interpretable decompositions of the unknown function.
-Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery\fTBD{maybe $\to$ conclusion}.
+\NA{
+Moreover, we demonstrate that the automatically discovered kernels outperform fixed kernel forms and other kernel construction algorithms on both interpolation and extrapolation tasks.
+}
+Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
 
 
 \section{Expressing structure through kernels}
 \label{sec:Structure}
 
 Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
-In the case of Gaussian process regression, the kernel defines a covariance function: ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$. \fTBD{RBG: Why $\kappa$ rather than $k$?}
+In the case of Gaussian process regression, the kernel is used to define a covariance function: ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$\footnotemark.
+\footnotetext{We use $\kernel$ to denote a kernel function, and $k, \KernelMatrix$ to denote vectors and matrices of evaluations of $\kernel$.}
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 \fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
 
@@ -113,31 +127,30 @@ In the case of Gaussian process regression, the kernel defines a covariance func
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
 
-Examples of commonly used kernels are given in Figure \ref{fig:basic_kernels}.
-%
+Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
+When used within the context of \gp{} regression, these kernels define priors on functions which place mass on smooth, periodic and linear  functions respectively.
 \input{tables/simple_kernels_table_v2.tex}
-
-When used within the context of GP regression, these kernels define priors on functions which place mass only on smooth, periodic or linear functions respectively.
-%\TBD{Reference a diagram - even if a composite kernel we can point out what the base kernel is doing.}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
-This allows one to create richly structured kernels from well understood base components.  Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
+This allows one to create richly structured and interpretable kernels from well understood base components.
+%Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 %
 \input{tables/example_structures_table_v2.tex}
 
 \paragraph{Summation}
 
 Summation of kernels corresponds to the summation of independent functions in the following sense.
-Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, and ${\function_2 \dist \GP(0, \kernel_2)}$ and are independent.
+Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, ${\function_2 \dist \GP(0, \kernel_2)}$ independently.
 Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2)}$.
-% \footnotemark.
-%\footnotetext{
-Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable. We make use of this in section \ref{sec:decomposing} to decompose a learned kernel into interpretable components
+Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable.
+We make use of this in section \ref{sec:decomposing} to decompose learned kernels into interpretable components.
 
-In one dimension, sums of kernels can express structure such as variation at multiple scales, or of superposition of different function types.  Some examples can be found in Figure \ref{fig:kernels}.
 
-In higher dimensions, summing kernels can correspond to decompositions of the form
+In one dimension, sums of kernels can express structure such as variation at multiple scales, or of the superposition of different function types.
+For example, row 4 of figure~\ref{fig:kernels} shows the superposition of linear and periodic kernels/functions.
+
+In multiple dimensions, summing kernels can correspond to decompositions of the form
 \begin{equation}
 \function(\inputVar_1, \inputVar_2) = \function_1(\inputVar_1) + \function_2(\inputVar_2)
 \end{equation}
@@ -145,7 +158,8 @@ In higher dimensions, summing kernels can correspond to decompositions of the fo
 %
 \input{tables/multi_d_additive_fig_v2}
 %
-Figure \ref{fig:multi_d_additivity} demonstrates a decomposition across dimensions.
+This is demonstrated in the first row of figure~\ref{fig:multi_d_additivity}.
+%demonstrates a decomposition across dimensions.
 
 
 \paragraph{Multiplication}
@@ -280,7 +294,7 @@ To deal with this, we take advantage of our greedy search procedure in order to 
 
 \paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
 
-\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is very interpretable.  We compare against this model in our multi-dimensional experiments.
+\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable.  We compare against this model in our multi-dimensional experiments.
 
 \cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
 
@@ -349,7 +363,7 @@ Since the complexity of our kernel is bounded only by the search depth, we could
 
 %Hyperkernels \cite{ong2002hyperkernels}
 
-\section{Validation via synthetic data}
+\section{Validation on synthetic data}
 
 We validate our method by constructing synthetic data sets to check that we can infer known structure.
 For several composite kernel expression we construct synthetic data by uniformly sampling 300 input points in a symmetric hyper cube of and then sample a Gaussian process over these data points.
@@ -382,10 +396,17 @@ $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 +
 \end{center}
 \end{table*}
 
-\section{Time Series Extrapolation}
+\section{Structure discovery in time series}
 
-In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
-We then also plot that same kernel and posterior decomposed into additive components.
+%In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
+%We then also plot that same kernel and posterior decomposed into additive components.
+
+We ran our method on several time series datasets in order to test whether it learns plausible and interpretable structure. 
+For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
+Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
+We pay special attention to the models' extrapolations beyond the range of observed data, since this is a strong test of the correctness of the learned structure.
+
+In these experiments, the search was run up to depth 10, and all of the base kernels from Section \ref{sec:Structure} were used.
 
 %\section{Decomposing a function}
 
@@ -395,33 +416,41 @@ We then also plot that same kernel and posterior decomposed into additive compon
 
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
 
+\paragraph{Decomposing a sum kernel}
 \label{sec:decomposing}
-We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
-The conditional distribution of a Gaussian $\function_1$ conditioned on its sum with another Gaussian $\function = \function_1 + \function_2$ where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$ is given by
+%We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
+Given a composite kernel consisting of a sum of several simpler kernels, we can analytically infer a decomposition of a function into a sum of the components.
+For simplicity, consider the case of a sum of two kernels.
+Let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.
+The conditional distribution of the component $\function_1$ conditioned on $\function$ is given by:
 \begin{align}
-\function_1 | \function \sim \mathcal{N} \big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \big).
+\function_1 | \function \sim \mathcal{N} \Big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
+& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
 \end{align}
+\TBD{RBG: In the variance formula, we're subtracting a vector and a scalar. Should the first term be the constant $k_1(x, x)$?
+Also, I was confused by the notation; I originally read this as a distribution over a function, whereas really it's a distribution over the value of the function at some point $x$.
+Can we change the notation to make this explicit?}
 %and the covariance between the two components, conditioned on their sum is given by:
 %\begin{align}
 %\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
 %\end{align}
 %Derivations can be found in the supplementary material.
 
-In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
+%In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
+All of the kernels in our search space can be written as sums of products of base kernels by applying the distributive rule. This often leads to interpretable decompositions, even when the learned kernel was not originally of this form.
 
-In these experiments, the search depth was set to 10 and the SE, Per, Lin and RQ kernels were used.
+
 
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a GP model to the dataset.
+First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
 %Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
 %Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen by our method, together with the posteriors of the additive components.
-The plot shows a very plausible extrapolation and highly interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
+The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
 
 \begin{figure*}[h!]
 \centering
@@ -470,7 +499,7 @@ Note that the linear kernel allows an element of heteroskedasticity in our model
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
 \hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different levels of kernel search on the airline dataset.}
+\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
 \label{fig:airline_grow}
 \end{figure}
 
@@ -509,7 +538,7 @@ Note that the linear kernel allows an element of heteroskedasticity in our model
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
 \paragraph{Solar Irradiance Data} 
-We examined the ability of our model to capture structure present in the time series plotting reconstructed solar irradiance from 1600 to 2000 \fTBD{Make these years exact}\cite{lean1995reconstruction}.
+We next analyzed a time series of annual solar irradiation data from 1610 to 2011 \cite{lean1995reconstruction}.
 %
 \begin{figure}[h!]
 \newcommand{\wsd}{9.5cm}  % width solar decomp
@@ -526,13 +555,19 @@ We examined the ability of our model to capture structure present in the time se
 \label{fig:solar_decomp}
 \end{figure}
 %
-Figure \ref{fig:solar_decomp} shows the posterior and residuals of our model on this dataset.  This dataset contains structure not easily model-able using the base kernels included in our experiments, and represents a failure mode of the model.  Specifically, the timespan from 1645 to 1715 contains no periodicity, and much lower variance than the rest of the dataset.  Because the base kernels included in our grammar are mostly stationary, it was not possible to model the non-stationarity present in the data, and the residuals clearly show structure that was not captured by our method.  However, because the BIC controlled overfitting fairly conservatively, the resulting fit failed fairly gracefully. \fTBD{I'm not crazy about my writing here.}
+Figure \ref{fig:solar_decomp} shows the posterior and residuals of the learned kernel on this dataset.
+While our model captures the periodic trend in the data, it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
+This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
+None of the models in our search space are capable of representing this structure, since all of the base kernels apart from Lin are stationary, and it is hard to see how Lin would help in modeling this structure.
+Despite the inability to model the Maunder minimum, our approach fails gracefully: the learned kernel still captures the overall periodic structure and longer term trends, and makes plausible extrapolations.
+It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
 \paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
 \section{Quantitative evaluation}
 
-In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
+%In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
+In addition to the qualitative evaluation in the previous section, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
@@ -547,6 +582,8 @@ In addition to producing highly interpretable decompositions of regression funct
 \label{fig:extrapolation}
 \end{figure}
 
+\TBD{RBG: It's not clear what the procedure is. Are we doing the thing I suggested, where we hold out the last 0.1 and train on $0.9 - \alpha$ to 0.9?}
+
 To test the extrapolation capabilities of our model against standard baselines, we computed predictive mean-squared-error as a function of the proportion of data used for training.
 Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{{} models.  
 
@@ -557,6 +594,8 @@ Linear regression models have fixed capacity, and quickly plateau in their predi
 
 \subsection{Interpolation}
 
+\TBD{RBG: Zoubin made the comment that in high dimensions, all prediction is extrapolation. Would it be better to title this section something like ``high-dimensional prediction?''}
+
 To demonstrate the interpolation accuracy of our method, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
 We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
 Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref{tbl:Regression Negative Log Likelihood}.  All bolded results are not significantly different from the best-performing method in each experiment in a paired t-test.
@@ -564,7 +603,8 @@ Results are presented in tables \ref{tbl:Regression Mean Squared Error} and \ref
 \input{tables/regression_results_mse.tex}
 \input{tables/regression_results_nll.tex}
 %
-Our method outperforms the other methods in all tests.
+Our method outperforms the other methods in all tests. \fTBD{Is it worth including the learned structures in the table?}
+\TBD{RBG: Can we provide any information about the datasets, e.g. number of data points and number of dimensions?}
 
 \paragraph{Details of methods}
 
@@ -608,18 +648,28 @@ was run using the all-subsets kernel, which corresponds to the same set of kerne
 
 \end{quotation}
 
-There has developed a large and mature literature on automatic structure discovery in unsupervised settings \fTBD{citations including Josh}.  
-For example, searches over large model classes have been succesfully used in machine vision \cite{pinto2009high}, analogous to high-throughput methods used in biology.
+%There has developed a large and mature literature on automatic structure discovery in unsupervised settings \fTBD{citations including Josh}.  
+%For example, searches over large model classes have been succesfully used in machine vision \cite{pinto2009high}, analogous to high-throughput methods used in biology.
+\TBD{RBG: I took out the prior work references since this doesn't seem like the right place to introduce them. If we want them, maybe move them to the related work section?  Also, note that the Pinto reference was supervised learning.}
 
-However, relatively little attention has been paid to automatic structure discovery in supervised learning. %\TBD{RBG: I don't think we need separate Discussion and Conclusion sections. I vote for getting rid of Discussion, since most of this is covered in the related work section anyway.}
+%However, relatively little attention has been paid to automatic structure discovery in supervised learning. %\TBD{RBG: I don't think we need separate Discussion and Conclusion sections. I vote for getting rid of Discussion, since most of this is covered in the related work section anyway.}
 %
-Our work respresents a step towards automated structure discover in supervised settings.
+%Our work respresents a step towards automated structure discover in supervised settings.
 % data-based modeling, as opposed to proposing the model beforehand.
 
-In particular, this work removes the need for an expert to propose a kernel family in order to effectively use a Gaussian process model.  
-Choosing a kernel family is a stumbling block even for experts.
-Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
+%In particular, this work removes the need for an expert to propose a kernel family in order to effectively use a Gaussian process model.  
+%Choosing a kernel family is a stumbling block even for experts.
+%Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
 
+The ability to learn kernel hyperparameters and combination weights automatically has been an important factor enabling the widespread use of kernel methods.
+For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
+
+Towards the goal of automating this process, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
+We proposed a search procedure for this space of kernels which parallels the process of scientific discovery.
+
+We found that the learned structures are often capable of accurate extrapolation in complex time series datasets and are competitive with widely used kernel classes and kernel combination methods on a variety of prediction tasks.
+The learned kernels often yield decompositions of a signal into diverse and interpretable components, which provides an additional degree of reassurance that the learned structure reflects the world.
+We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
 %Machine learning can be more data-driven, analogous to the high-thoughput approaches being used in biology. 
 
@@ -630,11 +680,11 @@ Automating the search over kernel structures will make it easier for non-statist
 
 
 
-\paragraph{Conclusion}
+%\paragraph{Conclusion}
 
-In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
+%In this paper, we introduced an automated search over composite kernels, defining the search space through a simple grammar consisting of a set of one-dimensional base kernels and operations which combine those kernels.
 
-We demonstrated that the composite structure search recovered interpretable\fTBD{Change to 'known' if we add those experiments} structure, and resulted in state-of-the-art predictive performance.  %We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
+%We demonstrated that the composite structure search recovered interpretable\fTBD{Change to 'known' if we add those experiments} structure, and resulted in state-of-the-art predictive performance.  %We further demonstrated an automated decomposition of the posterior into a sum of interpretable components.
 
 %\section{Future Work}
 
@@ -755,7 +805,7 @@ This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstr
 \includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
 \includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
 \end{tabular}
-\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a GP with only one term in its kernel.  Right:  The posterior mean of a GP with only one second-order term in its kernel.}
+\caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a \gp{} with only one term in its kernel.  Right:  The posterior mean of a \gp{} with only one second-order term in its kernel.}
 \label{fig:interpretable functions}
 \end{figure*}
 %
