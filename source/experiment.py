@@ -230,6 +230,39 @@ def run_experiment_file(filename):
             print 'Skipping file %s' % file
 
     os.system('reset')  # Stop terminal from going invisible.   
+
+def generate_model_fits(filename):
+    """
+    This is intended to be the function that's called to initiate a series of experiments.
+    """       
+    expstring = open(filename, 'r').read()
+    exp = eval(expstring)
+    exp = exp._replace(local_computation = True)
+    print experiment_fields_to_str(exp)
+    
+    data_sets = list(gen_all_datasets(exp.data_dir))
+    
+    # Create results directory if it doesn't exist.
+    if not os.path.isdir(exp.results_dir):
+        os.makedirs(exp.results_dir)
+
+    if exp.random_order:
+        random.shuffle(data_sets)
+
+    for r, file in data_sets:
+        # Check if this experiment has already been done.
+        output_file = os.path.join(exp.results_dir, file + "_result.txt")
+        if os.path.isfile(output_file):
+            print 'Experiment %s' % file
+            print 'Output to: %s' % output_file
+            data_file = os.path.join(r, file + ".mat")
+
+            calculate_model_fits(data_file, output_file, exp )
+            print "Finished file %s" % file
+        else:
+            print 'Skipping file %s' % file
+
+    os.system('reset')  # Stop terminal from going invisible.  
     
 def perform_experiment(data_file, output_file, exp):
     
@@ -248,9 +281,32 @@ def perform_experiment(data_file, output_file, exp):
         scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.
+    
+def calculate_model_fits(data_file, output_file, exp):
+         
+    prediction_file = os.path.join(exp.results_dir, os.path.splitext(os.path.split(data_file)[-1])[0] + "_predictions.mat")
+    X, y, D, = gpml.load_mat(data_file, y_dim=1)
+    Xtest = X
+    ytest = y
+        
+    best_scored_kernel = parse_results(output_file)
+    
+    predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
+                                      max_jobs=exp.max_jobs, verbose=exp.verbose)
+    scipy.io.savemat(prediction_file, predictions, appendmat=False)
+        
+    os.system('reset')  # Stop terminal from going invisible.
    
 
 def run_debug_kfold():
     """This is a quick debugging function."""
     run_experiment_file('../experiments/debug_example.py')
+    
+#def compute_SNRs(experiment_file):
+#    expstring = open(filename, 'r').read()
+#    exp = eval(expstring)
+#    print experiment_fields_to_str(exp)
+#    data_sets = list(gen_all_datasets(exp.data_dir))
+#    for r, file in data_sets:
+#        data_file = os.path.join(r, file + ".mat")
     
