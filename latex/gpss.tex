@@ -281,7 +281,7 @@ To deal with this, we take advantage of our greedy search procedure in order to 
 
 \paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  Our work can be viewed as an extension and automation of this approach.
 
-\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is very interpretable.  We compare against this model in our multi-dimensional experiments.
+\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable.  We compare against this model in our multi-dimensional experiments.
 
 \cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
 
@@ -441,7 +441,7 @@ First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-
 %Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen by our method, together with the posteriors of the additive components.
-The plot shows a very plausible extrapolation and highly interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
+The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
 
 \begin{figure*}[h!]
 \centering
