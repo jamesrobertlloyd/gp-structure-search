@@ -132,7 +132,7 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
 %
-Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
+Commonly used kernels include the squared exponential (\kSE), periodic (\kPer) and linear (\kLin) kernels (see figure~\ref{fig:basic_kernels}).
 %When used within the context of \gp{} regression, 
 These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
 %\input{tables/simple_kernels_table_v2.tex}
@@ -177,9 +177,9 @@ Multiplication of kernels does not correspond to a simple composition of functio
 %For example, multiplying base kernels of the same form that act upon different dimensions of $\InputSpace$ can create the multidimensional generalisations of these kernels; this is true of \eg SE and LN\TBD{ reference a picture}.
 %
 
-Multiplying a kernel $\kernel$ by the SE kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the SE kernel.
+Multiplying a kernel $\kernel$ by the \kSE{} kernel allows the structures implied by $\kernel$ to vary smoothly according the lengthscale of the \kSE{} kernel.
 This is shown in row 1 of Figure \ref{fig:kernels}.
-Multiplying $\kernel$ by Lin results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly.
+Multiplying $\kernel$ by \kLin{} results in the amplitude of structures implied by $\kernel$ growing or shrinking linearly.
 This is shown in rows 2 and 3 of Figure \ref{fig:kernels}.
 %\fTBD{Could perhaps perversely claim that multiplying by periodic results in wiggles being added to previous structure?}
 %
@@ -222,7 +222,7 @@ Linear trend with deviations & $\Lin + \SE$ \\
 Quadratically varying amplitude & $\Lin \times \Lin \times \SE$
 \end{tabular}
 
-In these expresssions, SE$_d$ denotes a squared-exponential kernel along the $d$th dimension.
+In these expresssions, $\SE_d$ denotes a squared-exponential kernel along the $d$th dimension.
 We use the term 'generalized Fourier decomposition' to express the fact that the periodic functions capturable by a \gp{} with a periodic kernel are not limited to sine and cosines.
 
 
@@ -242,7 +242,7 @@ We use the term 'generalized Fourier decomposition' to express the fact that the
 
 \fTBD{Remember to be consistent about kernel (families) if desired\dots}
 As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels.
-In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (SE), periodic (Per), linear (Lin), and rational quadratic (RQ).
+In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ).
 Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose parameters are the concatenation of the parameters for the base kernel families. 
 
 Our search procedure begins by proposing all base kernels applied to all input dimensions. 
@@ -329,13 +329,13 @@ One sort of structure is additive structure. Generalized additive models \cite{h
 
 It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
 Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
-\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.
+\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel on all dimensions.
 A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
 Semiparametric regression \TBD{add cites} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
-In our approach, this can be represented as a sum of SE and Lin.
+In our approach, this can be represented as a sum of \kSE{} and \kLin{}.
 
 \paragraph{Kernel learning}
 There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
@@ -420,13 +420,13 @@ The model correctly infers the structure of the kernel in all but one test; in f
 The table also reports the SNR of the model fit \ie the standard of the mean prediction at the data points divided by the standard deviation of the residuals.
 The values are all close to 10 indicating that the kernel structures are not overfitting (high values) or underfitting (low values).\fTBD{This section written in a hurry at the moment}
 
-\footnotetext{Random samples from SE kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
+\footnotetext{Random samples from \kSE{} kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
 
 \paragraph{Not for paper - annoying results - to be included if a fix is found}
 
 Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
 We were hoping to see simpler kernels.
-The kernels \emph{are} simpler, but Per kernels have been sprinkled in.
+The kernels \emph{are} simpler, but \kPer{} kernels have been sprinkled in.
 The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
 Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
 
@@ -661,8 +661,10 @@ We next analyzed a time series of annual solar irradiation data from 1610 to 201
 Figure \ref{fig:solar_decomp} shows the posterior and residuals of the learned kernel on this dataset.
 While our model captures the periodic trend in the data, it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
 This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
-None of the models in our search space are capable of representing this structure, since all of the base kernels apart from Lin are stationary%., and it is hard to see how Lin would help in modeling this structure.
+
+None of the models in our search space are capable of representing this structure, since all of the base kernels apart from \kLin{} are stationary%., and it is hard to see how Lin would help in modeling this structure.
 Despite the inability to model the Maunder minimum, our approach fails gracefully: the learned kernel still captures the overall periodic structure and longer term trends, and the extrapolation is honest about its uncertainty.
+
 It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
@@ -692,8 +694,7 @@ Predictive mean-squared-error was then computed for the complement of the traini
 Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{} models.  
 
 Linear regression models have fixed capacity, and quickly plateau in their predictive performance.
-In contrast, a \gp{} with an SE kernel never extrapolates on this data, since the best parameter values in terms of marginal likelihood only capture short term structure.
-The 
+In contrast, a \gp{} with an \kSE{} kernel never extrapolates on this data, since the best parameter values in terms of marginal likelihood only capture short term structure.
 %In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
 
 \fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
@@ -718,9 +719,10 @@ Our method outperforms the other methods in all tests. \fTBD{Is it worth includi
 
 Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
 %
-Generalized Additive Models (GP GAM) were implemented using with a \gp{} whose kernel is the 
+Generalized Additive Models (GP GAM) were implemented through a \gp{} whose kernel is a sum of \kSE{} kernels across dimensions.
+%This model was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
 %
-Additive \gp{} was run using SE as a base kernel, with at most ten degrees of interaction.
+Additive \gp{} was run using \kSE{} as a base kernel, with at most ten degrees of interaction.
 %
 Hierarchical Kernel Learning (HKL)
 %\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} 
