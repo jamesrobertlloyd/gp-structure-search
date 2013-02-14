@@ -157,14 +157,14 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 Commonly used kernels include the squared exponential (\kSE), periodic (\kPer) and linear (\kLin) kernels (see figure~\ref{fig:basic_kernels}).
 %When used within the context of \gp{} regression, 
 These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
-%\input{tables/simple_kernels_table_v2.tex}
+\input{tables/simple_kernels_table_v3.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 %
-\input{tables/example_structures_table_v3.tex}
+\input{tables/example_structures_table_v4.tex}
 
 \paragraph{Summation}
 
@@ -505,7 +505,7 @@ $\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_
                                               & $\SE_1 \times \SE_2 \times \Per_3$
                                               & \dots\\
 $\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$
-                                              & \dots
+                                              & $(\SE_1 + \SE_2 \times \SE_3) \times \Lin_3$
                                               & \dots \\
 $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$
                                               & $(\SE_1 + \SE_2) \times \SE_3 \times \Lin_4 \times \Lin_4$
@@ -521,10 +521,12 @@ $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 +
 %In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 %We then also plot that same kernel and posterior decomposed into additive components.
 
-We ran our method on several time series datasets in order to test whether it learns plausible and interpretable structure. 
-For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
-Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
-We pay special attention to the models' extrapolations beyond the range of observed data, since this is a strong test of the correctness of the learned structure.
+As a visual demonstration of the structures discovered by our method we performed the search over kernels on several time series datasets.
+%in order to test whether it learns plausible and interpretable structure. 
+%For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
+%Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
+%We pay special attention to the models' extrapolations beyond the range of observed data, since this is a strong test of the correctness of the learned structure.
+Our method produces interpretable decompositions of the unknown regression function and plausible extrapolations.
 
 In these experiments, the search was run up to depth 10, and all of the base kernels from Section \ref{sec:Structure} were used.
 
@@ -539,16 +541,19 @@ In these experiments, the search was run up to depth 10, and all of the base ker
 \paragraph{Decomposing a superposition}
 \label{sec:decomposing}
 %We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
-Given a composite kernel consisting of a sum of several simpler kernels, we can analytically infer a decomposition of a function into a superposition of component functions.
+Given a composite kernel consisting of a sum, % of several simpler kernels,
+we can analytically infer a decomposition of a function into a superposition of component functions.
 Formally,
 %For simplicity, consider the case of a sum of two kernels.
-let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.
-The conditional distribution of a vector of component values $\vf_1$ conditioned on observations $\vf$ is given by:
+let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.\fTBD{Change to sum notation}
+The conditional distribution of a vector of component values $\vf_1$ conditioned on observations $\vf$ is given by
 \begin{align}
-\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
-& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
+%\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
+%& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
+\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vK_1 (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
+& (\vK_1\inv + \vK_2\inv)\inv \Big).
 \end{align}
-\fTBD{Explain/clean vector notation}
+where $\vK_{ij} = k(x_i,x_j)$. 
 %and the covariance between the two components, conditioned on their sum is given by:
 %\begin{align}
 %\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
@@ -558,7 +563,7 @@ The conditional distribution of a vector of component values $\vf_1$ conditioned
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
 All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
 For example,
-\[{\SE \times (\RQ + \Lin) \equiv \SE \times \RQ + \SE \times \Lin}.\]
+\[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
 By decomposing a kernel into a sum we are able to apply the result above which  are often leads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
 
 \label{sec:extrapolation}
@@ -573,7 +578,7 @@ Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen b
 The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, demonstrating that there is little obvious structure left in the data.
 
-\begin{figure*}[h!]
+\begin{figure}[h!]
 \centering
 \newcommand{\wmg}{0.39\columnwidth}  % width maunu growth
 \newcommand{\hmg}{3.2cm}  % height maunu growth
@@ -585,7 +590,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
-\end{figure*}
+\end{figure}
 
 \begin{figure}[h!]
 \newcommand{\wmgd}{9.5cm}  % width mauna decomp
@@ -617,19 +622,19 @@ Finally, the fourth kernel has split the data into an approximately linear trend
 
 \fTBD{Good way to mention heteroskedasticity?}
 
-\begin{figure}[h!]
-\centering
-\newcommand{\wag}{4.8cm}  % width airline growth
-\newcommand{\hag}{4cm}  % height airline growth
-\begin{tabular}{cc}
-\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
-\end{tabular}
-\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
-\label{fig:airline_grow}
-\end{figure}
+%\begin{figure}[h!]
+%\centering
+%\newcommand{\wag}{4.8cm}  % width airline growth
+%\newcommand{\hag}{4cm}  % height airline growth
+%\begin{tabular}{cc}
+%\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
+%\end{tabular}
+%\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
+%\label{fig:airline_grow}
+%\end{figure}
 
 % Created by the command:
 % postprocessing.make_all_1d_figures(folder='../results/31-Jan-1d/', prefix='31-Jan-v3', rescale=False)
