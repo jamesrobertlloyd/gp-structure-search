@@ -381,17 +381,17 @@ Kernels used to generate synthetic data together, dimensionality, $d$, of the in
 \label{tbl:synthetic-less}
 \begin{center}
 {\small
-\begin{tabular}{c c | c c c}
+\begin{tabular}{c c | c c c c c}
 
-True kernel & $d$ & Inferred kernel & SNR of model fit \\
+True kernel & $d$ & Inferred kernel & SNR of model fit & Temp col & Temp col \\
 \hline
-$\SE + \RQ$                               & 1 & $\RQ$ & 11.1\\
-$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2\\
-$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7\\
-$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2\\
-$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7\\
-$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2\\
-$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9\\
+$\SE + \RQ$                               & 1 & $\RQ$ & 11.1 & 1.06 & 0.14\\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2 & 1.01 & 0.13\\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7 & 0.91 & 0.14\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2 & 0.84 & 0.09\\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7 & 1.02 & \dots\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2 & \dots & \dots\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9& 0.91 & 726\\
 \end{tabular}
 }
 \end{center}
@@ -429,7 +429,7 @@ $\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \ti
                                               & \dots \\
 $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$
                                               & $(\SE_1 + \SE_2) \times \SE_3 \times \Lin_4 \times \Lin_4$
-                                              & \dots \\
+                                              & $\Lin_2 \times \SE_3$ \\
 \end{tabular}
 }
 \end{center}
@@ -463,17 +463,16 @@ In these experiments, the search was run up to depth 10, and all of the base ker
 %We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
 Given a composite kernel consisting of a sum, % of several simpler kernels,
 we can analytically infer a decomposition of a function into a superposition of component functions.
-Formally,
+Formally,\fTBD{Old decomp commented out - but happy to have reintroduced}
 %For simplicity, consider the case of a sum of two kernels.
-let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1, k_1)$ and $\function_2 \sim \GP( \vmu_2, k_2)$.\fTBD{Change to sum notation}
-The conditional distribution of a vector of component values $\vf_1$ conditioned on observations $\vf$ is given by
-\begin{align}
+let ${\function = \sum\function_n}$, where ${\function_n \sim \GP( 0, k_n)}$.
+The conditional distribution of a vector of component values $\vf_n$ conditioned on observations $\vf$ is given by
+\[
 %\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
 %& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
-\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vK_1 (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
-& (\vK_1\inv + \vK_2\inv)\inv \Big).
-\end{align}
-where $\vK_{ij} = k(x_i,x_j)$. 
+\vf_n \given \vf \sim \mathcal{N} \Big( \vK_n (\vK_n + \vK_{-n}\inv)\inv \vf, (\vK_n\inv + \vK_{-n}\inv)\inv \Big).
+\]
+where ${\vK_{n,ij} = k_n(x_i,x_j),\,\,\vK_{-n,ij} = \sum_{m\neq n}k_m(x_i,x_j)}$. 
 %and the covariance between the two components, conditioned on their sum is given by:
 %\begin{align}
 %\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
@@ -489,12 +488,13 @@ By decomposing a kernel into a sum we are able to apply the result above which  
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-First, we revisited a dataset explored in \mbox{\cite{rasmussen38gaussian}}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
+First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
+, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
-%Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
-%Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
+Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
-Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen by our method, together with the posteriors of the additive components.
+Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with the posteriors of the additive components.
 The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, demonstrating that there is little obvious structure left in the data.
 
@@ -531,16 +531,15 @@ We also plot the residuals, demonstrating that there is little obvious structure
 
 Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
 We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
-In addition, the composite kernel discovered captures the near linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
+In addition, the composite kernel captures the near linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
+The discovery of linear structure allows for a highly plausible extrapolation.\fTBD{Mention heteroskedasticity?}
 
-Discovering this linearity results in very plausible extrapolations of the data.
-Figure~\ref{fig:airline_grow} demonstrates this by ploting the full posterior of the kernel discovered at sequential levels of the search.
-The first plot shows that the first kernel has discovered onyl short term continuity.
-The second kernel discovers periodicity that varies with time.
-The third kernel has discovered that the periodicity is growing approximately linearly.
-Finally, the fourth kernel has split the data into an approximately linear trend and growing oscillations.
-
-\fTBD{Good way to mention heteroskedasticity?}
+%Discovering this linearity results in very plausible extrapolations of the data.
+%Figure~\ref{fig:airline_grow} demonstrates this by ploting the full posterior of the kernel discovered at sequential levels of the search.
+%The first plot shows that the first kernel has discovered onyl short term continuity.
+%The second kernel discovers periodicity that varies with time.
+%The third kernel has discovered that the periodicity is growing approximately linearly.
+%Finally, the fourth kernel has split the data into an approximately linear trend and growing oscillations.
 
 %\begin{figure}[h!]
 %\centering
@@ -591,7 +590,7 @@ Finally, the fourth kernel has split the data into an approximately linear trend
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
 \paragraph{Solar Irradiance Data} 
-We next analyzed a time series of annual solar irradiation data from 1610 to 2011 \cite{lean1995reconstruction}.
+Finally, we analyze annual solar irradiation data from 1610 to 2011 \citep{lean1995reconstruction}.
 %
 \begin{figure}[h!]
 \newcommand{\wsd}{9.5cm}  % width solar decomp
@@ -608,14 +607,18 @@ We next analyzed a time series of annual solar irradiation data from 1610 to 201
 \label{fig:solar_decomp}
 \end{figure}
 %
-Figure \ref{fig:solar_decomp} shows the posterior and residuals of the learned kernel on this dataset.
-While our model captures the periodic trend in the data, it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
-This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
+The posterior and residuals of the learned kernel are shown in figure \ref{fig:solar_decomp}.
+The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
+%but it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
+%This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
 
-None of the models in our search space are capable of representing this structure, since all of the base kernels apart from \kLin{} are stationary%., and it is hard to see how Lin would help in modeling this structure.
-Despite the inability to model the Maunder minimum, our approach fails gracefully: the learned kernel still captures the overall periodic structure and longer term trends, and the extrapolation is honest about its uncertainty.
+None of the models in our search space are capable of representing this structure, since all of the base kernels apart from \kLin{} are stationary.
+%, and it is hard to see how Lin would help in modeling this structure.
+Despite this, our approach fails gracefully: the learned kernel still captures the overall periodic structure
+% and longer term trends
+, and the extrapolation is honest about its uncertainty.\fTBD{Add changepoint citation or do not include to prevent blocking other work}
 
-It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
+%It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
