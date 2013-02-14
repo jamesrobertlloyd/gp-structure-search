@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{preamble}
 \usepackage{natbib}
+%\usepackage[draft]{hyperref}
 \usepackage{hyperref}
 \usepackage{color}
 \usepackage{wasysym}
@@ -85,7 +86,8 @@ Supervised learning problems, such as classification and regression, learn a fun
 Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
 These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
-Kernel learning has been an important topic in machine learning \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,Bach_HKL} since the kernel essentially determines the pattern of inductive generalisation.
+Kernel learning has been an important topic in machine learning since the kernel essentially determines the pattern of inductive
+generalisation \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,Bach_HKL}.
 %In this paper, we pose the problem of kernel learning in a radically new way, as one of structure discovery from data.
 In previous work, kernel learning has been posed as a problem of (possibly very high-dimensional) parameter estimation.
 Here we reframe the problem of kernel learning as one of structure discovery from data.
@@ -537,7 +539,7 @@ By decomposing a kernel into a sum we are able to apply the result above which  
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
 
-First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
+First, we revisited a dataset explored in \mbox{\cite{rasmussen38gaussian}}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
 %Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
 %Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
