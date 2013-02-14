@@ -405,6 +405,15 @@ The one failure mode
 
 \footnotetext{Random samples from SE kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
 
+\NA{
+In general, as the SNR is decreased, the learned kernel structures become simpler as terms are removed or replaced by Lin kernels.
+However, we also observe spurious Per kernels appearing.
+The parameters of these spurious kernels were extreme and only resulted in minor modifications of the composite kernel near the origin (\ie only affecting short term structure).
+Fortunately these unusual additions to the kernel only significantly affect their visual presentation; their small modifications to the composite kernel result in imperceptible changes to predictions or decompositions of functions.
+These terms could have been prevented by limiting the range of certain parameters.
+A more elegant solution would be to place priors upon kernel parameters or introduce a new base kernel that expresses the short term structure represented by a Per kernel with extreme parameters.
+}
+
 \begin{table*}[ht!]
 \caption{{\small
 Kernels used to generate synthetic data together, dimensionality, $d$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
