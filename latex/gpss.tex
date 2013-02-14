@@ -309,28 +309,51 @@ While this procedure isn't guaranteed to find the global optimum, we offer some 
 \section{Related Work}
 \label{sec:related_work}
 
-\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
+%\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
 
-\paragraph{Generalized Additive Models} \cite{hastie1990generalized} are models in which the posterior mean can be expressed $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable.  We compare against this model in our multi-dimensional experiments.
+\paragraph{Gaussian process kernels} There has been significant work on constructing \gp{} kernels and analyzing their properties. This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 
-\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.  This model is motivated by the desire to specify the trade off between the interpretability of additive models and the flexibility of multiplicative models.
+\paragraph{Nonparametric regression in high dimensions} Nonparametric regression methods such as splines, locally weighted regression, and \gp{} regression are popular because they are capable of learning arbitrary smooth functions of the data. Unfortunately, they suffer from the curse of dimensionality: it is very difficult for the basic versions of these methods to generalize well in more than a few dimensions. Applying nonparametric methods in high-dimensional spaces requires imposing additional structure on the model.
 
-\paragraph{Compositional model search for unsupervised learning} \cite{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning.  Their models were composed of sums and element-wise products of random variables defined on matrices.  This model class contained a large number of existing unsupervised models as special cases.  Earlier work in unsupervised Bayseian structure discovery was done in \cite{kemp2008discovery}.
+One sort of structure is additive structure. Generalized additive models \cite{hastie1990generalized} are models in which the function is modeled as a sum of functions defined on the individual dimensions: $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable and often generalizes well. In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
 
-\paragraph{Smoothing-Spline ANOVA}  A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
+It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
+Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
+\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an SE kernel along each dimension, with an SE-ARD kernel on all dimensions.
+A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
-Learning in SS-ANOVA is usually done via penalized-maximum likelihood with a fixed sparsity hyperparameter.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
-This model is similar to ours, if we were to restict our attention to spline kernels.
 
-\paragraph{Additive Gaussian Processes} \cite{duvenaud2011additive11} is a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
-However, this model's parameterization is not as flexible as the kernels expressible in our grammar.
+Semiparametric regression \TBD{add cites} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
+In our approach, this can be represented as a sum of SE and Lin.
 
-\paragraph{Hierarchical Kernel Learning}
+\paragraph{Kernel learning}
+There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
+\cite{christoudias2009bayesian}
+\TBD{cite more} 
+\cite{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels.
+While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
+
+Another approach to kernel learning is to learn the embeddings of the points. 
+\TBD{Cite GP-LVM} learns an embedding of the data points into a low-dimensional space, and constructs a kernel over that space. 
+\citet{salakhutdinov2008using} use a deep neural network to learn an embedding. 
+\TBD{What are the advantages of our approach over GP-LVMs?  That it can generalize to new data points?  That it's more scalable?  I guess both of these approaches require specifying the form of the kernel.}
+
+\citet{diosan2007evolving} and \citet{bing2010gp} attempted to learn the structures of kernels using genetic algorithms.  \TBD{Something about how our work relates to theirs?}
+
+
+\paragraph{Structure discovery}
+
+There have been several attempts to uncover the structural form of a dataset by searching over a grammar of structures. For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities. Because we learn expressions describing the covariance structure rather than the functions themselves, we are able to capture structure which doesn't have a simple parametric form.
+
+\citet{kemp2008discovery} learned what structural form of a graph to use to model human similarity judgments. Examples of graphs included planes, trees, and cylinders. Some of their (discrete) graph structures have continous analogues in our own space; for instance, $SE_1 \times SE_2$ and $SE_1 \times Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
+
+\citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
+
+
+
 
 %In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach
-\cite{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
-The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels. In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.
 %For details, see \cite{Bach_HKL}.
 %Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
 % \subsubsection{All-subsets kernel with uniform weightings}
@@ -342,7 +365,7 @@ The subsets of kernels considered by this method are restricted to be a \textit{
 %which has computational complexity $O(D)$.
 %However, this formulation forces the weight of all $n$th order terms to be weighted by $\alpha^n$.
 %
-The main difficulty with this approach is that hyperparameters are hard to set other than by cross-validation. 
+
 %In contrast, our method optimizes the hyperparameters of each dimension's base kernel, as well as the relative weighting of each order of interaction. 
 
 
@@ -351,34 +374,12 @@ The main difficulty with this approach is that hyperparameters are hard to set o
 %However, the effect of a particular degree of interaction cannot be quantified by that approach.
 %Also, computationally, the Gibbs sampling approach used in \cite{kaufman2010bayesian} is disadvantageous.
 
-\paragraph{Genetic Searches over Kernel Structures}
-A similar method was developed by \cite{diosan2007evolving} using SVMs in place of Gaussian processes, cross-validation error instead of marginal likelihood, and a genetic algorithm instead of a greedy search.  
-In \cite{bing2010gp}, a genetic programming construction and optimization method was used to select a kernel for relevance vector machines.
-
-\paragraph{Equation Learning}
-A related body of work with similar goals are the various approaches to equation learning.  
-For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities.  The advantage of a \gp{}-based approach is that non-parametric structure can be represented even within an interpretable decomposition.  For example, while equation-learning methods could recover a function with a sine-wave component composed with other structure, our procedure can represent \emph{any} periodic function composed with other structure.
-
-\paragraph{Semiparametric Regression}
-Semiparametric regression \TBD{add cites} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
-Structure search has the same goal, but improves upon semiparametric regression in two ways.
-First, construcing a compound model through structure in the kernel allows us to integrate over the parameters of the implicit components of the model.
-Second, by automatically searching over components, we remove the limitation that the practictioner must be able to specify in advance the parametric form of any part of the model.
 
 
-\paragraph{Multiple Kernel Learning}
-There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
-\cite{christoudias2009bayesian}
-\TBD{cite more} 
-However, these methods typically construct all kernels in advance, and simply reweight them.  This sort of approach would be inapplicable in our case, since our search space is exponential in our search depth, and we also must estimate the hyperparameters of each kernel.%One could imagine expanding our search for some fixed depth, instantiating a sum of all
-%In the \gp{} framework,  showed how mixtures of kernels can be learnt by gradient descent in the Gaussian process framework.
-%They call this \emph{Bayesian localized multiple kernel learning}.
 
-\paragraph{Nonparametric kernel functions}
 
-Since the complexity of our kernel is bounded only by the search depth, we could consider the structure search to be a non-parametric kernel model - in a sense, a doubly nonparametric model.
-There has been some similar work along these lines in \cite{salakhutdinov2008using}, where a deep neural network was use to learn the kernel of a \gp{}.
-This is a very interesting approach to kernel learning, but potentially less interpretable.
+
+
 
 %Hyperkernels \cite{ong2002hyperkernels}
 
