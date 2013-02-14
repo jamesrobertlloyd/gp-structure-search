@@ -99,10 +99,10 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, save_folder='../figures/d
         else:
             print "Cannnot find file %s" % results_file
             
-def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10):
+def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10, prefix=''):
     make_all_1d_figures(folder=folder)
     for level in range(max_depth+1):
-        make_all_1d_figures(folder=folder, max_level=level)
+        make_all_1d_figures(folder=folder, max_level=level, prefix=prefix)
         
 def compare_1d_decompositions():
     '''Produces the decomposition for all the files in the listed directories - to see which one to pick'''

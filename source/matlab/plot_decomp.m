@@ -134,6 +134,10 @@ function mean_var_plot( xdata, ydata, xrange, forecast_mu, forecast_scale, small
     set(gca, 'TickDir', 'out');
     
     xlim([min(xrange), max(xrange)]);
+    if small_plot
+        totalrange = (max(xrange) - min(xrange));
+        xlim([min(xrange) + totalrange*0.7, max(xrange) - totalrange*0.05]);
+    end    
     
     % Plot a vertical bar to indicate the start of extrapolation.
     if ~all(forecast_mu == 0)  % Don't put extrapolation line on residuals plot.
@@ -147,11 +151,8 @@ function mean_var_plot( xdata, ydata, xrange, forecast_mu, forecast_scale, small
     
     set_fig_units_cm( 16,8 );
     
-   
-    
     if small_plot
-        xlim([min(xrange) + (max(xrange) - min(xrange))*0.6, max(xrange)]);
-        set_fig_units_cm( 5,5 );
+        set_fig_units_cm( 6, 6 );
     end
 end
 
