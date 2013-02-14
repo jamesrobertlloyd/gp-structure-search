@@ -85,7 +85,7 @@ Supervised learning problems, such as classification and regression, learn a fun
 Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
 These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
-Kernel learning has been an important topic in machine learning \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,DBLP:journals/corr/abs-0909-0844} since the kernel essentially determines the pattern of inductive generalisation.
+Kernel learning has been an important topic in machine learning \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,Bach_HKL} since the kernel essentially determines the pattern of inductive generalisation.
 In this paper, we pose the problem of kernel learning in a radically new way, as one of structure discovery from data.
 %A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}. \TBD{RBG: sounds like another approach to the same problem; want it to be an underexplored \emph{aspect} of the problem}
 %In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
@@ -111,23 +111,26 @@ Moreover, we demonstrate that the automatically discovered kernels outperform fi
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
 
 
-\section{Expressing structure through kernels}
+\section{Expressing structure through kernels} 
 \label{sec:Structure}
 
-Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
-In the case of Gaussian process regression, the kernel is used to define a covariance function: ${\KernelMatrix_{\inputVar \inputVar'} := \textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
+%Kernel functions $\kernel : \InputSpace \times \InputSpace \to \Reals$ can be used to define a measure of similarity between two points $\inputVar, \inputVar'$ in some space $\InputSpace$.
+Gaussian process models use a kernel to define the covariance between any two function values: ${\textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
+%The kernel determines which sorts of structures the model places most of its probability mass upon, and in effect determines the generalization properties of the model.
+The kernel determines which structures are likely under the \gp{} prior, which \NA{determines} the generalization properties of the model.
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
-\fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
-
+%\fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
+%
 %Examples of commonly used kernels include squared exponential (SE), periodic (Per) and linear kernels (Lin) defined below\fTBD{If we add RQ then we have everything in one place}
 %\begin{eqnarray}
 %\kernel_\textrm{SE}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 %\kernel_\textrm{Per}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
-
+%
 Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
-When used within the context of \gp{} regression, these kernels define priors on functions which place mass on smooth, periodic and linear  functions respectively.
+%When used within the context of \gp{} regression, 
+These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
 \input{tables/simple_kernels_table_v2.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
@@ -140,8 +143,8 @@ This allows one to create richly structured and interpretable kernels from well 
 \paragraph{Summation}
 
 Summation of kernels corresponds to the superposition of independent functions.
-Suppose ${\function_1 \dist \GP(0, \kernel_1)}$, ${\function_2 \dist \GP(0, \kernel_2)}$ independently.
-Then ${\function := \function_1 + \function_2 \dist \GP(0, \kernel_1 + \kernel_2)}$.
+Suppose ${\function_1 \dist \GP(\mu_1, \kernel_1)}$, ${\function_2 \dist \GP(\mu_2, \kernel_2)}$ independently.
+Then ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
 Additionally, the posterior of the component functions conditioned on observations of the sum are analytically tractable.
 We make use of this in section \ref{sec:decomposing} to decompose learned kernels into interpretable components.
 
@@ -321,12 +324,12 @@ However, this model's parameterization is not as flexible as the kernels express
 \paragraph{Hierarchical Kernel Learning}
 
 %In "High-Dimensional Non-Linear Variable Selection through Hierarchical Kernel Learning", Bach
-\cite{DBLP:journals/corr/abs-0909-0844} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
+\cite{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels which can be computed in polynomial time.
 The subsets of kernels considered by this method are restricted to be a \textit{hull} of kernels. In the setting we are considering in this paper, a hull can be defined as a subset of all terms such that if term $\prod_{j \in J} k_j(\bf x, x')$ is included in the subset, then so are all terms $\prod_{j \in J / i} k_j(\bf x, x')$, for all $i \in J$.
-%For details, see \cite{DBLP:journals/corr/abs-0909-0844}.
+%For details, see \cite{Bach_HKL}.
 %Given each dimension's kernel, and a pre-defined weighting over all terms, HKL performs model selection by searching over hulls of interaction terms.
 % \subsubsection{All-subsets kernel with uniform weightings}
-%In \cite{DBLP:journals/corr/abs-0909-0844}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
+%In \cite{Bach_HKL}, Bach also fixes the relative weighting between orders of interaction with a single term $\alpha$, computing the sum over all orders by:
 %\begin{equation}
 %\label{eqn:uniform}
 %k_{a}({\bf x, x'}) = v_D^2 \prod_{d=1}^D \left(1 + \alpha k_{d}(x_{d}, x_{d}') \right)
@@ -368,7 +371,9 @@ However, these methods typically construct all kernels in advance, and simply re
 
 \paragraph{Nonparametric kernel functions}
 
-Since the complexity of our kernel is bounded only by the search depth, we could consider the structure search to be a non-parametric kernel model - in a sense, a doubly nonparametric model.  There has been some similar work along these lines in \cite{salakhutdinov2008using}, where a deep neural network was use to learn the kernel of a \gp{}.  This is a very interesting approach to kernel learning, but potentially less interpretable.
+Since the complexity of our kernel is bounded only by the search depth, we could consider the structure search to be a non-parametric kernel model - in a sense, a doubly nonparametric model.
+There has been some similar work along these lines in \cite{salakhutdinov2008using}, where a deep neural network was use to learn the kernel of a \gp{}.
+This is a very interesting approach to kernel learning, but potentially less interpretable.
 
 %Hyperkernels \cite{ong2002hyperkernels}
 
@@ -434,11 +439,9 @@ Let $\function = \function_1 + \function_2$, where $\function_1 \sim \GP( \vmu_1
 The conditional distribution of the component $\function_1$ conditioned on $\function$ is given by:
 \begin{align}
 \function_1 | \function \sim \mathcal{N} \Big( & \vmu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \function - \vmu_1 - \vmu_2 \right), \nonumber \\
-& \vk_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
+& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
 \end{align}
-\TBD{RBG: In the variance formula, we're subtracting a vector and a scalar. Should the first term be the constant $k_1(x, x)$?
-Also, I was confused by the notation; I originally read this as a distribution over a function, whereas really it's a distribution over the value of the function at some point $x$.
-Can we change the notation to make this explicit?}
+\fTBD{Explain/clean vector notation}
 %and the covariance between the two components, conditioned on their sum is given by:
 %\begin{align}
 %\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
@@ -446,7 +449,9 @@ Can we change the notation to make this explicit?}
 %Derivations can be found in the supplementary material.
 
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
-All of the kernels in our search space can be written as sums of products of base kernels by applying the distributive rule. This often leads to interpretable decompositions, even when the learned kernel was not originally of this form.
+All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity. For example,
+\[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
+These equivalent forms are often more interpretableleads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
 
 
 
@@ -790,12 +795,12 @@ We believe that a data-driven approach to choosing kernel structures automatical
 
 \paragraph{Bach Synthetic Dataset}
 \fTBD{Too much text? Move to supplementary}
-In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{DBLP:journals/corr/abs-0909-0844}.
+In addition to standard UCI repository datasets, we generated a synthetic dataset following the same recipe as \cite{Bach_HKL}.
 % From a covariance matrix drawn from a Wishart distribution with 1024 degrees of freedom, we select 8 variables.
 %We then construct the non-linear function $f(X) = \sum_{i=1}^4 \sum_{j=1+1}^4 X_i X_j + \epsilon$, which sums all 2-way products of the first 4 variables, and adds Gaussian noise $\epsilon$.
 This dataset is one which can be predicted well by a kernel which is a sum of two-way interactions over the first 4 variables, ignoring the extra 4 noisy copies.
 %
-This dataset was designed by \cite{DBLP:journals/corr/abs-0909-0844} to demonstrate the advantages of HKL over a \gp{} with a SE-ARD kernel. 
+This dataset was designed by \cite{Bach_HKL} to demonstrate the advantages of HKL over a \gp{} with a SE-ARD kernel. 
 
 %If the dataset is large enough, HKL can construct a hull around only those subsets of cross terms that are optimal for predicting the output.
 %GP-ARD, in contrast, can only learn to ignore the noisy copy variables, but cannot learn to ignore the higher-term interactions between the predictive variables.
