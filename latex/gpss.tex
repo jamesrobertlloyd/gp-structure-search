@@ -401,27 +401,51 @@ This is a very interesting approach to kernel learning, but potentially less int
 
 We validate our method by constructing synthetic data sets to check that we can infer known structure.
 For several composite kernel expression we construct synthetic data by uniformly sampling 300 input points in a symmetric hyper cube of and then sample a Gaussian process over these data points.
-We then add \iid Gaussian noise to the output data with variance chosen to achieve a particular signal to noise ratio (SNR\footnotemark).
+We then add \iid Gaussian noise to the output data with variance chosen to achieve a signal to noise ratio (SNR\footnotemark) of 10.
 \footnotetext{We define the signal to noise ratio to be the standard deviation of the function divided by the standard deviation of the noise.}
 
-Table~\ref{tbl:synthetic} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the diemsionality, $d$, of the input space, together with those inferred by our search.
-When SNR is highest, the model correctly infers the structure of the kernel in all but one test; in fact it also discovers unintentionally introduced linear structure\footnotemark!
-The one failure mode
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the diemsionality, $d$, of the input space, together with the kernel inferred by our search.
+The model correctly infers the structure of the kernel in all but one test; in fact it also discovers unintentionally introduced linear structure\footnotemark!
+The table also reports the SNR of the model fit \ie the standard of the mean prediction at the data points divided by the standard deviation of the residuals.
+The values are all close to 10 indicating that the kernel structures are not overfitting (high values) or underfitting (low values).\fTBD{This section written in a hurry at the moment}
 
 \footnotetext{Random samples from SE kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
 
-\NA{
-In general, as the SNR is decreased, the learned kernel structures become simpler as terms are removed or replaced by Lin kernels.
-However, we also observe spurious Per kernels appearing.
-The parameters of these spurious kernels were extreme and only resulted in minor modifications of the composite kernel near the origin (\ie only affecting short term structure).
-Fortunately these unusual additions to the kernel only significantly affect their visual presentation; their small modifications to the composite kernel result in imperceptible changes to predictions or decompositions of functions.
-These terms could have been prevented by limiting the range of certain parameters.
-A more elegant solution would be to place priors upon kernel parameters or introduce a new base kernel that expresses the short term structure represented by a Per kernel with extreme parameters.
-}
+\paragraph{Not for paper - annoying results - to be included if a fix is found}
+
+Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
+We were hoping to see simpler kernels.
+The kernels \emph{are} simpler, but Per kernels have been sprinkled in.
+The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
+Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
 
 \begin{table*}[ht!]
 \caption{{\small
-Kernels used to generate synthetic data together, dimensionality, $d$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
+Kernels used to generate synthetic data together, dimensionality, $d$, of the input space, the inferred kernels and SNR of model fit.
+}}
+\label{tbl:synthetic-less}
+\begin{center}
+{\small
+\begin{tabular}{c c | c c c}
+
+True kernel & $d$ & Inferred kernel & SNR of model fit \\
+\hline
+$\SE + \RQ$                               & 1 & $\RQ$ & 11.1\\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2\\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2\\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9\\
+\end{tabular}
+}
+\end{center}
+\end{table*}
+
+\begin{table*}[ht!]
+\caption{{\small
+CURRENTLY NOT INTENDED FOR PAPER
+%Kernels used to generate synthetic data together, dimensionality, $d$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
 }}
 \label{tbl:synthetic}
 \begin{center}
