@@ -1,0 +1,64 @@
+\newcommand{\fhbig}{1.6cm}
+\newcommand{\fwbig}{1.8cm}
+\newcommand{\kernpic}[1]{\includegraphics[height=\fhbig,width=\fwbig]{../figures/structure_examples/#1}}
+\newcommand{\kernpicr}[1]{\rotatebox{90}{\includegraphics[height=\fwbig,width=\fhbig]{../figures/structure_examples/#1}}}
+\newcommand{\addkernpic}[1]{{\includegraphics[height=\fhbig,width=\fwbig]{../figures/additive_multi_d/#1}}}
+\newcommand{\largeplus}{\tabbox{{\Large+}}}
+\newcommand{\largeeq}{\tabbox{{\Large=}}}
+\newcommand{\largetimes}{\tabbox{{\Large$\times$}}}
+\begin{figure}
+\centering
+\renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+%\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
+%\begin{tabular}{C{\fwbig}C{\fwbig}C{\fwbig}C{\fwbig}}%{m{\fwbig}m{\fwbig}m{\fwbig}}
+\begin{tabularx}{\columnwidth}{XXXX}
+%Composite & Draws from \gp{} & \gp{} posterior \\ \toprule
+  \kernpic{se_kernel} & \kernpic{se_kernel_draws}
+& \kernpic{per_kernel} & \kernpic{per_kernel_draws}
+\\
+  {\small Squared-exp (SE)} & {\small local variation} 
+& {\small Periodic (Per)} & {\small repeating structure}
+\\
+\midrule
+  \kernpic{lin_kernel} & \kernpic{lin_kernel_draws}
+& \kernpic{rq_kernel} & \kernpic{rq_kernel_draws}
+\\
+  {\small Linear (Lin)} & {\small linear functions} 
+& {\small Rational-Quadratic(RQ)} & {\small slow variation}
+\\
+\midrule
+  \kernpic{se_times_per} & \kernpic{se_times_per_draws}
+& \kernpic{lin_times_lin} & \kernpic{lin_times_lin_draws} 
+\\
+  {\small SE  $\times$ Per} & {\small local periodic} 
+& {\small Lin $\times$ Lin} & {\small quadratic functions}
+\\
+\midrule
+  \kernpic{se_plus_per} & \kernpic{se_plus_per_draws}
+& \kernpic{lin_plus_per} & \kernpic{lin_plus_per_draws}
+\\
+  {\small SE + Per } & {\small periodic with noise}
+& {\small Lin + Per} & {\small trend with period}
+\\
+\midrule
+  \kernpic{se_times_lin} & \kernpic{se_times_lin_draws}
+& \kernpic{lin_times_per} & \kernpic{lin_times_per_draws}
+\\
+  {\small Lin $\times$ SE} & {\small increasing variation}
+& {\small Lin $\times$ Per} & {\small growing amplitude}
+\\
+\midrule
+  \addkernpic{additive_kernel} & \addkernpic{additive_kernel_draw_sum}
+& \addkernpic{sqexp_kernel}  & \addkernpic{sqexp_draw}
+\\
+  {\small $SE_1 + SE_2$} & {\small $f_1(x_1) + f_2(x_2)$}
+& {\small $SE_1 \times SE_2$} & {\small $f(x_1, x_2)$}
+\end{tabularx}
+\caption{ Examples of structures expressible by
+  composite kernels.  
+%The x-axis has the same scale for all plots.
+  Left column and third columns: base and composite kernels.  Second and fourth columns: draws from a \gp{} with each repective kernel.  The x-axis has the same range on all plots.}
+\label{fig:kernels}
+\end{figure}
+
+

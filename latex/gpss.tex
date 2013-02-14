@@ -86,7 +86,10 @@ Kernel-based nonparametric models, such as support vector machines and Gaussian 
 These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 
 Kernel learning has been an important topic in machine learning \fTBD{which citations canonical?}\citep[e.g.][]{diosan2007evolving,salakhutdinov2008using,Bach_HKL} since the kernel essentially determines the pattern of inductive generalisation.
-In this paper, we pose the problem of kernel learning in a radically new way, as one of structure discovery from data.
+%In this paper, we pose the problem of kernel learning in a radically new way, as one of structure discovery from data.
+In previous work, kernel learning has been posed as a problem of (possibly very high-dimensional) parameter estimation.
+Here we reframe the problem of kernel learning as one of structure discovery from data.
+This provides a more expressive modeling language, allows us to exploit efficient discrete search methods that rapidly explore a large space of structures, and yields results that are both more interpretable and better in objective generalization performance.
 %A key challenge for kernel based methods is learning an appropriate kernel from data, and a great many papers have been written on this important topic\TBD{ cite kernel learning for SVMs and GP literature}. \TBD{RBG: sounds like another approach to the same problem; want it to be an underexplored \emph{aspect} of the problem}
 %In this paper, we pose the problem of kernel learning as a problem of structure discovery from data.
 \fTBD{RBG: Any way to argue that kernel learning algorithms were an important factor in making kernel methods practical?  Then our method is the next logical step.}
@@ -111,6 +114,8 @@ Moreover, we demonstrate that the automatically discovered kernels outperform fi
 Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
 
 
+
+
 \section{Expressing structure through kernels} 
 \label{sec:Structure}
 
@@ -131,14 +136,14 @@ The kernel determines which structures are likely under the \gp{} prior, which \
 Commonly used kernels include the squared exponential (SE), periodic (Per) and linear (Lin) kernels (see figure~\ref{fig:basic_kernels}).
 %When used within the context of \gp{} regression, 
 These kernels define priors which place mass on smooth, periodic and linear  functions respectively.
-\input{tables/simple_kernels_table_v2.tex}
+%\input{tables/simple_kernels_table_v2.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 %
-\input{tables/example_structures_table_v2.tex}
+\input{tables/example_structures_table_v3.tex}
 
 \paragraph{Summation}
 
@@ -159,9 +164,9 @@ In multiple dimensions, summing kernels can correspond to decompositions of the 
 \ie `independent' variation in different dimensions.
 \NA{Structure of this form is referred to as generalised additive modeling}~\citep{hastie1990generalized}.
 %
-\input{tables/multi_d_additive_fig_v2}
+%\input{tables/multi_d_additive_fig_v2}
 %
-This is demonstrated visually in the first row of figure~\ref{fig:multi_d_additivity}.
+This is demonstrated visually in the bottom row of figure~\ref{fig:kernels}.
 %demonstrates a decomposition across dimensions.
 
 
