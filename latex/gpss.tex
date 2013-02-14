@@ -465,25 +465,26 @@ These equivalent forms are often more interpretableleads to interpretable decomp
 
 First, we revisited a dataset explored in \cite{rasmussen38gaussian}, pages 120-126, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
-%Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
-%Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
+Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolation improves dramatically as the search depth increases.  One may ask why the lengthscale of the base kernel was not chosen to be long enough to capture the long-term trend; the answer is that a \gp{} model assigns much higher marginal likelihood to kernels which capture the short frequencies of the data.
+
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the model chosen by our method, together with the posteriors of the additive components.
 The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity, medium-term deviations and short-term serially correlated `noise'.  We also plot the residuals, in order to indicate that there is little obvious structure left in the data.
 
-\begin{figure*}[h!]
+\begin{figure}[h!]
 \centering
-\newcommand{\wmg}{5.5cm}  % width maunu growth
-\newcommand{\hmg}{4cm}  % height maunu growth
+\newcommand{\wmg}{0.41\columnwidth}  % width maunu growth
+\newcommand{\hmg}{3.5cm}  % height maunu growth
 \begin{tabular}{c}
- \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
- \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
- \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
+\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
+\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
+\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+\caption{Posterior mean and variance for different depths of kernel search on the Mauna dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
-\end{figure*}
+\end{figure}
 
 \begin{figure}[h!]
 \newcommand{\wmgd}{9.5cm}  % width mauna decomp
@@ -503,24 +504,24 @@ The plot shows a plausible extrapolation and interpretable components: a long-te
 \paragraph{Airline passenger data}
 
 \TBD{Give an intro to this dataset.}
-Figures \ref{fig:airline_grow} and \ref{fig:airline_decomp} show the corresponding plots for the airline data set (\TBD{describe me!}).
+Figure \ref{fig:airline_decomp} shows the model discovered by our method on the airline dataset, as well as the corresponding decomposition.
 \TBD{Make similar observations of good performance}
 
 Note that the linear kernel allows an element of heteroskedasticity in our model - the posterior marginal variance grows with the increase in the number of passengers over time.
 
-\begin{figure}[h!]
-\centering
-\newcommand{\wag}{4.8cm}  % width airline growth
-\newcommand{\hag}{4cm}  % height airline growth
-\begin{tabular}{cc}
-\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
-\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
-\end{tabular}
-\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
-\label{fig:airline_grow}
-\end{figure}
+%\begin{figure}[h!]
+%\centering
+%\newcommand{\wag}{4.8cm}  % width airline growth
+%\newcommand{\hag}{4cm}  % height airline growth
+%\begin{tabular}{cc}
+%\includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_0/01-airline-s_all_small}
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_1/01-airline-s_all_small} \\
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_2/01-airline-s_all_small} 
+%\hspace{-1cm} \includegraphics[width=\wag,height=\hag]{../figures/decomposition/01-airline-s_max_level_3/01-airline-s_all_small}
+%\end{tabular}
+%\caption{Posterior mean and variance for different levels of kernel search on the airline dataset. \TBD{RBG: it looks like the figures on the left got clipped.}}
+%\label{fig:airline_grow}
+%\end{figure}
 
 % Created by the command:
 % postprocessing.make_all_1d_figures(folder='../results/31-Jan-1d/', prefix='31-Jan-v3', rescale=False)
