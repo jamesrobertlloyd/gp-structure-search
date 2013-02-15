@@ -311,11 +311,20 @@ This procedure is not guaranteed to find the global optimum, but is inspired by 
 
 %\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
 
-\paragraph{Gaussian process kernels} There has been significant work on constructing \gp{} kernels and analyzing their properties. This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
+\paragraph{Gaussian process kernels}
+There has been significant work on constructing \gp{} kernels and analyzing their properties.
+This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 
-\paragraph{Nonparametric regression in high dimensions} Nonparametric regression methods such as splines, locally weighted regression, and \gp{} regression are popular because they are capable of learning arbitrary smooth functions of the data. Unfortunately, they suffer from the curse of dimensionality: it is very difficult for the basic versions of these methods to generalize well in more than a few dimensions. Applying nonparametric methods in high-dimensional spaces requires imposing additional structure on the model.
+\paragraph{Nonparametric regression in high dimensions}
+Nonparametric regression methods such as splines, locally weighted regression, and \gp{} regression are popular because they are capable of learning arbitrary smooth functions of the data.
+Unfortunately, they suffer from the curse of dimensionality: it is very difficult for the basic versions of these methods to generalize well in more than a few dimensions.
+Applying nonparametric methods in high-dimensional spaces requires imposing additional structure on the model.
 
-One sort of structure is additive structure. Generalized additive models \cite{hastie1990generalized} are models in which the function is modeled as a sum of functions defined on the individual dimensions: $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$. These models have a limited compositional form, but one which is interpretable and often generalizes well. In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
+One such structure is additivity.
+Generalized additive models assume the regression function is a transformed sum of functions defined on the individual dimensions: $\expect[f(\vx)] = g\inv(\sum_{d=1}^D f_d(x_d))$.
+%Generalized additive models \cite{hastie1990generalized} are models in which the function is modeled as a sum of functions defined on the individual dimensions: $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.
+These models have a limited compositional form, but one which is interpretable and often generalizes well.
+In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
 
 It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
 Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
