@@ -48,6 +48,7 @@
 %\renewcommand{\PROBLEM}[1]{}
 %\renewcommand{\fPROBLEM}[1]{}
 %\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+       
     
 \begin{document}
 
@@ -405,16 +406,16 @@ The search was run to depth 10, using the base kernels from Section \ref{sec:Str
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
 
 \label{sec:extrapolation}
-\paragraph{Mauna Loa Atmospheric Carbon Dioxide}
+\paragraph{Mauna Loa Atmospheric CO$\mathbf{_{2}}$}
 
 First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
 , where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
-Figure \ref{fig:mauna_grow} show the posterior of the increasingly appropriate model as the search depth increases on this dataset.
-Note in particular that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Figure \ref{fig:mauna_grow} shows the posterior of the increasingly appropriate models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
+Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
-Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with the posteriors of the additive components.
-The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
+Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with its decomposition into additive components.
+The model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, demonstrating that there is little obvious structure left in the data.
 
 \begin{figure}
@@ -426,7 +427,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation improves.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first column, the function is only modeled as a locally smooth function, and the extrapolation is poor.  Next, a periodic component is added, and the extrapolation improves.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
 \end{figure}
@@ -442,7 +443,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_3} \\ + \\
 \hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_resid}
 \end{tabular}
-\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 8.  Subsequent rows: automatic decomposition of Mauna Loa data.  The signal has been automatically decomposed into long-term, yearly periodic, medium-term anomaly and short-term noise components, respectively. Note that in the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
+\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 10.  Subsequent rows show the automatic decomposition of the time series.  The decompositions shows long-term, yearly periodic, medium-term anomaly components and residuals, respectively.  In the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
 \end{figure}
 \label{fig:mauna_decomp}
 
@@ -450,8 +451,8 @@ We also plot the residuals, demonstrating that there is little obvious structure
 
 Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
 We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
-In addition, the composite kernel captures the near linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
-The discovery of linear structure allows for a highly plausible extrapolation.\fTBD{Mention heteroskedasticity?}
+In addition, the composite kernel captures the near-linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
+%The discovery of linear structure allows for a growing uncertainty highly plausible extrapolation.\fTBD{Mention heteroskedasticity?}
 
 %Discovering this linearity results in very plausible extrapolations of the data.
 %Figure~\ref{fig:airline_grow} demonstrates this by ploting the full posterior of the kernel discovered at sequential levels of the search.
@@ -496,7 +497,7 @@ The discovery of linear structure allows for a highly plausible extrapolation.\f
  + \\
 \hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_resid}
 \end{tabular}
-\caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Due to the linear kernel, the marginal variance grows over time, making this a heteroskedastic model. 
+\caption{First row:  The airline dataset and posterior after a search of depth 10.  Subsequent rows: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term deviations.  Due to the linear kernel, the marginal variance grows over time, making this a heteroskedastic model. 
 %\TBD{RBG: We allow heteroskedastic noise in our models?}
 }
 \label{fig:airline_decomp}
@@ -527,15 +528,13 @@ Finally, we analyze annual solar irradiation data from 1610 to 2011 \citep{lean1
 \end{figure}
 %
 The posterior and residuals of the learned kernel are shown in figure \ref{fig:solar_decomp}.
-The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
+%The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
 %but it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
 %This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
-
-None of the models in our search space are capable of representing this structure, since all of the base kernels apart from \kLin{} are stationary.
+%
+None of the models in our search space are capable of parsimoniously representing the lack of variation from 1645 to 1715. %, since all of the base kernels apart from \kLin{} are stationary.
 %, and it is hard to see how Lin would help in modeling this structure.
-Despite this, our approach fails gracefully: the learned kernel still captures the periodic structure and the quickly growing psoterior variance demonstrates that the model is uncertain agout long term structure.
-\fTBD{Minor merge conflict will appear here}
-\fTBD{Add changepoint citation or do not include to prevent blocking other work}
+Despite this, our approach fails gracefully: the learned kernel still captures the periodic structure, and the quickly growing posterior variance demonstrates that the model is uncertain about long term structure.
 
 %It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
