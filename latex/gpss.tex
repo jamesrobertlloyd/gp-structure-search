@@ -62,7 +62,7 @@
 
 \begin{abstract}
 Despite its importance, choosing the structural form of the kernel in nonparametric regression remains a black art.
-We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
+We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernels.
 We present a method for searching over this space of structures which mirrors the scientific discovery process.
 The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
 Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
@@ -86,7 +86,7 @@ Our structure search method outperforms many widely used kernel families and ker
 %Supervised learning problems, such as classification and regression, learn a function $\function$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
 Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}s), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
 These methods depend on defining a kernel function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are expected to be at two inputs $\inputVar$ and $\inputVar'$.
-By defining the measure of similarity between inputs, the kernel determines the pattern of inductive generlization.
+By defining the measure of similarity between inputs, the kernel determines the pattern of inductive generalization.
 %The kernel function gives a measure of similarity between inputs and determines the pattern of inductive generalizations that are made. 
 
 The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
@@ -158,7 +158,7 @@ The kernel specifies which structures are likely under the \gp{} prior, which in
 %\end{eqnarray}
 %
 In this section, we review the ways in which kernel families\footnotemark can be composed to express diverse priors over functions. 
-\footnotetext{When unclear from context we use `kernel family' to refer to a particular parametric form of function and `kernel' to refer to a particular function with all parameter values determined.}  
+\footnotetext{When unclear from context, we use "kernel family" to refer to the parametric forms of the functions given in the appendix. A kernel is a kernel family with all of the parameters specified.}  
 
 There has been significant work on constructing \gp{} kernels and analyzing their properties, summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 %
