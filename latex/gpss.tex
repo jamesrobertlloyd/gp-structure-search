@@ -192,7 +192,7 @@ For instance, in multidimensional data, the multiplicative kernel $\SE_1 \times 
 In univariate data, multiplying a kernel by \kSE{} gives a way of converting global structure to local structure. 
 For instance, $\Per$ corresponds to globally periodic structure, whereas $\Per \times \SE$ corresponds to locally periodic structure, as shown in row 1 of figure~\ref{fig:kernels}.
 
-Many architectures for learning complex functions, such as convolutional networks \TBD{cite} and sum-product networks \TBD{cite}, include units which compute AND-like and OR-like operations.
+Many architectures for learning complex functions, such as convolutional networks \cite{lecun1989backpropagation} and sum-product networks \cite{poon2011sum}, include units which compute AND-like and OR-like operations.
 Composite kernels can be viewed in this way too. A sum of kernels can be understood as an OR-like operation: two points are considered similar if either kernel has a high value.
 Similarly, multiplying kernels is an AND-like operation, since two points are considered similar only if both kernels have high values.
 Because we are applying these operations to the similarity functions rather than the regression functions themselves, compositions of even a few base kernels are able to capture complex relationships in data which do not have a simple parametric form.
