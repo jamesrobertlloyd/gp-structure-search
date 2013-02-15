@@ -357,87 +357,9 @@ Some of their (discrete) graph structures have continous analogues in our own sp
 
 \citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
 
-\section{Validation on synthetic data}
-\label{sec:synthetic}
 
-We validate our method by constructing synthetic data sets to check that we can infer known structure.
-For several composite kernel expression we constructed synthetic data by uniformly sampling 300 input points in a symmetric hyper cube and then sampled a Gaussian process over these data points.
-We then added \iid Gaussian noise to the output data with variance chosen to achieve a signal to noise ratio (SNR\footnotemark) of 10.
-\footnotetext{We define the signal to noise ratio to be the standard deviation of the function divided by the standard deviation of the noise.}
-%
-\begin{table*}[ht!]
-\caption{{\small
-Kernels used to generate synthetic data, dimensionality, $d$, of the input space, the inferred kernels and SNR of model fit.
-}}
-\label{tbl:synthetic-less}
-\begin{center}
-{%\small
-\begin{tabular}{c c | c c c}
-%
-True kernel & $d$ & Inferred kernels & Estimated SNR (Truth = 10)\\% & Temp col & Temp col \\
-\hline
-$\SE + \RQ$                               & 1 & $\RQ$ & 11.1 \\%& 1.06 & 0.14\\
-$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2 \\%& 1.01 & 0.13\\
-$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7 \\%& 0.91 & 0.14\\
-$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2 \\%& 0.84 & 0.09\\
-$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7 \\%& 1.02 & \dots\\
-$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2 \\%& \dots & \dots\\
-$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9 \\%& 0.91 & 726\\
-\end{tabular}
-}
-\end{center}
-\end{table*}
-%
-%\begin{table*}[ht!]
-%\caption{{\small
-%CURRENTLY NOT INTENDED FOR PAPER
-%Kernels used to generate synthetic data together, dimensionality, $d$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
-%}}
-%\label{tbl:synthetic}
-%\begin{center}
-%{\tiny
-%\begin{tabular}{c c | c c c}
-%Kernel & $d$ & SNR = 10 & SNR = 1 & SNR = 0.1 \\
-%\hline
-%$\SE + \RQ$                               & 1 & $\RQ$
-%                                              & $\SE \times \Per$
-%                                              & $\Lin$ \\
-%$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ 
-%                                              & $\Lin \times (\Per + \SE)$
-%                                              & $\SE$ \\
-%$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$
-%                                              & $\SE_2 \times \Lin_2$ 
-%                                              & $\Lin_1 \times \Per_2$\\
-%$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$
-%                                              & $\Lin_2 \times \Per_1 + \SE_3$
-%                                              & $\SE_2$ \\
-%$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$
-%                                              & $\SE_1 \times \SE_2 \times \Per_3$
-%                                              & \dots\\
-%$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$
-%                                              & $(\SE_1 + \SE_2 \times \SE_3) \times \Lin_3$
-%                                              & \dots \\
-%$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$
-%                                              & $(\SE_1 + \SE_2) \times \SE_3 \times \Lin_4 \times \Lin_4$
-%                                              & $\Lin_2 \times \SE_3$ \\
-%\end{tabular}
-%}
-%\end{center}
-%\end{table*}
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the dimensionality, $d$, of the input space, the kernel inferred by our search and the SNR of the model fit and model residuals.
 
-Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure. 
-Random samples from \kSE{} kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.
-The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 10 would indicate over and underfitting respectively.
-The values reported show that the model is not serverely over- or under-fitting.
 
-%\paragraph{Not for paper - annoying results - to be included if a fix is found}
-
-%Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
-%We were hoping to see simpler kernels.
-%The kernels \emph{are} simpler, but \kPer{} kernels have been sprinkled in.
-%The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
-%Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
 
 
 
@@ -447,7 +369,7 @@ The values reported show that the model is not serverely over- or under-fitting.
 %In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 %We then also plot that same kernel and posterior decomposed into additive components.
 
-As a visual demonstration of the structures discovered by our method we performed the search over kernels on several time series datasets.
+As a demonstration of the structures discovered by our method, we performed the search over kernels on several time series datasets.
 %in order to test whether it learns plausible and interpretable structure. 
 %For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
 %Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
@@ -628,11 +550,100 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
+
+
+
+\section{Validation on synthetic data}
+\label{sec:synthetic}
+
+We validated our method's ability to recover known structure on a set of synthetic datasets.
+For several composite kernel expressions, we constructed synthetic data by first sampling 300 points uniformly at random, then sampling function values at those points from a \gp{} prior.
+We then added \iid Gaussian noise to the function values, with variance chosen to achieve a signal-to-noise ratio (SNR\footnotemark) of 100.
+\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
+%
+\begin{table*}[ht!]
+\caption{{\small
+Kernels used to generate synthetic data, dimensionality $D$ of the input space, inferred kernels, and estimated SNR.
+}}
+\label{tbl:synthetic-less}
+\begin{center}
+{%\small
+\begin{tabular}{c c | c c c}
+%
+True kernel & $D$ & Inferred kernels & Estimated SNR (Truth = 10)\\% & Temp col & Temp col \\
+\hline
+$\SE + \RQ$                               & 1 & $\RQ$ & 11.1 \\%& 1.06 & 0.14\\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2 \\%& 1.01 & 0.13\\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7 \\%& 0.91 & 0.14\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2 \\%& 0.84 & 0.09\\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7 \\%& 1.02 & \dots\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2 \\%& \dots & \dots\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9 \\%& 0.91 & 726\\
+\end{tabular}
+}
+\end{center}
+\end{table*}
+%
+%\begin{table*}[ht!]
+%\caption{{\small
+%CURRENTLY NOT INTENDED FOR PAPER
+%Kernels used to generate synthetic data together, dimensionality, $D$, of the input space and the inferred kernels at different signal to noise ratios (SNR).
+%}}
+%\label{tbl:synthetic}
+%\begin{center}
+%{\tiny
+%\begin{tabular}{c c | c c c}
+%Kernel & $D$ & SNR = 10 & SNR = 1 & SNR = 0.1 \\
+%\hline
+%$\SE + \RQ$                               & 1 & $\RQ$
+%                                              & $\SE \times \Per$
+%                                              & $\Lin$ \\
+%$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ 
+%                                              & $\Lin \times (\Per + \SE)$
+%                                              & $\SE$ \\
+%$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$
+%                                              & $\SE_2 \times \Lin_2$ 
+%                                              & $\Lin_1 \times \Per_2$\\
+%$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$
+%                                              & $\Lin_2 \times \Per_1 + \SE_3$
+%                                              & $\SE_2$ \\
+%$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$
+%                                              & $\SE_1 \times \SE_2 \times \Per_3$
+%                                              & \dots\\
+%$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$
+%                                              & $(\SE_1 + \SE_2 \times \SE_3) \times \Lin_3$
+%                                              & \dots \\
+%$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$
+%                                              & $(\SE_1 + \SE_2) \times \SE_3 \times \Lin_4 \times \Lin_4$
+%                                              & $\Lin_2 \times \SE_3$ \\
+%\end{tabular}
+%}
+%\end{center}
+%\end{table*}
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel applied to) and the dimensionality, $D$, of the input space, the kernel chosen by our search and the SNR of the model fit and model residuals.
+
+Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure. 
+The functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
+The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 10 would indicate over and underfitting respectively.
+The values reported show that the model is not serverely over- or under-fitting.
+
+%\paragraph{Not for paper - annoying results - to be included if a fix is found}
+
+%Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
+%We were hoping to see simpler kernels.
+%The kernels \emph{are} simpler, but \kPer{} kernels have been sprinkled in.
+%The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
+%Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
+
+
+
+
+
 \section{Quantitative evaluation}
 \label{sec:quantitative}
 
 %In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
-In addition to the qualitative evaluation in the previous section, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
+In addition to the qualitative evaluation in section \ref{sec:time_series}, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
