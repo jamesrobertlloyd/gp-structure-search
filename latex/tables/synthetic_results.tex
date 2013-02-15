@@ -1,0 +1,22 @@
+\begin{table*}[ht!]
+\caption{{\small
+Kernels used to generate synthetic data, dimensionality $D$ of the input space, inferred kernels, and estimated SNR.
+}}
+\label{tbl:synthetic-less}
+\begin{center}
+{\small
+\begin{tabular}{c c | c c c}
+%
+True kernel & $D$ & Inferred kernels & Estimated SNR (Truth = 100)\\% & Temp col & Temp col \\
+\hline
+$\SE + \RQ$                               & 1 & $\RQ$ & 123 \\%& 1.06 & 0.14\\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 104 \\%& 1.01 & 0.13\\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 114 \\%& 0.91 & 0.14\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 149 \\%& 0.84 & 0.09\\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 94 \\%& 1.02 & \dots\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 125 \\%& \dots & \dots\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 142 \\%& 0.91 & 726\\
+\end{tabular}
+}
+\end{center}
+\end{table*}
