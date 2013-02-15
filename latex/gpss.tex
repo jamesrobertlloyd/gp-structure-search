@@ -6,8 +6,8 @@
 \usepackage{preamble}
 \usepackage{natbib}
 %%%% REMEMBER ME!
-\usepackage[draft]{hyperref}
-%\usepackage{hyperref}
+%\usepackage[draft]{hyperref}
+\usepackage{hyperref}
 \usepackage{color}
 \usepackage{wasysym}
 \usepackage{subfigure}
@@ -155,14 +155,7 @@ The kernel specifies which structures are likely under the \gp{} prior, which de
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
 %
-Commonly used kernels include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels. 
-For scalar-valued inputs, these kernels are defined as follows (also see Figure~\ref{fig:kernels}):\fTBD{Equations necessary?}
-\begin{align}
-\kernel_\textrm{SE}(\inputVar, \inputVar') &= \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
-\kernel_\textrm{Per}(\inputVar, \inputVar') &= \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
-\kernel_\textrm{Lin}(\inputVar, \inputVar') &= \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
-\kernel_\textrm{RQ}(\inputVar, \inputVar') &= \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
-\end{align}
+Commonly used kernels include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels  (see Figure~\ref{fig:kernels} and appendix).
 \input{tables/simple_kernels_table_v3.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
@@ -749,6 +742,17 @@ The learned kernels often yield decompositions of a signal into diverse and inte
 We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
 \subsubsection*{Acknowledgements}
+
+\appendix
+\section*{Appendix}
+\label{appendix}
+For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels are defined as follows:
+\begin{eqnarray*}
+\kernel_\textrm{SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
+\kernel_\textrm{Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+\kernel_\textrm{Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
+\kernel_\textrm{RQ}(\inputVar, \inputVar') =& \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
+\end{eqnarray*}
 
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
