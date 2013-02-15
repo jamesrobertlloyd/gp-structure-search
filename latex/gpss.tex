@@ -5,6 +5,7 @@
 \usepackage{graphicx}
 \usepackage{preamble}
 \usepackage{natbib}
+%%%% REMEMBER ME!
 \usepackage[draft]{hyperref}
 %\usepackage{hyperref}
 \usepackage{color}
@@ -52,6 +53,7 @@
 
 \twocolumn[
 \icmltitle{Structure Discovery in Nonparametric Regression through Compositional Kernel Search}
+%%%%Remember me!
 %\icmlauthor{Anonymous Authors}
 %\icmladdress{ Unknown Institution}
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML, structure learning, extrapolation, regression, kernel learning, equation learning, supervised learning, time series}
@@ -61,10 +63,7 @@
 \begin{abstract}
 Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.%\NA{, often expressed as a kernel function}.
 %\fTBD{Mention \gp{}s? Or generic kernel statement?}
-\NA{
-In particular, Gaussian processes require the specification of a kernel.
-}
-While there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
+\NA{This is often specified by a kernel, and whilst} there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
 We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
 We present a method for searching over this space of structures which mirrors the scientific discovery process.
 The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
@@ -87,7 +86,7 @@ Kernel-based nonparametric models, such as support vector machines and Gaussian 
 These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
 The kernel function gives a measure of similarity between inputs and determines the pattern of inductive generalizations that are made. 
 
-The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
+\fTBD{I liked the pattern of inductive generalisation - resurrect?}The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
 Examples include learning hyperparameters \TBD{cite?}, linear combination weights \cite{Back_HKL}, and mappings from the input space to an embedding space \cite{salakhutdinov2008using}.
 These techniques have in common that kernel learning is posed as a (possibly high dimensional) parameter estimation problem.
 However, to apply existing kernel learning algorithms, the user must specify the parametric form of the kernel, and this can require considerable expertise, as well as trial and error.
@@ -134,8 +133,6 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 %\paragraph{Benefits of kernel structure}  In many regression problems, or time series analysis, or when modeling dynamical systems, we often think we are observing the superposition of multiple distinct causal processes.
 %For example, an underlying linear function plus Gaussian noise in classical linear regression, or an underlying linear dynamics plus Gaussian observation noise in a Kalman filter.
 %Our approach can be seen as a general way to learn functions like this, where the product of kernels can be used to capture richer causal proceses (e.g., nonlinear rather simply linear, amplifying perioidic (as in the second layer of the airline example) rather than simply periodic) and the sum of kernels corresponds to the superposition of these causal processes.
-
-
 
 \section{Expressing structure through kernels} 
 \label{sec:Structure}
