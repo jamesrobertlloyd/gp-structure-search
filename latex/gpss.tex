@@ -205,7 +205,7 @@ Linear trend with deviations & $\Lin + \SE$ \\
 Linearly growing amplitude & $\Lin \times \SE$
 \end{tabular}
 
-We use the term `generalized Fourier decomposition' to express the fact that the periodic functions expressible by a \gp{} with a periodic kernel are not limited to sine and cosine.
+We use the term `generalized Fourier decomposition' to express that the periodic functions expressible by a \gp{} with a periodic kernel are not limited to sine and cosine.
 
 
 %\section{Gaussian Processes Priors}
@@ -219,6 +219,10 @@ We use the term `generalized Fourier decomposition' to express the fact that the
 %
 %The technique of constructing composite kernels using sums and products of existing kernels is not new \cite{rasmussen38gaussian} [more cites, Phil Hennig's astronomy work?].  
 %However, the main contribution of this paper is to automate the search over kernel structures.
+
+
+
+
 
 \section{Searching over structures}
 \label{sec:Search}
@@ -369,14 +373,21 @@ Some of their (discrete) graph structures have continous analogues in our own sp
 %In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 %We then also plot that same kernel and posterior decomposed into additive components.
 
-As a demonstration of the structures discovered by our method, we performed the search over kernels on several time series datasets.
+As a demonstration of the structures discoverable by our method, we performed the search over kernels on several time series datasets.
 %in order to test whether it learns plausible and interpretable structure. 
 %For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
 %Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
 %We pay special attention to the models' extrapolations beyond the range of observed data, since this is a strong test of the correctness of the learned structure.
-Our method produces interpretable decompositions of the unknown regression function and plausible extrapolations.
+Our method discovers rich structure in these datasets, and produces plausible extrapolations.  
 
-In these experiments, the search was run up to depth 10, and all of the base kernels from Section \ref{sec:Structure} were used.
+We further demonstrate that the discovered structures can be decomposed into sums of interpretrable components.  
+All kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
+For example,
+\[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
+%By decomposing a kernel into a sum we are able to decompose .%, even when the learned kernel was not originally of this form.
+As discussed in section 2, a \gp{} whose kernel is a sum of kernels is equivalent to a sum of \gp{} models.
+%these decompositions can be interpreted as superpositions of causal processes.
+Details of computations are given in the appendix.
 
 %\section{Decomposing a function}
 
@@ -386,32 +397,12 @@ In these experiments, the search was run up to depth 10, and all of the base ker
 
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
 
-\paragraph{Decomposing a superposition}
-\label{sec:decomposing}
-%We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
-Given a composite kernel consisting of a sum, % of several simpler kernels,
-we can analytically infer a decomposition of a function into a superposition of component functions.
-Formally,\fTBD{Old decomp commented out - but happy to have reintroduced}
-%For simplicity, consider the case of a sum of two kernels.
-let ${\function = \sum\function_n}$, where ${\function_n \sim \GP( 0, k_n)}$.
-The conditional distribution of a vector of component values $\vf_n$ conditioned on observations $\vf$ is given by
-\[
-%\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
-%& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
-\vf_n \given \vf \sim \mathcal{N} \Big( \vK_n (\vK_n + \vK_{-n}\inv)\inv \vf, (\vK_n\inv + \vK_{-n}\inv)\inv \Big).
-\]
-where ${\vK_{n,ij} = k_n(x_i,x_j),\,\,\vK_{-n,ij} = \sum_{m\neq n}k_m(x_i,x_j)}$. 
-%and the covariance between the two components, conditioned on their sum is given by:
-%\begin{align}
-%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
-%\end{align}
-%Derivations can be found in the supplementary material.
+The search was run to depth 10, using the base kernels from Section \ref{sec:Structure}.
+
+
+%\paragraph{Decomposing a superposition}
 
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
-All of the kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
-For example,
-\[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
-By decomposing a kernel into a sum we are able to apply the result above which  are often leads to interpretable decompositions.%, even when the learned kernel was not originally of this form.
 
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric Carbon Dioxide}
@@ -426,7 +417,7 @@ Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model ch
 The plot shows a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, demonstrating that there is little obvious structure left in the data.
 
-\begin{figure}[h!]
+\begin{figure}
 \centering
 \newcommand{\wmg}{0.39\columnwidth}  % width maunu growth
 \newcommand{\hmg}{3.2cm}  % height maunu growth
@@ -440,7 +431,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \label{fig:mauna_grow}
 \end{figure}
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \newcommand{\wmgd}{9.5cm}  % width mauna decomp
 \newcommand{\hmgd}{3.1cm}  % height mauna decomp
 \newcommand{\mdrd}{../figures/decomposition/11-Feb-03-mauna2003-s}  % mauna decomp results dir
@@ -486,7 +477,7 @@ The discovery of linear structure allows for a highly plausible extrapolation.\f
 % Created by the command:
 % postprocessing.make_all_1d_figures(folder='../results/31-Jan-1d/', prefix='31-Jan-v3', rescale=False)
 
-\begin{figure}[h!]
+\begin{figure}[ht!]
 \centering
 \newcommand{\wagd}{9.5cm}  % width airline decomp
 \newcommand{\hagd}{3.5cm}  % height airline decomp
@@ -756,13 +747,38 @@ We believe that a data-driven approach to choosing kernel structures automatical
 \appendix
 \section*{Appendix}
 \label{appendix}
+\paragraph{Kernel definitions}
 For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels are defined as follows:
+%
 \begin{eqnarray*}
 \kernel_\textrm{SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 \kernel_\textrm{Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
 \kernel_\textrm{Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
 \kernel_\textrm{RQ}(\inputVar, \inputVar') =& \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
 \end{eqnarray*}
+
+
+\paragraph{Posterior decomposition}
+\label{sec:decomposing}
+%We can analytically decompose a \gp{} posterior distribution over additive components using the following identity:
+Given a composite kernel consisting of a sum, % of several simpler kernels,
+we can analytically infer a decomposition of a function into a superposition of component functions.
+Formally,\fTBD{Old decomp commented out - but happy to have reintroduced}
+%For simplicity, consider the case of a sum of two kernels.
+let ${\function = \sum\function_n}$, where ${\function_n \sim \GP( 0, k_n)}$.
+The conditional distribution of a vector of component values $\vf_n$ conditioned on observations $\vf$ is given by
+\[
+%\vf_1 | \vf \sim \mathcal{N} \Big( & \boldsymbol\mu_1 + \vk_1\tra (\vK_1 + \vK_2)\inv \left( \vf - \boldsymbol\mu_1 - \boldsymbol\mu_2 \right), \nonumber \\
+%& \vK_1 - \vk_1\tra (\vK_1 + \vK_2)\inv \vk_1 \Big).
+\vf_n \given \vf \sim \mathcal{N} \Big( \vK_n (\vK_n + \vK_{-n}\inv)\inv \vf, (\vK_n\inv + \vK_{-n}\inv)\inv \Big).
+\]
+where ${\vK_{n,ij} = k_n(x_i,x_j),\,\,\vK_{-n,ij} = \sum_{m\neq n}k_m(x_i,x_j)}$. 
+%and the covariance between the two components, conditioned on their sum is given by:
+%\begin{align}
+%\cov(\vf_1^\star, \vf_2^\star) | \vf = \vk_1^{\star\tra} (\vK_1 + \vK_2)\inv \vk_2^\star
+%\end{align}
+%Derivations can be found in the supplementary material.
+
 
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
