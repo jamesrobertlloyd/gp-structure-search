@@ -382,30 +382,34 @@ Some of their (discrete) graph structures have continous analogues in our own sp
 %In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 %We then also plot that same kernel and posterior decomposed into additive components.
 
-As a demonstration of the structures discoverable by our method, we performed the search over kernels on several time series datasets.
+In order to investigate our method's ability to discover structure, we performed the search over kernels on several time series datasets.
 %in order to test whether it learns plausible and interpretable structure. 
 %For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
 %Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
 %We pay special attention to the models' extrapolations beyond the range of observed data, since this is a strong test of the correctness of the learned structure.
 Our method discovers rich structure in these datasets, and produces plausible extrapolations.  
 
-We further demonstrate that the discovered structures can be decomposed into sums of interpretrable components.  
-All kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
-For example,
+%We further demonstrate that the discovered structures can be decomposed into sums of interpretrable components.  
+%All kernels in our search space can equivalently be written as sums of products of base kernels by applying distributivity.
+%For example,
+As discussed in section 2, a \gp{} whose kernel is a sum of kernels can be viewed as a sum of functions drawn from component \gp{}s.
+This provides another method of visualizing the learned structures.
+In particular, all kernels in our search space can be equivalently written as sums of products of base kernels by applying distributivity \eg
 \[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
+We visualize the decompositions into sums of components using the formulae given in the appendix.
 %By decomposing a kernel into a sum we are able to decompose .%, even when the learned kernel was not originally of this form.
-As discussed in section 2, a \gp{} whose kernel is a sum of kernels is equivalent to a sum of \gp{} models.
+%
 %these decompositions can be interpreted as superpositions of causal processes.
-Details of computations are given in the appendix.
-
+%Details of computations are given in the appendix.
+%
 %\section{Decomposing a function}
-
+%
 %Sums of kernels were shown in section~\ref{sec:Structure} to correspond to sums of independent functions.
 %By splitting kernel expressions found by our search algorithm into additive components, we can also decompose the \gp{} posterior over functions into a joint distribution over functions that are summed togther.
 %This potentially allows us to probabilistically separate causally the independent processes that give rise to the data. 
-
+%
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
-
+%
 The search was run to depth 10, using the base kernels from Section \ref{sec:Structure}.
 
 
@@ -416,15 +420,17 @@ The search was run to depth 10, using the base kernels from Section \ref{sec:Str
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric CO$\mathbf{_{2}}$}
 
-First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
-, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
+First, we analyzed records of carbon dioxide levels recorded at the Mauna Loa observatory.
+Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, it serves as a test of our algorithm's ability to recover known structure.
+%First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
+%, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
-Figure \ref{fig:mauna_grow} shows the posterior of the increasingly appropriate models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
+Figure \ref{fig:mauna_grow} shows the posterior function estimates under increasingly structured models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
 Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with its decomposition into additive components.
-The model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
-We also plot the residuals, demonstrating that there is little obvious structure left in the data.
+The final model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
+We also plot the residuals, observing that there is little obvious structure left in the data.
 
 \begin{figure}
 \centering
@@ -451,7 +457,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_3} \\ + \\
 \hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_resid}
 \end{tabular}
-\caption{First row: The posterior on the Mauna Loa dataset after a search of depth 10.  Subsequent rows show the automatic decomposition of the time series.  The decompositions shows long-term, yearly periodic, medium-term anomaly components and residuals, respectively.  In the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
+\caption{First row: The posterior on the Mauna Loa dataset, after a search of depth 10.  Subsequent rows show the automatic decomposition of the time series.  The decompositions shows long-term, yearly periodic, medium-term anomaly components and residuals, respectively.  In the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
 \end{figure}
 \label{fig:mauna_decomp}
 
@@ -518,7 +524,7 @@ In addition, the composite kernel captures the near-linearity of the trend as we
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
 \paragraph{Solar Irradiance Data} 
-Finally, we analyze annual solar irradiation data from 1610 to 2011 \citep{lean1995reconstruction}.
+Finally, we analyzed annual solar irradiation data from 1610 to 2011 \citep{lean1995reconstruction}.
 %
 \begin{figure}[h!]
 \newcommand{\wsd}{9.5cm}  % width solar decomp
@@ -563,11 +569,11 @@ We then added \iid Gaussian noise to the function values, with variance chosen t
 \footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
 %
 %
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel applied to) and the dimensionality, $D$, of the input space, the kernel chosen by our search and the SNR of the model fit and model residuals.
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to) the dimensionality $D$ of the input space, the kernel chosen by our search and the SNR of the model fit and model residuals.
 
-Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure. 
+Our method finds all of the relevant structure in all but one test; in fact it also discovers unintentionally introduced linear structure. 
 The functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
-The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 100 would indicate over and underfitting respectively.
+The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 100 would indicate over- and under-fitting respectively.
 The values reported show that the model is not serverely over- or under-fitting.
 
 %\paragraph{Not for paper - annoying results - to be included if a fix is found}
@@ -602,12 +608,13 @@ In addition to the qualitative evaluation in section \ref{sec:time_series}, we a
 \end{figure}
 
 We compared the extrapolation capabilities of our model against standard baselines.  
-Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error of each method.  
+Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error (MSE) of each method.  
 We varied the size of the training set from the first 10\% to the first 90\% of the range of the data.
 
 Figure \ref{fig:extrapolation} shows the learning curves of linear regression, a variety of fixed kernel family \gp{} models, and our method.  
-\gp{} models with only \kSE{} and \kPer{} kernels did not capture the long-term trends, since the best parameter values in terms of \gp{} marginal likelihood only capture short term structure.  Linear regression approximately captured the long-term trend, but quickly plateaud in predictive performance.
-The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPer}$) captured more structure and performed better, and the full structures discovered by our search dominated in terms of predictive performance.
+\gp{} models with only \kSE{} and \kPer{} kernels did not capture the long-term trends, since the best parameter values in terms of \gp{} marginal likelihood only capture short term structure. 
+Linear regression approximately captured the long-term trend, but quickly plateaued in predictive performance.
+The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPer}$) eventually captured more structure and performed better, but the full structures discovered by our search outperformed the other approaches in terms of predictive performance for all data amounts.
 %In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
 
 %\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
@@ -615,14 +622,15 @@ The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPe
 
 \subsection{High-dimensional prediction}
 
-To demonstrate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
-We performed 10 fold cross validation on 5 datasets comparing 5 methods in terms of mean-squared (MSE) error and predictive likelihood.   The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.  Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernels.
+To evaluate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
+We performed 10 fold cross validation on 5 datasets\footnote{The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.} comparing 5 methods in terms of MSE and predictive likelihood.
+Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernels.
 
-The comparison includes three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarichical Kernel Learning (HKL).
+The comparison included three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarichical Kernel Learning (HKL).
 %We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
 
 
-Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperforms all other methods in all tests.
+Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperformed all other methods in all tests.
 %All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
 
 %
