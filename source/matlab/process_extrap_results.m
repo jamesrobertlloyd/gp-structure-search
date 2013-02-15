@@ -1,11 +1,11 @@
-results_directory = '../../results/9-Feb 1d learning curves/';
+results_directory = '../../results/15-Feb-1d-extrap-roger/';
 full_data_directory = '../../data/1d_data_rescaled/';
-fold_data_directory = '../../data/1d_extrap_folds/';
-figure_directory = '../../figures/extrapolation_curves/';
+fold_data_directory = '../../data/1d_extrap_roger_folds/';
+figure_directory = '../../figures/extrap_roger_curves/';
 clear experiments
 experiments{1} = '01-airline-s';
-%experiments{2} = '02-solar-s';
-experiments{2} = '03-mauna2003-s';
+experiments{2} = '02-solar-s';
+experiments{1} = '03-mauna2003-s';
 folds = 10;
 percentiles = 100 * (1:(folds-1)) / folds;
 
@@ -14,7 +14,7 @@ quick_test_mode = false;
 restart_sd = 4;
 restarts = 10;
 
-max_iters = 200; % Max iterations for GP training.
+max_iters = 100; % Max iterations for GP training.
 lw = 2;        % Line width.
 
 for i = 1:length(experiments)
