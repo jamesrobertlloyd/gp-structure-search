@@ -318,7 +318,7 @@ One sort of structure is additive structure. Generalized additive models \cite{h
 It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
 Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
 \cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel on all dimensions.
-A closely related procedure is smoothing-splines ANOVA (SS-ANOVA)\cite{wahba1990spline, gu2002smoothing}.
+A closely related procedure is smoothing-splines ANOVA \cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
@@ -355,23 +355,7 @@ We validate our method by constructing synthetic data sets to check that we can 
 For several composite kernel expression we constructed synthetic data by uniformly sampling 300 input points in a symmetric hyper cube and then sampled a Gaussian process over these data points.
 We then added \iid Gaussian noise to the output data with variance chosen to achieve a signal to noise ratio (SNR\footnotemark) of 10.
 \footnotetext{We define the signal to noise ratio to be the standard deviation of the function divided by the standard deviation of the noise.}
-
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the dimensionality, $d$, of the input space, the kernel inferred by our search and the SNR of the model fit and model residuals.
-
-Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure\footnotemark!
-The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 10 would indicate over and underfitting respectively.
-The values reported shows that there is a slight tendency to overfit but it is not severe.
-
-\footnotetext{Random samples from \kSE{} kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.}
-
-%\paragraph{Not for paper - annoying results - to be included if a fix is found}
-
-%Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
-%We were hoping to see simpler kernels.
-%The kernels \emph{are} simpler, but \kPer{} kernels have been sprinkled in.
-%The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
-%Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
-
+%
 \begin{table*}[ht!]
 \caption{{\small
 Kernels used to generate synthetic data, dimensionality, $d$, of the input space, the inferred kernels and SNR of model fit.
@@ -380,8 +364,8 @@ Kernels used to generate synthetic data, dimensionality, $d$, of the input space
 \begin{center}
 {%\small
 \begin{tabular}{c c | c c c}
-
-True kernel & $d$ & Inferred kernel & SNR of model fit\\% & Temp col & Temp col \\
+%
+True kernel & $d$ & Inferred kernels & Estimated SNR (Truth = 10)\\% & Temp col & Temp col \\
 \hline
 $\SE + \RQ$                               & 1 & $\RQ$ & 11.1 \\%& 1.06 & 0.14\\
 $\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2 \\%& 1.01 & 0.13\\
@@ -394,7 +378,7 @@ $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 +
 }
 \end{center}
 \end{table*}
-
+%
 %\begin{table*}[ht!]
 %\caption{{\small
 %CURRENTLY NOT INTENDED FOR PAPER
@@ -431,6 +415,22 @@ $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 +
 %}
 %\end{center}
 %\end{table*}
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (underscores indicate which dimension each kernel applied to) and the dimensionality, $d$, of the input space, the kernel inferred by our search and the SNR of the model fit and model residuals.
+
+Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure. 
+Random samples from \kSE{} kernels with long length scales occasionally resulted in near linear trends in the data which were only noticed after running the search algorithm.
+The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 10 would indicate over and underfitting respectively.
+The values reported show that the model is not serverely over- or under-fitting.
+
+%\paragraph{Not for paper - annoying results - to be included if a fix is found}
+
+%Table~\ref{tbl:synthetic} shows the same experiment with different signal to noise ratios.
+%We were hoping to see simpler kernels.
+%The kernels \emph{are} simpler, but \kPer{} kernels have been sprinkled in.
+%The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
+%Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
+
+
 
 \section{Structure discovery in time series}
 \label{sec:time_series}
@@ -504,7 +504,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
 \end{figure}
@@ -574,7 +574,7 @@ The discovery of linear structure allows for a highly plausible extrapolation.\f
  + \\
 \hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_resid}
 \end{tabular}
-\caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Note that the variance of the noise grows over time, making this a heteroskedastic model. 
+\caption{First row:  The airline dataset and posterior after a search of depth 8.  Rows 2-4: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term noise.  Due to the linear kernel, the marginal variance grows over time, making this a heteroskedastic model. 
 %\TBD{RBG: We allow heteroskedastic noise in our models?}
 }
 \label{fig:airline_decomp}

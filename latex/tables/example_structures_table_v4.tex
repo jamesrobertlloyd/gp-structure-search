@@ -15,7 +15,7 @@
   \kernpic{se_times_per} & \kernpic{se_times_per_draws}
 & \kernpic{lin_times_lin} & \kernpic{lin_times_lin_draws} 
 \\
-  {\small SE  $\times$ Per} & {\small local periodic} 
+  {\small SE  $\times$ Per} & {\small local periodicity} 
 & {\small Lin $\times$ Lin} & {\small quadratic functions}
 \\
 \midrule
@@ -23,7 +23,7 @@
 & \kernpic{lin_plus_per} & \kernpic{lin_plus_per_draws}
 \\
   {\small SE + Per } & {\small periodic with noise}
-& {\small Lin + Per} & {\small trend with period}
+& {\small Lin + Per} & {\small periodic with trend}
 \\
 \midrule
   \kernpic{se_times_lin} & \kernpic{se_times_lin_draws}
@@ -36,13 +36,13 @@
   \addkernpic{additive_kernel} & \addkernpic{additive_kernel_draw_sum}
 & \addkernpic{sqexp_kernel}  & \addkernpic{sqexp_draw}
 \\
-  {\small $SE_1 + SE_2$} & {\small {$f_1(x_1) + f_2(x_2)$}}
+  {\small $SE_1 + SE_2$} & {\small $f_1(x_1)$ $+ f_2(x_2)$}
 & {\small $SE_1 \times SE_2$} & {\small $f(x_1, x_2)$}
 \end{tabularx}
 \caption{ Examples of structures expressible by
   composite kernels.  
 %The x-axis has the same scale for all plots.
-  Left column and third columns: composite kernels.  Second and fourth columns: draws from a \gp{} with each repective kernel.  The x-axis has the same range on all plots.}
+  Left column and third columns: composite kernels $k(\cdot,0)$.  Plots have same meaning as in Figure \ref{fig:basic_kernels}.}
 \label{fig:kernels}
 \end{figure}
 
