@@ -567,18 +567,18 @@ Kernels used to generate synthetic data, dimensionality $D$ of the input space, 
 }}
 \label{tbl:synthetic-less}
 \begin{center}
-{%\small
+{\small
 \begin{tabular}{c c | c c c}
 %
-True kernel & $D$ & Inferred kernels & Estimated SNR (Truth = 10)\\% & Temp col & Temp col \\
+True kernel & $D$ & Inferred kernels & Estimated SNR (Truth = 100)\\% & Temp col & Temp col \\
 \hline
-$\SE + \RQ$                               & 1 & $\RQ$ & 11.1 \\%& 1.06 & 0.14\\
-$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 10.2 \\%& 1.01 & 0.13\\
-$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 10.7 \\%& 0.91 & 0.14\\
-$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 12.2 \\%& 0.84 & 0.09\\
-$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 9.7 \\%& 1.02 & \dots\\
-$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 11.2 \\%& \dots & \dots\\
-$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 11.9 \\%& 0.91 & 726\\
+$\SE + \RQ$                               & 1 & $\RQ$ & 123 \\%& 1.06 & 0.14\\
+$\Lin \times \Per$                        & 1 & $\Lin \times \Per$ & 104 \\%& 1.01 & 0.13\\
+$\SE_1 + \RQ_2$                           & 2 & $\SE_1 + \RQ_2$ & 114 \\%& 0.91 & 0.14\\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 & $\SE_1 + \SE_2 \times \Per_1 + \SE_3 \times \Lin_2$ & 149 \\%& 0.84 & 0.09\\
+$\SE_1 \times \SE_2$                      & 4 & $\SE_1 \times \SE_2 \times \Lin_1$ & 94 \\%& 1.02 & \dots\\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 & $(\SE_1 \times \SE_2 + \SE_2 \times \SE_3) \times \Lin_3$ & 125 \\%& \dots & \dots\\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 & $(\SE_1 + \SE_2) \times (\SE_3 + \SE_4\times\Lin_4)$ & 142 \\%& 0.91 & 726\\
 \end{tabular}
 }
 \end{center}
@@ -624,7 +624,7 @@ Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate d
 
 Our method correctly infers the structure of the kernels in all but one test; in fact it also discovers unintentionally introduced linear structure. 
 The functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
-The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 10 would indicate over and underfitting respectively.
+The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 100 would indicate over and underfitting respectively.
 The values reported show that the model is not serverely over- or under-fitting.
 
 %\paragraph{Not for paper - annoying results - to be included if a fix is found}
@@ -658,20 +658,17 @@ In addition to the qualitative evaluation in section \ref{sec:time_series}, we a
 \label{fig:extrapolation}
 \end{figure}
 
-\fTBD{I like Roger's experiment idea of hold out last 0.1 and train on $0.9 - \alpha$ to 0.9? Will be implemented if time.}
+We compared the extrapolation capabilities of our model against standard baselines.  
+Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error of each method.  
+We varied the size of the training set from the first 10\% to the first 90\% of the range of the data.
 
-To test the extrapolation capabilities of our model against standard baselines, we trained different models and ran our method on increasing continuous proportions of the airline data starting at the first time point.
-Predictive mean-squared-error was then computed for the complement of the training set.
-Figure \ref{fig:extrapolation} shows these learning curves, comparing against linear regression, and a variety of fixed kernel \gp{} models.  
-
-Linear regression models have fixed capacity, and quickly plateau in their predictive performance.
-In contrast, a \gp{} with an \kSE{} kernel never extrapolates on this data, since the best parameter values in terms of marginal likelihood only capture short term structure.
-The more ap[propriately structured \gp{} models perform better but the improved performance of our method warrants its flexibility.
+Figure \ref{fig:extrapolation} shows the learning curves of linear regression, a variety of fixed kernel family \gp{} models, and our method.  
+\gp{} models with only \kSE{} and \kPer{} kernels did not capture the long-term trends, since the best parameter values in terms of \gp{} marginal likelihood only capture short term structure.  Linear regression approximately captured the long-term trend, but quickly plateaud in predictive performance.
+The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPer}$) captured more structure and performed better, and the full structures discovered by our search dominated in terms of predictive performance.
 %In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
 
-\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
-\fTBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
-
+%\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
+%\fTBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
 
 \subsection{High-dimensional prediction}
 
