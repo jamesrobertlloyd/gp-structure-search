@@ -1,14 +1,16 @@
 \begin{figure}[h!]
-\newcommand{\wmgd}{9.5cm}  % width mauna decomp
+\newcommand{\wmgd}{9.cm}  % width mauna decomp
 \newcommand{\hmgd}{3.1cm}  % height mauna decomp
 \newcommand{\mdrd}{../figures/decomposition/11-Feb-03-mauna2003-s}  % mauna decomp results dir
+\newcommand{\mbm}{\hspace{-0.8cm}}  % move back
 \begin{tabular}{c}
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_all} \\ = \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_1} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_2_zoom} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_3} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_resid}
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_all} \\ = \\
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_1} \\ + \\
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_2_zoom} \\ + \\
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_3} \\ + \\
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_resid}
 \end{tabular}
 \caption{First row: The posterior on the Mauna Loa dataset, after a search of depth 10.  Subsequent rows show the automatic decomposition of the time series.  The decompositions shows long-term, yearly periodic, medium-term anomaly components and residuals, respectively.  In the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
-\end{figure}
 \label{fig:mauna_decomp}
+\end{figure}
+

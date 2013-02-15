@@ -40,13 +40,13 @@
 %\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
-%\renewcommand{\LATER}[1]{}
-%\renewcommand{\fLATER}[1]{}
-%\renewcommand{\TBD}[1]{}
-%\renewcommand{\fTBD}[1]{}
-%\renewcommand{\PROBLEM}[1]{}
-%\renewcommand{\fPROBLEM}[1]{}
-%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+\renewcommand{\LATER}[1]{}
+\renewcommand{\fLATER}[1]{}
+\renewcommand{\TBD}[1]{}
+\renewcommand{\fTBD}[1]{}
+\renewcommand{\PROBLEM}[1]{}
+\renewcommand{\fPROBLEM}[1]{}
+\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
        
     
 \begin{document}
@@ -176,9 +176,9 @@ These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \k
 
 \paragraph{Summation}
 
-By summing kernels, we can model the data as superpositions of independent functions, possibly representing different structure.
-Suppose ${\function_1 \dist \GP(\mu_1, \kernel_1)}$, ${\function_2 \dist \GP(\mu_2, \kernel_2)}$ independently.
-Then ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
+By summing kernels, we can model the data as a superposition of independent functions, possibly representing different structure.
+Suppose functions ${\function_1, \function_2}$ are draw from independent \gp{} priors, ${\function_1 \dist \GP(\mu_1, \kernel_1)}$, ${\function_2 \dist \GP(\mu_2, \kernel_2)}$.
+Then it follows that ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
 
 In time series models, sums of kernels can express superposition of different processes, possibly operating at different scales.
 In multiple dimensions, summing kernels gives additive structure over different dimensions, similar to generalized additive models~\citep{hastie1990generalized}.
@@ -235,11 +235,10 @@ We use the term `generalized Fourier decomposition' to express that the periodic
 \label{sec:Search}
 
 As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels.
-In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ).
-Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel \NA{family}, whose parameters are the concatenation of the parameters for the base kernel families. 
+In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: \kSE, \kPer, \kLin, and \kRQ.
+Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel family, whose parameters are the concatenation of the parameters for the base kernel families. 
 
-Our search procedure begins by proposing all base kernels families applied to all input dimensions. 
-%
+Our search procedure begins by proposing all base kernel families applied to all input dimensions. 
 We allow the following search operators over our set of expressions:
 \begin{itemize}
 \item[(1)] Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
@@ -248,7 +247,7 @@ We allow the following search operators over our set of expressions:
 \end{itemize}
 
 These operators can generate all possible algebraic expressions.
-To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernel families, we would obtain a context-free grammar which generates the set of algebraic expressions.
+To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernel families, we would obtain a context-free grammar (CFG) which generates the set of algebraic expressions.
 However, the more general versions of these rules allow more flexibility in the search procedure, which is useful because the CFG derivation may not be the most straightforward way to arrive at a kernel family.
 
 Our algorithm searches over this space using a greedy search: at each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
@@ -278,7 +277,7 @@ Unfortunately, optimizing over parameters is not a convex optimization problem, 
 %The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
 For example, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
 
-To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous model are initialized to their previous values.
+To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
 The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
 This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals.
 % inspired by the same heuristic of extending models by examining residuals mentioned above.
@@ -331,15 +330,15 @@ These models have a limited compositional form, but one which is interpretable a
 In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
 
 It is possible to add more flexibility to additive models by considering higher-order interactions between different dimensions. 
-Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all possible products of one-dimensional base kernels.  
-\citet{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel (\ie a product) on all dimensions.
+Additive Gaussian processes \cite{duvenaud2011additive11} are a \gp{} model whose kernel implicitly sums over all possible products of one-dimensional base kernels.  
+\citet{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel (\ie a product of \kSE{} over all dimensions).
 Both of these models can be expressed in our grammar.
 
 A closely related procedure is smoothing-splines ANOVA \cite{wahba1990spline, gu2002smoothing}.
 This model is a linear combinations of splines along each dimension, all pairs of dimensions, and possibly higher-order combinations.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
-Semiparametric regression \citep[e.g.][]{ruppert2003semiparametric} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
+Semiparametric regression \citep[e.g.][]{ruppert2003semiparametric} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a `catch-all' nonparametric part (such as a \gp{} with an SE kernel).
 In our approach, this can be represented as a sum of \kSE{} and \kLin{}.
 
 \paragraph{Kernel learning}
@@ -356,7 +355,7 @@ This model is typically used in unsupervised tasks and requires an expensive int
 \citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is a flexible approach to kernel learning but potentially less interpretable.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
-Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.\fTBD{Mention extrapolation?}
+Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
 %We build upon this work by demonstrating the structure implied by composite kernels, allowing for the automatic discovery of interpretable structure from data.
 %We build upon this work by interpreting the structure of composite kernels, demonstrating the automatic discovery of interpretable structure from data.
 %We build upon this work by 
@@ -365,7 +364,7 @@ Our work goes beyond this prior work by demonstrating the structure implied by c
 
 \paragraph{Structure discovery}
 
-There have been several attempts to uncover the structural form of a dataset by searching over a grammar of structures. For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities. Because we learn expressions describing the covariance structure rather than the functions themselves, we are able to capture structure which doesn't have a simple parametric form.
+There have been several attempts to uncover the structural form of a dataset by searching over a grammar of structures. For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities. Because we learn expressions describing the covariance structure rather than the functions themselves, we are able to capture structure which does not have a simple parametric form.
 
 \citet{kemp2008discovery} learned the structural form of a graph used to model human similarity judgments.
 Examples of graphs included planes, trees, and cylinders.
@@ -421,10 +420,9 @@ The search was run to depth 10, using the base kernels from Section \ref{sec:Str
 %In cases where the kernel expression contains any product of a sum, our software automatically expands out the expression into an equivalent sum of products.  This operation transforms the posterior into a more interpretable, but equivalent, form.
 
 \label{sec:extrapolation}
-\paragraph{Mauna Loa Atmospheric CO$\mathbf{_{2}}$}
+\paragraph{Mauna Loa atmospheric CO$\mathbf{_{2}}$}
 
 \input{tables/mauna_growth.tex}
-\input{tables/mauna_decomp.tex}
 First, we analyzed records of carbon dioxide levels recorded at the Mauna Loa observatory.
 Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, it serves as a test of our algorithm's ability to recover known structure.
 %First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
@@ -433,13 +431,16 @@ Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, it ser
 Figure \ref{fig:mauna_grow} shows the posterior function estimates under increasingly structured models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
 Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
+\input{tables/mauna_decomp.tex}
+
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with its decomposition into additive components.
 The final model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, observing that there is little obvious structure left in the data.
 
+
+
 \paragraph{Airline passenger data}
 
-\input{tables/airline_decomp.tex}
 
 Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
 We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
@@ -476,10 +477,13 @@ In addition, the composite kernel captures the near-linearity of the trend as we
 %The accuracy experiments show that our method consistently matches or beats previous state of the art regression methods (\TBD{not yet statistically significantly within each experiment - more experiments currently running\ldots}).
 %The decomposition experiments produce highly interpretable decompositions of time series data and highly plausible extrapolations; a particularly rare property of naively applied (linear) smoothers (\TBD{justify comment - e.g.~local linear is just linear, GP Sq-Exp nose dives towards the mean}).
 
-\paragraph{Solar Irradiance Data} 
+
+
+\paragraph{Solar irradiance Data} 
 Finally, we analyzed annual solar irradiation data from 1610 to 2011 \citep{lean1995reconstruction}.
 %
-\input{tables/solar_decomp.tex}
+
+
 %
 The posterior and residuals of the learned kernel are shown in figure \ref{fig:solar_decomp}.
 %The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
@@ -493,9 +497,11 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 %It is likely that our framework could be extended to capture nonstationary structure by adding a changepoint kernel \TBD{cite?}.
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
+\input{tables/solar_decomp.tex}
+
+\input{tables/airline_decomp.tex}
 
 \input{tables/extrapolation.tex}
-
 
 \section{Validation on synthetic data}
 \label{sec:synthetic}
@@ -509,10 +515,11 @@ We then added \iid Gaussian noise to the function values, with variance chosen s
 %\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
 %
 %
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to) the dimensionality $D$ of the input space, the kernel chosen by our search, and the estimated noise variance.
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to), the dimensionality $D$ of the input space, the kernel chosen by our search, and the estimated noise variance.
 
-Our method finds all of the relevant structure in all but one test; in fact it also discovers unintentionally introduced linear structure. 
-The functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
+Our method finds all of the relevant structure in all but one test.  In fact, it also discovers unintentionally introduced linear structure:
+functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
+
 The estimated noise level $\sigma_n$ numerically assesses the quality of the fit to the data; large positive or negative deviations from 0.1 would indicate under-fitting and over-fitting, respectively.
 The values reported show that the model is not severely over- or under-fitting.
 
@@ -555,7 +562,7 @@ The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPe
 
 To evaluate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
 We performed 10 fold cross validation on 5 datasets\footnote{The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.} comparing 5 methods in terms of MSE and predictive likelihood.
-Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernels.
+Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernel families.
 
 The comparison included three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarichical Kernel Learning (HKL).
 %We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
@@ -623,7 +630,7 @@ Results are presented in table \ref{tbl:Regression Mean Squared Error}; our meth
 %Choosing a kernel family is a stumbling block even for experts.
 %Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
 
-The ability to learn kernel parameters and combination weights automatically has been an important factor enabling the widespread use of kernel methods.
+The ability to learn kernel parameters and combination weights automatically has been an important factor in enabling the widespread use of kernel methods.
 For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
 
 Towards the goal of automating this process, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
@@ -642,10 +649,10 @@ We believe that a data-driven approach to choosing kernel structures automatical
 For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels are defined as follows:
 %
 \begin{eqnarray*}
-\kernel_\textrm{SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
-\kernel_\textrm{Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
-\kernel_\textrm{Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
-\kernel_\textrm{RQ}(\inputVar, \inputVar') =& \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
+\kernel_{\SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
+\kernel_{\Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+\kernel_{\Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
+\kernel_{\RQ}(\inputVar, \inputVar') =& \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
 \end{eqnarray*}
 
 
