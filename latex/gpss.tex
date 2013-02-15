@@ -326,14 +326,16 @@ Generalized additive models assume the regression function is a transformed sum 
 These models have a limited compositional form, but one which is interpretable and often generalizes well.
 In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
 
-It is possible to add more flexibility to additive models by considering limited-order interactions between different dimensions. 
-Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all $2^D$ possible products of one-dimensional base kernels.  
-\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel on all dimensions.
+It is possible to add more flexibility to additive models by considering higher-order interactions between different dimensions. 
+Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all possible products of one-dimensional base kernels.  
+\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel (\ie a product) on all dimensions.
+Both of these models can be expressed in our grammar.
+
 A closely related procedure is smoothing-splines ANOVA \cite{wahba1990spline, gu2002smoothing}.
 This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
-Semiparametric regression \TBD{add cites} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
+Semiparametric regression \citep[e.g.][]{ruppert2003semiparametric} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
 In our approach, this can be represented as a sum of \kSE{} and \kLin{}.
 
 \paragraph{Kernel learning}
@@ -344,18 +346,21 @@ There is a large body of work attempting to construct a rich kernel through a we
 While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
 
 Another approach to kernel learning is to learn the embeddings of the points. 
-\TBD{Cite GP-LVM} learns an embedding of the data points into a low-dimensional space, and constructs a kernel over that space. 
-\citet{salakhutdinov2008using} use a deep neural network to learn an embedding. 
-\TBD{What are the advantages of our approach over GP-LVMs?  That it can generalize to new data points?  That it's more scalable?  I guess both of these approaches require specifying the form of the kernel.}
+\cite{lawrence2005probabilistic} learns an embedding of the data points into a low-dimensional space, and constructs a fixed kernel structure over that space.
+\NA{
+This model is typically used in unsupervised tasks requires an expensive integration or optimisation over potential embeddings when generalising to new data points.
+}
+\citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is an interesting approach to kernel learning but potentially less interpretable.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} attempted to learn the structures of kernels using genetic algorithms.  \TBD{Something about how our work relates to theirs?}
-
 
 \paragraph{Structure discovery}
 
 There have been several attempts to uncover the structural form of a dataset by searching over a grammar of structures. For example, \cite{schmidt2009distilling}, \cite{todorovski1997declarative} and \cite{washio1999discovering} attempt to learn parametric forms of equations to describe time series, or relations between quantities. Because we learn expressions describing the covariance structure rather than the functions themselves, we are able to capture structure which doesn't have a simple parametric form.
 
-\citet{kemp2008discovery} learned what structural form of a graph to use to model human similarity judgments. Examples of graphs included planes, trees, and cylinders. Some of their (discrete) graph structures have continous analogues in our own space; for instance, $SE_1 \times SE_2$ and $SE_1 \times Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
+\citet{kemp2008discovery} learned the structural form of a graph used to model human similarity judgments.
+Examples of graphs included planes, trees, and cylinders.
+Some of their (discrete) graph structures have continous analogues in our own space; \eg $SE_1 \times SE_2$ and $SE_1 \times Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
 
 \citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
 
