@@ -33,7 +33,6 @@
 \newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}m{#1}}
 \newcommand{\tabbox}[1]{#1}
 
-
 \setlength{\marginparwidth}{0.6in}
 \input{include/commenting.tex}
 
@@ -41,13 +40,13 @@
 %\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
-\renewcommand{\LATER}[1]{}
-\renewcommand{\fLATER}[1]{}
-\renewcommand{\TBD}[1]{}
-\renewcommand{\fTBD}[1]{}
-\renewcommand{\PROBLEM}[1]{}
-\renewcommand{\fPROBLEM}[1]{}
-\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+%\renewcommand{\LATER}[1]{}
+%\renewcommand{\fLATER}[1]{}
+%\renewcommand{\TBD}[1]{}
+%\renewcommand{\fTBD}[1]{}
+%\renewcommand{\PROBLEM}[1]{}
+%\renewcommand{\fPROBLEM}[1]{}
+%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
        
     
 \begin{document}
@@ -62,15 +61,17 @@
 ]
 
 \begin{abstract}
-Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.%\NA{, often expressed as a kernel function}.
-%\fTBD{Mention \gp{}s? Or generic kernel statement?}
-\NA{This is often specified by a kernel, and while} there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
+Despite its importance, choosing the structural form of the kernel in nonparametric regression remains a black art.
 We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
 We present a method for searching over this space of structures which mirrors the scientific discovery process.
 The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
+Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
+%Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
+%This is often specified by a kernel, and while there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
+%\fTBD{Mention \gp{}s? Or generic kernel statement?}
+%\NA{, often expressed as a kernel function}.
 %The composite kernels in our search space are highly interpretable and can express abstract properties of a function.
 %Specifically, composite kernels allow for the automatic decompositon of a function into diverse and interpetable components, and in some cases allow for long-range extrapolation.
-Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
 \end{abstract}
 
 %Nonparametric regression methods are used widely and successfully but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
@@ -156,7 +157,8 @@ The kernel specifies which structures are likely under the \gp{} prior, which in
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
 %
-In this section, we review the ways in which kernels can be composed to express diverse priors over functions.  
+In this section, we review the ways in which kernel families\footnotemark can be composed to express diverse priors over functions. 
+\footnotetext{When unclear from context we use `kernel family' to refer to a particular parametric form of function and `kernel' to refer to a particular function with all parameter values determined.}  
 
 There has been significant work on constructing \gp{} kernels and analyzing their properties, summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 %
@@ -346,7 +348,7 @@ There is a large body of work attempting to construct a rich kernel through a we
 %\citet{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels.
 While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
 
-Another approach to kernel learning is to learn the embeddings of the points. 
+Another approach to kernel learning is to learn an embedding of the data points. 
 \citet{lawrence2005probabilistic} learns an embedding of the data points into a low-dimensional space, and constructs a fixed kernel structure over that space.
 \NA{
 This model is typically used in unsupervised tasks and requires an expensive integration or optimisation over potential embeddings when generaliing to new data points.
@@ -354,7 +356,8 @@ This model is typically used in unsupervised tasks and requires an expensive int
 \citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is a flexible approach to kernel learning but potentially less interpretable.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
-We build upon this work by demonstrating the structure implied by composite kernels, allowing for the automatic discovery of interpretable structure from data.
+Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.\fTBD{Mention extrapolation?}
+%We build upon this work by demonstrating the structure implied by composite kernels, allowing for the automatic discovery of interpretable structure from data.
 %We build upon this work by interpreting the structure of composite kernels, demonstrating the automatic discovery of interpretable structure from data.
 %We build upon this work by 
 %pointing out and demonstrating the interpretability of the structure implied by composite kernels, and demonstrating useful decompositions on several real datasets, as well as by examining extrapolation, structure recovery, and multidimensional regression.
@@ -366,7 +369,7 @@ There have been several attempts to uncover the structural form of a dataset by 
 
 \citet{kemp2008discovery} learned the structural form of a graph used to model human similarity judgments.
 Examples of graphs included planes, trees, and cylinders.
-Some of their (discrete) graph structures have continous analogues in our own space; \eg $SE_1 \times SE_2$ and $SE_1 \times Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
+Some of their (discrete) graph structures have continous analogues in our own space; \eg $\SE_1 \times \SE_2$ and $\SE_1 \times \Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
 
 \citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
 
