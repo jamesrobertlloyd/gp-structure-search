@@ -8,7 +8,7 @@ function plot_structure_examples()
 % David Duvenaud
 % Jan 2013
 
-seed=3;   % fixing the seed of the random generators
+seed=7;   % fixing the seed of the random generators
 randn('state',seed);
 rand('state',seed);
 
@@ -104,7 +104,7 @@ for k = 1:numel(kernels)
     samples_plot( xrange, samples, [1:n_samples] );
 
     if savefigs
-        save2pdf([ figpath, kernel_names{k} '_draws_s3.pdf'], gcf, 600, true);
+        save2pdf([ figpath, kernel_names{k} '_draws_s7.pdf'], gcf, 600, true);
     end
     pause(0.01);
     drawnow;    
