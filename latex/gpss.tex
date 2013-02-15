@@ -505,16 +505,16 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 
 We validated our method's ability to recover known structure on a set of synthetic datasets.
 For several composite kernel expressions, we constructed synthetic data by first sampling 300 points uniformly at random, then sampling function values at those points from a \gp{} prior.
-We then added \iid Gaussian noise to the function values, with variance chosen to achieve a signal-to-noise ratio (SNR\footnotemark) of 100.
-\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
+We then added \iid Gaussian noise to the function values, with variance chosen such that the standard deviation of the noise $\sigma_n$ relative to the sample variance of the function was 0.1.
+%\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
 %
 %
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to) the dimensionality $D$ of the input space, the kernel chosen by our search and the SNR of the model fit and model residuals.
+Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to) the dimensionality $D$ of the input space, the kernel chosen by our search, and the estimated noise variance.
 
 Our method finds all of the relevant structure in all but one test; in fact it also discovers unintentionally introduced linear structure. 
 The functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
-The SNR of the model fit numerically assesses the quality of the fit to the data; large positive or negative deviations from 100 would indicate over- and under-fitting respectively.
-The values reported show that the model is not serverely over- or under-fitting.
+The estimated noise level $\sigma_n$ numerically assesses the quality of the fit to the data; large positive or negative deviations from 0.1 would indicate under-fitting and over-fitting, respectively.
+The values reported show that the model is not severely over- or under-fitting.
 
 %\paragraph{Not for paper - annoying results - to be included if a fix is found}
 
