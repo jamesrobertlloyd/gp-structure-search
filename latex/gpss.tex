@@ -41,13 +41,13 @@
 %\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
-%\renewcommand{\LATER}[1]{}
-%\renewcommand{\fLATER}[1]{}
-%\renewcommand{\TBD}[1]{}
-%\renewcommand{\fTBD}[1]{}
-%\renewcommand{\PROBLEM}[1]{}
-%\renewcommand{\fPROBLEM}[1]{}
-%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+\renewcommand{\LATER}[1]{}
+\renewcommand{\fLATER}[1]{}
+\renewcommand{\TBD}[1]{}
+\renewcommand{\fTBD}[1]{}
+\renewcommand{\PROBLEM}[1]{}
+\renewcommand{\fPROBLEM}[1]{}
+\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
        
     
 \begin{document}
@@ -420,6 +420,8 @@ The search was run to depth 10, using the base kernels from Section \ref{sec:Str
 \label{sec:extrapolation}
 \paragraph{Mauna Loa Atmospheric CO$\mathbf{_{2}}$}
 
+\input{tables/mauna_growth.tex}
+\input{tables/mauna_decomp.tex}
 First, we analyzed records of carbon dioxide levels recorded at the Mauna Loa observatory.
 Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, it serves as a test of our algorithm's ability to recover known structure.
 %First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
@@ -432,36 +434,9 @@ Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model ch
 The final model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, observing that there is little obvious structure left in the data.
 
-\begin{figure}
-\centering
-\newcommand{\wmg}{0.39\columnwidth}  % width maunu growth
-\newcommand{\hmg}{3.2cm}  % height maunu growth
-\begin{tabular}{c}
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_0/03-mauna2003-s_all_small} 
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
-\hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
-\end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first column, the function is only modeled as a locally smooth function, and the extrapolation is poor.  Next, a periodic component is added, and the extrapolation improves.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
-}
-\label{fig:mauna_grow}
-\end{figure}
-
-\begin{figure}[ht!]
-\newcommand{\wmgd}{9.5cm}  % width mauna decomp
-\newcommand{\hmgd}{3.1cm}  % height mauna decomp
-\newcommand{\mdrd}{../figures/decomposition/11-Feb-03-mauna2003-s}  % mauna decomp results dir
-\begin{tabular}{c}
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_all} \\ = \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_1} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_2_zoom} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_3} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/03-mauna2003-s_resid}
-\end{tabular}
-\caption{First row: The posterior on the Mauna Loa dataset, after a search of depth 10.  Subsequent rows show the automatic decomposition of the time series.  The decompositions shows long-term, yearly periodic, medium-term anomaly components and residuals, respectively.  In the third row, the scale has been changed in order to clearly show the yearly periodic structure.}
-\end{figure}
-\label{fig:mauna_decomp}
-
 \paragraph{Airline passenger data}
+
+\input{tables/airline_decomp.tex}
 
 Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
 We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
@@ -492,31 +467,6 @@ In addition, the composite kernel captures the near-linearity of the trend as we
 % Created by the command:
 % postprocessing.make_all_1d_figures(folder='../results/31-Jan-1d/', prefix='31-Jan-v3', rescale=False)
 
-\begin{figure}[ht!]
-\centering
-\newcommand{\wagd}{9.5cm}  % width airline decomp
-\newcommand{\hagd}{3.5cm}  % height airline decomp
-%\newcommand{\ard}{../figures/decomposition/11-Feb-01-airline-s}  % airline results dir
-\newcommand{\ard}{../figures/decomposition/31-Jan-v301-airline-months}  % airline results dir
-\begin{tabular}{c}
-\hspace{-1cm}\includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_all} \\
- = \\ 
-%\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-s_4} \\
-% + \\
-\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_1} \\
- + \\
-\hspace{-1cm}  \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_2} \\
- + \\
-\hspace{-1cm}   \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_3} \\
- + \\
-\hspace{-1cm} \includegraphics[width=\wagd,height=\hagd]{\ard/01-airline-months_resid}
-\end{tabular}
-\caption{First row:  The airline dataset and posterior after a search of depth 10.  Subsequent rows: Additive decomposition of posterior into long-term smooth trend, yearly variation, and short-term deviations.  Due to the linear kernel, the marginal variance grows over time, making this a heteroskedastic model. 
-%\TBD{RBG: We allow heteroskedastic noise in our models?}
-}
-\label{fig:airline_decomp}
-\end{figure}
-
 %To evaluate the effectiveness of our method we performed two types of experiments.
 %First, we examined the ability of our algorithm to discover useful structure in one-dimensional datasets.  Second, we examined the predictive performance of our model on multi-dimensional datasets.
 % testing the ability of the algorithm to infer both an accurate regression function estimate and to produce an interpretable decomposition of a regression function.
@@ -526,20 +476,7 @@ In addition, the composite kernel captures the near-linearity of the trend as we
 \paragraph{Solar Irradiance Data} 
 Finally, we analyzed annual solar irradiation data from 1610 to 2011 \citep{lean1995reconstruction}.
 %
-\begin{figure}[h!]
-\newcommand{\wsd}{9.5cm}  % width solar decomp
-\newcommand{\hsd}{4cm}  % height solar decomp
-\newcommand{\srd}{../figures/decomposition/11-Feb-02-solar-s}  % solar decomp results dir
-\begin{tabular}{c}
-\hspace{-1cm} \includegraphics[width=\wsd,height=\hsd]{\srd/02-solar-s_all} \\
-%\\ = \\
-%\hspace{-1cm} \includegraphics[width=\wsd,height=\hsd]{\srd/02-solar-s_1} \\ + \\
-%\hspace{-1cm} \includegraphics[width=\wsd,height=\hsd]{\srd/02-solar-s_2} \\ + \\
-\hspace{-1cm} \includegraphics[width=\wsd,height=\hsd]{\srd/02-solar-s_resid}
-\end{tabular}
-\caption{Full posterior and residuals on the solar irradiance dataset.}
-\label{fig:solar_decomp}
-\end{figure}
+\input{tables/solar_decomp.tex}
 %
 The posterior and residuals of the learned kernel are shown in figure \ref{fig:solar_decomp}.
 %The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
@@ -554,7 +491,7 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 
 %\paragraph{Multidimensional decomposition}  Decomposition of multi-dimensional posteriors into sums of one-dimensional functions is possible as well, and was demonstrated in \cite{duvenaud2011additive11}.  \fTBD{Probably citing myself too much...}
 
-
+\input{tables/extrapolation.tex}
 
 
 \section{Validation on synthetic data}
@@ -596,16 +533,7 @@ In addition to the qualitative evaluation in section \ref{sec:time_series}, we a
 
 \subsection{Extrapolation}
 
-\begin{figure}[h!]
-\centering
-\begin{tabular}{c}
-\hspace{-0.5cm} \includegraphics[width=0.95\columnwidth]{../figures/extrapolation_curves/01-airline-s-ex-curve_hint.pdf}
-\end{tabular}
-\caption{Extrapolation performance on the airline dataset.  Here, we show average test-set MSE as a function of the fraction of the dataset used for training. 
-%\TBD{RBG: Are we using a fixed test set, or the complement of the training set?  It seems like we should do the former, so that the results are less noisy.}
-}
-\label{fig:extrapolation}
-\end{figure}
+
 
 We compared the extrapolation capabilities of our model against standard baselines.  
 Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error (MSE) of each method.  
@@ -739,7 +667,7 @@ where ${\vK_{n,ij} = k_n(x_i,x_j),\,\,\vK_{-n,ij} = \sum_{m\neq n}k_m(x_i,x_j)}$
 %\end{align}
 %Derivations can be found in the supplementary material.
 
-
+\newpage
 \bibliographystyle{format/icml2013}
 \bibliography{gpss}
 \end{document}
