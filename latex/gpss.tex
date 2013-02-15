@@ -33,7 +33,6 @@
 \newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}m{#1}}
 \newcommand{\tabbox}[1]{#1}
 
-
 \setlength{\marginparwidth}{0.6in}
 \input{include/commenting.tex}
 
@@ -62,15 +61,16 @@
 ]
 
 \begin{abstract}
-Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.%\NA{, often expressed as a kernel function}.
-%\fTBD{Mention \gp{}s? Or generic kernel statement?}
-\NA{This is often specified by a kernel, and while} there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
+Nonparametric regression methods are used widely and successfully, but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
+This is often specified by a kernel, and while there are effective data-driven techniques for learning kernel parameters, choosing the structural form of the kernel remains a black art.
 We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernel families.
 We present a method for searching over this space of structures which mirrors the scientific discovery process.
 The learned structures can often decompose functions into interpretable components and enable long-range extrapolation on time-series datasets.
+Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
+%\fTBD{Mention \gp{}s? Or generic kernel statement?}
+%\NA{, often expressed as a kernel function}.
 %The composite kernels in our search space are highly interpretable and can express abstract properties of a function.
 %Specifically, composite kernels allow for the automatic decompositon of a function into diverse and interpetable components, and in some cases allow for long-range extrapolation.
-Our structure search method outperforms many widely used kernel families and kernel combination methods on a variety of prediction tasks.
 \end{abstract}
 
 %Nonparametric regression methods are used widely and successfully but their effectiveness depends strongly on choosing an appropriate measure of similarity between data points.
