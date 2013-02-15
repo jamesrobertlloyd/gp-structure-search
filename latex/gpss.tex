@@ -83,13 +83,13 @@ Our structure search method outperforms many widely used kernel families and ker
 \section{Introduction}
 
 %Supervised learning problems, such as classification and regression, learn a function $\function$ from some input (predictor) variables, $\InputVar$, to some output (response) variables, $\outputVar$.
-Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
-These methods depend on defining a kernel or covariance function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are at two inputs $\inputVar$ and $\inputVar'$, respectively.
+Kernel-based nonparametric models, such as support vector machines and Gaussian processes (\gp{}s), have been one of the dominant paradigms for supervised machine learning over the last 20 years.
+These methods depend on defining a kernel function, $\kernel(\inputVar,\inputVar')$, which specifies how similar or correlated outputs $\outputVar$ and $\outputVar'$ are expected to be at two inputs $\inputVar$ and $\inputVar'$.
 By defining the measure of similarity between inputs, the kernel determines the pattern of inductive generlization.
 %The kernel function gives a measure of similarity between inputs and determines the pattern of inductive generalizations that are made. 
 
 The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
-Examples include learning hyperparameters \TBD{cite?}, linear combination weights \cite{Back_HKL}, and mappings from the input space to an embedding space \cite{salakhutdinov2008using}.
+Examples include learning hyperparameters \TBD{cite?}, linear combination weights \cite{Bach_HKL}, and mappings from the input space to an embedding space \cite{salakhutdinov2008using}.
 These techniques all pose kernel learning as a (possibly high dimensional) parameter estimation problem.
 %These techniques have in common that kernel learning is posed as a (possibly high dimensional) parameter estimation problem.
 However, to apply existing kernel learning algorithms, the user must specify the parametric form of the kernel, and this can require considerable expertise, as well as trial and error.
@@ -104,14 +104,14 @@ We found that our structure discovery algorithm is able to automatically recover
 On a variety of time series datasets, the learned kernels yield decompositions of the unknown function into interpretable components that enable accurate extrapolation beyond the range of the observations.
 Furthermore, the automatically discovered kernels outperform a variety of widely used kernel classes and kernel combination methods on supervised prediction tasks.
 
-\fTBD{I hate these paragraphs, but they seem to be required...} 
-Section \ref{sec:Structure} outlines some commonly used kernel families as well as ways in which they can be composed. 
-Our grammar over kernels and our proposed structure discovery algorithm are described in Section \ref{sec:Search}. 
-Section \ref{sec:related_work} situates our work in the context of other nonparametric regression, kernel learning, and structure discovery methods.
-We evaluate our methods on synthetic datasets, time series analysis, and high-dimensional prediction problems in Sections \ref{sec:synthetic} through \ref{sec:quantitative}, respectively.
+%\fTBD{I hate these paragraphs, but they seem to be required...} 
+%Section \ref{sec:Structure} outlines some commonly used kernel families as well as ways in which they can be composed. 
+%Our grammar over kernels and our proposed structure discovery algorithm are described in Section \ref{sec:Search}. 
+%Section \ref{sec:related_work} situates our work in the context of other nonparametric regression, kernel learning, and structure discovery methods.
+%We evaluate our methods on synthetic datasets, time series analysis, and high-dimensional prediction problems in Sections \ref{sec:synthetic} through \ref{sec:quantitative}, respectively.
 
 While we focus on Gaussian process regression, we believe our kernel search method can be extended to other supervised learning frameworks such as classification or ordinal regression, or to other kinds of kernel architectures such as kernel SVMs.
-Our hope is that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
+We hope that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
 
 
 %Kernel learning has been an important topic in machine learning since the kernel essentially determines the pattern of inductive
@@ -145,7 +145,7 @@ Our hope is that the algorithm developed in this paper will help replace the cur
 \fTBD{kernel structure / kernel?}
 Gaussian process models use a kernel to define the covariance between any two function values: ${\textrm{Cov}(\outputVar, \outputVar') = \kernel(\inputVar,\inputVar')}$.
 %The kernel determines which sorts of structures the model places most of its probability mass upon, and in effect determines the generalization properties of the model.
-The kernel specifies which structures are likely under the \gp{} prior, which determines the generalization properties of the model.
+The kernel specifies which structures are likely under the \gp{} prior, which in turn determines the generalization properties of the model.
 %The kernel, $\kernel$, must define a valid covariance function\fTBD{expand me}; when this is the case $\kernel$ is said to be positive semi-definite (PSD).
 %\fTBD{RBG: we should make the distinction between kernels and kernel families, and then use it consistently}
 %
@@ -155,8 +155,11 @@ The kernel specifies which structures are likely under the \gp{} prior, which de
 %\kernel_\textrm{Per}(\inputVar, \inputVar') = & \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
 %\kernel_\textrm{Lin}(\inputVar, \inputVar') = & \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell).
 %\end{eqnarray}
+
+There has been significant work on constructing \gp{} kernels and analyzing their properties.
+This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 %
-Commonly used kernels include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels  (see Figure~\ref{fig:kernels} and appendix).
+Commonly used kernels families include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) (see Figure~\ref{fig:basic_kernels} and the appendix).
 \input{tables/simple_kernels_table_v3.tex}
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
@@ -228,34 +231,33 @@ We use the term `generalized Fourier decomposition' to express that the periodic
 \section{Searching over structures}
 \label{sec:Search}
 
-\fTBD{Remember to be consistent about kernel (families) if desired\dots}
 As discussed above, we can construct a wide variety of kernel structures compositionally by adding and multiplying a small number of base kernels.
 In particular, we consider the four base kernel families discussed in Section \ref{sec:Structure}: squared exp (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ).
-Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel \NA{family}, whose parameters are the concatenation of the parameters for the base kernel \NA{families}. 
+Any algebraic expression combining these kernels using the operations $+$ and $\times$ defines a kernel \NA{family}, whose parameters are the concatenation of the parameters for the base kernel families. 
 
-Our search procedure begins by proposing all base kernels applied to all input dimensions. 
-
+Our search procedure begins by proposing all base kernels families applied to all input dimensions. 
+%
 We allow the following search operators over our set of expressions:
 \begin{itemize}
 \item[(1)] Any subexpression $\subexpr$ can be replaced with $\subexpr + \baseker$, where $\baseker$ is any base kernel family.
 \item[(2)] Any subexpression $\subexpr$ can be replaced with $\subexpr \times \baseker$, where $\baseker$ is any base kernel family.
-\item[(3)] Any base kernel $\baseker$ may be replaced with any other base kernel $\baseker^\prime$.
+\item[(3)] Any base kernel $\baseker$ may be replaced with any other base kernel family $\baseker^\prime$.
 \end{itemize}
 
 These operators can generate all possible algebraic expressions.
-To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernels, we would obtain a context-free grammar which generates the set of algebraic expressions.
-However, the more general versions of these rules allow more flexibility in the search procedure, since the CFG derivation may not be the most straightforward way to arrive at a kernel \NA{structure}.
+To see this, observe that if we restricted the $+$ and $\times$ rules only to apply to base kernel families, we would obtain a context-free grammar which generates the set of algebraic expressions.
+However, the more general versions of these rules allow more flexibility in the search procedure, which is useful because the CFG derivation may not be the most straightforward way to arrive at a kernel family.
 
-We search over this space using a greedy search: in each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
+Our algorithm searches over this space using a greedy search: at each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
 
 Our search operators are motivated by strategies researchers often use to construct kernels.
 In particular,
 \begin{itemize}
-\item We look for structure, \eg periodicity, in the residuals of a model, and then extend the model to capture that structure.
+\item One can look for structure, \eg periodicity, in the residuals of a model, and then extend the model to capture that structure.
 This corresponds to applying rule (1).
-\item We start with structure, \eg Linearity, which is supposed to hold globally, but find that it only holds locally.
+\item One can start with structure, \eg linearity, which is assumed to hold globally, but find that it only holds locally.
 This corresponds to applying rule (2) to obtain the structure shown in rows 1 and 3 of figure~\ref{fig:kernels}.
-\item We add features incrementally, analgous to algorithms like boosting, backfitting, or forward selection.
+\item One can add features incrementally, analgous to algorithms like boosting, backfitting, or forward selection.
 These correspond to applying rules (1) or (2) to new dimensions not yet included in the model.
 \end{itemize}
 
@@ -270,12 +272,13 @@ To avoid an expensive integration over kernel parameters, we used the Bayesian i
 %For instance, random cross-validation could be used when the goal is interpolation.
 
 Unfortunately, optimizing over parameters is not a convex optimization problem, and the space can have many local optima.
-The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
-Similarly, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
+%The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
+For example, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
 
-To alleviate this difficulty we take advantage of our search procedure to get smart initializations: all of the parameters which were part of the previous model are initialized to their previous values.
+To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous model are initialized to their previous values.
 The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
-This procedure is not guaranteed to find the global optimum, but is inspired by the same heuristic of extending models by examining residual mentioned above.
+This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals.
+% inspired by the same heuristic of extending models by examining residuals mentioned above.
 %\begin{itemize}
 %\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old parameters fixed.
 %\item If a simple structure includes a periodic kernel, the learned period is likely to be approximately correct even if the true structure turns out to be more complex.
@@ -309,14 +312,14 @@ This procedure is not guaranteed to find the global optimum, but is inspired by 
 
 %\paragraph{Composite kernels in GP models} The technique of constructing composite kernels using sums and products of existing kernels was demonstrated in detail in Chapter 5 of \cite{rasmussen38gaussian}, where the resulting posterior mean was also decomposed into a sum of component-wise means, although the posterior variance was not.  While \cite{rasmussen38gaussian} manually explored several composite kernels for a particular dataset, our work automates this search process over a grammar of possible composite kernels.
 
-\paragraph{Gaussian process kernels}
-There has been significant work on constructing \gp{} kernels and analyzing their properties.
-This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
+%\paragraph{Gaussian process kernels}
+%There has been significant work on constructing \gp{} kernels and analyzing their properties.
+%This work is summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 
 \paragraph{Nonparametric regression in high dimensions}
 Nonparametric regression methods such as splines, locally weighted regression, and \gp{} regression are popular because they are capable of learning arbitrary smooth functions of the data.
 Unfortunately, they suffer from the curse of dimensionality: it is very difficult for the basic versions of these methods to generalize well in more than a few dimensions.
-Applying nonparametric methods in high-dimensional spaces requires imposing additional structure on the model.
+Applying nonparametric methods in high-dimensional spaces can require imposing additional structure on the model.
 
 One such structure is additivity.
 Generalized additive models (GAM) assume the regression function is a transformed sum of functions defined on the individual dimensions: $\expect[f(\vx)] = g\inv(\sum_{d=1}^D f_d(x_d))$.
@@ -326,11 +329,11 @@ In our grammar, we can capture analogous structure through sums of base kernels 
 
 It is possible to add more flexibility to additive models by considering higher-order interactions between different dimensions. 
 Additive Gaussian processes \cite{duvenaud2011additive11} are a Gaussian process model whose kernel implicitly sums over all possible products of one-dimensional base kernels.  
-\cite{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel (\ie a product) on all dimensions.
+\citet{plate1999accuracy} constructs a \gp{} with a composite kernel, summing an \kSE{} kernel along each dimension, with an SE-ARD kernel (\ie a product) on all dimensions.
 Both of these models can be expressed in our grammar.
 
 A closely related procedure is smoothing-splines ANOVA \cite{wahba1990spline, gu2002smoothing}.
-This model is a weighted sum of splines along each dimension, plus a sum of splines over all pairs of dimensions, all triplets, etc, with each individual interaction term having a separate weighting parameter.
+This model is a linear combinations of splines along each dimension, all pairs of dimensions, and possibly higher-order combinations.
 Because the number of terms to consider grows exponentially in the order, in practice, only terms of first and second order are usually considered.
 
 Semiparametric regression \citep[e.g.][]{ruppert2003semiparametric} attempts to combine interpretability with flexibility by building  a composite model out of an interpretable, parametric part (such as linear regression) and a ``catch-all'' nonparametric part (such as a \gp{} with an SE kernel).
@@ -340,15 +343,15 @@ In our approach, this can be represented as a sum of \kSE{} and \kLin{}.
 There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels, including in \gp{} models.  
 \cite{christoudias2009bayesian}
 \TBD{cite more} 
-\cite{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels.
+\citet{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels.
 While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
 
 Another approach to kernel learning is to learn the embeddings of the points. 
-\cite{lawrence2005probabilistic} learns an embedding of the data points into a low-dimensional space, and constructs a fixed kernel structure over that space.
+\citet{lawrence2005probabilistic} learns an embedding of the data points into a low-dimensional space, and constructs a fixed kernel structure over that space.
 \NA{
 This model is typically used in unsupervised tasks requires an expensive integration or optimisation over potential embeddings when generalising to new data points.
 }
-\citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is an interesting approach to kernel learning but potentially less interpretable.
+\citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is a flexible approach to kernel learning but potentially less interpretable.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} attempted to learn the structures of kernels using genetic algorithms.  \TBD{Something about how our work relates to theirs?}
 
