@@ -314,7 +314,7 @@ Unfortunately, they suffer from the curse of dimensionality: it is very difficul
 Applying nonparametric methods in high-dimensional spaces requires imposing additional structure on the model.
 
 One such structure is additivity.
-Generalized additive models assume the regression function is a transformed sum of functions defined on the individual dimensions: $\expect[f(\vx)] = g\inv(\sum_{d=1}^D f_d(x_d))$.
+Generalized additive models (GAM) assume the regression function is a transformed sum of functions defined on the individual dimensions: $\expect[f(\vx)] = g\inv(\sum_{d=1}^D f_d(x_d))$.
 %Generalized additive models \cite{hastie1990generalized} are models in which the function is modeled as a sum of functions defined on the individual dimensions: $\expect[f(\vx)] = \sum_{d=1}^D f_d(x_d)$.
 These models have a limited compositional form, but one which is interpretable and often generalizes well.
 In our grammar, we can capture analogous structure through sums of base kernels along different dimensions.
@@ -435,7 +435,7 @@ We also plot the residuals, demonstrating that there is little obvious structure
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small}
 \hspace{-0.7cm} \includegraphics[width=\wmg,height=\hmg]{../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small}
 \end{tabular}
-\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation is better.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
+\caption{Posterior mean and variance for different depths of kernel search.  The dashed line marks the extent of the dataset.  In the first row, the function is only modeled as a locally smooth function, and the extrapolation is extemely poor.  In the second, a periodic component is added, and the extrapolation improves.  At depth 3, the kernel can capture most of the relevant structure, and is able to extrapolate reasonably. %\TBD{RBG: (1) I think we somehow need to visualize the lengthscales, to make it obvious that the SE kernels really mean different things. (2) Why isn't SE + PE the correct answer?}
 }
 \label{fig:mauna_grow}
 \end{figure}
@@ -672,13 +672,16 @@ The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPe
 
 \subsection{High-dimensional prediction}
 
-To demonstrate the predictive accuracy of our method within a standard cross validation experiment, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
-We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
-The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.
+To demonstrate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
+We performed 10 fold cross validation on 5 datasets comparing 5 methods in terms of mean-squared (MSE) error and predictive likelihood.   The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.  Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernels.
 
-Results are presented in table \ref{tbl:Regression Mean Squared Error}.
-All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
-Our method outperforms all other methods in all tests.
+The comparison includes three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarichical Kernel Learning (HKL).
+%We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
+
+
+Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperforms all other methods in all tests.
+%All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
+
 %
 %\input{tables/regression_results_mse.tex}
 %\input{tables/regression_results_nll.tex}
@@ -686,24 +689,23 @@ Our method outperforms all other methods in all tests.
 %
 %\fTBD{Is it worth including the learned structures in the table?}
 
-\paragraph{Details of methods}
-
-Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
+%\paragraph{Details of methods}
+%Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
 %
-Generalized Additive Models (GP GAM) were implemented through a \gp{} whose kernel is a sum of \kSE{} kernels across dimensions.
+%Generalized Additive Models (GP GAM) were implemented through a \gp{} whose kernel is a sum of \kSE{} kernels across dimensions.
 %This model was included to demonstrate that the gain in predictive performance was not simply due to the inclusion of additive structure.
 %
-Additive \gp{} was run using \kSE{} as a base kernel, with at most ten degrees of interaction.
+%Additive \gp{} was run using \kSE{} as a base kernel, with at most ten degrees of interaction.
 %
-Hierarchical Kernel Learning (HKL)
+%Hierarchical Kernel Learning (HKL)
 %\footnote{Code for HKL available at \texttt{http://www.di.ens.fr/\textasciitilde fbach/hkl/}} 
-was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive \gp{} with a squared-exp base kernel.
+%was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive \gp{} with a \kSE{} base kernel.
 %Because HKL does not produce a probabilistic prediction, it could not be included in Table \ref{tbl:Regression Negative Log Likelihood}.
 %
-Our structure search was run up to depth 8, using \kSE{} and \kRQ{} as the base kernels.
 
 
-\paragraph{Source code}All \gp{} related computations were performed using the standard GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; code to perform all experiments is available on github\fTBD{Include?}.
+
+\paragraph{Source code}All \gp{} model-fitting was performed by automated calls to the GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; Python code to perform all experiments is available on github\footnote{Link to be included upon publication.}.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
