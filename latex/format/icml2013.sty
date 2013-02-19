@@ -74,6 +74,10 @@
 \DeclareOption{nohyperref}{%
   \gdef\nohyperref{1}
 }
+\DeclareOption{arxiv}{%
+  \renewcommand{\Notice@String}{\ICML@jointfirst}
+  \gdef\isaccepted{1}
+}
 
 \ifdefined\nohyperref\else\ifdefined\hypersetup
   \definecolor{mydarkblue}{rgb}{0,0.08,0.45}
@@ -104,6 +108,10 @@
 \newcommand{\ICML@appearing}{Appearing in \textit{Proceedings of the
 $\mathit{30}^{th}$ International Conference on Machine Learning},
 Atlanta, Georgia, USA, 2013. Copyright 2013 by the author(s)/owner(s).}
+
+\newcommand{\ICML@jointfirst}{$^\dagger$These two authors contributed equally. 
+\newline $^*$ denotes University of Cambridge.
+\newline $^\ddagger$ denotes Massachussets Institute of Technology.}
 
 %%%%%%%%%%%%%%%%%%%%
 % This string is printed at the bottom of the page for the draft/under
@@ -476,6 +484,7 @@ International Conference on Machine Learning (ICML).  Do not distribute.}
    \parsep 1pt plus 0.5pt minus 0.5pt 
    \itemsep \parsep} 
 \def\@listiii{\leftmargin\leftmarginiii 
+
 
     \labelwidth\leftmarginiii\advance\labelwidth-\labelsep 
     \topsep 1pt plus 0.5pt minus 0.5pt  
