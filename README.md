@@ -16,4 +16,4 @@ http://arxiv.org/abs/1302.4922
 Feel free to email us:
 James Lloyd (jrl44@cam.ac.uk)
 David Duvenaud (dkd23@cam.ac.uk)
-Roger Grosse (rgrosse_at_mit_edu)
+Roger Grosse (rgrosse@mit.edu)
