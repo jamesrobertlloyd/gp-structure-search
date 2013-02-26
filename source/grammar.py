@@ -8,6 +8,7 @@ ONE_D_RULES = [('A', ('+', 'A', 'B'), {'A': 'any', 'B': 'base'}),        # repla
                ('A', 'B', {'A': 'base', 'B': 'base'}),                   # replace one base kernel with another
                ]
 
+#### FIXME - Code duplication - do we need the OneDGrammar as a special case - else remove
 class OneDGrammar:
     def __init__(self):
         self.rules = ONE_D_RULES
@@ -34,10 +35,14 @@ MULTI_D_RULES = [('A', ('+', 'A', 'B'), {'A': 'multi', 'B': 'mask'}),
                  ]
     
 class MultiDGrammar:
-    def __init__(self, ndim, debug=False):
+    def __init__(self, ndim, debug=False, base_kernels='SE'):
         self.rules = MULTI_D_RULES
         self.ndim = ndim
         self.debug = debug
+        if not debug:
+            self.base_kernels = base_kernels
+        else:
+            self.base_kernels = 'SE'
         
     def type_matches(self, kernel, tp):
         if tp == 'multi':
@@ -73,12 +78,9 @@ class MultiDGrammar:
         if tp in ['1d', 'multi']:
             raise RuntimeError("Can't expand the '%s' type" % tp)
         elif tp == 'base':
-            return list(fk.base_kernel_families(self.ndim))
+            return [fam.default() for fam in fk.base_kernel_families(self.base_kernels)]
         elif tp == 'mask':
-            result = []
-            for d in range(self.ndim):
-                result += [fk.MaskKernel(self.ndim, d, fam_default) for fam_default in fk.base_kernel_families(self.ndim)]
-            return result
+            return list(fk.base_kernels(self.ndim, self.base_kernels))
         else:
             raise RuntimeError('Unknown type: %s' % tp)
     
@@ -186,9 +188,9 @@ def remove_duplicates(kernels):
         curr = k
     return result
     
-def expand_kernels(D, seed_kernels, verbose=False, debug=False):    
+def expand_kernels(D, seed_kernels, verbose=False, debug=False, base_kernels='SE'):    
     '''Makes a list of all expansions of a set of kernels in D dimensions.'''
-    g = MultiDGrammar(D, debug=debug)
+    g = MultiDGrammar(D, debug=debug, base_kernels=base_kernels)
     if verbose:
         print 'Seed kernels :'
         for k in seed_kernels:

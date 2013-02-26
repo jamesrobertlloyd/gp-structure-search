@@ -99,6 +99,9 @@ class SqExpKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'SE'
+    
     @staticmethod    
     def description():
         return "Squared-exponential"
@@ -120,6 +123,9 @@ class SqExpKernel(BaseKernel):
     
     def english_name(self):
         return 'SqExp'
+    
+    def id_name(self):
+        return 'SE'
     
     def param_vector(self):
         # order of args matches GPML
@@ -175,6 +181,9 @@ class SqExpPeriodicKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'Per'
+    
     @staticmethod    
     def description():
         return "Periodic"
@@ -197,6 +206,9 @@ class SqExpPeriodicKernel(BaseKernel):
     
     def english_name(self):
         return 'Periodic'
+    
+    def id_name(self):
+        return 'Per'
     
     def param_vector(self):
         # order of args matches GPML
@@ -276,6 +288,9 @@ class RQKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'RQ'
+    
     @staticmethod    
     def description():
         return "Rational Quadratic"
@@ -298,6 +313,9 @@ class RQKernel(BaseKernel):
         return '{@covRQiso}'
     
     def english_name(self):
+        return 'RQ'
+    
+    def id_name(self):
         return 'RQ'
     
     def param_vector(self):
@@ -359,6 +377,9 @@ class ConstKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'Const'
+    
     @staticmethod    
     def description():
         return "Constant"
@@ -379,6 +400,9 @@ class ConstKernel(BaseKernel):
     
     def english_name(self):
         return 'CS'
+    
+    def id_name(self):
+        return 'Const'
     
     def param_vector(self):
         # order of args matches GPML
@@ -435,6 +459,9 @@ class LinKernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    def id_name(self):
+        return 'Lin'
 
     @staticmethod    
     def description():
@@ -460,6 +487,9 @@ class LinKernel(BaseKernel):
     
     def english_name(self):
         return 'LN'
+    
+    def id_name(self):
+        return 'Lin'
     
     def param_vector(self):
         # order of args matches GPML
@@ -521,6 +551,9 @@ class QuadraticKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'Quad'
+    
     @staticmethod    
     def description():
         return "Quadratic"
@@ -542,6 +575,9 @@ class QuadraticKernel(BaseKernel):
     
     def english_name(self):
         return 'QD'
+    
+    def id_name(self):
+        return 'Quad'
     
     def param_vector(self):
         # order of args matches GPML
@@ -599,6 +635,9 @@ class CubicKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'Cubic'
+    
     @staticmethod    
     def description():
         return "Cubic"
@@ -620,6 +659,9 @@ class CubicKernel(BaseKernel):
     
     def english_name(self):
         return 'CB'
+    
+    def id_name(self):
+        return 'Cubic'
     
     def param_vector(self):
         # order of args matches GPML
@@ -676,6 +718,9 @@ class PP0KernelFamily(BaseKernelFamily):
     
     def depth(self):
         return 0
+    
+    def id_name(self):
+        return 'PP0'
 
     @staticmethod    
     def description():
@@ -699,6 +744,9 @@ class PP0Kernel(BaseKernel):
     
     def english_name(self):
         return 'P0'
+    
+    def id_name(self):
+        return 'PP0'
     
     def param_vector(self):
         # order of args matches GPML
@@ -756,6 +804,9 @@ class PP1KernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'PP1'
+    
     @staticmethod    
     def description():
         return "Piecewise Polynomial 1"
@@ -777,6 +828,9 @@ class PP1Kernel(BaseKernel):
     
     def english_name(self):
         return 'P1'
+    
+    def id_name(self):
+        return 'PP1'
     
     def param_vector(self):
         # order of args matches GPML
@@ -834,6 +888,9 @@ class PP2KernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'PP2'
+    
     @staticmethod    
     def description():
         return "Piecewise Polynomial 2"
@@ -855,6 +912,9 @@ class PP2Kernel(BaseKernel):
     
     def english_name(self):
         return 'P2'
+    
+    def id_name(self):
+        return 'PP2'
     
     def param_vector(self):
         # order of args matches GPML
@@ -912,6 +972,9 @@ class PP3KernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'PP3'
+    
     @staticmethod    
     def description():
         return "Piecewise Polynomial 3"
@@ -933,6 +996,9 @@ class PP3Kernel(BaseKernel):
     
     def english_name(self):
         return 'P3'
+    
+    def id_name(self):
+        return 'PP3'
     
     def param_vector(self):
         # order of args matches GPML
@@ -989,6 +1055,9 @@ class MaternKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'MT'
+    
     @staticmethod    
     def description():
         return "Mat\\'{e}rn"
@@ -1009,6 +1078,9 @@ class MaternKernel(BaseKernel):
         return '{@covMaterniso, 1}' # nu = 0.5
     
     def english_name(self):
+        return 'MT'
+    
+    def id_name(self):
         return 'MT'
     
     def param_vector(self):
@@ -1069,6 +1141,9 @@ class ChangeKernelFamily(BaseKernelFamily):
     def depth(self):
         return 0
     
+    def id_name(self):
+        return 'Change'
+    
     @staticmethod    
     def description():
         return "Changepoint"
@@ -1090,6 +1165,9 @@ class ChangeKernel(BaseKernel):
     
     def english_name(self):
         return 'CH'
+    
+    def id_name(self):
+        return 'Change'
     
     def param_vector(self):
         # order of args matches GPML
@@ -1390,36 +1468,51 @@ class ProductKernel(Kernel):
 
 
 #### FIXME - Sort out the naming of the two functions below            
-def base_kernels(ndim=1):
+def base_kernels(ndim=1, base_kernel_names='SE'):
     '''
     Generator of all base kernels for a certain dimensionality of data
     '''
-    #### FIXME - Redundant at the moment
-    if ndim == 1:
-        for k in base_kernel_families(ndim):
-            yield MaskKernel(ndim, 0, k)
-            # Todo: fix 1D kernels to work without MaskKernels.
-    else:
-        for dim in range(ndim):
-            for k in multi_d_kernel_families():
-                yield MaskKernel(ndim, dim, k)
+    for dim in range(ndim):
+        for fam in base_kernel_families(base_kernel_names):
+            yield MaskKernel(ndim, dim, fam.default())
+    #if ndim == 1:
+    #    for k in base_kernel_families(ndim):
+    #        yield MaskKernel(ndim, 0, k)
+    #        # Todo: fix 1D kernels to work without MaskKernels.
+    #else:
+    #    for dim in range(ndim):
+    #        for k in multi_d_kernel_families():
+    #            yield MaskKernel(ndim, dim, k)
  
-def base_kernel_families(ndim):
+def base_kernel_families(base_kernel_names):
     '''
     Generator of all base kernel families.
     '''
-    #### FIXME - This should not happen here!
-    if ndim == 1:
-        yield SqExpKernelFamily().default()
-        yield SqExpPeriodicKernelFamily().default()
-        yield RQKernelFamily().default()
-        yield LinKernelFamily().default()
-        #yield ChangeKernelFamily().default()
-    else:
-        yield SqExpKernelFamily().default()
-        yield SqExpPeriodicKernelFamily().default()
-        yield RQKernelFamily().default()
-        yield LinKernelFamily().default()
+    for family in [SqExpKernelFamily(), \
+                   SqExpPeriodicKernelFamily(), \
+                   RQKernelFamily(), \
+                   LinKernelFamily(), \
+                   ChangeKernelFamily(), \
+                   QuadraticKernelFamily(), \
+                   CubicKernelFamily(), \
+                   PP0KernelFamily(), \
+                   PP1KernelFamily(), \
+                   PP2KernelFamily(), \
+                   PP3KernelFamily(), \
+                   MaternKernelFamily()]:
+        if family.id_name() in base_kernel_names.split(','):
+            yield family
+    #if ndim == 1:
+    #    yield SqExpKernelFamily().default()
+    #    yield SqExpPeriodicKernelFamily().default()
+    #    yield RQKernelFamily().default()
+    #    yield LinKernelFamily().default()
+    #    #yield ChangeKernelFamily().default()
+    #else:
+    #    yield SqExpKernelFamily().default()
+    #    yield SqExpPeriodicKernelFamily().default()
+    #    yield RQKernelFamily().default()
+    #    yield LinKernelFamily().default()
     #yield QuadraticKernelFamily().default()
     #yield CubicKernelFamily().default()
     #yield PP0KernelFamily().default()
@@ -1428,16 +1521,17 @@ def base_kernel_families(ndim):
     #yield PP3KernelFamily().default()
     #yield MaternKernelFamily().default()       
 
-def multi_d_kernel_families():
-    '''
-    Generator of all base kernel families for multidimensional problems.
-    '''
-    yield SqExpKernelFamily().default()
-    yield SqExpPeriodicKernelFamily().default()
-    yield RQKernelFamily().default()
-    yield LinKernelFamily().default()
-    
-        
+#def multi_d_kernel_families():
+#    '''
+#    Generator of all base kernel families for multidimensional problems.
+#    '''
+#    yield SqExpKernelFamily().default()
+#    yield SqExpPeriodicKernelFamily().default()
+#    yield RQKernelFamily().default()
+#    yield LinKernelFamily().default()  
+   
+   
+#### FIXME - Do the two functions below get called ever?        
 def test_kernels(ndim=1):
     '''
     Generator of a subset of base kernels for testing
@@ -1547,7 +1641,7 @@ class ScoredKernel:
         self.bic_nle = bic_nle
         self.noise = noise
         
-    def score(self, criterion='bic'):#'laplace'):#'bic'):
+    def score(self, criterion='bic'):
         #### FIXME - Change default to laplace when it is definitely bug free
         return {'bic': self.bic_nle,
                 'nll': self.nll,
