@@ -4,7 +4,7 @@ load 'r_concrete_500_fold_10_of_10.mat'
 
 %% Load GPML
 
-%%%% CHANGE ME!
+%%%% CHANGE ME ON DIFFERENT MACHINES
 addpath(genpath('/home/jrl44/Documents/MATLAB/GPML'));
 
 %% Set up model structure and previously learned parameters
@@ -74,3 +74,7 @@ for i = my_range
 end
 figure;
 plot(my_range, values);
+
+%% Rerun the optimiser
+
+[hyp_opt, nlls] = minimize(hyp_opt, @gp, +1000000, @infExact, meanfunc, covfunc, likfunc, X, y);
