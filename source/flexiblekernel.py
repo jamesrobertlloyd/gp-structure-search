@@ -386,7 +386,7 @@ class ConstKernelFamily(BaseKernelFamily):
 
     @staticmethod    
     def params_description():
-        return "none"        
+        return "Output variance"        
     
 class ConstKernel(BaseKernel):
     def __init__(self, output_variance):
@@ -416,11 +416,14 @@ class ConstKernel(BaseKernel):
             (self.output_variance)
     
     def pretty_print(self):
-        return colored('CS(ell=%1.1f)' % (self.output_variance),
+        return colored('CS(sf=%1.1f)' % (self.output_variance),
                        self.depth())
         
     def latex_print(self):
-        return 'CS'           
+        return 'CS'    
+    
+    def id_name(self):
+        return 'Const'       
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1491,6 +1494,7 @@ def base_kernel_families(base_kernel_names):
     for family in [SqExpKernelFamily(), \
                    SqExpPeriodicKernelFamily(), \
                    RQKernelFamily(), \
+                   ConstKernelFamily(), \
                    LinKernelFamily(), \
                    ChangeKernelFamily(), \
                    QuadraticKernelFamily(), \
