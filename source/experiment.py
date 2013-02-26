@@ -69,7 +69,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     '''Search for the best kernel, in parallel on fear or local machine.'''
 
     # Initialise kernels to be all base kernels along all dimensions.
-    current_kernels = list(fk.base_kernels(D))
+    current_kernels = list(fk.base_kernels(D, exp.base_kernels))
     
     # Initialise period at a multiple of the shortest distance between points, to prevent Nyquist problems.
     if use_min_period:
@@ -103,7 +103,9 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
             print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
             
         # Remove near duplicates from these all_results (top m all_results only for efficiency)
-        new_results = remove_duplicates(new_results, X, local_computation=exp.local_computation, verbose=exp.verbose)
+        if exp.k > 1:
+            # Only remove duplicates if they affect the search
+            new_results = remove_duplicates(new_results, X, local_computation=exp.local_computation, verbose=exp.verbose)
 
         print 'All new results after duplicate removal:'
         for result in new_results:
@@ -120,7 +122,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         
         # Extract the best k kernels from the new all_results
         best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:exp.k]]
-        current_kernels = grammar.expand_kernels(D, best_kernels, verbose=exp.verbose, debug=exp.debug)
+        current_kernels = grammar.expand_kernels(D, best_kernels, verbose=exp.verbose, debug=exp.debug, base_kernels=exp.base_kernels)
         
         if exp.debug==True:
             current_kernels = current_kernels[0:4]
@@ -190,7 +192,8 @@ Experiment = namedtuple("Experiment",
                         'make_predictions, '
                         'skip_complete,'
                         'results_dir,'
-                        'iters'
+                        'iters,'
+                        'base_kernels'
                         );
 
 def experiment_fields_to_str(exp):
