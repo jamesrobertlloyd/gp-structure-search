@@ -79,7 +79,7 @@ def covariance_distance(kernels, X, local_computation=True, verbose=True):
     return distance
 
        
-def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500):
+def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500, zero_mean=False):
     '''
     Sets up the kernel optimisation and nll calculation experiments, returns the results as scored kernels
     Input:
@@ -117,13 +117,17 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
         print 'Creating scripts'
     scripts = [None] * len(kernels)
     for (i, kernel) in enumerate(kernels):
-        scripts[i] = gpml.OPTIMIZE_KERNEL_CODE % {'datafile': data_file.split('/')[-1],
-                                                  'writefile': '%(output_file)s', # N.B. cblparallel manages output files
-                                                  'gpml_path': cblparallel.gpml_path(local_computation),
-                                                  'kernel_family': kernel.gpml_kernel_expression(),
-                                                  'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
-                                                  'noise': str(noise),
-                                                  'iters': str(iters)}
+        parameters = {'datafile': data_file.split('/')[-1],
+                      'writefile': '%(output_file)s', # N.B. cblparallel manages output files
+                      'gpml_path': cblparallel.gpml_path(local_computation),
+                      'kernel_family': kernel.gpml_kernel_expression(),
+                      'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+                      'noise': str(noise),
+                      'iters': str(iters)}
+        if zero_mean:
+            scripts[i] = gpml.OPTIMIZE_KERNEL_CODE_ZERO_MEAN % parameters
+        else:
+            scripts[i] = gpml.OPTIMIZE_KERNEL_CODE % parameters
         #### Need to be careful with % signs
         #### For the moment, cblparallel expects no single % signs - FIXME
         scripts[i] = re.sub('% ', '%% ', scripts[i])
@@ -155,7 +159,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     return results     
 
    
-def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=False, max_jobs=500, verbose=True):
+def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=False, max_jobs=500, verbose=True, zero_mean=False):
     '''
     Evaluates a kernel on held out data
     Input:
@@ -186,13 +190,17 @@ def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=F
             print 'Moving data file to fear'
         cblparallel.copy_to_remote(data_file)
     # Create prediction code
-    code = gpml.PREDICT_AND_SAVE_CODE % {'datafile': data_file.split('/')[-1],
-                                         'writefile': '%(output_file)s',
-                                         'gpml_path': cblparallel.gpml_path(local_computation),
-                                         'kernel_family': best_scored_kernel.k_opt.gpml_kernel_expression(),
-                                         'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
-                                         'noise': str(best_scored_kernel.noise),
-                                         'iters': str(30)}
+    parameters ={'datafile': data_file.split('/')[-1],
+                 'writefile': '%(output_file)s',
+                 'gpml_path': cblparallel.gpml_path(local_computation),
+                 'kernel_family': best_scored_kernel.k_opt.gpml_kernel_expression(),
+                 'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
+                 'noise': str(best_scored_kernel.noise),
+                 'iters': str(30)}
+    if zero_mean:
+        code = gpml.PREDICT_AND_SAVE_CODE_ZERO_MEAN % parameters
+    else:
+        code = gpml.PREDICT_AND_SAVE_CODE % parameters
     code = re.sub('% ', '%% ', code) # HACK - cblparallel currently does not like % signs
     # Evaluate code - potentially on cluster
     if local_computation:   

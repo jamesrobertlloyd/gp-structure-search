@@ -115,6 +115,50 @@ save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 %% exit();
 """
 
+OPTIMIZE_KERNEL_CODE_ZERO_MEAN = r"""
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
+X = double(X)
+y = double(y)
+
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Set up model.
+meanfunc = {@meanZero}
+hyp.mean = [];
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = %(noise)s
+
+%% Repeat...
+[hyp_opt, nlls] = minimize(hyp, @gp, -int32(%(iters)s * 3 / 3), @infExact, meanfunc, covfunc, likfunc, X, y);
+%% ...optimisation - hopefully restarting optimiser will make it more robust to scale issues
+%% [hyp_opt, nlls_2] = minimize(hyp_opt, @gp, -int32(%(iters)s * 3 / 3), @infExact, meanfunc, covfunc, likfunc, X, y);
+%% nlls = [nlls_1; nlls_2];
+best_nll = nlls(end)
+
+%% Compute Hessian numerically for laplace approx
+num_hypers = length(hyp.cov);
+hessian = NaN(num_hypers, num_hypers);
+delta = 1e-6;
+a='Get original gradients';
+[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
+for d = 1:num_hypers
+    dhyp_opt = hyp_opt;
+    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
+    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+end
+hessian = 0.5 * (hessian + hessian');
+
+save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
+%% exit();
+"""
+
 class OptimizerOutput:
     def __init__(self, kernel_hypers, nll, nlls, hessian, noise_hyp):
         self.kernel_hypers = kernel_hypers
@@ -123,7 +167,7 @@ class OptimizerOutput:
         self.hessian = hessian
         self.noise_hyp = noise_hyp
 
-def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300):
+def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300, zero_mean=False):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
@@ -140,13 +184,17 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
     if verbose:
         print kernel_init_params
     
-    code = OPTIMIZE_KERNEL_CODE % {'datafile': temp_data_file,
-                                   'writefile': temp_write_file,
-                                   'gpml_path': config.GPML_PATH,
-                                   'kernel_family': kernel_expression,
-                                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
-                                   'noise': str(noise),
-                                   'iters': str(iters)}
+    parameters =  {'datafile': temp_data_file,
+                   'writefile': temp_write_file,
+                   'gpml_path': config.GPML_PATH,
+                   'kernel_family': kernel_expression,
+                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
+                   'noise': str(noise),
+                   'iters': str(iters)}
+    if zero_mean:
+        code = OPTIMIZE_KERNEL_CODE_ZERO_MEAN % parameters
+    else:
+        code = OPTIMIZE_KERNEL_CODE % parameters
     run_matlab_code(code, verbose)
     
     output = read_outputs(temp_write_file)
@@ -310,8 +358,48 @@ save( '%(writefile)s', 'posterior_mean' );
 exit();
 """
 
+MEAN_FUNCTION_CODE_ZERO_MEAN = r"""
+%% Load the data, it should contain X, y, X_test
+load '%(datafile)s'
+X = double(X)
+y = double(y)
+Xtest = double(Xtest)
 
-def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, iters=300):
+addpath(genpath('%(gpml_path)s'));
+
+%% Set up model.
+meanfunc = {@meanZero}
+hyp.mean = []
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = %(noise)s
+
+[hyp, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
+
+%%HACK
+
+hyp.cov = %(kernel_params)s
+K = feval(covfunc{:}, hyp.cov, X);
+K = K + exp(hyp.lik * 2) * eye(size(K));
+
+%% We have now found appropriate mean and noise parameters
+
+component_covfunc = %(component_kernel_family)s
+hyp.cov = %(component_kernel_params)s
+
+component_K = feval(component_covfunc{:}, hyp.cov, X, X_test)';
+
+posterior_mean = component_K * (K \ y);
+
+save( '%(writefile)s', 'posterior_mean' );
+exit();
+"""
+
+
+def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, iters=300, zero_mean=False):
     #### Problem - we are not storing the learnt mean and noise - will need to re-learn - might not be especially correct!
     #### This is therefore just a placeholder
     if X.ndim == 1:
@@ -330,15 +418,20 @@ def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, ite
     (fd2, temp_write_file) = tempfile.mkstemp(suffix='.mat')
     scipy.io.savemat(temp_data_file, data)
     
-    code = MEAN_FUNCTION_CODE % {'datafile': temp_data_file,
-                                 'writefile': temp_write_file,
-                                 'gpml_path': config.GPML_PATH,
-                                 'kernel_family': kernel.gpml_kernel_expression(),
-                                 'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
-                                 'component_kernel_family': component_kernel.gpml_kernel_expression(),
-                                 'component_kernel_params': '[ %s ]' % ' '.join(str(p) for p in component_kernel.param_vector()),
-                                 'noise': str(noise),
-                                 'iters': str(iters)}
+    parameters ={'datafile': temp_data_file,
+                 'writefile': temp_write_file,
+                 'gpml_path': config.GPML_PATH,
+                 'kernel_family': kernel.gpml_kernel_expression(),
+                 'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
+                 'component_kernel_family': component_kernel.gpml_kernel_expression(),
+                 'component_kernel_params': '[ %s ]' % ' '.join(str(p) for p in component_kernel.param_vector()),
+                 'noise': str(noise),
+                 'iters': str(iters)}
+    
+    if zero_mean:
+        code = MEAN_FUNCTION_CODE_ZERO_MEAN % parameters
+    else:
+        code = MEAN_FUNCTION_CODE % parameters
     
     run_matlab_code(code)
 
@@ -399,15 +492,64 @@ a='Supposedly finished writing file'
 %% exit();
 """
 
+PREDICT_AND_SAVE_CODE_ZERO_MEAN = r"""
+a='Load the data, it should contain X and y.'
+load '%(datafile)s'
+X = double(X)
+y = double(y)
+Xtest = double(Xtest)
+ytest = double(ytest)
+
+%% Load GPML
+addpath(genpath('%(gpml_path)s'));
+
+%% Set up model.
+meanfunc = {@meanZero}
+hyp.mean = []
+
+covfunc = %(kernel_family)s
+hyp.cov = %(kernel_params)s
+
+likfunc = @likGauss
+hyp.lik = %(noise)s
+
+%% Optimize a little anyways.
+[hyp_opt, nlls] = minimize(hyp, @gp, -%(iters)s, @infExact, meanfunc, covfunc, likfunc, X, y);
+best_nll = nlls(end)
+
+model.hypers = hyp_opt;
+
+%% Evaluate a test points.
+[ymu, ys2, predictions, fs2, loglik] = gp(model.hypers, @infExact, meanfunc, covfunc, likfunc, X, y, Xtest, ytest)
+
+actuals = ytest;
+timestamp = now
+
+'%(writefile)s'
+
+save('%(writefile)s', 'loglik', 'predictions', 'actuals', 'model', 'timestamp');
+
+pwd
+%% save('/home/dkd23/Dropbox/results/r_pumadyn512_fold_3_of_10_result.txt'
+
+a='Supposedly finished writing file'
+
+%% exit();
+"""
+
 #### TODO - remove me
-def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30):  
-    code = PREDICT_AND_SAVE_CODE % {'datafile': data_file,
-                                    'writefile': write_file,
-                                    'gpml_path': config.GPML_PATH,
-                                    'kernel_family': kernel_expression,
-                                    'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
-                                    'noise': str(noise),
-                                    'iters': str(iters)}
+def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30, zero_mean=False):  
+    parameters = {'datafile': data_file,
+                  'writefile': write_file,
+                  'gpml_path': config.GPML_PATH,
+                  'kernel_family': kernel_expression,
+                  'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
+                  'noise': str(noise),
+                  'iters': str(iters)}
+    if zero_mean:
+        code = PREDICT_AND_SAVE_CODE_ZERO_MEAN % parameters
+    else:
+        code = PREDICT_AND_SAVE_CODE % parameters
     run_matlab_code(code, verbose=True)
     
 # Matlab code to evaluate DISTANCE of kernels

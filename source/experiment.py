@@ -91,7 +91,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         current_kernels = fk.add_random_restarts(current_kernels, exp.n_rand, exp.sd, min_period=min_period)
         # Score the kernels
         new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=exp.verbose, local_computation=exp.local_computation,
-                                          zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters)
+                                          zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean)
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
         assert(len(new_results) > 0) # FIXME - Need correct control flow if this happens 
@@ -193,7 +193,8 @@ Experiment = namedtuple("Experiment",
                         'skip_complete,'
                         'results_dir,'
                         'iters,'
-                        'base_kernels'
+                        'base_kernels,'
+                        'zero_mean'
                         );
 
 def experiment_fields_to_str(exp):
@@ -280,7 +281,7 @@ def perform_experiment(data_file, output_file, exp):
     
     if exp.make_predictions:
         predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
-                                          max_jobs=exp.max_jobs, verbose=exp.verbose)
+                                          max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean)
         scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.
@@ -295,7 +296,7 @@ def calculate_model_fits(data_file, output_file, exp):
     best_scored_kernel = parse_results(output_file)
     
     predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
-                                      max_jobs=exp.max_jobs, verbose=exp.verbose)
+                                      max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.
