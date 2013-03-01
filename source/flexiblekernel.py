@@ -75,6 +75,9 @@ class BaseKernel(Kernel):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
         return [np.random.normal(scale=sd) if p ==0 else p for p in self.param_vector()]
         
+    def out_of_bounds(self, constraints):
+        '''Most kernels are allowed to have any parameter value'''
+        return False
 
 class SqExpKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -263,6 +266,9 @@ class SqExpPeriodicKernel(BaseKernel):
         
     def depth(self):
         return 0
+            
+    def out_of_bounds(self, constraints):
+        return self.period < constraints['min_period']
     
 
 class RQKernelFamily(BaseKernelFamily):
@@ -1290,6 +1296,16 @@ class MaskKernel(Kernel):
         
     def depth(self):
         return self.base_kernel.depth() + 1
+            
+    def out_of_bounds(self, constraints):
+        # Extract relevant constraints
+        if isinstance(constraints['min_period'], (list, tuple, np.ndarray)):
+            # Pick out relevant minimum period
+            constraints['min_period'] = constraints['min_period'][self.active_dimension]
+        else:
+            # min_period either one dimensional or None - do nothing
+            pass
+        return self.base_kernel.out_of_bounds(constraints)
     
 
 class SumKernelFamily(KernelFamily):
@@ -1378,6 +1394,9 @@ class SumKernel(Kernel):
             return SumKernel(self.operands + other.operands).copy()
         else:
             return SumKernel(self.operands + [other]).copy()
+            
+    def out_of_bounds(self, constraints):
+        return any([o.out_of_bounds(constraints) for o in self.operands]) 
     
 class ProductKernelFamily(KernelFamily):
     def __init__(self, operands):
@@ -1468,6 +1487,9 @@ class ProductKernel(Kernel):
             return ProductKernel(self.operands + other.operands).copy()
         else:
             return ProductKernel(self.operands + [other]).copy()
+            
+    def out_of_bounds(self, constraints):
+        return any([o.out_of_bounds(constraints) for o in self.operands]) 
 
 
 #### FIXME - Sort out the naming of the two functions below            

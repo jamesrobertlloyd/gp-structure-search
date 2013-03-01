@@ -71,9 +71,10 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     # Initialise kernels to be all base kernels along all dimensions.
     current_kernels = list(fk.base_kernels(D, exp.base_kernels))
     
-    # Initialise period at a multiple of the shortest distance between points, to prevent Nyquist problems.
+    # Initialise period at a multiple of the shortest / average distance between points, to prevent Nyquist problems.
     if use_min_period:
-        min_period = np.log([PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
+        #min_period = np.log([PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
+        min_period = np.log([max(PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]), PERIOD_HEURISTIC * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
     else:
         min_period = None
     print min_period
@@ -92,6 +93,10 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         # Score the kernels
         new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=exp.verbose, local_computation=exp.local_computation,
                                           zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean)
+        # Enforce the period heuristic
+        #### TODO - Concept of parameter constraints is more general than this - make it so
+        if use_min_period:
+            new_results = [sk for sk in new_results if not sk.k_opt.out_of_bounds({'min_period' : min_period})]
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
         assert(len(new_results) > 0) # FIXME - Need correct control flow if this happens 
