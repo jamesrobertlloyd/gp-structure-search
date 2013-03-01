@@ -71,6 +71,6 @@ source/.metadata/
 Link to source
 test_results/
 temp_figures/
-
+*.unfinished
 
 .DS_Store
