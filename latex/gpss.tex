@@ -371,6 +371,11 @@ This model is typically used in unsupervised tasks and requires an expensive int
 }
 \citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is a flexible approach to kernel learning but potentially less interpretable.
 
+%To learn periodic structure, 
+\citet{WilAda13} derive kernels of the form ${\SE \times \cos(x-x')}$, forming a basis for stationary kernels through spectral density estimation.
+%motivated as spectral density estimation.
+These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be added to our grammar.
+
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
 Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
 %We build upon this work by demonstrating the structure implied by composite kernels, allowing for the automatic discovery of interpretable structure from data.
@@ -378,6 +383,7 @@ Our work goes beyond this prior work by demonstrating the structure implied by c
 %We build upon this work by 
 %pointing out and demonstrating the interpretability of the structure implied by composite kernels, and demonstrating useful decompositions on several real datasets, as well as by examining extrapolation, structure recovery, and multidimensional regression.
 %Our work extends theirs by examining the interpretable structure of the discovered kernels.
+
 
 \paragraph{Structure discovery}
 
@@ -446,10 +452,10 @@ Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, it ser
 %, where a kernel was hand-tailored to fit a \gp{} model to the dataset.
 
 \input{tables/mauna_growth.tex}
+\input{tables/mauna_decomp.tex}
 
 Figure \ref{fig:mauna_grow} shows the posterior function estimates under increasingly structured models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
 %
-\input{tables/mauna_decomp.tex}
 %
 Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
@@ -510,11 +516,11 @@ The posterior and residuals of the learned kernel are shown in figure \ref{fig:s
 %The composite kernel captures the periodic structure in the data, but does not capture the flat structure from 1645 to 1715 during which sunspots were extremely rare.
 %but it misses out on another aspect of the data: the flat period from 1645 to 1715 which contains no periodicity and has much smaller variance than the rest of the dataset.
 %This corresponds to the Maunder minimum, a period in which sunspots were extremely rare.
+\input{tables/airline_decomp.tex}
 %
 None of the models in our search space are capable of parsimoniously representing the lack of variation from 1645 to 1715. %, since all of the base kernels apart from \kLin{} are stationary.
 %, and it is hard to see how Lin would help in modeling this structure.
 %
-\input{tables/airline_decomp.tex}
 %
 Despite this, our approach fails gracefully: the learned kernel still captures the periodic structure, and the quickly growing posterior variance demonstrates that the model is uncertain about long term structure.
 
@@ -669,7 +675,7 @@ The learned kernels often yield decompositions of a signal into diverse and inte
 We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
 \subsubsection*{Acknowledgements}
-The authors would like to thank Carl Rasmussen for helpful discussions.
+The authors would like to thank Carl Rasmussen and Andrew G. Wilson for helpful discussions.
 
 \appendix
 \section{Appendix}
@@ -794,9 +800,9 @@ This dataset was designed by \cite{Bach_HKL} to demonstrate the advantages of HK
 \begin{figure*}[h!]
 \centering
 \begin{tabular}{ccc}
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order1.pdf} &
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_1st_order2.pdf}& 
-\includegraphics[width=0.3\textwidth]{../figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
+\includegraphics[width=0.3\textwidth]{figures/additive_multi_d/interpretable_1st_order1.pdf} &
+\includegraphics[width=0.3\textwidth]{figures/additive_multi_d/interpretable_1st_order2.pdf}& 
+\includegraphics[width=0.3\textwidth]{figures/additive_multi_d/interpretable_2nd_order1.pdf}\\
 \end{tabular}
 \caption{One-dimensional decompositions of the concrete dataset posterior.  Left, Centre:  Green points indicate the original data, blue points are data after the mean contribution from the other dimensions' first-order terms has been subtracted.  The black line is the posterior mean of a \gp{} with only one term in its kernel.  Right:  The posterior mean of a \gp{} with only one second-order term in its kernel.}
 \label{fig:interpretable functions}
