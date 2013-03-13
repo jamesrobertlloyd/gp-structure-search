@@ -38,7 +38,7 @@ LOCAL_TEMP_PATH = '/home/user/git/gp-structure-search/temp'
 
 6. Automated kernel discovery!
 
-7. The results of the kernel search will be in a text file.  Many helper functions to summarize results are in postprocessing.py.  For example, to produce nice plots of your decomposition, call make_all_1d_figures()
+7. The results of the kernel search will be in a text file in your results directory.  Many helper functions to summarize results are in postprocessing.py.  For example, to produce nice plots of your decomposition, call make_all_1d_figures()
 
 
 If you have any questions about getting this running on your machine, please let us know.
