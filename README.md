@@ -34,6 +34,13 @@ LOCAL_TEMP_PATH = '/home/user/git/gp-structure-search/temp'
 
 4. Modify one of the experiments in experiments/ to suit your needs.  Set local_computation=True.
 
+5. In a Python interpreter, import experiment.py, and call run_experiment_file(filename).
+
+6. Automated kernel discovery!
+
+7. The results of the kernel search will be in a text file.  Many helper functions to summarize results are in postprocessing.py.  For example, to produce nice plots of your decomposition, call make_all_1d_figures()
+
+
 If you have any questions about getting this running on your machine, please let us know.
 
 If describe your problem to us, we'd be happy to give advice about running the method.
