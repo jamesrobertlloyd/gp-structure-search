@@ -20,11 +20,11 @@ Roger Grosse (rgrosse@mit.edu)
 
 ### Install instructions:
 
-1.  You'll need a copy of Matlab.  Install the [GPML toolkit](http://www.gaussianprocess.org/gpml/code/matlab/doc/)
+1.  Install the [GPML toolkit](http://www.gaussianprocess.org/gpml/code/matlab/doc/).  You'll need a copy of Matlab.
 
-2.  Copy the custom covariances in source/matlab/custom_cov/ to the cov/ directory in your GPML install.
+2.  Copy the custom covariances in `source/matlab/custom_cov/` to the `cov/` directory in your GPML install.
 
-3.  You'll also need Python 2.7.  Create a `config.py file, something like:  
+3.  You'll also need Python 2.7.  Create a `config.py` file, something like:  
     
     `MATLAB_LOCATION = "/misc/apps/matlab/matlabR2011b/bin/matlab"`  
     `GPML_PATH = '/home/user/gpml/'`  
