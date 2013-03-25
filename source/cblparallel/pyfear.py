@@ -13,6 +13,7 @@ import os
 import re
 import tempfile
 import time
+import xml.etree.ElementTree as ET
 
 class fear(object):
     '''
@@ -190,13 +191,31 @@ class fear(object):
     
     def qstat(self):
         '''Updates a dictionary with (job id, status) pairs'''
-        output = self.command('. /usr/local/grid/divf2/common/settings.sh; qstat -u %s' % USERNAME)
-        # Now process this text to turn it into a list of job statuses
-        # First remove multiple spaces from the interesting lines (i.e. not header)
-        without_multi_space = [re.sub(' +',' ',line) for line in output[2:]]
-        # Now create a dictionary of job ids and statuses
-        self.status = {key: value for (key, value) in zip([line.split(' ')[0] for line in without_multi_space], \
-                                                          [line.split(' ')[4] for line in without_multi_space])}
+        # Parse xml response from qstat
+        queue_list = ET.fromstring(''.join(self.command('. /usr/local/grid/divf2/common/settings.sh; qstat -u %s -xml' % USERNAME)))
+        # Clear old status dictionary
+        self.status = {}
+        # Iterate over jobs within multiple quese lists
+        for queue in queue_list:
+            for job in queue:
+                # Iterate over fields in job - extracting id and status
+                for element in job:
+                    if element.tag == 'JB_job_number':
+                        job_id = element.text
+                    elif element.tag == 'state':
+                        status = element.text
+                # Append to dictionary
+                self.status[job_id] = status
+        
+        #### Old non-xml version
+        #'''Updates a dictionary with (job id, status) pairs'''
+        #output = self.command('. /usr/local/grid/divf2/common/settings.sh; qstat -u %s' % USERNAME)
+        ## Now process this text to turn it into a list of job statuses
+        ## First remove multiple spaces from the interesting lines (i.e. not header)
+        #without_multi_space = [re.sub(' +',' ',line) for line in output[2:]]
+        ## Now create a dictionary of job ids and statuses
+        #self.status = {key: value for (key, value) in zip([line.split(' ')[0] for line in without_multi_space], \
+        #                                                  [line.split(' ')[4] for line in without_multi_space])}
     
     def job_terminated(self, job_id, update=False):
         '''Returns true if job not listed by qstat'''
