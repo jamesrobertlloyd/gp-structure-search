@@ -572,13 +572,13 @@ The values reported show that the model is not severely over- or under-fitting.
 \label{sec:quantitative}
 
 %In addition to producing highly interpretable decompositions of regression functions, our method also produces state of the art predictions in both extrapolation and interpolation tasks.
-In addition to the qualitative evaluation in section \ref{sec:time_series}, we also investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
+In addition to the qualitative evaluation in section \ref{sec:time_series}, we investigated quantitatively how our method performs on both extrapolation and interpolation tasks.
 
 \subsection{Extrapolation}
 
 We compared the extrapolation capabilities of our model against standard baselines.  
 Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error (MSE) of each method.  
-We varied the size of the training set from the first 10\% to the first 90\% of the range of the data.
+We varied the size of the training set from the first 10\% to the first 90\% of the data.
 
 Figure \ref{fig:extrapolation} shows the learning curves of linear regression, a variety of fixed kernel family \gp{} models, and our method.  
 \gp{} models with only \kSE{} and \kPer{} kernels did not capture the long-term trends, since the best parameter values in terms of \gp{} marginal likelihood only capture short term structure. 
@@ -625,8 +625,8 @@ Results are presented in table \ref{tbl:Regression Mean Squared Error}; our meth
 
 
 
-%\paragraph{Source code}All \gp{} model-fitting was performed by automated calls to the GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; Python code to perform all experiments will be made available.
-%is available on github\footnote{\texttt{github.com/jamesrobertlloyd/gp-structure-search}}.
+%\paragraph{Source code}
+All \gp{} hyperparameter tuning was performed by automated calls to the GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; Python code to perform all experiments is available on github\footnote{\texttt{github.com/jamesrobertlloyd/gp-structure-search}}.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
@@ -664,10 +664,10 @@ Results are presented in table \ref{tbl:Regression Mean Squared Error}; our meth
 %Choosing a kernel family is a stumbling block even for experts.
 %Automating the search over kernel structures will make it easier for non-statisticians to construct appropriate models for their data.
 
-The ability to learn kernel parameters and combination weights automatically has been an important factor in enabling the widespread use of kernel methods.
-For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
+%The ability to learn kernel parameters and combination weights automatically has been an important factor in enabling the widespread use of kernel methods.
+%For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
 
-Towards the goal of automating this process, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
+Towards the goal of automating the choice of kernel family, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
 We proposed a search procedure for this space of kernels which parallels the process of scientific discovery.
 
 We found that the learned structures are often capable of accurate extrapolation in complex time series datasets and are competitive with widely used kernel classes and kernel combination methods on a variety of prediction tasks.
