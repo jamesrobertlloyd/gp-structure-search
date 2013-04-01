@@ -1,0 +1,32 @@
+ GAUSSIAN PROCESS REGRESSION AND CLASSIFICATION Toolbox version 3.1
+    for GNU Octave 3.2.x and Matlab 7.x 
+
+Copyright (c) by Carl Edward Rasmussen and Hannes Nickisch, 2011-02-15.
+
+Changes and small incremental bug fixes applied since last release.
+
+2011-02-15, hn
+- added gfortran support to util/lbfgsb/Makefile (thanks to Ernst Kloppenburg)
+
+2011-01-05
+- changed parametrisation in cov/covPeriodic.m (thanks to Philipp Hennig)
+
+2010-12-21
+- fixed a stupid bug in cov/covFITC.m (thanks to Krzysztof Chalupka)
+
+2010-12-16
+- changed scalars in util/solve_chol.c to long to provide 64bit compatibility (thanks to Ernst Kloppenburg)
+
+2010-12-14
+- added infLOO to allow pseudo-likelihood optimisation instead of the
+  marginal likelihood
+
+2010-12-13
+- fixed a performance issue in util/sq_dist.m (thanks to Krzysztof Chalupka)
+
+2010-11-26
+- fixed a bug causing numerical problems in infFITC and covFITC whenever Kuu is close to singular (thanks to Joris M. Mooij)
+
+2010-11-24
+- lbfgs compilation requires some packages not in jaunty but in hardy
+- updated the documentation to account for this
