@@ -14,6 +14,7 @@ import numpy as np
 nax = np.newaxis
 import os
 import random
+import re
 import scipy.io
 
 import flexiblekernel as fk
@@ -23,10 +24,9 @@ import gpml
 import utils.latex
 import cblparallel
 from cblparallel.util import mkstemp_safe
-from config import *
-import job_controller as jc   # This might be a good, if hacky, place to switch to an MIT controller.
+import job_controller as jc
 import utils.misc
-import re
+
 
 PERIOD_HEURISTIC = 10;   # How many multiples of the smallest interval between points to initialize periods to.
 FROBENIUS_CUTOFF = 0.01; # How different two matrices have to be to be considered different.

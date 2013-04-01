@@ -22,7 +22,7 @@ import utils.latex
 import re
 
 
-def parse_all_results(folder=config.D1_RESULTS_PATH, save_file='kernels.tex', one_d=False):
+def parse_all_results(folder, save_file='kernels.tex', one_d=False):
     """
     Creates a list of results, then sends them to be formatted into latex.
     """
@@ -42,7 +42,7 @@ def parse_all_results(folder=config.D1_RESULTS_PATH, save_file='kernels.tex', on
     utils.latex.table(''.join(['../latex/tables/', save_file]), rownames, colnames, entries)
 
 
-def gen_all_results(folder=config.RESULTS_PATH):
+def gen_all_results(folder):
     """Look through all the files in the results directory"""
     file_list = sorted([f for (r,d,f) in os.walk(folder)][0])
     #for r,d,f in os.walk(folder):
@@ -53,7 +53,7 @@ def gen_all_results(folder=config.RESULTS_PATH):
             yield files.split('.')[-2], best_tuple
                 
 
-def make_all_1d_figures(folder=config.D1_RESULTS_PATH, save_folder='../figures/decomposition/', max_level=None, prefix='', rescale=True):
+def make_all_1d_figures(folder, save_folder='../figures/decomposition/', max_level=None, prefix='', rescale=True):
     """Crawls the results directory, and makes decomposition plots for each file.
     
     prefix is an optional string prepended to the output directory
@@ -99,7 +99,7 @@ def make_all_1d_figures(folder=config.D1_RESULTS_PATH, save_folder='../figures/d
         else:
             print "Cannnot find file %s" % results_file
             
-def make_all_1d_figures_all_depths(folder=config.D1_RESULTS_PATH, max_depth=10, prefix=''):
+def make_all_1d_figures_all_depths(folder, max_depth=10, prefix=''):
     make_all_1d_figures(folder=folder)
     for level in range(max_depth+1):
         make_all_1d_figures(folder=folder, max_level=level, prefix=prefix)

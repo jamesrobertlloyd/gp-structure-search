@@ -58,7 +58,6 @@ latex/*.pdf
 
 *~
 
-config.py
 temp/
 sexy_results/
 sandpit/
@@ -67,6 +66,7 @@ scratch/
 source/temp.m
 source/temp_data.mat
 source/.metadata/
+source/cblparallel/config.py
 .metadata/
 Link to source
 test_results/
