@@ -182,25 +182,48 @@ def gen_all_datasets(dir):
 
 
 # Defines a class that keeps track of all the options for an experiment.
-Experiment = namedtuple("Experiment",
-                        'description,'
-                        'data_dir,'
-                        'max_depth, '
-                        'random_order,'
-                        'k,'
-                        'debug, '
-                        'local_computation,' 
-                        'n_rand, ' 
-                        'sd, '
-                        'max_jobs, ' 
-                        'verbose, '
-                        'make_predictions, '
-                        'skip_complete,'
-                        'results_dir,'
-                        'iters,'
-                        'base_kernels,'
-                        'zero_mean'
-                        );
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean')):
+    def __new__(cls, 
+                data_dir,                  # Where to find the datasets.
+                results_dir,               # Where to write the results.
+                description = 'no description',
+                max_depth = 10,            # How deep to run the search.
+                random_order = False,      # Randomize the order of the datasets?
+                k = 1,                     # Keep the k best kernels at every iteration.  1 => greedy search.
+                debug = False,
+                local_computation = True,  # Run experiments locally, or on the cloud.
+                n_rand = 2,                # Number of random restarts.
+                sd = 4,                    # Standard deviation of random restarts.
+                max_jobs=500,              # Maximum number of jobs to run at once on cluster.
+                verbose=False,
+                make_predictions=False,    # Whether or not to forecast on a test set.
+                skip_complete=True,        # Whether to re-run already completed experiments.
+                iters=100,                 # How long to optimize hyperparameters for.
+                base_kernels='SE,RQ,Per,Lin,Const',
+                zero_mean=True):    
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean)
+
+
+
+#Experiment = namedtuple("Experiment",
+#                        'description,'
+#                        'data_dir,'
+#                        'max_depth, '
+#                        'random_order,'
+#                        'k,'
+#                        'debug, '
+#                        'local_computation,' 
+#                        'n_rand, ' 
+#                        'sd, '
+#                        'max_jobs, ' 
+#                        'verbose, '
+#                        'make_predictions, '
+#                        'skip_complete,'
+#                        'results_dir,'
+#                        'iters,'
+#                        'base_kernels,'
+#                        'zero_mean'
+#                        );
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"

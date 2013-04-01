@@ -1,19 +1,13 @@
-# An example experiment.
+# An example experiment that runs quickly.
 
-Experiment(description='An example experiment for debugging',
+Experiment(description='An example experiment',
            data_dir='../data/1d_data/01-airline.mat',
-           max_depth=2, 
-           random_order=False,
-           k=1,
-           debug=True, 
-           local_computation=True, 
-           n_rand=2,
-           sd=2, 
-           max_jobs=500, 
+           results_dir='../examples/',
+           max_depth=2,                # How deep to run the search.
+           k=1,                        # Keep the k best kernels at every iteration.  1 => greedy search.
+           n_rand=2,                   # Number of random restarts.
+           iters=10,                   # How long to optimize hyperparameters for.
+           base_kernels='SE,Per,Lin',
            verbose=True,
            make_predictions=False,
-           skip_complete=False,
-           results_dir='../examples/',
-           iters=10,
-           base_kernels='SE,RQ,Per,Lin,Const',
-           zero_mean=True)
+           skip_complete=False)
