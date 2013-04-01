@@ -687,7 +687,7 @@ For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), line
 \kernel_{\SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
 \kernel_{\Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
 \kernel_{\Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
-\kernel_{\RQ}(\inputVar, \inputVar') =& \left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
+\kernel_{\RQ}(\inputVar, \inputVar') =& \sigma^2\left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
 \end{eqnarray*}
 
 
