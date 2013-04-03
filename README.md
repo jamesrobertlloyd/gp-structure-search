@@ -12,35 +12,23 @@ by David Duvenaud, James Robert Lloyd, Roger Grosse, Joshua B. Tenenbaum, Zoubin
 http://arxiv.org/abs/1302.4922
 
 
-Feel free to email us:  
-James Lloyd (jrl44@cam.ac.uk)  
-David Duvenaud (dkd23@cam.ac.uk)  
-Roger Grosse (rgrosse@mit.edu)  
+Feel free to email us with any questions:  
+[James Lloyd](http://mlg.eng.cam.ac.uk/Lloyd/) (jrl44@cam.ac.uk)  
+[David Duvenaud](http://mlg.eng.cam.ac.uk/duvenaud/) (dkd23@cam.ac.uk)  
+[Roger Grosse](http://people.csail.mit.edu/rgrosse/) (rgrosse@mit.edu)  
 
 
-### Install instructions:
+### Instructions:
 
-1.  Install the [GPML toolkit](http://www.gaussianprocess.org/gpml/code/matlab/doc/).  You'll need a copy of Matlab.
+You'll need Matlab and Python 2.7 with numpy.
 
-2.  Copy the custom covariances in `source/matlab/custom_cov/` to the `cov/` directory in your GPML install.
+To check whether the framework runs, go to the source directory and run `demo.py`.
 
-3.  You'll also need Python 2.7.  Create a `config.py` file, something like:  
-    
-    `MATLAB_LOCATION = "/misc/apps/matlab/matlabR2011b/bin/matlab"`  
-    `GPML_PATH = '/home/user/gpml/'`  
-    `COLOR_SCHEME = 'dark'`  
-    `LOCATION = 'local'`  
-    `LOCAL_TEMP_PATH = '/home/user/git/gp-structure-search/temp'`  
+There are some example experiment scripts `source/examples/`.
 
-4. Modify one of the experiments in `experiments/` to suit your needs.  Set `local_computation=True`.
-
-5. In a Python interpreter, `import experiment.py`, and call `run_experiment_file(filename)`.
-
-6. Watch automated kernel discovery!
-
-7. The results of the kernel search will be in a text file in your results directory.  Many helper functions to summarize results are in `postprocessing.py`.  For example, to produce nice plots of your decomposition, call `make_all_1d_figures()`
+Many helper functions to summarize results are in `postprocessing.py`.  For example, to produce nice plots of your decomposition, call `make_all_1d_figures()`
 
 
-If you have any questions about getting this running on your machine, please let us know.
+If you have any questions about getting this running on your machine or cluster, please let us know.
 
-If describe your problem to us, we'd be happy to give advice about running the method.
+If describe your problem to us, we'll also happy to give advice about running the method.
