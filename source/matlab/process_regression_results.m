@@ -1,10 +1,10 @@
 %% Read results and print latex format table
 
-experiment_name = '28 Jan';
+experiment_name = '11 Mar';
 
 experiments = {};
 experiments{1} = 'bach_synth_r_200';
-experiments{2} = 'r_concrete_500';
+%experiments{2} = 'r_concrete_500';
 %experiments{3} = 'r_pumadyn512';
 %experiments{4} = 'r_servo';
 %experiments{5} = 'r_housing';
@@ -14,7 +14,7 @@ experiments{2} = 'r_concrete_500';
 %folder = '../saved_results/22-Jan/';
 %folder = '../../results/';
 %folder = '../../saved_results/28-Jan/';
-folder = '../../results/16-Feb/';
+folder = '../../results/11-Mar/';
 
 MSEs = zeros(length(experiments),1);
 liks = zeros(length(experiments),1);
