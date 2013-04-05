@@ -106,10 +106,10 @@ These methods depend on defining a kernel function, $\kernel(\inputVar,\inputVar
 By defining the measure of similarity between inputs, the kernel determines the pattern of inductive generalization.
 %The kernel function gives a measure of similarity between inputs and determines the pattern of inductive generalizations that are made. 
 
-The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
-Examples include learning hyperparameters \cite{rasmussen38gaussian}, linear combination weights \cite{Bach_HKL}, and mappings from the input space to an embedding space \cite{salakhutdinov2008using}.
-These techniques all pose kernel learning as a (possibly high dimensional) parameter estimation problem.
-%These techniques have in common that kernel learning is posed as a (possibly high dimensional) parameter estimation problem.
+Most existing techniques pose kernel learning as a (possibly high-dimensional) parameter estimation problem.
+%The ability to learn kernels automatically has helped greatly in making kernel methods accessible to non-experts.
+Examples include learning hyperparameters \cite{rasmussen38gaussian}, linear combinations of fixed kernels \cite{Bach_HKL}, and mappings from the input space to an embedding space \cite{salakhutdinov2008using}.
+
 However, to apply existing kernel learning algorithms, the user must specify the parametric form of the kernel, and this can require considerable expertise, as well as trial and error.
 
 To make kernel learning more generally applicable, we reframe the kernel learning problem as one of structure discovery.
