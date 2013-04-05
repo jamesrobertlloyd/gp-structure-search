@@ -6,21 +6,22 @@
 % Feb 2013
 
 
-topdir = '../../figures/decomposition/';
+topdir = '../../figures/decomposition';
+latexdir = '../../latex/figures/decomposition';
 dirnames = dir(topdir);
 isub = [dirnames(:).isdir]; %# returns logical vector
 dirnames = {dirnames(isub).name}';
 dirnames(ismember(dirnames,{'.','..'})) = [];
 
 dirnames = [];
-%dirnames{1} = '../../figures/decomposition/11-Feb-02-solar-s';
-%dirnames{2} = '../../figures/decomposition/11-Feb-03-mauna2003-s';
-%dirnames{1} = '../../figures/decomposition/31-Jan-v301-airline-months';
+dirnames{end+1} = '11-Feb-02-solar-s';
+dirnames{end+1} = '11-Feb-03-mauna2003-s';
+dirnames{end+1} = '31-Jan-v301-airline-months';
 
-dirnames{1} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_0';
-dirnames{2} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_1';
-dirnames{3} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_2';
-dirnames{4} = '../../figures/decomposition/11-Feb-v4-03-mauna2003-s_max_level_3';
+dirnames{end+1} = '11-Feb-v4-03-mauna2003-s_max_level_0';
+dirnames{end+1} = '11-Feb-v4-03-mauna2003-s_max_level_1';
+dirnames{end+1} = '11-Feb-v4-03-mauna2003-s_max_level_2';
+dirnames{end+1} = '11-Feb-v4-03-mauna2003-s_max_level_3';
 
 for i = 1:length(dirnames)
     dirname = dirnames{i};
@@ -28,8 +29,10 @@ for i = 1:length(dirnames)
     for f_ix = 1:numel(files)
         curfile = [topdir, '/', dirname, '/', files(f_ix).name];
         h = open(curfile);
-        pdfname = strrep(curfile, '.fig', '.pdf')
-        save2pdf( pdfname, gcf, 600, true );
+        outfile = [topdir, '/', dirname, '/', files(f_ix).name];
+        pdfname = strrep(outfile, '.fig', '')
+        %save2pdf( pdfname, gcf, 600, true );
+        export_fig(pdfname, '-pdf');
         close all
     end
 end

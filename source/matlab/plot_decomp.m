@@ -12,9 +12,11 @@ y = y - mean(y);
 left_extend = 0.05;  % What proportion to extend beyond the data range.
 right_extend = 0.2;
 
+num_interpolation_points = 2000;
+
 x_left = min(X) - (max(X) - min(X))*left_extend;
 x_right = max(X) + (max(X) - min(X))*right_extend;
-xrange = linspace(x_left, x_right, 2000)';
+xrange = linspace(x_left, x_right, num_interpolation_points)';
 
 
 noise_var = exp(2*log_noise);
@@ -105,21 +107,28 @@ function mean_var_plot( xdata, ydata, xrange, forecast_mu, forecast_scale, small
 
     % Figure settings.
     lw = 1.2;
-    opacity = 0.14;
- 
-    % Plot mean function.
-    plot(xrange, forecast_mu, 'Color', colorbrew(2), 'LineWidth', lw); hold on;
-        
+    opacity = 1;
+    light_blue = [227 237 255]./255;
+    
     % Plot confidence bears.
     jbfill( xrange', ...
         forecast_mu' + forecast_scale', ...
         forecast_mu' - forecast_scale', ...
-        colorbrew(2), 'none', 1, opacity); hold on;   
-
+        light_blue, 'none', 1, opacity); hold on;   
+    
+    
+    set(gca,'Layer','top');  % Stop axes from being overridden.
+        
     % Plot data.
     %plot( xdata, ydata, 'ko', 'MarkerSize', 2.1, 'MarkerFaceColor', facecol, 'MarkerEdgeColor', facecol ); hold on;    
     %h_dots = line( xdata, ydata, 'Marker', '.', 'MarkerSize', 2, 'MarkerEdgeColor',  [0 0 0], 'MarkerFaceColor', [0 0 0], 'Linestyle', 'none' ); hold on;    
     plot( xdata, ydata, 'k.');
+ 
+    
+    % Plot mean function.
+    plot(xrange, forecast_mu, 'Color', colorbrew(2), 'LineWidth', lw); hold on;
+        
+
     
     %set(gca, 'Children', [h_dots, h_bars, h_mean ] );
     %e1 = (max(xrange) - min(xrange))/300;
