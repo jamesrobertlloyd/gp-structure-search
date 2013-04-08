@@ -112,7 +112,7 @@ Examples include learning hyperparameters \cite{rasmussen38gaussian}, linear com
 
 However, to apply existing kernel learning algorithms, the user must specify the parametric form of the kernel, and this can require considerable expertise, as well as trial and error.
 
-To make kernel learning more generally applicable, we reframe the kernel learning problem as one of structure discovery.
+To make kernel learning more generally applicable, we reframe the kernel learning problem as one of structure discovery, and automate the choice of kernel form.
 In particular, we formulate a space of kernel structures defined compositionally in terms of sums and products of a small number of base kernel structures\fTBD{Structures or families?}.
 This provides an expressive modeling language which concisely captures many widely used techniques for constructing kernels.
 We focus on Gaussian process regression, where the kernel specifies a covariance function, because the Bayesian framework is a convenient way to formalize structure discovery.
@@ -626,7 +626,14 @@ Results are presented in table \ref{tbl:Regression Mean Squared Error}; our meth
 
 
 %\paragraph{Source code}
-All \gp{} hyperparameter tuning was performed by automated calls to the GPML toolbox\footnote{Available at \texttt{www.gaussianprocess.org/gpml/code/}}; Python code to perform all experiments is available on github\footnote{\texttt{github.com/jamesrobertlloyd/gp-structure-search}}.
+All \gp{} hyperparameter tuning was performed by automated calls to the GPML toolbox\footnote{Available at 
+\href{http://www.gaussianprocess.org/gpml/code/}
+{\texttt{www.gaussianprocess.org/gpml/code/}}
+}; Python code to perform all experiments is available on github\footnote{
+%\texttt{github.com/jamesrobertlloyd/gp-structure-search}
+\href{http://www.github.com/jamesrobertlloyd/gp-structure-search}
+{\texttt{github.com/jamesrobertlloyd/gp-structure-search}}
+}.
 
 %$k = 1$, $D = 8$, kernels are SE and RQ (\TBD{currently running other experiments that may be more canonical}).
 %We have extended the comparison of \cite{duvenaud2011additive11} to include our method.
