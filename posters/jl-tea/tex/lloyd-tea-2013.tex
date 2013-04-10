@@ -224,8 +224,10 @@
     % Title text
     \node[inner sep=0,text width=0.7\textwidth,text centered,font=\Huge] (Title) at (0,0) 
     {
-      {\sffamily \Huge \textbf{Structure Discovery in Nonparametric\\Regression through Compositional Kernel Search}}\\
-      {\huge\sffamily David Duvenaud\textsuperscript{1}, James Robert Lloyd\textsuperscript{1}, Roger Grosse\textsuperscript{2}, Joshua B. Tenenbaum\textsuperscript{2}, Zoubin Ghahramani\textsuperscript{1}}\\
+      {\sffamily \Huge \textbf{Automating pattern discovery and the statistical process for regression}}\\
+      {\huge\sffamily David Duvenaud\textsuperscript{1}, \textbf{James Robert Lloyd}\textsuperscript{1}, Roger Grosse\textsuperscript{2},}\\
+      \vspace{-0.1\baselineskip}
+      {\huge\sffamily Joshua B. Tenenbaum\textsuperscript{2}, Zoubin Ghahramani\textsuperscript{1}}\\
       \vspace{-0.3\baselineskip}
       {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
     };
@@ -238,12 +240,12 @@
         \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
     };
     % MIT badge
-    \node [mybox] (MIT Badge) at (-0.9, 0) {
-        \Huge{MIT!}
+    \node [mybox] (MIT Badge) at (-0.75, 0) {
+        \includegraphics[height=\badgeheight]{../badges/MIT2.jpg}
     };
     % QR code
-    \node [mybox] (QR code) at (-0.8, 0) {
-        \Huge{QR}
+    \node [mybox] (QR code) at (-0.95, 0) {
+        \includegraphics[height=\badgeheight]{../badges/QR.png}
     };
 \end{tikzpicture}
 \end{center}
@@ -328,13 +330,13 @@
 
 \mysection{Example: Airline}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
 
 \begin{center}
-  \huge{Figure 5}
+  \input{../figures/fig_airline.tex}
 \end{center}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
 
 \end{multicols}
 
