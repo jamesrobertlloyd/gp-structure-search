@@ -177,6 +177,9 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\usepackage{preamble}
+\usepackage{tabularx}
+
 \def\newarrow{\mbox{\begin{tikzpicture}
              \useasboundingbox{(-3pt,-4.5pt) rectangle (19pt,1pt)};
              \draw[->] (0,-0.07)--(17pt,-0.07);\end{tikzpicture}}}
@@ -274,7 +277,7 @@
 
 \large
 
-\mysection{Structured data sets}
+\mysection{Data may often exhibit high level structure \eg linearity, periodicity\ldots}
 
 \vspace{4\baselineskip}
 
@@ -284,41 +287,88 @@
 
 \vspace{4\baselineskip}
 
-\mysection{Corresponding GP kernel structures}
+\begin{itemize}
+  \item Seemingly different regression methods would be required to model these data sets, and produce credible extrapolations
+  \item \ldots
+  \item \ldots
+\end{itemize}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
 
-\begin{center}
-  \huge{Figures 1 and 2}
-\end{center}
+\mysection{Gaussian process regression can model many structures with an appropriately chosen kernel}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
+
+\begin{itemize}
+  \item The kernel encodes the inductive bias of the model \ie the types of functions the model `believes in'
+  \item Below we depict standard base kernels, and examples of functions the model believes in (samples from the prior)
+\end{itemize}
+\vspace{1\baselineskip}
+\input{../figures/fig_simple_kernels.tex}
+\vspace{1\baselineskip}
+\begin{itemize}
+  \item Base kernels can be combined to create more complicated structural assumptions
+\end{itemize}
+\vspace{1\baselineskip}
+\input{../figures/fig_example_structures.tex}
 
 \newpage 
 
-\mysection{A grammar for statistical models}
+\mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
+
+\begin{itemize}
+  \item Constructing appropriate composite kernels has previously been the domain of Gaussian process experts
+  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$'
+  \item These operations are interpretable\ldots
+  \begin{itemize}
+    \item Addition of kernels corresponds to the addition of independent functions
+    \item Multiplication of kernels behaves like an `AND' operation, combining properties of the base kernels
+  \end{itemize}
+  \item \ldots and produce a rich space including many standard statistical models
+\end{itemize}
+
+\vspace{1\baselineskip}
 
 \begin{center}
-  \huge{Remember the example expressions table}
+  \begin{tabular}{l|l}
+  Bayesian linear regression & $\Lin$ \\
+  %Bayesian quadratric regression & $\Lin \times \Lin$ \\
+  Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
+  Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
+  Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
+  Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
+  Linear trend with deviations & $\Lin + \SE$ \\
+  Linearly growing amplitude & $\Lin \times \SE$
+  \end{tabular}
 \end{center}
 
-\vspace{4\baselineskip}
+\vspace{1\baselineskip}
 
-\mysection{Learning grammar stagewise}
+\mysection{\ldots which we search greedily, producing progressively better statistical models}
 
-\vspace{4\baselineskip}
+\vspace{2\baselineskip}
 
 \begin{center}
-  \huge{Figure 3}
+  \huge{Draw a picture of the search}
 \end{center}
 
-\vspace{4\baselineskip}
+\vspace{5\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_mauna_growth.tex}
+\end{center}
 
 \newpage 
 
 \mysection{Example: Mauna Loa CO$_2$ concentration}
+
+\vspace{1\baselineskip}
+
+\begin{itemize}
+  \item By automatically inferring an appropriate kernel, we can also automatically decompose functions into additive components
+\end{itemize}
 
 \vspace{3\baselineskip}
 
@@ -326,7 +376,7 @@
   \input{../figures/fig_mauna.tex}
 \end{center}
 
-\vspace{18\baselineskip}
+\vspace{17\baselineskip}
 
 \mysection{Example: International airline passengers}
 
