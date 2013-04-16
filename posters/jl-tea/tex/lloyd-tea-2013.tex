@@ -277,20 +277,20 @@
 
 \large
 
-\mysection{Data may often exhibit high level structure \eg linearity, periodicity\ldots}
+\mysection{Data may often exhibit high level structure \eg linearity, periodicity etc.}
 
-\vspace{4\baselineskip}
+\vspace{0\baselineskip}
 
 \begin{center}
-  \huge{Display some 1d data sets - linear, quadratic, periodic, airline}
+  \input{../figures/fig_motivation.tex}
 \end{center}
 
-\vspace{4\baselineskip}
+\vspace{0\baselineskip}
 
 \begin{itemize}
-  \item Seemingly different regression methods would be required to model these data sets, and produce credible extrapolations
-  \item \ldots
-  \item \ldots
+  \item Smoothing methods (\eg local linear regression) would all produce good estimates of the regression function within the data for the above\ldots
+  \item \ldots but this would ignore any high level structure
+  \item Traditionally, different statistical models would be required to produce a parsimonious fit to the above and enabel extrapolation
 \end{itemize}
 
 \vspace{1\baselineskip}
@@ -316,20 +316,20 @@
 
 \mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
 
-\vspace{1\baselineskip}
+\vspace{0.5\baselineskip}
 
 \begin{itemize}
   \item Constructing appropriate composite kernels has previously been the domain of Gaussian process experts
-  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$'
-  \item These operations are interpretable\ldots
-  \begin{itemize}
-    \item Addition of kernels corresponds to the addition of independent functions
-    \item Multiplication of kernels behaves like an `AND' operation, combining properties of the base kernels
-  \end{itemize}
-  \item \ldots and produce a rich space including many standard statistical models
+  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', which includes
+  %\item These operations are interpretable\ldots
+  %\begin{itemize}
+  %  \item Addition of kernels corresponds to the addition of independent functions
+  %  \item Multiplication of kernels behaves like an `AND' operation, combining properties of the base kernels
+  %\end{itemize}
+  %\item \ldots and produce a rich space including many standard statistical models
 \end{itemize}
 
-\vspace{1\baselineskip}
+\vspace{0.5\baselineskip}
 
 \begin{center}
   \begin{tabular}{l|l}
@@ -348,13 +348,16 @@
 
 \mysection{\ldots which we search greedily, producing progressively better statistical models}
 
-\vspace{2\baselineskip}
+\begin{itemize}
+  \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
+  \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
+\end{itemize}
 
 \begin{center}
-  \huge{Draw a picture of the search}
+  \input{../figures/fig_search_tree.tex}
 \end{center}
 
-\vspace{5\baselineskip}
+\vspace{13\baselineskip}
 
 \begin{center}
   \input{../figures/fig_mauna_growth.tex}

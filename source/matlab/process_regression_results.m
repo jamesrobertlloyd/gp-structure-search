@@ -4,7 +4,7 @@ experiment_name = '11 Mar';
 
 experiments = {};
 experiments{1} = 'bach_synth_r_200';
-%experiments{2} = 'r_concrete_500';
+experiments{2} = 'r_concrete_500';
 %experiments{3} = 'r_pumadyn512';
 %experiments{4} = 'r_servo';
 %experiments{5} = 'r_housing';
