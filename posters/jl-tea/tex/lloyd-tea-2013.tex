@@ -277,7 +277,7 @@
 
 \large
 
-\mysection{Data may often exhibit high level structure \eg linearity, periodicity etc.}
+\mysection{Data often exhibits high level structure}
 
 \vspace{0\baselineskip}
 
@@ -288,16 +288,16 @@
 \vspace{0\baselineskip}
 
 \begin{itemize}
-  \item Smoothing methods (\eg local linear regression) would all produce good estimates of the regression function within the data for the above\ldots
-  \item \ldots but this would ignore any high level structure
-  \item Traditionally, different statistical models would be required to produce a parsimonious fit to the above and enabel extrapolation
+  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
+  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
+  \item Instead, we automate statistical model \emph{construction}, which allows for a very large set of models to be considered
 \end{itemize}
 
-\vspace{1\baselineskip}
+\vspace{0.5\baselineskip}
 
 \mysection{Gaussian process regression can model many structures with an appropriately chosen kernel}
 
-\vspace{1\baselineskip}
+\vspace{0.5\baselineskip}
 
 \begin{itemize}
   \item The kernel encodes the inductive bias of the model \ie the types of functions the model `believes in'
@@ -305,7 +305,7 @@
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_simple_kernels.tex}
-\vspace{1\baselineskip}
+\vspace{0.5\baselineskip}
 \begin{itemize}
   \item Base kernels can be combined to create more complicated structural assumptions
 \end{itemize}
