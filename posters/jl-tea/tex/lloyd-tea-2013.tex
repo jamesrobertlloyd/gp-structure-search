@@ -277,7 +277,7 @@
 
 \large
 
-\mysection{Data often exhibits high level structure}
+\mysection{Data often exhibits high level structure or patterns}
 
 \vspace{0\baselineskip}
 
@@ -285,12 +285,30 @@
   \input{../figures/fig_motivation.tex}
 \end{center}
 
+%\vspace{0\baselineskip}
+
+%\begin{itemize}
+%  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
+%  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
+%  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
+%\end{itemize}
+
+%\vspace{0.5\baselineskip}
+
+\mysection{Identifying this structure is crucial for extrapolation}
+
+\vspace{0\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_synth_extrap.tex}
+\end{center}
+
 \vspace{0\baselineskip}
 
 \begin{itemize}
   \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
   \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
-  \item Instead, we automate statistical model \emph{construction}, which allows for a very large set of models to be considered
+  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
 \end{itemize}
 
 \vspace{0.5\baselineskip}
@@ -301,26 +319,26 @@
 
 \begin{itemize}
   \item The kernel encodes the inductive bias of the model \ie the types of functions the model `believes in'
-  \item Below we depict standard base kernels, and examples of functions the model believes in (samples from the prior)
+  \item Below we list standard base kernels, and examples of functions the model believes in (samples from the prior)
 \end{itemize}
 \vspace{1\baselineskip}
-\input{../figures/fig_simple_kernels.tex}
+\input{../figures/fig_simple_kernels_no_kern.tex}
 \vspace{0.5\baselineskip}
 \begin{itemize}
   \item Base kernels can be combined to create more complicated structural assumptions
 \end{itemize}
 \vspace{1\baselineskip}
-\input{../figures/fig_example_structures.tex}
+\input{../figures/fig_example_structures_no_kern.tex}
 
 \newpage 
 
 \mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
 
-\vspace{0.5\baselineskip}
+\vspace{0.25\baselineskip}
 
 \begin{itemize}
   \item Constructing appropriate composite kernels has previously been the domain of Gaussian process experts
-  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', which includes
+  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', including \eg
   %\item These operations are interpretable\ldots
   %\begin{itemize}
   %  \item Addition of kernels corresponds to the addition of independent functions
@@ -348,6 +366,8 @@
 
 \mysection{\ldots which we search greedily, producing progressively better statistical models}
 
+\vspace{0.25\baselineskip}
+
 \begin{itemize}
   \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
   \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
@@ -367,19 +387,19 @@
 
 \mysection{Example: Mauna Loa CO$_2$ concentration}
 
-\vspace{1\baselineskip}
+\vspace{0\baselineskip}
 
 \begin{itemize}
-  \item By automatically inferring an appropriate kernel, we can also automatically decompose functions into additive components
+  \item By automatically inferring an appropriate kernel, we can also automatically decompose functions into additive components (additive components of the kernel correspond to independent additive functions)
 \end{itemize}
 
-\vspace{3\baselineskip}
+\vspace{3.5\baselineskip}
 
 \begin{center}
   \input{../figures/fig_mauna.tex}
 \end{center}
 
-\vspace{17\baselineskip}
+\vspace{17.5\baselineskip}
 
 \mysection{Example: International airline passengers}
 
