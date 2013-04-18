@@ -1,0 +1,396 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% From a template maintained at https://github.com/jamesrobertlloyd/cbl-tikz-poster
+%
+% Code near the top should be fairly standard and not need to be changed
+%  - except for the document class
+% Code lower down is more likely to be customised
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Document class
+%
+% Change this if you want a different size / orientation poster etc
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
+%\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% 'Basic' packages
+%
+% TODO - Almost certainly some are unnecessary - feel free to remove nonstandard
+% packages if you think it is a good idea not to always have them
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{multicol}
+\usepackage{color}
+\usepackage{shadow}
+\usepackage{morefloats}
+\usepackage{cite}
+\usepackage[pdftex]{graphicx}
+\usepackage{rotating}
+\usepackage{amsmath, amsthm, amssymb, bm}
+\usepackage{array}
+\usepackage{nth}
+\usepackage[square,numbers]{natbib}
+\usepackage{booktabs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% TIKZ packages and common definitions
+%
+% Add extra things as per your tikz needs
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{../common/picins}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes,calc}
+\tikzstyle{mybox} = [draw=white, rectangle]
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% myfig
+%
+% \myfig - replacement for \figure
+% necessary, since in multicol-environment 
+% \figure won't work        
+%                 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newcommand{\myfig}[3][0]{
+\begin{center}
+  \vspace{1.5cm}
+  \includegraphics[width=#3\hsize,angle=#1]{#2}
+  \nobreak\medskip
+\end{center}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% mycaption                
+%
+% \mycaption - replacement for \caption
+% necessary, since in multicol-environment \figure and
+% therefore \caption won't work
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\newcounter{figure}
+\setcounter{figure}{1}
+\newcommand{\mycaption}[1]{
+  \vspace{0.5cm}
+  \begin{quote}
+    {{\sc Figure} \arabic{figure}: #1}
+  \end{quote}
+  \vspace{1cm}
+  \stepcounter{figure}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Some standard colours
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\definecolor{camlightblue}{rgb}{0.601 , 0.8, 1}
+\definecolor{camdarkblue}{rgb}{0, 0.203, 0.402}
+\definecolor{camred}{rgb}{1, 0.203, 0}
+\definecolor{camyellow}{rgb}{1, 0.8, 0}
+\definecolor{lightblue}{rgb}{0, 0, 0.80}
+\definecolor{white}{rgb}{1, 1, 1}
+\definecolor{whiteblue}{rgb}{0.80, 0.80, 1}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Some look and feel definitions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength{\columnsep}{0.03\textwidth}
+\setlength{\columnseprule}{0.0018\textwidth}
+\setlength{\parindent}{0.0cm}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% \mysection - replacement for \section*
+% 
+% Puts a pretty box around some text
+% TODO - any other thoughts for what this box should look like
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tikzstyle{mysection} = [rectangle, 
+									draw=none, 
+									shade, 
+									outer color=camlightblue!30,
+									inner color=camlightblue!30,
+									text width=0.965\columnwidth,
+									text centered,
+									rounded corners=20pt,
+									minimum height=0.11\columnwidth]
+
+\newcommand{\mysection}[1]
+{
+\begin{center}
+  \begin{tikzpicture}
+    \node[mysection] {\sffamily\bfseries\LARGE#1};
+  \end{tikzpicture}
+\end{center}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Set the font
+%
+% TODO - Not sure what a canonical choice is - feel free to modify
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewcommand{\familydefault}{cmss}
+\sffamily
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Poster environment
+%
+% Centres everything and can be used to define the width of the content
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newenvironment{poster}{
+  \begin{center}
+  \begin{minipage}[c]{0.96\textwidth}
+}{
+  \end{minipage} 
+  \end{center}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% This is probably a good place to put content specific packages and definitions
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{preamble}
+\usepackage{tabularx}
+
+\def\newarrow{\mbox{\begin{tikzpicture}
+             \useasboundingbox{(-3pt,-4.5pt) rectangle (19pt,1pt)};
+             \draw[->] (0,-0.07)--(17pt,-0.07);\end{tikzpicture}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The document environment starts here
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Begin the poster environment - centres things and potentially changes the width
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{poster}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Potentially add some space at the top of the poster
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace{0\baselineskip}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Draw the header as a TIKZ picture
+%
+% Using TIKZ to allow for easy alignment
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{center}
+\begin{tikzpicture}[x=0.5\textwidth]
+    % Dummy nodes at edges for spacing
+    % TODO - a better way?
+    \node at (+1, 0) {};    
+    \node at (-1, 0) {};
+    % Set the size of the badges
+    \def \badgeheight {0.08\textwidth}
+    % Title text
+    \node[inner sep=0,text width=0.7\textwidth,text centered,font=\Huge] (Title) at (0,0) 
+    {
+      {\sffamily \Huge \textbf{Automating pattern discovery and the statistical process for regression}}\\
+      {\huge\sffamily David Duvenaud\textsuperscript{1}, \textbf{James Robert Lloyd}\textsuperscript{1}, Roger Grosse\textsuperscript{2},}\\
+      \vspace{-0.1\baselineskip}
+      {\huge\sffamily Joshua B. Tenenbaum\textsuperscript{2}, Zoubin Ghahramani\textsuperscript{1}}\\
+      \vspace{-0.3\baselineskip}
+      {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
+    };
+    % Cambridge badge
+    \node [mybox] (Cambridge Badge) at (+0.75, 0) {
+        \includegraphics[height=\badgeheight]{../badges/cam-crest-and-text.pdf}
+    };
+    % CBL badge
+    \node [mybox] (CBL Badge) at (+0.9, 0) {
+        \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
+    };
+    % MIT badge
+    \node [mybox] (MIT Badge) at (-0.75, 0) {
+        \includegraphics[height=\badgeheight]{../badges/MIT2.jpg}
+    };
+    % QR code
+    \node [mybox] (QR code) at (-0.95, 0) {
+        \includegraphics[height=\badgeheight]{../badges/QR.png}
+    };
+\end{tikzpicture}
+\end{center}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Spacing between title and main body
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\vspace{1\baselineskip}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Columns environment
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{multicols}{3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Start of content
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\large
+
+\mysection{Data often exhibits high level structure}
+
+\vspace{0\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_motivation.tex}
+\end{center}
+
+\vspace{0\baselineskip}
+
+\begin{itemize}
+  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
+  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
+  \item Instead, we automate statistical model \emph{construction}, which allows for a very large set of models to be considered
+\end{itemize}
+
+\vspace{0.5\baselineskip}
+
+\mysection{Gaussian process regression can model many structures with an appropriately chosen kernel}
+
+\vspace{0.5\baselineskip}
+
+\begin{itemize}
+  \item The kernel encodes the inductive bias of the model \ie the types of functions the model `believes in'
+  \item Below we depict standard base kernels, and examples of functions the model believes in (samples from the prior)
+\end{itemize}
+\vspace{1\baselineskip}
+\input{../figures/fig_simple_kernels.tex}
+\vspace{0.5\baselineskip}
+\begin{itemize}
+  \item Base kernels can be combined to create more complicated structural assumptions
+\end{itemize}
+\vspace{1\baselineskip}
+\input{../figures/fig_example_structures.tex}
+
+\newpage 
+
+\mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
+
+\vspace{0.5\baselineskip}
+
+\begin{itemize}
+  \item Constructing appropriate composite kernels has previously been the domain of Gaussian process experts
+  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', which includes
+  %\item These operations are interpretable\ldots
+  %\begin{itemize}
+  %  \item Addition of kernels corresponds to the addition of independent functions
+  %  \item Multiplication of kernels behaves like an `AND' operation, combining properties of the base kernels
+  %\end{itemize}
+  %\item \ldots and produce a rich space including many standard statistical models
+\end{itemize}
+
+\vspace{0.5\baselineskip}
+
+\begin{center}
+  \begin{tabular}{l|l}
+  Bayesian linear regression & $\Lin$ \\
+  %Bayesian quadratric regression & $\Lin \times \Lin$ \\
+  Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
+  Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
+  Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
+  Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
+  Linear trend with deviations & $\Lin + \SE$ \\
+  Linearly growing amplitude & $\Lin \times \SE$
+  \end{tabular}
+\end{center}
+
+\vspace{1\baselineskip}
+
+\mysection{\ldots which we search greedily, producing progressively better statistical models}
+
+\begin{itemize}
+  \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
+  \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
+\end{itemize}
+
+\begin{center}
+  \input{../figures/fig_search_tree.tex}
+\end{center}
+
+\vspace{13\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_mauna_growth.tex}
+\end{center}
+
+\newpage 
+
+\mysection{Example: Mauna Loa CO$_2$ concentration}
+
+\vspace{1\baselineskip}
+
+\begin{itemize}
+  \item By automatically inferring an appropriate kernel, we can also automatically decompose functions into additive components
+\end{itemize}
+
+\vspace{3\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_mauna.tex}
+\end{center}
+
+\vspace{17\baselineskip}
+
+\mysection{Example: International airline passengers}
+
+\vspace{3\baselineskip}
+
+\begin{center}
+  \input{../figures/fig_airline.tex}
+\end{center}
+
+\end{multicols}
+
+\end{poster}
+
+\end{document}
