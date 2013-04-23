@@ -67,6 +67,9 @@ def remove_nan_scored_kernels(scored_kernels):
     
 def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, exp, use_min_period=True):
     '''Search for the best kernel, in parallel on fear or local machine.'''
+    
+    # Initialise random seeds - randomness may be used in e.g. data subsetting
+    utils.misc.set_all_random_seeds(exp.random_seed)
 
     # Initialise kernels to be all base kernels along all dimensions.
     current_kernels = list(fk.base_kernels(D, exp.base_kernels))
@@ -92,7 +95,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         current_kernels = fk.add_random_restarts(current_kernels, exp.n_rand, exp.sd, min_period=min_period)
         # Score the kernels
         new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=exp.verbose, local_computation=exp.local_computation,
-                                          zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean)
+                                          zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean, random_seed=exp.random_seed)
         # Enforce the period heuristic
         #### TODO - Concept of parameter constraints is more general than this - make it so
         if use_min_period:
@@ -187,7 +190,7 @@ def gen_all_datasets(dir):
 
 # Defines a class that keeps track of all the options for an experiment.
 # Maybe more natural as a dictionary to handle defaults - but named tuple looks nicer with . notation
-class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results')):
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed')):
     def __new__(cls, 
                 data_dir,                  # Where to find the datasets.
                 results_dir,               # Where to write the results.
@@ -206,8 +209,9 @@ class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, ran
                 iters=100,                 # How long to optimize hyperparameters for.
                 base_kernels='SE,RQ,Per,Lin,Const',
                 zero_mean=True,            # If false, use a constant mean function - cannot be used with the Const kernel
-                verbose_results=False):    # Whether or not to record all kernels tested
-        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results)
+                verbose_results=False,     # Whether or not to record all kernels tested
+                random_seed=0):           
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed)
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"
@@ -293,7 +297,7 @@ def perform_experiment(data_file, output_file, exp):
     
     if exp.make_predictions:
         predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
-                                          max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean)
+                                          max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean, random_seed=exp.random_seed)
         scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.
@@ -308,7 +312,7 @@ def calculate_model_fits(data_file, output_file, exp):
     best_scored_kernel = parse_results(output_file)
     
     predictions = jc.make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=exp.local_computation,
-                                      max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean)
+                                      max_jobs=exp.max_jobs, verbose=exp.verbose, zero_mean=exp.zero_mean, random_seed=exp.random_seed)
     scipy.io.savemat(prediction_file, predictions, appendmat=False)
         
     os.system('reset')  # Stop terminal from going invisible.

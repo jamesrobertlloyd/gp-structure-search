@@ -6,6 +6,11 @@ import Image
 import mkl_hack
 import scipy.linalg
 import scipy.stats
+import random
+
+def set_all_random_seeds(seed=0):
+    random.seed(seed)
+    np.random.seed(seed)
 
 def sample_truncated_normal(loc=0, scale=1, min_value=-np.Inf):
     '''Uses inverse cdf method - actually uses survival function sf = 1-cdf'''

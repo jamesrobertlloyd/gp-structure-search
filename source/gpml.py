@@ -72,6 +72,9 @@ def run_matlab_code(code, verbose=False, jvm=True):
 
 # Matlab code to optimise hyper-parameters on one file, given one kernel.
 OPTIMIZE_KERNEL_CODE = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
 X = double(X)
@@ -116,6 +119,9 @@ save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 """
 
 OPTIMIZE_KERNEL_CODE_ZERO_MEAN = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
 X = double(X)
@@ -167,7 +173,7 @@ class OptimizerOutput:
         self.hessian = hessian
         self.noise_hyp = noise_hyp
 
-def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300, zero_mean=False):
+def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=False, verbose=False, noise=None, iters=300, zero_mean=False, random_seed=0):
     if X.ndim == 1:
         X = X[:, nax]
     if y.ndim == 1:
@@ -190,7 +196,8 @@ def optimize_params(kernel_expression, kernel_init_params, X, y, return_all=Fals
                    'kernel_family': kernel_expression,
                    'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
                    'noise': str(noise),
-                   'iters': str(iters)}
+                   'iters': str(iters),
+                   'seed': str(random_seed)}
     if zero_mean:
         code = OPTIMIZE_KERNEL_CODE_ZERO_MEAN % parameters
     else:
@@ -319,6 +326,9 @@ def plot_kernel(kernel, X):
 
 # Matlab code to compute mean fit
 MEAN_FUNCTION_CODE = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 %% Load the data, it should contain X, y, X_test
 load '%(datafile)s'
 X = double(X)
@@ -359,6 +369,9 @@ exit();
 """
 
 MEAN_FUNCTION_CODE_ZERO_MEAN = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 %% Load the data, it should contain X, y, X_test
 load '%(datafile)s'
 X = double(X)
@@ -399,7 +412,7 @@ exit();
 """
 
 
-def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, iters=300, zero_mean=False):
+def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, iters=300, zero_mean=False, random_seed=0):
     #### Problem - we are not storing the learnt mean and noise - will need to re-learn - might not be especially correct!
     #### This is therefore just a placeholder
     if X.ndim == 1:
@@ -426,7 +439,8 @@ def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, ite
                  'component_kernel_family': component_kernel.gpml_kernel_expression(),
                  'component_kernel_params': '[ %s ]' % ' '.join(str(p) for p in component_kernel.param_vector()),
                  'noise': str(noise),
-                 'iters': str(iters)}
+                 'iters': str(iters),
+                 'seed': str(random_seed)}
     
     if zero_mean:
         code = MEAN_FUNCTION_CODE_ZERO_MEAN % parameters
@@ -448,6 +462,9 @@ def posterior_mean (kernel, component_kernel, X, y, X_test=None, noise=None, ite
 
 # Matlab code to make predictions on a dataset.
 PREDICT_AND_SAVE_CODE = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
 X = double(X)
@@ -493,6 +510,9 @@ a='Supposedly finished writing file'
 """
 
 PREDICT_AND_SAVE_CODE_ZERO_MEAN = r"""
+rand('twister', %(seed)s);
+randn('state', %(seed)s);
+
 a='Load the data, it should contain X and y.'
 load '%(datafile)s'
 X = double(X)
@@ -538,14 +558,15 @@ a='Supposedly finished writing file'
 """
 
 #### TODO - remove me
-def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30, zero_mean=False):  
+def make_predictions(kernel_expression, kernel_init_params, data_file, write_file, noise, iters=30, zero_mean=False, random_seed=0):  
     parameters = {'datafile': data_file,
                   'writefile': write_file,
                   'gpml_path': config.GPML_PATH,
                   'kernel_family': kernel_expression,
                   'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel_init_params),
                   'noise': str(noise),
-                  'iters': str(iters)}
+                  'iters': str(iters),
+                  'seed': str(random_seed)}
     if zero_mean:
         code = PREDICT_AND_SAVE_CODE_ZERO_MEAN % parameters
     else:

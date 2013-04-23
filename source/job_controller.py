@@ -79,7 +79,7 @@ def covariance_distance(kernels, X, local_computation=True, verbose=True):
     return distance
 
        
-def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500, zero_mean=False):
+def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_computation=False, zip_files=False, max_jobs=500, zero_mean=False, random_seed=0):
     '''
     Sets up the kernel optimisation and nll calculation experiments, returns the results as scored kernels
     Input:
@@ -123,7 +123,8 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
                       'kernel_family': kernel.gpml_kernel_expression(),
                       'kernel_params': '[ %s ]' % ' '.join(str(p) for p in kernel.param_vector()),
                       'noise': str(noise),
-                      'iters': str(iters)}
+                      'iters': str(iters),
+                      'seed': str(random_seed)}
         if zero_mean:
             scripts[i] = gpml.OPTIMIZE_KERNEL_CODE_ZERO_MEAN % parameters
         else:
@@ -159,7 +160,7 @@ def evaluate_kernels(kernels, X, y, verbose=True, noise=None, iters=300, local_c
     return results     
 
    
-def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=False, max_jobs=500, verbose=True, zero_mean=False):
+def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=False, max_jobs=500, verbose=True, zero_mean=False, random_seed=0):
     '''
     Evaluates a kernel on held out data
     Input:
@@ -196,7 +197,8 @@ def make_predictions(X, y, Xtest, ytest, best_scored_kernel, local_computation=F
                  'kernel_family': best_scored_kernel.k_opt.gpml_kernel_expression(),
                  'kernel_params': '[ %s ]' % ' '.join(str(p) for p in best_scored_kernel.k_opt.param_vector()),
                  'noise': str(best_scored_kernel.noise),
-                 'iters': str(30)}
+                 'iters': str(30),
+                 'seed': str(random_seed)}
     if zero_mean:
         code = gpml.PREDICT_AND_SAVE_CODE_ZERO_MEAN % parameters
     else:
