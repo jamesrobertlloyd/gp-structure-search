@@ -75,3 +75,5 @@ temp_figures/
 *.unfinished
 
 .DS_Store
+examples/*.txt
+examples/*/*
