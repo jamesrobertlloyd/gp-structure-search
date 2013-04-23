@@ -126,7 +126,8 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                 print result.nll, result.laplace_nle, result.bic_nle, result.k_opt.pretty_print()
         
         # Extract the best k kernels from the new all_results
-        best_kernels = [r.k_opt for r in sorted(new_results, key=ScoredKernel.score)[0:exp.k]]
+        best_results = sorted(new_results, key=ScoredKernel.score)[0:exp.k]
+        best_kernels = [r.k_opt for r in best_results]
         current_kernels = grammar.expand_kernels(D, best_kernels, verbose=exp.verbose, debug=exp.debug, base_kernels=exp.base_kernels)
         
         if exp.debug==True:
@@ -139,8 +140,13 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                           % (experiment_data_file_name, experiment_fields_to_str(exp)))
             for (i, all_results) in enumerate(results_sequence):
                 outfile.write('\n%%%%%%%%%% Level %d %%%%%%%%%%\n\n' % i)
-                for result in all_results:
-                    print >> outfile, result  
+                if exp.verbose_results:
+                    for result in all_results:
+                        print >> outfile, result  
+                else:
+                    # Only print top k kernels - i.e. those used to seed the next level of the search
+                    for result in best_results:
+                        print >> outfile, result 
     
     # Rename temporary results file to actual results file                
     os.rename(results_filename + '.unfinished', results_filename)
@@ -179,10 +185,9 @@ def gen_all_datasets(dir):
     file_list.sort()
     return file_list
 
-
-
 # Defines a class that keeps track of all the options for an experiment.
-class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean')):
+# Maybe more natural as a dictionary to handle defaults - but named tuple looks nicer with . notation
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results')):
     def __new__(cls, 
                 data_dir,                  # Where to find the datasets.
                 results_dir,               # Where to write the results.
@@ -200,30 +205,9 @@ class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, ran
                 skip_complete=True,        # Whether to re-run already completed experiments.
                 iters=100,                 # How long to optimize hyperparameters for.
                 base_kernels='SE,RQ,Per,Lin,Const',
-                zero_mean=True):    
-        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean)
-
-
-
-#Experiment = namedtuple("Experiment",
-#                        'description,'
-#                        'data_dir,'
-#                        'max_depth, '
-#                        'random_order,'
-#                        'k,'
-#                        'debug, '
-#                        'local_computation,' 
-#                        'n_rand, ' 
-#                        'sd, '
-#                        'max_jobs, ' 
-#                        'verbose, '
-#                        'make_predictions, '
-#                        'skip_complete,'
-#                        'results_dir,'
-#                        'iters,'
-#                        'base_kernels,'
-#                        'zero_mean'
-#                        );
+                zero_mean=True,            # If false, use a constant mean function - cannot be used with the Const kernel
+                verbose_results=False):    # Whether or not to record all kernels tested
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results)
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"
