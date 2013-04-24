@@ -37,7 +37,7 @@
 \input{include/commenting.tex}
 
 \newif\ifarXiv
-\arXivtrue
+%\arXivtrue
 
 \ifarXiv
 	\usepackage[arxiv]{format/icml2013}
@@ -47,14 +47,14 @@
 %\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
 
 %% For submission, make all render blank.
-\renewcommand{\LATER}[1]{}
-\renewcommand{\fLATER}[1]{}
-\renewcommand{\TBD}[1]{}
-\renewcommand{\fTBD}[1]{}
-\renewcommand{\PROBLEM}[1]{}
-\renewcommand{\fPROBLEM}[1]{}
-\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
-   
+%\renewcommand{\LATER}[1]{}
+%\renewcommand{\fLATER}[1]{}
+%\renewcommand{\TBD}[1]{}
+%\renewcommand{\fTBD}[1]{}
+%\renewcommand{\PROBLEM}[1]{}
+%\renewcommand{\fPROBLEM}[1]{}
+%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+
     
 \begin{document}
 
@@ -71,13 +71,14 @@
 %\icmladdress{Massachussets Institute of Technology}
 \icmlauthor{Zoubin Ghahramani$^{\dagger}$}{zoubin@eng.cam.ac.uk}
 %\icmladdress{University of Cambridge}
-%\icmladdress{Brain and Cognitive Sciences, Massachusetts Institute of Technology}       
+%\icmladdress{Brain and Cognitive Sciences, Massachusetts Institute of Technology}    
             
 \icmlkeywords{nonparametrics, gaussian process, machine learning, ICML, structure learning, extrapolation, regression, kernel learning, equation learning, supervised learning, time series}
 \vskip 0.3in
 ]
 
 \begin{abstract}
+\fTBD{How do we get author addresses and joint authorship showing properly in ICML accepted format?}
 Despite its importance, choosing the structural form of the kernel in nonparametric regression remains a black art.
 We define a space of kernel structures which are built compositionally by adding and multiplying a small number of base kernels.
 We present a method for searching over this space of structures which mirrors the scientific discovery process.
@@ -129,7 +130,7 @@ Furthermore, the automatically discovered kernels outperform a variety of widely
 %We evaluate our methods on synthetic datasets, time series analysis, and high-dimensional prediction problems in Sections \ref{sec:synthetic} through \ref{sec:quantitative}, respectively.
 
 While we focus on Gaussian process regression, we believe our kernel search method can be extended to other supervised learning frameworks such as classification or ordinal regression, or to other kinds of kernel architectures such as kernel SVMs.
-We hope that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel discovery.
+We hope that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel construction\fTBD{Previously discovery}.
 
 
 %Kernel learning has been an important topic in machine learning since the kernel essentially determines the pattern of inductive
@@ -175,16 +176,20 @@ The kernel specifies which structures are likely under the \gp{} prior, which in
 %\end{eqnarray}
 %
 In this section, we review the ways in which kernel families\footnotemark can be composed to express diverse priors over functions. 
-\footnotetext{When unclear from context, we use "kernel family" to refer to the parametric forms of the functions given in the appendix. A kernel is a kernel family with all of the parameters specified.}  
+\footnotetext{When unclear from context, we use `kernel family' to refer to the parametric forms of the functions given in the appendix. A kernel is a kernel family with all of the parameters specified.}  
 
 There has been significant work on constructing \gp{} kernels and analyzing their properties, summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 %
 Commonly used kernels families include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) (see Figure~\ref{fig:basic_kernels} and the appendix).
+\NA{
+We consider this particular small set of kernels since they are distinguishable, interpretable and through composition they span a very large space of priors on functions.
+} 
 \input{tables/simple_kernels_table_v3.tex}
+
 
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
-This allows one to create richly structured and interpretable kernel from well understood base components.
+This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
 All of the base kernels we use are one-dimensional; kernels over multidimensional inputs are constructed by adding and multiplying kernels over individual dimensions.
 These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \kSE{} kernel over the second dimension of $\inputVar$.
@@ -193,9 +198,9 @@ These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \k
 
 \paragraph{Summation}
 
-By summing kernels, we can model the data as a superposition of independent functions, possibly representing different structure.
+By summing kernels, we can model the data as a superposition of independent functions, possibly representing different structures.
 Suppose functions ${\function_1, \function_2}$ are draw from independent \gp{} priors, ${\function_1 \dist \GP(\mu_1, \kernel_1)}$, ${\function_2 \dist \GP(\mu_2, \kernel_2)}$.
-Then it follows that ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
+Then ${\function := \function_1 + \function_2 \dist \GP(\mu_1 + \mu_2, \kernel_1 + \kernel_2)}$.
 
 In time series models, sums of kernels can express superposition of different processes, possibly operating at different scales.
 In multiple dimensions, summing kernels gives additive structure over different dimensions, similar to generalized additive models~\citep{hastie1990generalized}.
@@ -207,12 +212,12 @@ These two kinds of structure are demonstrated in rows 2 and 4 of figure~\ref{fig
 Multiplying kernels allows us to account for interactions between different input dimensions or different notions of similarity. 
 For instance, in multidimensional data, the multiplicative kernel $\SE_1 \times \SE_3$ represents a smoothly varying function of dimensions 1 and 3 which is not constrained to be additive.
 In univariate data, multiplying a kernel by \kSE{} gives a way of converting global structure to local structure. 
-For instance, $\Per$ corresponds to globally periodic structure, whereas $\Per \times \SE$ corresponds to locally periodic structure, as shown in row 1 of figure~\ref{fig:kernels}.
+For example, $\Per$ corresponds to globally periodic structure, whereas $\Per \times \SE$ corresponds to locally periodic structure, as shown in row 1 of figure~\ref{fig:kernels}.
 
 Many architectures for learning complex functions, such as convolutional networks \cite{lecun1989backpropagation} and sum-product networks \cite{poon2011sum}, include units which compute AND-like and OR-like operations.
 Composite kernels can be viewed in this way too. A sum of kernels can be understood as an OR-like operation: two points are considered similar if either kernel has a high value.
 Similarly, multiplying kernels is an AND-like operation, since two points are considered similar only if both kernels have high values.
-Because we are applying these operations to the similarity functions rather than the regression functions themselves, compositions of even a few base kernels are able to capture complex relationships in data which do not have a simple parametric form.
+Since we are applying these operations to the similarity functions rather than the regression functions themselves, compositions of even a few base kernels are able to capture complex relationships in data which do not have a simple parametric form.
 
 \paragraph{Example expressions}
 
@@ -268,6 +273,8 @@ To see this, observe that if we restricted the $+$ and $\times$ rules only to ap
 However, the more general versions of these rules allow more flexibility in the search procedure, which is useful because the CFG derivation may not be the most straightforward way to arrive at a kernel family.
 
 Our algorithm searches over this space using a greedy search: at each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
+\fTBD{Mention bounded depth of search here}
+\fTBD{Perhaps also mention that greediness is in no sense optimal}
 
 Our search operators are motivated by strategies researchers often use to construct kernels.
 In particular,
@@ -296,7 +303,8 @@ For example, in data with periodic structure, integer multiples of the true peri
 
 To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
 The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
-This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals.
+This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals\footnotemark.
+\footnotetext{This is the heuristic used in chapter 5 of \citet{rasmussen38gaussian} when constructing a kernel to analyse the Mauna Loa data set.}
 % inspired by the same heuristic of extending models by examining residuals mentioned above.
 %\begin{itemize}
 %\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old parameters fixed.
