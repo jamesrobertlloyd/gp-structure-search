@@ -114,7 +114,7 @@ Examples include learning hyperparameters \cite{rasmussen38gaussian}, linear com
 However, to apply existing kernel learning algorithms, the user must specify the parametric form of the kernel, and this can require considerable expertise, as well as trial and error.
 
 To make kernel learning more generally applicable, we reframe the kernel learning problem as one of structure discovery, and automate the choice of kernel form.
-In particular, we formulate a space of kernel structures defined compositionally in terms of sums and products of a small number of base kernel structures\fTBD{Structures or families?}.
+In particular, we formulate a space of kernel structures defined compositionally in terms of sums and products of a small number of base kernel structures.
 This provides an expressive modeling language which concisely captures many widely used techniques for constructing kernels.
 We focus on Gaussian process regression, where the kernel specifies a covariance function, because the Bayesian framework is a convenient way to formalize structure discovery.
 Borrowing discrete search techniques which have proved successful in equation discovery \cite{todorovski1997declarative} and unsupervised learning \cite{grosse2012exploiting}, we automatically search over this space of kernel structures using marginal likelihood as the search criterion.
@@ -372,7 +372,7 @@ Semiparametric regression \citep[e.g.][]{ruppert2003semiparametric} attempts to 
 In our approach, this can be represented as a sum of \kSE{} and \kLin{}.
 
 \paragraph{Kernel learning}
-There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels \citep[e.g.][]{christoudias2009bayesian, Bach_HKL}.\fTBD{Cite more}
+There is a large body of work attempting to construct a rich kernel through a weighted sum of base kernels \citep[e.g.][]{christoudias2009bayesian, Bach_HKL}.
 %, including \gp{} models. 
 %\citet{Bach_HKL} uses a regularized optimization framework to learn a weighted sum over an exponential number of kernels.
 While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
@@ -559,21 +559,24 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 \section{Validation on synthetic data}
 \label{sec:synthetic}
 
-\input{tables/synthetic_results.tex}
+\input{tables/synthetic_results_extended.tex}
 
 We validated our method's ability to recover known structure on a set of synthetic datasets.
 For several composite kernel expressions, we constructed synthetic data by first sampling 300 points uniformly at random, then sampling function values at those points from a \gp{} prior.
-We then added \iid Gaussian noise to the function values, with variance chosen such that the standard deviation of the noise $\sigma_n$ relative to the sample variance of the function was 0.1.
+%We then added \iid Gaussian noise to the function values, with variance chosen such that the standard deviation of the noise $\sigma_n$ relative to the sample variance of the function was 0.1.
+\NA{
+We then added \iid Gaussian noise to the function values, with variance chosen to create particular signal to noise ratios (SNRs).
+}
 %\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
 %
 %
-Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to), the dimensionality $D$ of the input space, the kernel chosen by our search, and the estimated noise variance.
+%Table~\ref{tbl:synthetic-less} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to), the dimensionality $D$ of the input space, the kernel chosen by our search, and the estimated noise variance.
 
-Our method finds all of the relevant structure in all but one test.  In fact, it also discovers unintentionally introduced linear structure:
-functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
+%Our method finds all of the relevant structure in all but one test.
+%In fact, it also discovers unintentionally introduced linear structure: functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
 
-The estimated noise level $\sigma_n$ numerically assesses the quality of the fit to the data; large positive or negative deviations from 0.1 would indicate under-fitting and over-fitting, respectively.
-The values reported show that the model is not severely over- or under-fitting.
+%The estimated noise level $\sigma_n$ numerically assesses the quality of the fit to the data; large positive or negative deviations from 0.1 would indicate under-fitting and over-fitting, respectively.
+%The values reported show that the model is not severely over- or under-fitting.
 
 %\paragraph{Not for paper - annoying results - to be included if a fix is found}
 
@@ -583,10 +586,29 @@ The values reported show that the model is not severely over- or under-fitting.
 %The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
 %Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
 
+\NA{
+Table~\ref{tbl:synthetic} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to), the dimensionality $D$ of the input space, and the kernels chosen by our search for different SNRs.
+Dashes - indicate that no kernel had a higher marginal likelihood than modeling the data as \iid Gaussians (\ie equivalent to a constant kernel).
+}
+
+\NA{
+For the highest SNR, the method finds all relevant structure in all but one test.
+There is a tendency to find additional linear structure which is explainable since functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
+}
+
+\NA{
+As the SNR lowers, the kernel expressions generally become simpler.
+Two kernels have been marked with an asterisk indicating that the search has inferred more complex and erroneous structure.
+For the first data set with $\textrm{SNR} = 1$, the search erroneously infers periodic structure.
+On examining the data set, and the posterior fit of this kernel, the data could certainly be argued to have ambiguous structure.
+}
 
 \input{tables/extrapolation.tex}
 
-\input{tables/regression_results_combined.tex}
+%\input{tables/regression_results_combined.tex}
+\input{tables/regression_results_ext_combined.tex}
+%\input{tables/regression_results_ext_mse.tex}
+%\input{tables/regression_results_ext_nll.tex}
 
 \section{Quantitative evaluation}
 \label{sec:quantitative}
@@ -600,11 +622,13 @@ We compared the extrapolation capabilities of our model against standard baselin
 Dividing the airline dataset into contiguous training and test sets, we computed the predictive mean-squared-error (MSE) of each method.  
 We varied the size of the training set from the first 10\% to the first 90\% of the data.
 
-Figure \ref{fig:extrapolation} shows the learning curves of linear regression, a variety of fixed kernel family \gp{} models, and our method.  
+Figure \ref{fig:extrapolation} shows the learning curves of linear regression, a variety of fixed kernel family \gp{} models\footnotemark, and our method.  
 \gp{} models with only \kSE{} and \kPer{} kernels did not capture the long-term trends, since the best parameter values in terms of \gp{} marginal likelihood only capture short term structure. 
 Linear regression approximately captured the long-term trend, but quickly plateaued in predictive performance.
 The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPer}$) eventually captured more structure and performed better, but the full structures discovered by our search outperformed the other approaches in terms of predictive performance for all data amounts.
 %In contrast, a \gp{} with an SE or RQ kernel has unbounded capacity.  However, simply having unbounded capacity does not necessarily translate into the ability to extrapolate, as demonstrate in Figure \ref{fig:extrapolation}.  Only by increasing the amount of structure expressible in a model can we capture the regularities in the data that allow long-range extrapolation.
+
+\footnotetext{\NA{All of the methods evaluated in table \ref{tbl:Regression Mean Squared Error} reduce to an \kSE{} kernel for one dimensional data.}}
 
 %\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
 %\fTBD{RBG: We could make this point as part of the learning curves for extrapolation by marking the points at which each additional aspect of the structure is found.}
@@ -613,13 +637,19 @@ The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPe
 
 To evaluate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
 We performed 10 fold cross validation on 5 datasets\footnote{The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.} comparing 5 methods in terms of MSE and predictive likelihood.
-Our structure search was run up to depth 10, using \kSE{} and \kRQ{} as the base kernel families.
+\NA{
+Our structure search was run up to depth 10, using different subsets of the base kernel families.
+}
 
 The comparison included three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarichical Kernel Learning (HKL).
 %We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
 
-
-Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperformed all other methods in all tests.
+%Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperformed all other methods in all tests.
+\NA{
+Results are presented in table \ref{tbl:Regression Mean Squared Error}.
+Our method with all base kernels was always the best performing method, or the difference in performance was not statiscally significant at the 5\% level.
+Although not statistically significant, increasing the number of base kernels did not always increase the performance of the search, suggesting scope for improvment.
+}
 %All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
 
 %

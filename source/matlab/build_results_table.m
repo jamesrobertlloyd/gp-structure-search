@@ -24,9 +24,11 @@ dataset_names{4} = 'r_servo';
 dataset_names{5} = 'r_housing';
 
 if nargin < 1; num_folds = 10; end
-if nargin < 2; results_dirs = { '/scratch/Dropbox/results/22-Jan/', '/scratch/Dropbox/results/28-Jan/' }; end
-if nargin < 3; experiment_names = { '22-Jan', '28-Jan' }; end
-if nargin < 4; tex_prefix = '../latex/tables/regression_results'; end
+%if nargin < 2; results_dirs = { '/scratch/Dropbox/results/22-Jan/', '/scratch/Dropbox/results/28-Jan/' }; end
+if nargin < 2; results_dirs = { '../../results/4-Feb/', '../../results/28-Jan/', '../../results/11-Mar/'  }; end
+if nargin < 3; experiment_names = { '$\\SE{}$', '$\\SE{}, \\RQ{}$', '$\\SE{}, \\RQ{}, \\Lin{}, \\Per{}$' }; end
+%if nargin < 4; tex_prefix = '../latex/tables/regression_results'; end
+if nargin < 4; tex_prefix = '../../latex/tables/regression_results_ext'; end
 if nargin < 5; use_additive_results = true; end
 
 num_new_methods = numel(results_dirs);
