@@ -273,8 +273,13 @@ To see this, observe that if we restricted the $+$ and $\times$ rules only to ap
 However, the more general versions of these rules allow more flexibility in the search procedure, which is useful because the CFG derivation may not be the most straightforward way to arrive at a kernel family.
 
 Our algorithm searches over this space using a greedy search: at each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
-\fTBD{Mention bounded depth of search here}
-\fTBD{Perhaps also mention that greediness is in no sense optimal}
+\NA{
+It is unlikely that a greedy search will be optimal, but empirically it has performed well to date.
+}
+\NA{
+At the end of the search, we select the highest scoring kernel over the entire search.\footnotemark
+}
+\footnotetext{\NA{Since search operator (3) results in copies of the current composite kernel, the search typically stops itself, selecting the same kernel expression at each level of the search.}}
 
 Our search operators are motivated by strategies researchers often use to construct kernels.
 In particular,
@@ -377,12 +382,16 @@ Another approach to kernel learning is to learn an embedding of the data points.
 \NA{
 This model is typically used in unsupervised tasks and requires an expensive integration or optimisation over potential embeddings when generalizing to new data points.
 }
-\citet{salakhutdinov2008using} use a deep neural network to learn an embedding; this is a flexible approach to kernel learning but potentially less interpretable.
+\citet{salakhutdinov2008using} use a deep neural network to learn an embedding;
+\NA{
+this is a flexible approach to kernel learning but relys upon finding structure in the inputs, \inputVar.
+Instead we focus on domains where most of the interesting structure is contained within the function values, \outputVar.
+}\fTBD{removed comment about interpretability}%; this is a flexible approach to kernel learning but potentially less interpretable.
 
 %To learn periodic structure, 
 \citet{WilAda13} derive kernels of the form ${\SE \times \cos(x-x')}$, forming a basis for stationary kernels through spectral density estimation.
 %motivated as spectral density estimation.
-These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be added to our grammar.
+These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be include in our grammar.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
 Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
@@ -443,7 +452,8 @@ We visualize the decompositions into sums of components using the formulae given
 %
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
 %
-The search was run to depth 10, using the base kernels from Section \ref{sec:Structure}.
+The search was run to depth 10\footnotemark, using the base kernels from Section \ref{sec:Structure}.
+\footnotetext{\NA{Typically the highest scoring kernel was found at an earlier depth. We ran to a fixed depth to reduce the chance of the search stopping due to poor choices of random initial parameters for new kernels.}}
 
 
 %\paragraph{Decomposing a superposition}
@@ -467,12 +477,14 @@ Figure \ref{fig:mauna_grow} shows the posterior function estimates under increas
 %
 Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
 
-
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with its decomposition into additive components.
 The final model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, observing that there is little obvious structure left in the data.
 
-
+\NA{
+The decomposition is qualitatively identical to that constructed in \citet{rasmussen38gaussian}.
+On this example, our search procedure is able to automate this construction where previously two \gp{} experts devoted 4 pages of text and analysis to the development of a composite kernel.
+}
 
 \paragraph{Airline passenger data}
 
