@@ -74,13 +74,17 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     # Initialise kernels to be all base kernels along all dimensions.
     current_kernels = list(fk.base_kernels(D, exp.base_kernels))
     
+    # Create location, scale and minimum period parameters to pass around for initialisations
+    data_shape = {}
+    data_shape['input_location'] = [np.mean(X[:,dim]) for dim in range(X.shape[1])]
+    data_shape['output_location'] = np.mean(y)
+    data_shape['input_scale'] = np.log([np.std(X[:,dim]) for dim in range(X.shape[1])])
+    data_shape['output_scale'] = np.log(np.std(y)) 
     # Initialise period at a multiple of the shortest / average distance between points, to prevent Nyquist problems.
     if use_min_period:
-        #min_period = np.log([PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]) for i in range(X.shape[1])])
-        min_period = np.log([max(PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]), PERIOD_HEURISTIC * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
+        data_shape['min_period'] = np.log([max(PERIOD_HEURISTIC * utils.misc.min_abs_diff(X[:,i]), PERIOD_HEURISTIC * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
     else:
-        min_period = None
-    print min_period
+        data_shape['min_period'] = None
     
     all_results = []
     results_sequence = []     # List of lists of results, indexed by level of expansion.
@@ -92,14 +96,14 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
             current_kernels = current_kernels[0:4]
              
         # Add random restarts to kernels
-        current_kernels = fk.add_random_restarts(current_kernels, exp.n_rand, exp.sd, min_period=min_period)
+        current_kernels = fk.add_random_restarts(current_kernels, exp.n_rand, exp.sd, data_shape=data_shape)
         # Score the kernels
         new_results = jc.evaluate_kernels(current_kernels, X, y, verbose=exp.verbose, local_computation=exp.local_computation,
                                           zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean, random_seed=exp.random_seed)
         # Enforce the period heuristic
         #### TODO - Concept of parameter constraints is more general than this - make it so
         if use_min_period:
-            new_results = [sk for sk in new_results if not sk.k_opt.out_of_bounds({'min_period' : min_period})]
+            new_results = [sk for sk in new_results if not sk.k_opt.out_of_bounds(data_shape)]
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
         assert(len(new_results) > 0) # FIXME - Need correct control flow if this happens 
@@ -282,7 +286,7 @@ def generate_model_fits(filename):
         else:
             print 'Skipping file %s' % file
 
-    os.system('reset')  # Stop terminal from going invisible.  
+    os.system('reset')  # Stop terminal from going invisible. 
     
 def perform_experiment(data_file, output_file, exp):
     

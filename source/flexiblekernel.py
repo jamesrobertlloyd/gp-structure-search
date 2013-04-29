@@ -71,9 +71,9 @@ class BaseKernel(Kernel):
         '''This is true of all base kernels, hence definition here'''  
         return len(self.param_vector())
         
-    def default_params_replaced(self, sd=1, min_period=None):
+    def default_params_replaced(self, sd=1, data_shape=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
-        return [np.random.normal(scale=sd) if p ==0 else p for p in self.param_vector()]
+        return [np.random.normal(scale=sd) if p == 0 else p for p in self.param_vector()]
         
     def out_of_bounds(self, constraints):
         '''Most kernels are allowed to have any parameter value'''
@@ -133,6 +133,16 @@ class SqExpKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return SqExpKernel(self.lengthscale, self.output_variance)
@@ -217,23 +227,27 @@ class SqExpPeriodicKernel(BaseKernel):
         # order of args matches GPML
         return np.array([self.lengthscale, self.period, self.output_variance])
         
-    def default_params_replaced(self, sd=1, min_period=None):
+    def default_params_replaced(self, sd=1, data_shape=None):
         '''Overwrites base method, using min period to prevent Nyquist errors'''
         result = self.param_vector()
         if result[0] == 0:
             # Min period represents a minimum sensible scale - use it for lengthscale as well
-            if min_period is None:
-                result[0] = utils.misc.sample_truncated_normal(loc=0, scale=sd)
+            # Scale with data_scale though
+            if data_shape['min_period'] is None:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
             else:
-                result[0] = utils.misc.sample_truncated_normal(loc=0, scale=sd, min_value=min_period)
-        if result[1] == 0:
+                result[0] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale'], scale=sd, min_value=data_shape['min_period'])
+        if result[1] == -2:
             #### FIXME - Caution, magic numbers
-            if min_period is None:
-                result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd)
+            # Min period represents a minimum sensible scale
+            # Scale with data_scale
+            if data_shape['min_period'] is None:
+                result[1] = np.random.normal(loc=data_shape['input_scale']-2, scale=sd)
             else:
-                result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd, min_value=min_period)
+                result[1] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale']-2, scale=sd, min_value=data_shape['min_period'])
         if result[2] == 0:
-            result[2] = np.random.normal(scale=sd)
+            # Set scale factor with output scale
+            result[2] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
         return result
 
     def copy(self):
@@ -327,6 +341,19 @@ class RQKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance, self.alpha])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        if result[2] == 0:
+            # Set alpha indepedently of data shape
+            result[2] = np.random.normal(loc=0, scale=sd)
+        return result
 
     def copy(self):
         return RQKernel(self.lengthscale, self.output_variance, self.alpha)
@@ -416,6 +443,13 @@ class ConstKernel(BaseKernel):
 
     def copy(self):
         return ConstKernel(self.output_variance)
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set scale factor with output scale
+            result[0] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
     
     def __repr__(self):
         return 'ConstKernel(output_variance=%f)' % \
@@ -458,7 +492,7 @@ class LinKernelFamily(BaseKernelFamily):
         return colored('LN', self.depth())
     
     def default(self):
-        return LinKernel(0., 0., 0.)
+        return LinKernel(-2.0, 0., 0.)
     
     def __cmp__(self, other):
         assert isinstance(other, KernelFamily)
@@ -483,7 +517,7 @@ class LinKernelFamily(BaseKernelFamily):
 class LinKernel(BaseKernel):
     # FIXME - Caution - magic numbers! This one means offset of essentially zero and scale of 1
     # FIXME - lengthscale is actually an inverse scale
-    def __init__(self, offset=-10, lengthscale=0, location=0):
+    def __init__(self, offset=-2, lengthscale=0, location=0):
         self.offset = offset
         self.lengthscale = lengthscale
         self.location = location
@@ -503,6 +537,19 @@ class LinKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.offset, self.lengthscale, self.location])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == -2:
+            #### Caution - magic numbers - Offset assumed to be near zero since non zero means covered by constant kernel
+            result[0] = np.random.normal(loc=-10, scale=sd)
+        if result[1] == 0:
+            # Lengthscale scales with ratio of y std and x std (gradient = delta y / delta x)
+            result[1] = np.random.normal(loc=data_shape['output_scale'] - data_shape['input_scale'], scale=sd)
+        if result[2] == 0:
+            # Location moves with input location, and variance scales in input variance
+            result[2] = np.random.normal(loc=data_shape['input_location'], scale=sd*np.exp(data_shape['input_scale']))
+        return result
         
     def effective_params(self):
         '''It's linear regression'''  
@@ -573,6 +620,8 @@ class QuadraticKernelFamily(BaseKernelFamily):
     
 class QuadraticKernel(BaseKernel):
     def __init__(self, offset, output_variance):
+        #### FIXME - Should the offset defauly to something small? Or will we never use this kernel
+        #### If using this kernel we should also add the default params replaced function
         self.offset = offset
         self.output_variance = output_variance
         
@@ -657,6 +706,8 @@ class CubicKernelFamily(BaseKernelFamily):
     
 class CubicKernel(BaseKernel):
     def __init__(self, offset, output_variance):
+        #### FIXME - Should the offset defauly to something small? Or will we never use this kernel
+        #### If using this kernel we should also add the default params replaced function
         self.offset = offset
         self.output_variance = output_variance
         
@@ -760,6 +811,16 @@ class PP0Kernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return PP0Kernel(self.lengthscale, self.output_variance)
@@ -844,6 +905,16 @@ class PP1Kernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return PP1Kernel(self.lengthscale, self.output_variance)
@@ -928,6 +999,16 @@ class PP2Kernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return PP2Kernel(self.lengthscale, self.output_variance)
@@ -1012,6 +1093,16 @@ class PP3Kernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return PP3Kernel(self.lengthscale, self.output_variance)
@@ -1095,6 +1186,16 @@ class MaternKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.lengthscale, self.output_variance])
+        
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0:
+            # Set lengthscale with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Set scale factor with output scale
+            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+        return result
 
     def copy(self):
         return MaternKernel(self.lengthscale, self.output_variance)
@@ -1139,6 +1240,7 @@ class ChangeKernelFamily(BaseKernelFamily):
         # A steepness of exactly zero will result in no gradient.
         # We might consider reparameterizing at some point.
         # The parameters aren't in log space.
+        #### TODO - Put steepness parameter in log space for consistency since this will scale like a lengthscale
         return ChangeKernel(1., 0.)
     
     def __cmp__(self, other):
@@ -1181,6 +1283,18 @@ class ChangeKernel(BaseKernel):
     def param_vector(self):
         # order of args matches GPML
         return np.array([self.steepness, self.location])
+    
+    #### TODO - Uncomment me when this kernel is implemented
+    #### N.B. This assumes the steepness parameter is on a log scale and scales like a lengthscale    
+    def default_params_replaced(self, sd=1, data_shape=None):
+        result = self.param_vector()
+        if result[0] == 0: #### TODO - Make sure this default matches that in self.default() - should do when on log scale
+            # Set steepness with input scale
+            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+        if result[1] == 0:
+            # Location moves with input location, and variance scales in input variance
+            result[1] = np.random.normal(loc=data_shape['input_location'], scale=sd*np.exp(data_shape['input_scale']))
+        return result
 
     def copy(self):
         return ChangeKernel(self.steepness, self.location)
@@ -1277,15 +1391,16 @@ class MaskKernel(Kernel):
     def effective_params(self):
         return self.base_kernel.effective_params()
         
-    def default_params_replaced(self, sd=1, min_period=None):
-        '''Returns the parameter vector with any default values replaced with random Gaussian'''
-        if isinstance(min_period, (list, tuple, np.ndarray)):
-            # Pick out relevant minimum period
-            min_period = min_period[self.active_dimension]
-        else:
-            # min_periods either one dimensional or None
-            min_period = min_period
-        return self.base_kernel.default_params_replaced(sd=sd, min_period=min_period)
+    def default_params_replaced(self, sd=1, data_shape=None):
+        # Replaces multi-d parameters with appropriate dimensions selected
+        # If parameters are already 1-d then it does nothing
+        if isinstance(data_shape['input_location'], (list, tuple, np.ndarray)):
+            data_shape['input_location'] = data_shape['input_location'][self.active_dimension]
+        if isinstance(data_shape['input_scale'], (list, tuple, np.ndarray)):
+            data_shape['input_scale'] = data_shape['input_scale'][self.active_dimension]
+        if isinstance(data_shape['min_period'], (list, tuple, np.ndarray)):
+            data_shape['min_period'] = data_shape['min_period'][self.active_dimension]
+        return self.base_kernel.default_params_replaced(sd=sd, data_shape=data_shape)
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1375,9 +1490,9 @@ class SumKernel(Kernel):
     def effective_params(self):
         return sum([o.effective_params() for o in self.operands])
         
-    def default_params_replaced(self, sd=1, min_period=None):
+    def default_params_replaced(self, sd=1, data_shape=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
-        return np.concatenate([o.default_params_replaced(sd=sd, min_period=min_period) for o in self.operands])
+        return np.concatenate([o.default_params_replaced(sd=sd, data_shape=data_shape) for o in self.operands])
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1468,9 +1583,9 @@ class ProductKernel(Kernel):
         '''The scale of a product of kernels is over parametrised'''
         return sum([o.effective_params() for o in self.operands]) - (len(self.operands) - 1)
         
-    def default_params_replaced(self, sd=1, min_period=None):
+    def default_params_replaced(self, sd=1, data_shape=None):
         '''Returns the parameter vector with any default values replaced with random Gaussian'''
-        return np.concatenate([o.default_params_replaced(sd=sd, min_period=min_period) for o in self.operands])
+        return np.concatenate([o.default_params_replaced(sd=sd, data_shape=data_shape) for o in self.operands])
     
     def __cmp__(self, other):
         assert isinstance(other, Kernel)
@@ -1702,11 +1817,11 @@ def replace_defaults(param_vector, sd):
     '''Replaces zeros in a list with Gaussians'''
     return [np.random.normal(scale=sd) if p ==0 else p for p in param_vector]
 
-def add_random_restarts_single_kernel(kernel, n_rand, sd, min_period=None):
+def add_random_restarts_single_kernel(kernel, n_rand, sd, data_shape):
     '''Returns a list of kernels with random restarts for default values'''
     #return [kernel] + list(itertools.repeat(kernel.family().from_param_vector(replace_defaults(kernel.param_vector(), sd)), n_rand))
-    return [kernel] + list(map(lambda unused : kernel.family().from_param_vector(kernel.default_params_replaced(sd=sd, min_period=min_period)), [None] * n_rand))
+    return [kernel] + list(map(lambda unused : kernel.family().from_param_vector(kernel.default_params_replaced(sd=sd, data_shape=data_shape)), [None] * n_rand))
 
-def add_random_restarts(kernels, n_rand=1, sd=4, min_period=None):    
+def add_random_restarts(kernels, n_rand=1, sd=4, data_shape=None):    
     '''Augments the list to include random restarts of all default value parameters'''
-    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd, min_period)]
+    return [k_rand for kernel in kernels for k_rand in add_random_restarts_single_kernel(kernel, n_rand, sd, data_shape)]

@@ -53,16 +53,20 @@ def gen_all_results(folder):
             yield files.split('.')[-2], best_tuple
                 
 
-def make_all_1d_figures(folder, save_folder='../figures/decomposition/', max_level=None, prefix='', rescale=True):
+def make_all_1d_figures(folder, save_folder='../figures/decomposition/', max_level=None, prefix='', rescale=True, data_folder=None):
     """Crawls the results directory, and makes decomposition plots for each file.
     
     prefix is an optional string prepended to the output directory
     """
     #### Quick fix to axis scaling
+    #### TODO - Ultimately this and the shunt below should be removed / made elegant
     if rescale:
         data_sets = list(exp.gen_all_datasets("../data/1d_data_rescaled/"))
     else:
-        data_sets = list(exp.gen_all_datasets("../data/1d_data/"))
+        if data_folder is None:
+            data_sets = list(exp.gen_all_datasets("../data/1d_data/"))
+        else:
+            data_sets = list(exp.gen_all_datasets(data_folder))
     for r, file in data_sets:
         results_file = os.path.join(folder, file + "_result.txt")
         # Is the experiment complete
