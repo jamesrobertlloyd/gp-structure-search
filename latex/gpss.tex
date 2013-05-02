@@ -61,15 +61,15 @@
 \twocolumn[
 \icmltitle{Structure Discovery in Nonparametric Regression through Compositional Kernel Search}
 
-\icmlauthor{David Duvenaud$^{*\dagger}$}{dkd23@cam.ac.uk}
+\icmlauthor{David Duvenaud$^{\dagger}$}{dkd23@cam.ac.uk}
 %\icmladdress{University of Cambridge}
-\icmlauthor{James Robert Lloyd$^{*\dagger}$}{jrl44@cam.ac.uk}
+\icmlauthor{James Robert Lloyd$^{\dagger}$}{jrl44@cam.ac.uk}
 %\icmladdress{University of Cambridge}
-\icmlauthor{Roger Grosse$^{\ddagger}$}{rgrosse@mit.edu}
+\icmlauthor{Roger Grosse}{rgrosse@mit.edu}
 %\icmladdress{Massachussets Institute of Technology}
-\icmlauthor{Joshua B. Tenenbaum$^{\ddagger}$}{jbt@mit.edu}
+\icmlauthor{Joshua B. Tenenbaum}{jbt@mit.edu}
 %\icmladdress{Massachussets Institute of Technology}
-\icmlauthor{Zoubin Ghahramani$^{\dagger}$}{zoubin@eng.cam.ac.uk}
+\icmlauthor{Zoubin Ghahramani}{zoubin@eng.cam.ac.uk}
 %\icmladdress{University of Cambridge}
 %\icmladdress{Brain and Cognitive Sciences, Massachusetts Institute of Technology}    
             
@@ -130,7 +130,8 @@ Furthermore, the automatically discovered kernels outperform a variety of widely
 %We evaluate our methods on synthetic datasets, time series analysis, and high-dimensional prediction problems in Sections \ref{sec:synthetic} through \ref{sec:quantitative}, respectively.
 
 While we focus on Gaussian process regression, we believe our kernel search method can be extended to other supervised learning frameworks such as classification or ordinal regression, or to other kinds of kernel architectures such as kernel SVMs.
-We hope that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel construction\fTBD{Previously discovery}.
+We hope that the algorithm developed in this paper will help replace the current and often opaque art of kernel engineering with a more transparent science of automated kernel construction%\fTBD{Previously discovery}
+.
 
 
 %Kernel learning has been an important topic in machine learning since the kernel essentially determines the pattern of inductive
@@ -181,12 +182,10 @@ In this section, we review the ways in which kernel families\footnotemark can be
 There has been significant work on constructing \gp{} kernels and analyzing their properties, summarized in Chapter 4 of \cite{rasmussen38gaussian}. 
 %
 Commonly used kernels families include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) (see Figure~\ref{fig:basic_kernels} and the appendix).
-\NA{
-We consider this particular small set of kernels since they are distinguishable, interpretable and through composition they span a very large space of priors on functions.
-} 
 \input{tables/simple_kernels_table_v3.tex}
 
 
+\paragraph{Composing Kernels}
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
@@ -273,13 +272,14 @@ To see this, observe that if we restricted the $+$ and $\times$ rules only to ap
 However, the more general versions of these rules allow more flexibility in the search procedure, which is useful because the CFG derivation may not be the most straightforward way to arrive at a kernel family.
 
 Our algorithm searches over this space using a greedy search: at each stage, we choose the highest scoring kernel and expand it by applying all possible operators.
-\NA{
-It is unlikely that a greedy search will be optimal, but empirically it has performed well to date.
-}
-\NA{
-At the end of the search, we select the highest scoring kernel over the entire search.\footnotemark
-}
-\footnotetext{\NA{Since search operator (3) results in copies of the current composite kernel, the search typically stops itself, selecting the same kernel expression at each level of the search.}}
+%\NA{
+%It is unlikely that a greedy search will be optimal, but empirically it has performed well to date.
+%}
+%\NA{
+%We then select the highest scoring kernel over the entire search.
+%\footnotemark
+%}
+%\footnotetext{\NA{Since search operator (3) results in copies of the current composite kernel, the search typically stops itself, selecting the same kernel expression at each level of the search.}}
 
 Our search operators are motivated by strategies researchers often use to construct kernels.
 In particular,
@@ -309,7 +309,7 @@ For example, in data with periodic structure, integer multiples of the true peri
 To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
 The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
 This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals\footnotemark.
-\footnotetext{This is the heuristic used in chapter 5 of \citet{rasmussen38gaussian} when constructing a kernel to analyse the Mauna Loa data set.}
+%\footnotetext{This is the heuristic used in chapter 5 of \citet{rasmussen38gaussian} when constructing a kernel to analyse the Mauna Loa dataset.}
 % inspired by the same heuristic of extending models by examining residuals mentioned above.
 %\begin{itemize}
 %\item We (as researchers) often choose kernel structures by looking at the residuals and coming up with a model for those. This is analogous to applying rule (1), adding a new kernel but keeping the old parameters fixed.
@@ -378,20 +378,21 @@ There is a large body of work attempting to construct a rich kernel through a we
 While these approaches find the optimal solution in polynomial time, speed comes at a cost: the component kernels, as well as their hyperparameters, must be specified in advance.
 
 Another approach to kernel learning is to learn an embedding of the data points. 
-\citet{lawrence2005probabilistic} learns an embedding of the data points into a low-dimensional space, and constructs a fixed kernel structure over that space.
-\NA{
-This model is typically used in unsupervised tasks and requires an expensive integration or optimisation over potential embeddings when generalizing to new data points.
-}
+\citet{lawrence2005probabilistic} learns an embedding of the data into a low-dimensional space, and constructs a fixed kernel structure over that space.
+%\NA{
+This model is typically used in unsupervised tasks and requires an expensive integration or optimisation over potential embeddings when generalizing to test points.
+%}
 \citet{salakhutdinov2008using} use a deep neural network to learn an embedding;
-\NA{
-this is a flexible approach to kernel learning but relys upon finding structure in the inputs, \inputVar.
-Instead we focus on domains where most of the interesting structure is contained within the function values, \outputVar.
-}\fTBD{removed comment about interpretability}%; this is a flexible approach to kernel learning but potentially less interpretable.
+%\NA{
+this is a flexible approach to kernel learning but relies upon finding structure in the input density, \function(\inputVar).
+Instead we focus on domains where most of the interesting structure is in \function(\inputVar).
+%}\fTBD{removed comment about interpretability}%; this is a flexible approach to kernel learning but potentially less interpretable.
 
 %To learn periodic structure, 
-\citet{WilAda13} derive kernels of the form ${\SE \times \cos(x-x')}$, forming a basis for stationary kernels through spectral density estimation.
+\citet{WilAda13} derive kernels of the form ${\SE \times \cos(x-x')}$, forming a basis for stationary kernels.
+% through spectral density estimation.
 %motivated as spectral density estimation.
-These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be include in our grammar.
+These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be included in our grammar.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
 Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
@@ -408,7 +409,7 @@ There have been several attempts to uncover the structural form of a dataset by 
 
 \citet{kemp2008discovery} learned the structural form of a graph used to model human similarity judgments.
 Examples of graphs included planes, trees, and cylinders.
-Some of their (discrete) graph structures have continous analogues in our own space; \eg $\SE_1 \times \SE_2$ and $\SE_1 \times \Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
+Some of their discrete graph structures have continous analogues in our own space; \eg $\SE_1 \times \SE_2$ and $\SE_1 \times \Per_2$ can be seen as mapping the data to a plane and a cylinder, respectively.
 
 \citet{grosse2012exploiting} performed a greedy search over a compositional model class for unsupervised learning, using a grammar and a search procedure which parallel our own. This model class contained a large number of existing unsupervised models as special cases and was able to discover such structure automatically from data. Our work is tackling a similar problem, but in a supervised setting.
 
@@ -436,7 +437,7 @@ Our method discovers rich structure in these datasets, and produces plausible ex
 %For example,
 As discussed in section 2, a \gp{} whose kernel is a sum of kernels can be viewed as a sum of functions drawn from component \gp{}s.
 This provides another method of visualizing the learned structures.
-In particular, all kernels in our search space can be equivalently written as sums of products of base kernels by applying distributivity \eg
+In particular, all kernels in our search space can be equivalently written as sums of products of base kernels by applying distributivity. For example,
 \[{\SE \times (\RQ + \Lin) = \SE \times \RQ + \SE \times \Lin}.\]
 We visualize the decompositions into sums of components using the formulae given in the appendix.
 %By decomposing a kernel into a sum we are able to decompose .%, even when the learned kernel was not originally of this form.
@@ -452,8 +453,11 @@ We visualize the decompositions into sums of components using the formulae given
 %
 %\TBD{RBG: It's not immediately obvious that this section is part of the experiments. Also, maybe consider moving it till after the quantitative comparisons?  It could be useful rhetorically to first ask, ``how well does our algorithm do,'' and then ``let's find out why it works.''}
 %
-The search was run to depth 10\footnotemark, using the base kernels from Section \ref{sec:Structure}.
-\footnotetext{\NA{Typically the highest scoring kernel was found at an earlier depth. We ran to a fixed depth to reduce the chance of the search stopping due to poor choices of random initial parameters for new kernels.}}
+The search was run to depth 10, using the base kernels from Section \ref{sec:Structure}.
+%\NA{
+%We consider this set of kernels since they are diverse, interpretable and through composition span a large space of priors on functions.
+%}
+%\footnotetext{\NA{Typically the highest scoring kernel was found at an earlier depth. We ran to a fixed depth to reduce the chance of the search stopping due to poor choices of random initial parameters for new kernels.}}
 
 
 %\paragraph{Decomposing a superposition}
@@ -480,19 +484,20 @@ Note that, while the data can be smoothly interpolated by a single base kernel m
 Figure \ref{fig:mauna_decomp} shows the complete posterior of the final model chosen by our method, together with its decomposition into additive components.
 The final model exhibits both a plausible extrapolation and interpretable components: a long-term trend, annual periodicity and medium-term deviations from the trend.
 We also plot the residuals, observing that there is little obvious structure left in the data.
-
-\NA{
-The decomposition is qualitatively identical to that constructed in \citet{rasmussen38gaussian}.
-On this example, our search procedure is able to automate this construction where previously two \gp{} experts devoted 4 pages of text and analysis to the development of a composite kernel.
-}
+%
+%\NA{
+%
+%The decomposition is qualitatively identical to that constructed in \citet{rasmussen38gaussian}.
+%On this example, our search procedure is able to automate this construction where previously two \gp{} experts devoted 4 pages of text and analysis to the development of a composite kernel.
+%}
 
 \paragraph{Airline passenger data}
 
 
 
 Figure \ref{fig:airline_decomp} shows the decomposition produced by applying our method to monthly totals of international airline passengers~\citep{box2011time}.
-We observe similar components to the previous dataset \ie a long term trend, annual periodicity and medium term deviations.
-In addition, the composite kernel captures the near-linearity of the trend as well as the linearly growing amplitude of the annual oscillations.
+We observe similar components to the previous dataset: a long term trend, annual periodicity and medium-term deviations.
+In addition, the composite kernel captures the near-linearity of the long-term trend, and the linearly growing amplitude of the annual oscillations.
 %The discovery of linear structure allows for a growing uncertainty highly plausible extrapolation.\fTBD{Mention heteroskedasticity?}
 
 %Discovering this linearity results in very plausible extrapolations of the data.
@@ -559,14 +564,15 @@ Despite this, our approach fails gracefully: the learned kernel still captures t
 \section{Validation on synthetic data}
 \label{sec:synthetic}
 
-\input{tables/synthetic_results_extended.tex}
+%\input{tables/synthetic_results_extended.tex}
+\input{tables/synthetic_results_extended_v2.tex}
+%\input{tables/synthetic_results.tex}
 
 We validated our method's ability to recover known structure on a set of synthetic datasets.
 For several composite kernel expressions, we constructed synthetic data by first sampling 300 points uniformly at random, then sampling function values at those points from a \gp{} prior.
 %We then added \iid Gaussian noise to the function values, with variance chosen such that the standard deviation of the noise $\sigma_n$ relative to the sample variance of the function was 0.1.
-\NA{
-We then added \iid Gaussian noise to the function values, with variance chosen to create particular signal to noise ratios (SNRs).
-}
+We then added \iid Gaussian noise to the functions, at various signal-to-noise ratios (SNR).
+
 %\footnotetext{We define the signal to noise ratio to be the sample variance of the function divided by the variance of the noise.}
 %
 %
@@ -586,22 +592,21 @@ We then added \iid Gaussian noise to the function values, with variance chosen t
 %The parameters of these spurious kernels are extreme and they do not affect the kernel structure greatly - but they distract the reader.
 %Future work could have elegant fixes for these problems (we are generating plenty of ideas as we go but the deadline is looking), for the time being we will try some heuristics (\eg do not display if it contributes a small (in some sense) amount to the total variation of the kernel).
 
-\NA{
-Table~\ref{tbl:synthetic} lists the composite kernels we used to generate data (subscripts indicate which dimension each kernel was applied to), the dimensionality $D$ of the input space, and the kernels chosen by our search for different SNRs.
-Dashes - indicate that no kernel had a higher marginal likelihood than modeling the data as \iid Gaussians (\ie equivalent to a constant kernel).
-}
+Table~\ref{tbl:synthetic} lists the true kernels we used to generate the data.  Subscripts indicate which dimension each kernel was applied to.  Subsequent columns show the dimensionality $D$ of the input space, and the kernels chosen by our search for different SNRs.
+Dashes - indicate that no kernel had a higher marginal likelihood than modeling the data as \iid Gaussian noise. % (\ie equivalent to a constant kernel).
 
-\NA{
+%\NA{
 For the highest SNR, the method finds all relevant structure in all but one test.
-There is a tendency to find additional linear structure which is explainable since functions sampled from \kSE{} kernels with long length scales occasionally resulted in near-linear trends in the data.
-}
-
-\NA{
-As the SNR lowers, the kernel expressions generally become simpler.
-Two kernels have been marked with an asterisk indicating that the search has inferred more complex and erroneous structure.
-For the first data set with $\textrm{SNR} = 1$, the search erroneously infers periodic structure.
-On examining the data set, and the posterior fit of this kernel, the data could certainly be argued to have ambiguous structure.
-}
+The reported additional linear structure is explainable by the fact that functions sampled from \kSE{} kernels with long length scales occasionally have near-linear trends.
+%}
+%
+%\NA{
+%As the SNR lowers, the kernel expressions generally become simpler.
+As the noise increases, our method generally backs off to simpler structures, rather than overfitting.
+%Two kernels have been marked with an asterisk indicating that the search has inferred more complex and erroneous structure.
+%For the first data set with $\textrm{SNR} = 1$, the search erroneously infers periodic structure.
+%On examining the data set, and the posterior fit of this kernel, the data could certainly be argued to have ambiguous structure.
+%}
 
 \input{tables/extrapolation.tex}
 
@@ -648,7 +653,7 @@ The comparison included three methods with fixed kernel families: Additive \gp{}
 \NA{
 Results are presented in table \ref{tbl:Regression Mean Squared Error}.
 Our method with all base kernels was always the best performing method, or the difference in performance was not statiscally significant at the 5\% level.
-Although not statistically significant, increasing the number of base kernels did not always increase the performance of the search, suggesting scope for improvment.
+%Although not statistically significant, increasing the number of base kernels did not always increase the performance of the search, suggesting scope for improvment.
 }
 %All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
 
@@ -727,15 +732,15 @@ All \gp{} hyperparameter tuning was performed by automated calls to the GPML too
 Towards the goal of automating the choice of kernel family, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
 We proposed a search procedure for this space of kernels which parallels the process of scientific discovery.
 
-We found that the learned structures are often capable of accurate extrapolation in complex time series datasets and are competitive with widely used kernel classes and kernel combination methods on a variety of prediction tasks.
-The learned kernels often yield decompositions of a signal into diverse and interpretable components, which provides an additional degree of reassurance that the learned structure reflects the world.
+We found that the learned structures are often capable of accurate extrapolation in complex time-series datasets, and are competitive with widely used kernel classes and kernel combination methods on a variety of prediction tasks.
+The learned kernels often yield decompositions of a signal into diverse and interpretable components, which enables model-checking by humans.  %provides an additional degree of reassurance that the learned structure reflects the world.
 We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
 \subsubsection*{Acknowledgements}
 The authors would like to thank Carl Rasmussen and Andrew G. Wilson for helpful discussions.
 
 \appendix
-\section{Appendix}
+\section*{Appendix}
 \label{appendix}
 \paragraph{Kernel definitions}
 For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) kernels are defined as follows:

@@ -1,0 +1,51 @@
+\begin{table*}[ht!]
+\caption{{\small
+%Kernels used to generate synthetic data, dimensionality, $D$, of the input space, and the estimated kernels.% at different signal to noise ratios (SNR).
+Kernels chosen by our method on synthetic data generated using known kernel structures. $D$ denotes the dimension of the functions being modeled.  SNR indicates the signal-to-noise ratio.
+%The two kernels marked with an asterisk * indicate when the search procedure inferred extraneous structure.
+}}
+\label{tbl:synthetic}
+\begin{center}
+{\small
+\begin{tabular}{c c | c c c}
+True Kernel & $D$ & SNR = 10 & SNR = 1 & \hspace{-1cm} SNR = 0.1 \\
+\hline
+$\SE + \RQ$                               & 1 
+                                              & $\SE$
+                                              & $\SE \times \Per$
+                                              & $\SE$
+                                              \\
+$\Lin \times \Per$                        & 1 
+                                              & $\Lin \times \Per$
+                                              & $\Lin \times \Per$
+                                              & $\SE$
+                                              \\
+$\SE_1 + \RQ_2$                           & 2 
+                                              & $\SE_1 + \SE_2$
+                                              & $\Lin_1 + \SE_2$ 
+                                              & $\Lin_1$
+                                              \\
+$\SE_1 + \SE_2 \times \Per_1 + \SE_3$     & 3 
+                                              & $\SE_1 + \SE_2 \times \Per_1 + \SE_3$
+                                              & $\SE_2 \times \Per_1 + \SE_3$
+                                              & -
+                                              \\
+$\SE_1 \times \SE_2$                      & 4 
+                                              & $\SE_1 \times \SE_2$
+                                              & $\Lin_1 \times \SE_2$
+                                              & $\Lin_2$
+                                              \\
+$\SE_1 \times \SE_2 + \SE_2 \times \SE_3$ & 4 
+                                              & $\SE_1 \times \SE_2 + \SE_2 \times \SE_3$
+                                              & $\SE_1 + \SE_2 \times \SE_3$
+                                              & $\SE_1$
+                                              \\
+$(\SE_1 + \SE_2) \times (\SE_3 + \SE_4)$  & 4 
+                                              & $(\SE_1 + \SE_2) \times (\SE_3\times\Lin_3\times\Lin_1 + \SE_4)$
+                                              & $(\SE_1 + \SE_2) \times \SE_3 \times \SE_4$
+                                              & -
+                                              \\
+\end{tabular}
+}
+\end{center}
+\end{table*}
