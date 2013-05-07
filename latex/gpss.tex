@@ -186,7 +186,7 @@ There has been significant work on constructing \gp{} kernels and analyzing thei
 Commonly used kernels families include the squared exponential (\kSE), periodic (\kPer), linear (\kLin), and rational quadratic (\kRQ) (see Figure~\ref{fig:basic_kernels} and the appendix).
 \input{tables/simple_kernels_table_v3.tex}
 
-
+%\vspace{-0.5cm}
 \paragraph{Composing Kernels}
 Positive semidefinite kernels (\ie those which define valid covariance functions) are closed under addition and multiplication.
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
@@ -290,24 +290,25 @@ In particular,
 This corresponds to applying rule (1).
 \item One can start with structure, \eg linearity, which is assumed to hold globally, but find that it only holds locally.
 This corresponds to applying rule (2) to obtain the structure shown in rows 1 and 3 of figure~\ref{fig:kernels}.
-\item One can add features incrementally, analgous to algorithms like boosting, backfitting, or forward selection.
-These correspond to applying rules (1) or (2) to new dimensions not yet included in the model.
+\item One can add features incrementally, analogous to algorithms like boosting, backfitting, or forward selection.
+This corresponds to applying rules (1) or (2) to dimensions not yet included in the model.
 \end{itemize}
 
 \paragraph{Scoring kernel families}
 
-Choosing kernel structures requires a criterion for evaluating the structures.
-We choose marginal likelihood as our criterion since it balances the fit and complexity of a structure \citep[e.g.][]{rasmussen2001occam}.
+Choosing kernel structures requires a criterion for evaluating structures.
+We choose marginal likelihood as our criterion, since it balances the fit and complexity of a model \citep{rasmussen2001occam}.  Conditioned on kernel parameters, the marginal likelihood of a \gp{} can be computed exactly.  However, to evaluate a kernel family, we must integrate over kernel parameters as well.  We approximate this intractable integral with the Bayesian information criterion \citep{schwarz1978estimating} after first optimizing to find the maximum-likelihood kernel parameters.
 %In a fully Bayesian approach, we would put priors over the parameters and compute the marginal likelihood of the models with all the parameters integrated out.
 %However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \fTBD{If true, say we got similar results using Laplace}
-To avoid an expensive integration over kernel parameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
+%To avoid an expensive integration over kernel parameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
 %We note that other model selection criteria could be used with our search procedure.
 %For instance, random cross-validation could be used when the goal is interpolation.
 
 Unfortunately, optimizing over parameters is not a convex optimization problem, and the space can have many local optima.
+%Unfortunately, the required optimization over parameters is not convex, and the space can have many local optima.
 %The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
 For example, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
-
+%
 To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
 The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
 This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals.
@@ -618,8 +619,8 @@ As the noise increases, our method generally backs off to simpler structures.
 %On examining the data set, and the posterior fit of this kernel, the data could certainly be argued to have ambiguous structure.
 %}
 
-%\input{tables/regression_results_combined.tex}
-\input{tables/regression_results_ext_combined.tex}
+\input{tables/regression_results_combined.tex}
+%\input{tables/regression_results_ext_combined.tex}
 %\input{tables/regression_results_ext_mse.tex}
 %\input{tables/regression_results_ext_nll.tex}
 
@@ -764,7 +765,7 @@ For scalar-valued inputs, the squared exponential (\kSE), periodic (\kPer), line
 %
 \begin{eqnarray*}
 \kernel_{\SE}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{(\inputVar - \inputVar')^2}{2\ell^2}\right) \\
-\kernel_{\Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2(\pi|\inputVar - \inputVar'|/p)}{\ell^2}\right) \\
+\kernel_{\Per}(\inputVar, \inputVar') =& \sigma^2\exp\left(-\frac{2\sin^2 (\pi(\inputVar - \inputVar')/p)}{\ell^2}\right) \\
 \kernel_{\Lin}(\inputVar, \inputVar') =& \sigma_b^2 + \sigma_v^2(\inputVar - \ell)(\inputVar' - \ell) \\
 \kernel_{\RQ}(\inputVar, \inputVar') =& \sigma^2\left( 1 + \frac{(\inputVar - \inputVar')^2}{2 \alpha \ell^2} \right)^{-\alpha}
 \end{eqnarray*}
