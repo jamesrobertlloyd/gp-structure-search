@@ -192,6 +192,7 @@ Positive semidefinite kernels (\ie those which define valid covariance functions
 % \ie any algebraic composition of PSD kernels will define a PSD kernel.\fTBD{Cite theorem}
 This allows one to create richly structured and interpretable kernels from well understood base components.
 %Figure \ref{fig:kernels} shows several examples of structured kernels that can be constructed by adding or multiplying standard base kernels.
+
 All of the base kernels we use are one-dimensional; kernels over multidimensional inputs are constructed by adding and multiplying kernels over individual dimensions.
 These dimensions are represented using subscripts, e.g. $\SE_2$ represents an \kSE{} kernel over the second dimension of $\inputVar$.
 %
@@ -235,7 +236,7 @@ Linear trend with local deviations & $\Lin + \SE$ \\
 Linearly growing amplitude & $\Lin \times \SE$
 \end{tabular}
 
-We use the term `generalized Fourier decomposition' to express that the periodic functions expressible by a \gp{} with a periodic kernel are not limited to sine and cosine.
+We use the term `generalized Fourier decomposition' to express that the periodic functions expressible by a \gp{} with a periodic kernel are not limited to sinusoids.
 
 
 %\section{Gaussian Processes Priors}
@@ -297,7 +298,7 @@ This corresponds to applying rules (1) or (2) to dimensions not yet included in 
 \paragraph{Scoring kernel families}
 
 Choosing kernel structures requires a criterion for evaluating structures.
-We choose marginal likelihood as our criterion, since it balances the fit and complexity of a model \citep{rasmussen2001occam}.  Conditioned on kernel parameters, the marginal likelihood of a \gp{} can be computed exactly.  However, to evaluate a kernel family, we must integrate over kernel parameters as well.  We approximate this intractable integral with the Bayesian information criterion \citep{schwarz1978estimating} after first optimizing to find the maximum-likelihood kernel parameters.
+We choose marginal likelihood as our criterion, since it balances the fit and complexity of a model \citep{rasmussen2001occam}.  Conditioned on kernel parameters, the marginal likelihood of a \gp{} can be computed analytically.  However, to evaluate a kernel family we must integrate over kernel parameters.  We approximate this intractable integral with the Bayesian information criterion \citep{schwarz1978estimating} after first optimizing to find the maximum-likelihood kernel parameters.
 %In a fully Bayesian approach, we would put priors over the parameters and compute the marginal likelihood of the models with all the parameters integrated out.
 %However, as this would be difficult to do across our space of models, we approximate this integral by choosing the parameters to optimize the marginal likelihood, and then apply the Bayesian information criterion (BIC) to penalize model complexity. \fTBD{If true, say we got similar results using Laplace}
 %To avoid an expensive integration over kernel parameters, we used the Bayesian information criterion \citep{schwarz1978estimating} as an approximation.
@@ -309,8 +310,8 @@ Unfortunately, optimizing over parameters is not a convex optimization problem, 
 %The example in figure \ref{fig:mauna_grow} can be modeled with a short length scale and small noise or a long length scale and large noise, and both explanations are better than any intermediate ones.
 For example, in data with periodic structure, integer multiples of the true period (\ie harmonics) are often local optima. 
 %
-To alleviate this difficulty, we take advantage of our search procedure to construct smart initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
-The parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
+To alleviate this difficulty, we take advantage of our search procedure to provide reasonable initializations: all of the parameters which were part of the previous kernel are initialized to their previous values.
+All parameters are then optimized using conjugate gradients, randomly restarting the newly introduced parameters.
 This procedure is not guaranteed to find the global optimum, but it implements the commonly used heuristic of iteratively modeling residuals.
 %\footnotetext{This is the heuristic used in chapter 5 of \citet{rasmussen38gaussian} when constructing a kernel to analyse the Mauna Loa dataset.}
 % inspired by the same heuristic of extending models by examining residuals mentioned above.
@@ -398,7 +399,8 @@ Instead we focus on domains where most of the interesting structure is in \funct
 These kernels share similarities with ${\kSE \times \kPer}$ but can express negative prior correlation, and could usefully be included in our grammar.
 
 \citet{diosan2007evolving} and \citet{bing2010gp} learn composite kernels for support vector machines and relevance vector machines, using genetic search algorithms.
-Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
+%Our work goes beyond this prior work by demonstrating the structure implied by composite kernels, employing a Bayesian search criterion, and allowing for the automatic discovery of interpretable structure from data.
+Our work employs a Bayesian search criterion, and goes beyond this prior work by demonstrating the interpretability of the structure implied by composite kernels, and how such structure allows for extrapolation.
 %We build upon this work by demonstrating the structure implied by composite kernels, allowing for the automatic discovery of interpretable structure from data.
 %We build upon this work by interpreting the structure of composite kernels, demonstrating the automatic discovery of interpretable structure from data.
 %We build upon this work by 
@@ -428,7 +430,7 @@ Some of their discrete graph structures have continous analogues in our own spac
 %In this section, we show on several time series datasets both the kernel expression found by our search, and the complete \gp{} posterior distribution implied by that kernel and the data.  
 %We then also plot that same kernel and posterior decomposed into additive components.
 
-In order to investigate our method's ability to discover structure, we ran the kernel search on several time-series.
+To investigate our method's ability to discover structure, we ran the kernel search on several time-series.
 %in order to test whether it learns plausible and interpretable structure. 
 %For these datasets, we show both the best kernel expressions found in each stage of the search, and the complete posterior distribution implied by that kernel and the data. 
 %Additionally, we show decompositions of the time series into superpositions of components as implied by the kernel structure.
@@ -473,7 +475,7 @@ The search was run to depth 10, using the base kernels from Section \ref{sec:Str
 \paragraph{Mauna Loa atmospheric CO$\mathbf{_{2}}$}
 
 
-First, we analyzed records of carbon dioxide levels recorded at the Mauna Loa observatory.
+Using our method, we analyzed records of carbon dioxide levels recorded at the Mauna Loa observatory.
 Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, we can compare the kernel chosen by our method to a kernel constructed by human experts.
 %it serves as a test of our algorithm's ability to recover known structure.
 %First, we revisit a dataset explored in \mbox{\cite{rasmussen38gaussian}}%, pages 120-126
@@ -482,10 +484,8 @@ Since this dataset was analyzed in detail by \citet{rasmussen38gaussian}, we can
 \input{tables/mauna_growth.tex}
 \input{tables/mauna_decomp.tex}
 
-Figure \ref{fig:mauna_grow} shows the posterior function estimates under increasingly structured models, as measured by approximate marginal likelihood, as the search depth increases on this dataset.
-%
-%
-Note that, while the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the search depth increases.
+Figure \ref{fig:mauna_grow} shows the posterior mean and variance on this dataset as the search depth increases.
+While the data can be smoothly interpolated by a single base kernel model, the extrapolations improve dramatically as the increased search depth allows more structure to be included.
 
 Figure \ref{fig:mauna_decomp} shows the 
 %complete posterior of the 
@@ -650,7 +650,7 @@ The more richly structured \gp{} models (${\kSE + \kPer}$ and ${\kSE \times \kPe
 
 \footnotetext{
 %\NA{
-In one dimension, the predictive means of all baseline methods in table \ref{tbl:Regression Mean Squared Error} are identical to a \gp{} with an $\kSE{}$ kernel.}
+In one dimension, the predictive means of all baseline methods in table \ref{tbl:Regression Mean Squared Error} are identical to that of a \gp{} with an $\kSE{}$ kernel.}
 %}
 
 %\fTBD{Josh: Can you write about the Blessing of abstraction, and doing lots with a small amount of data?  This might become apparent from plotting the extraplolations.}
@@ -659,29 +659,28 @@ In one dimension, the predictive means of all baseline methods in table \ref{tbl
 \subsection{High-dimensional prediction}
 
 To evaluate the predictive accuracy of our method in a high-dimensional setting, we extended the comparison of \cite{duvenaud2011additive11} to include our method.
-We performed 10 fold cross validation on 5 datasets\footnote{The data sets had dimensionalities ranging from 4 to 13 and the number of data points ranged from 150 to 450.} comparing 5 methods in terms of MSE and predictive likelihood.
+We performed 10 fold cross validation on 5 datasets
+\footnote{The data sets had dimensionalities ranging from 4 to 13, and the number of data points ranged from 150 to 450.} comparing 5 methods in terms of MSE and predictive likelihood.
 %\NA{
-Our structure search was run up to depth 10, using different subsets of the base kernel families.
+Our structure search was run up to depth 10, using the \SE{} and \RQ{} base kernel families.
+%different subsets of the base kernel families.
 %}
 
 The comparison included three methods with fixed kernel families: Additive \gp{}s, Generalized Additive Models (GAM), and a \gp{} with a standard \kSE{} kernel using Automatic Relevance Determination (\gp{} \kSE{}-ARD).  Also included was the related kernel-search method of Hierarchical Kernel Learning (HKL).
 %We compared 5 methods on 5 datasets in terms of mean-squared (MSE) error and predictive likelihood, averaging across 10 data folds.
 
-%Results are presented in table \ref{tbl:Regression Mean Squared Error}; our method outperformed all other methods in all tests.
+Results are presented in table \ref{tbl:Regression Mean Squared Error}.  Our method outperformed the next-best method in each test, although not substantially.
 
-Results are presented in table \ref{tbl:Regression Mean Squared Error}.
-Our method with all base kernels was always the best performing method, or the difference in performance was not statiscally significant at the 5\% level.
+%Results are presented in table \ref{tbl:Regression Mean Squared Error}.
+%Our method with all base kernels was always the best performing method, or the difference in performance was not statiscally significant at the 5\% level.
 %Although not statistically significant, increasing the number of base kernels did not always increase the performance of the search, suggesting scope for improvement.
-
+%
 %All bold results are not significantly different from the best-performing method in each experiment in a paired t-test with a $p$-value of 5\%.
-
 %
 %\input{tables/regression_results_mse.tex}
 %\input{tables/regression_results_nll.tex}
-
 %
 %\fTBD{Is it worth including the learned structures in the table?}
-
 %\paragraph{Details of methods}
 %Linear regression was included as a baseline, with noise variance set to the empirical variance on the training residuals.
 %
@@ -695,9 +694,6 @@ Our method with all base kernels was always the best performing method, or the d
 %was run using the all-subsets kernel, which corresponds to the same set of kernels as considered by the additive \gp{} with a \kSE{} base kernel.
 %Because HKL does not produce a probabilistic prediction, it could not be included in Table \ref{tbl:Regression Negative Log Likelihood}.
 %
-
-
-
 %\paragraph{Source code}
 All \gp{} hyperparameter tuning was performed by automated calls to the GPML toolbox\footnote{Available at 
 \href{http://www.gaussianprocess.org/gpml/code/}
@@ -747,7 +743,8 @@ All \gp{} hyperparameter tuning was performed by automated calls to the GPML too
 %The ability to learn kernel parameters and combination weights automatically has been an important factor in enabling the widespread use of kernel methods.
 %For the most part, however, it has been up to the user to choose the proper form for the kernel, a task which requires considerable expertise.
 
-Towards the goal of automating the choice of kernel family, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.
+Towards the goal of automating the choice of kernel family, we introduced a space of composite kernels defined compositionally as sums and products of a small number of base kernels.  
+The set of models included in this space includes many standard regression models.
 We proposed a search procedure for this space of kernels which parallels the process of scientific discovery.
 
 We found that the learned structures are often capable of accurate extrapolation in complex time-series datasets, and are competitive with widely used kernel classes and kernel combination methods on a variety of prediction tasks.
@@ -755,7 +752,7 @@ The learned kernels often yield decompositions of a signal into diverse and inte
 We believe that a data-driven approach to choosing kernel structures automatically can help make nonparametric regression and classification methods accessible to non-experts.
 
 \subsubsection*{Acknowledgements}
-The authors would like to thank Carl Rasmussen and Andrew G. Wilson for helpful discussions.
+We thank Carl Rasmussen and Andrew G. Wilson for helpful discussions.  This work was funded in part by NSERC, EPSRC grant EP/I036575/1, and Google.
 
 \appendix
 \section*{Appendix}
