@@ -1,0 +1,358 @@
+% File:  aistats2e.sty
+
+% Modified Miro Dudik, 2011, 2012: change venue, year and volume number
+%
+% Modified Geoff Gordon, 2010: change to 2011
+%
+% Modified Mauricio Alvarez, 2009. Headings for the manuscript when
+% being under review and additional changes so that the headings are
+% automatically obtained from the title and author fields from the tex
+% file. Also changes to the year 2009 for 2010 where it appeared.
+%
+% Modified Mauricio Alvarez, 2009. Copyright Notice and commands for headings
+%
+%
+% Originally this file contains the LaTeX formatting parameters for the Morgan
+% Kaufmann two column, 8 1/2 by 11 inch proceedings format.
+
+
+\NeedsTeXFormat{LaTeX2e}
+
+\ProvidesPackage{aistats2e}
+
+\DeclareOption{accepted}{\renewcommand{\statePaper}{\acceptedPaper}%
+                         \renewcommand{\Notice@String}{\AISTATS@appearing}}
+
+\newcommand{\statePaper}{0}
+\newcommand{\acceptedPaper}{1}
+\newcommand{\Notice@String}{Preliminary work.  Under review by  AISTATS 2013.  Do not distribute.}
+\newcommand{\AISTATS@appearing}{Appearing in Proceedings of the $16^{th}$ International Conference on Artificial
+  Intelligence and Statistics (AISTATS) 2013, Scottsdale, AZ, USA\@. Volume XX of JMLR: W\&CP XX. Copyright
+  2013 by the authors.}
+
+\ProcessOptions\relax
+
+\evensidemargin .05in \oddsidemargin .05in
+\setlength\topmargin{-25pt} \setlength\textheight{9.25in}
+\setlength\textwidth{6.75in} \setlength\columnsep{0.25in}
+\newlength\titlebox \setlength\titlebox{2.375in}
+\setlength\headheight{10pt} \setlength\headsep{15pt}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%% To include the copyright legend at the end of
+%%%% the first column of the first page. Adapted from ICML09.sty
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\ftype@copyrightbox{8}
+\def\@copyrightspace{
+% Create a float object positioned at the bottom of the column.  Note
+% that because of the mystical nature of floats, this has to be called
+% before the first column is populated with text (e.g., from the title
+% or abstract blocks).  Otherwise, the text will force the float to
+% the next column.  -- TDRL.
+\@float{copyrightbox}[b]
+\begin{center}
+\setlength{\unitlength}{1pc}
+\begin{picture}(20,2.5)
+% Create a line separating the main text from the note block.
+% 4.818pc==0.8in.
+\put(0,3.5){\line(1,0){4.818}}
+% Insert the text string itself.  Note that the string has to be
+% enclosed in a parbox -- the \put call needs a box object to
+% position.  Without the parbox, the text gets splattered across the
+% bottom of the page semi-randomly.  The 19.75pc distance seems to be
+% the width of the column, though I can't find an appropriate distance
+% variable to substitute here.  -- TDRL.
+\put(0,0){\parbox[b]{19.75pc}{\small \Notice@String}}
+\end{picture}
+\end{center}
+\end@float}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\setlength\footskip{0pt}
+\thispagestyle{empty}     \pagestyle{empty}
+\flushbottom \twocolumn \sloppy
+
+\def\addcontentsline#1#2#3{}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%     Definition of maketitle (includes title and author)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\RequirePackage{fancyhdr}
+
+% box to check the size of the running head
+\newbox\titrun
+\newbox\autrun
+
+% general page style
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+
+\fancyhead{}
+\fancyfoot{}
+
+% definition to set running head title and running head author
+\def\runningtitle#1{\gdef\@runningtitle{#1}}
+\def\runningauthor#1{\gdef\@runningauthor{#1}}
+
+\long\def\aistatstitle#1{
+
+   %\renewcommand{\headrulewidth}{0.5pt}
+
+   \gdef\@runningheadingerrortitle{0}
+
+   % If paper is under review print this as headings
+
+   \ifnum\statePaper=0
+    {
+     \gdef\@runningtitle{Manuscript under review by AISTATS 2013}
+    }
+   \fi
+
+   % If the paper is accepted, print the title or the running title as heading.
+
+   \ifnum\statePaper=1
+   {
+   \ifx\undefined\@runningtitle
+    {
+    \gdef\@runningtitle{#1}
+    }
+   \fi
+   }
+   \fi
+
+   \ifnum\@runningheadingerrortitle=0
+         {
+         \global\setbox\titrun=\vbox{\small\bf\@runningtitle}%
+         \ifdim\wd\titrun>\textwidth%
+            {\gdef\@runningheadingerrortitle{2}
+             \gdef\@messagetitle{Running heading title too long}
+            }%
+         \else\ifdim\ht\titrun>10pt
+              {\gdef\@runningheadingerrortitle{3}
+              \gdef\@messagetitle{Running heading title breaks the line}
+              }%
+              \fi
+          \fi
+         }
+    \fi
+
+   \ifnum\@runningheadingerrortitle>0
+     {
+        \fancyhead[CE]{\small\bf\@messagetitle}
+        \ifnum\@runningheadingerrortitle>1
+           \typeout{}%
+           \typeout{}%
+           \typeout{*******************************************************}%
+           \typeout{Running heading title exceeds size limitations for running head.}%
+           \typeout{Please supply a shorter form for the running head}
+           \typeout{with \string\runningtitle{...}\space just after \string\begin{document}}%
+           \typeout{*******************************************************}%
+           \typeout{}%
+           \typeout{}%
+        \fi
+     }
+  \else
+     {
+          \fancyhead[CE]{\small\bf\@runningtitle}
+     }
+  \fi
+
+  \hsize\textwidth
+  \linewidth\hsize \toptitlebar {\centering
+  {\Large\bf #1 \par}}
+ \bottomtitlebar \vskip 0.2in plus 1fil minus 0.1in
+}
+
+\long\def\aistatsauthor#1{
+
+   \gdef\@runningheadingerrorauthor{0}
+
+   % If the paper is under review, print this message as heading.
+
+   \ifnum\statePaper=0
+    {
+     \gdef\@runningauthor{Manuscript under review by AISTATS 2013}
+    }
+   \fi
+
+   % If the paper is accepted, print the author names or runningauthor as heading.
+
+   \ifnum\statePaper=1
+   {
+   \ifx\undefined\@runningauthor%
+    {
+   \gdef\@runningauthor{\def\and{\unskip{,}\enspace}\def\And{\unskip{,}\enspace}\def\AND{\unskip{,}\enspace}
+   #1}
+    }
+   \fi
+    }
+   \fi
+
+  \ifnum\@runningheadingerrorauthor=0
+      {
+      \global\setbox\autrun=\vbox{\small\bf\@runningauthor}
+      \ifdim\wd\autrun>\textwidth%
+            {\gdef\@runningheadingerrorauthor{2}
+             \gdef\@messageauthor{Running heading author too long}
+            }%
+         \else\ifdim\ht\autrun>10pt
+              {\gdef\@runningheadingerrorauthor{3}
+              \gdef\@messageauthor{Running heading author breaks the line}
+              }%
+              \fi
+          \fi
+      }
+  \fi
+
+  \ifnum\@runningheadingerrorauthor>0
+     {
+       \fancyhead[CO]{\small\bf\@messageauthor}
+       \ifnum\@runningheadingerrorauthor>1
+           \typeout{}%
+           \typeout{}%
+           \typeout{*******************************************************}%
+           \typeout{Running heading author exceeds size limitations for running head.}%
+           \typeout{Please supply a shorter form for the running head}
+           \typeout{with \string\runningauthor{...}\space just after \string\begin{document}}%
+           \typeout{*******************************************************}%
+           \typeout{}%
+           \typeout{}%
+      \fi
+     }
+  \else
+     {
+     \fancyhead[CO]{\small\bf\@runningauthor}
+     }
+  \fi
+
+
+{\def\and{\unskip\enspace{\rm and}\enspace}%
+  \def\And{\end{tabular}\hss \egroup \hskip 1in plus 2fil
+           \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf}%
+  \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+         \vskip 0.25in plus 1fil minus 0.125in
+          \hbox to \linewidth\bgroup \hfil\hfil
+            \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf}
+  \def\ANDD{\end{tabular}\hss\egroup \hfil\hfil\egroup
+         \vskip 0.25in plus 1fil minus 0.125in
+          \hbox to \linewidth\bgroup \hfil\hfil
+            \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf}
+     \hbox to \linewidth\bgroup \hfil\hfil
+     \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c}\bf #1
+                         \end{tabular}
+       \hss\egroup
+    \hfil\hfil\egroup}
+}
+
+\long\def\aistatsaddress#1{
+{\def\and{\unskip\enspace{\rm and}\enspace}%
+  \def\And{\end{tabular}\hss \egroup \hskip 1in plus 2fil
+           \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c} }%
+  \def\AND{\end{tabular}\hss\egroup \hfil\hfil\egroup
+         \vskip 0.25in plus 1fil minus 0.125in
+          \hbox to \linewidth\bgroup \hfil\hfil
+            \hbox to 0pt  \bgroup \hss \begin{tabular}[t]{c}}
+   \def\ANDD{\end{tabular}\hss\egroup \hfil\hfil\egroup
+         \vskip 0.25in plus 1fil minus 0.125in
+          \hbox to \linewidth \bgroup \hfil\hfil
+            \hbox to 0pt  \bgroup \hss\begin{tabular}[t]{c}\bf}
+     \hbox to \linewidth\bgroup \hfil\hfil
+     \hbox to 0pt\bgroup\hss \begin{tabular}[t]{c} #1
+                         \end{tabular}
+       \hss\egroup
+    \hfil\hfil\egroup}
+  \vskip 0.3in plus 2fil minus 0.1in
+}
+
+\renewcommand{\headrulewidth}{0.5pt}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Definition of abstract environment
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\renewenvironment{abstract}
+{\@copyrightspace\centerline{\large\bf
+Abstract}\vspace{0.5ex}\begin{quote}}{\par\end{quote}\vskip 1ex}
+
+% sections with less space
+\def\section{\@startsection {section}{1}{\z@}{-2.0ex plus
+    -0.5ex minus -.2ex}{1.5ex plus 0.3ex minus .2ex}{\large\bf\raggedright}}
+\def\subsection{\@startsection{subsection}{2}{\z@}{-1.8ex plus
+    -0.5ex minus -.2ex}{0.8ex plus .2ex}{\normalsize\bf\raggedright}}
+\def\subsubsection{\@startsection{subsubsection}{3}{\z@}{-1.5ex plus
+   -0.5ex minus -.2ex}{0.5ex plus .2ex}{\normalsize\bf\raggedright}}
+\def\paragraph{\@startsection{paragraph}{4}{\z@}{1.5ex plus
+   0.5ex minus .2ex}{-1em}{\normalsize\bf}}
+\def\subparagraph{\@startsection{subparagraph}{5}{\z@}{1.5ex plus
+   0.5ex minus .2ex}{-1em}{\normalsize\bf}}
+\def\subsubsubsection{\vskip 5pt{\noindent\normalsize\rm\raggedright}}
+
+
+% Footnotes
+\footnotesep 6.65pt %
+\skip\footins 9pt plus 4pt minus 2pt
+\def\footnoterule{\kern-3pt \hrule width 5pc \kern 2.6pt }
+\setcounter{footnote}{0}
+
+% Lists and paragraphs
+\parindent 0pt
+\topsep 4pt plus 1pt minus 2pt
+\partopsep 1pt plus 0.5pt minus 0.5pt
+\itemsep 2pt plus 1pt minus 0.5pt
+\parsep 2pt plus 1pt minus 0.5pt
+\parskip .5pc
+
+
+\leftmargin 2em \leftmargini\leftmargin \leftmarginii 2em
+\leftmarginiii 1.5em \leftmarginiv 1.0em \leftmarginv .5em
+\leftmarginvi .5em
+\labelwidth\leftmargini\advance\labelwidth-\labelsep \labelsep 5pt
+
+\def\@listi{\leftmargin\leftmargini}
+\def\@listii{\leftmargin\leftmarginii
+   \labelwidth\leftmarginii\advance\labelwidth-\labelsep
+   \topsep 2pt plus 1pt minus 0.5pt
+   \parsep 1pt plus 0.5pt minus 0.5pt
+   \itemsep \parsep}
+\def\@listiii{\leftmargin\leftmarginiii
+    \labelwidth\leftmarginiii\advance\labelwidth-\labelsep
+    \topsep 1pt plus 0.5pt minus 0.5pt
+    \parsep \z@ \partopsep 0.5pt plus 0pt minus 0.5pt
+    \itemsep \topsep}
+\def\@listiv{\leftmargin\leftmarginiv
+     \labelwidth\leftmarginiv\advance\labelwidth-\labelsep}
+\def\@listv{\leftmargin\leftmarginv
+     \labelwidth\leftmarginv\advance\labelwidth-\labelsep}
+\def\@listvi{\leftmargin\leftmarginvi
+     \labelwidth\leftmarginvi\advance\labelwidth-\labelsep}
+
+\abovedisplayskip 7pt plus2pt minus5pt%
+\belowdisplayskip \abovedisplayskip
+\abovedisplayshortskip  0pt plus3pt%
+\belowdisplayshortskip  4pt plus3pt minus3pt%
+
+% Less leading in most fonts (due to the narrow columns)
+% The choices were between 1-pt and 1.5-pt leading
+\def\@normalsize{\@setsize\normalsize{11pt}\xpt\@xpt}
+\def\small{\@setsize\small{10pt}\ixpt\@ixpt}
+\def\footnotesize{\@setsize\footnotesize{10pt}\ixpt\@ixpt}
+\def\scriptsize{\@setsize\scriptsize{8pt}\viipt\@viipt}
+\def\tiny{\@setsize\tiny{7pt}\vipt\@vipt}
+\def\large{\@setsize\large{14pt}\xiipt\@xiipt}
+\def\Large{\@setsize\Large{16pt}\xivpt\@xivpt}
+\def\LARGE{\@setsize\LARGE{20pt}\xviipt\@xviipt}
+\def\huge{\@setsize\huge{23pt}\xxpt\@xxpt}
+\def\Huge{\@setsize\Huge{28pt}\xxvpt\@xxvpt}
+
+\def\toptitlebar{
+\hrule height4pt
+\vskip .25in}
+
+\def\bottomtitlebar{
+\vskip .25in
+\hrule height1pt
+\vskip .25in}

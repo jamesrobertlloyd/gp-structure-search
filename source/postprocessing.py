@@ -121,6 +121,141 @@ def compare_1d_decompositions():
     for folder in folders:
         make_all_1d_figures(folder=folder, save_folder='../temp_figures/' + folder.split('/')[-1])
         
+def collate_decompositions(top_folder, tex):
+    '''Produces a LaTeX document with all decompositions displayed'''
+    latex_header = '''
+\documentclass[twoside]{article}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{preamble}
+\usepackage{natbib}
+%%%% REMEMBER ME!
+%\usepackage[draft]{hyperref}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{wasysym}
+\usepackage{subfigure}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{bm}
+\\newcommand{\\theHalgorithm}{\\arabic{algorithm}}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{ %
+    pdftitle={},
+    pdfauthor={},
+    pdfsubject={},
+    pdfkeywords={},
+    pdfborder=0 0 0,
+    pdfpagemode=UseNone,
+    colorlinks=true,
+    linkcolor=mydarkblue,
+    citecolor=mydarkblue,
+    filecolor=mydarkblue,
+    urlcolor=mydarkblue,
+    pdfview=FitH}
+
+\\newcolumntype{x}[1]{>{\centering\\arraybackslash\hspace{0pt}}m{#1}}
+\\newcommand{\\tabbox}[1]{#1}
+
+\setlength{\marginparwidth}{0.6in}
+\input{include/commenting.tex}
+
+\\newif\ifarXiv
+%\\arXivtrue
+
+\ifarXiv
+	\usepackage[arxiv]{format/icml2013}
+\else
+	\usepackage[accepted]{format/icml2013}
+\\fi
+%\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
+
+%% For submission, make all render blank.
+%\\renewcommand{\LATER}[1]{}
+%\\renewcommand{\\fLATER}[1]{}
+%\\renewcommand{\TBD}[1]{}
+%\\renewcommand{\\fTBD}[1]{}
+%\\renewcommand{\PROBLEM}[1]{}
+%\\renewcommand{\\fPROBLEM}[1]{}
+%\\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+
+    
+\\begin{document}
+
+%\\renewcommand{\\baselinestretch}{0.99}
+
+\\twocolumn[
+\icmltitle{Structure Discovery in Nonparametric Regression through Compositional Kernel Search - Automatic Decompositions}
+
+\icmlauthor{David Duvenaud$^{\dagger}$}{dkd23@cam.ac.uk}
+%\icmladdress{University of Cambridge}
+\icmlauthor{James Robert Lloyd$^{\dagger}$}{jrl44@cam.ac.uk}
+%\icmladdress{University of Cambridge}
+\icmlauthor{Roger Grosse}{rgrosse@mit.edu}
+%\icmladdress{Massachussets Institute of Technology}
+\icmlauthor{Joshua B. Tenenbaum}{jbt@mit.edu}
+%\icmladdress{Massachussets Institute of Technology}
+\icmlauthor{Zoubin Ghahramani}{zoubin@eng.cam.ac.uk}
+%\icmladdress{University of Cambridge}
+%\icmladdress{Brain and Cognitive Sciences, Massachusetts Institute of Technology}    
+            
+\icmlkeywords{nonparametrics, gaussian process, machine learning, ICML, structure learning, extrapolation, regression, kernel learning, equation learning, supervised learning, time series}
+\\vskip 0.3in
+]
+'''
+
+    latex_footer = '''
+
+\end{document}    
+'''
+
+    latex_body = '''
+\section{%(folder)s}
+
+\input{figures/%(folder)s/decomp.tex}    
+'''
+
+    decomp_header = '''
+\\begin{figure}[H]
+\\newcommand{\wmgd}{1\columnwidth}
+\\newcommand{\hmgd}{3.0cm}
+\\newcommand{\mdrd}{figures/%(folder)s}
+\\newcommand{\mbm}{\hspace{-0.3cm}}
+\\begin{tabular}{c}
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/%(folder)s_all} \\\\ = \\\\
+'''
+
+    decomp_footer = '''
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/%(folder)s_resid}
+\end{tabular}
+\end{figure}
+'''
+
+    decomp_body = '''
+\mbm \includegraphics[width=\wmgd,height=\hmgd]{\mdrd/%(folder)s_%(number)d} \\\\ + \\\\
+'''
+    
+    latex = latex_header
+    for folder in [adir for adir in sorted(os.listdir(top_folder)) if os.path.isdir(os.path.join(top_folder, adir))]:
+        decomp_text = decomp_header % {'folder' : folder}
+        i = 1
+        while os.path.isfile(os.path.join(top_folder, folder, '%s_%d.pdf' % (folder, i))):
+            decomp_text = decomp_text + decomp_body % {'folder' : folder, 'number' : i}
+            i += 1
+        decomp_text = decomp_text + decomp_footer % {'folder' : folder}
+        
+        with open(os.path.join(top_folder, folder, 'decomp.tex'), 'w') as decomp_file:
+            decomp_file.write(decomp_text)
+        
+        latex = latex + latex_body % {'folder' : folder}
+    latex = latex + latex_footer
+    
+    with open(tex, 'w') as latex_file:
+        latex_file.write(latex)
+    
+                
 def make_kernel_description_table():
     '''A helper to generate a latex table listing all the kernels used, and their descriptions.'''
     entries = [];
