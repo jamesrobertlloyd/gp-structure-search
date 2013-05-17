@@ -65,7 +65,7 @@ def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=Tr
 def remove_nan_scored_kernels(scored_kernels):    
     return [k for k in scored_kernels if not np.isnan(k.score())] 
     
-def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, exp, use_min_period=True):
+def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, exp):
     '''Search for the best kernel, in parallel on fear or local machine.'''
     
     # Initialise random seeds - randomness may be used in e.g. data subsetting
@@ -81,7 +81,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
     data_shape['input_scale'] = np.log([np.std(X[:,dim]) for dim in range(X.shape[1])])
     data_shape['output_scale'] = np.log(np.std(y)) 
     # Initialise period at a multiple of the shortest / average distance between points, to prevent Nyquist problems.
-    if use_min_period:
+    if exp.use_min_period:
         data_shape['min_period'] = np.log([max(exp.period_heuristic * utils.misc.min_abs_diff(X[:,i]), exp.period_heuristic * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
     else:
         data_shape['min_period'] = None
@@ -102,7 +102,7 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
                                           zip_files=False, max_jobs=exp.max_jobs, iters=exp.iters, zero_mean=exp.zero_mean, random_seed=exp.random_seed)
         # Enforce the period heuristic
         #### TODO - Concept of parameter constraints is more general than this - make it so
-        if use_min_period:
+        if exp.use_min_period:
             new_results = [sk for sk in new_results if not sk.k_opt.out_of_bounds(data_shape)]
         # Some of the scores may have failed - remove nans to prevent sorting algorithms messing up
         new_results = remove_nan_scored_kernels(new_results)
@@ -194,7 +194,7 @@ def gen_all_datasets(dir):
 
 # Defines a class that keeps track of all the options for an experiment.
 # Maybe more natural as a dictionary to handle defaults - but named tuple looks nicer with . notation
-class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, period_heuristic')):
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic')):
     def __new__(cls, 
                 data_dir,                  # Where to find the datasets.
                 results_dir,               # Where to write the results.
@@ -215,8 +215,9 @@ class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, ran
                 zero_mean=True,            # If false, use a constant mean function - cannot be used with the Const kernel
                 verbose_results=False,     # Whether or not to record all kernels tested
                 random_seed=0,
+		use_min_period=True,       # Whether to not let the period in a periodic kernel be smaller than the minimum period.
                 period_heuristic=10):      # Minimum period in periodic kernels = period_heuristic * smallest distance in input data     
-        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, period_heuristic)
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic)
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"
