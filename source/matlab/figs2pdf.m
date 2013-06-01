@@ -8,8 +8,10 @@
 
 %topdir = '../../figures/decomposition';
 %latexdir = '../../latex/figures/decomposition';
-topdir = '../../figures/decomposition/temp';
-latexdir = '../../latex/figures/decomposition/temp';
+%topdir = '../../figures/decomposition/temp';
+%latexdir = '../../latex/figures/decomposition/temp';
+topdir = '../../figures/decomposition/no-rq-test';
+latexdir = '../../latex/figures/decomposition/no-rq-test';
 dirnames = dir(topdir);
 isub = [dirnames(:).isdir]; %# returns logical vector
 dirnames = {dirnames(isub).name}';
