@@ -77,3 +77,5 @@ temp_figures/
 .DS_Store
 examples/*.txt
 examples/*/*
+analyses/time-series/gpss.pdf
+posters/jl-tea/tex/lloyd-tea-2013.pdf
