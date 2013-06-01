@@ -1,0 +1,32 @@
+\begin{tikzpicture}
+[sibling distance=0.23\columnwidth,-,thick, level distance=0.1\columnwidth, transform canvas={scale = 0.9}]
+%\footnotesize
+\node[shape=rectangle,draw,thick,fill=camlightblue!30] {No structure}
+  child {node {$\SE$}
+  }
+  child {node[shape=rectangle,draw,thick,fill=camlightblue!30] {$\RQ$}
+    [sibling distance=0.16\columnwidth]
+    child {node {$\SE$ + \RQ}}
+    child {node {\ldots}}
+    child {node[shape=rectangle,draw,thick,fill=camlightblue!30] {$\Per + \RQ$}
+      [sibling distance=0.2\columnwidth]
+      child {node {$\SE + \Per + \RQ$}}
+      child {node {\ldots}}
+      child {node[shape=rectangle,draw,thick,fill=camlightblue!30] {$\SE \times (\Per + \RQ)$}
+        [sibling distance=0.14\columnwidth]
+        child {node {\ldots}}
+        child {node {\ldots}}
+        child {node {\ldots}}
+      }
+      child {node {\ldots}}
+    }
+    %child {node {$\RQ \times \SE$}}
+    child {node {\ldots}}
+    child {node {$\Per \times \RQ$}}
+  }
+  child {node {$\Lin$}
+  }
+  child {node {$\Per$}
+  };
+\end{tikzpicture}
+
