@@ -1,0 +1,28 @@
+\newcommand{\fhbig}{3.2cm}
+\newcommand{\fwbig}{3.6cm}
+\newcommand{\kernpic}[1]{\includegraphics[height=\fhbig,width=\fwbig]{../figures/structure_examples/#1}}
+\newcommand{\kernpicr}[1]{\rotatebox{90}{\includegraphics[height=\fwbig,width=\fhbig]{../figures/structure_examples/#1}}}
+\newcommand{\addkernpic}[1]{{\includegraphics[height=\fhbig,width=\fwbig]{../figures/additive_multi_d/#1}}}
+\newcommand{\largeplus}{\tabbox{{\Large+}}}
+\newcommand{\largeeq}{\tabbox{{\Large=}}}
+\newcommand{\largetimes}{\tabbox{{\Large$\times$}}}
+\centering
+\renewcommand{\tabularxcolumn}[1]{>{\arraybackslash}m{#1}}
+%\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
+%\begin{tabular}{C{\fwbig}C{\fwbig}C{\fwbig}C{\fwbig}}%{m{\fwbig}m{\fwbig}m{\fwbig}}
+\begin{tabularx}{0.8\columnwidth}{XXXX}
+%Composite & Draws from \gp{} & \gp{} posterior \\ \toprule
+  \kernpic{se_kernel} & \kernpic{se_kernel_draws}
+& \kernpic{per_kernel} & \kernpic{per_kernel_draws_s2}
+\\
+  {\small Squared-exp (\kSE)} & {\small local variation} 
+& {\small Periodic (\kPer)} & {\small repeating structure}
+\\
+%\midrule
+  \kernpic{lin_kernel} & \kernpic{lin_kernel_draws}
+& \kernpic{rq_kernel} & \kernpic{rq_kernel_draws}
+\\
+  {\small Linear (\kLin)} & {\small linear functions} 
+& {\small Rational-quadratic (\kRQ)} & {\small multi-scale variation}
+\end{tabularx}
+

@@ -13,7 +13,7 @@ from pyfear import fear
 from util import mkstemp_safe
 import os
 import psutil, subprocess, sys, time
-from counter import Progress
+from utils.counter import Progress
 
 from config import *
 
