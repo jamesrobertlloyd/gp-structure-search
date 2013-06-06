@@ -15,6 +15,7 @@ experiments{5} = 'r_housing';
 %folder = '../../results/';
 %folder = '../../saved_results/28-Jan/';
 folder = '../../results/11-Mar/';
+%folder = '../../results/May-13-no-RQ/';
 
 MSEs = zeros(length(experiments),1);
 liks = zeros(length(experiments),1);
