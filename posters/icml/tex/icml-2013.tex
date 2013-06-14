@@ -16,8 +16,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
-%\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+%\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
+\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+%\documentclass{article}
+%\usepackage[portrait,a0paper,margin=1in]{geometry}
+
+\addtolength{\oddsidemargin}{-1.2in}
+%	\addtolength{\evensidemargin}{-.875in}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -165,7 +170,7 @@
 
 \newenvironment{poster}{
   \begin{center}
-  \begin{minipage}[c]{0.96\textwidth}
+  \begin{minipage}[c]{0.95\textwidth}
 }{
   \end{minipage} 
   \end{center}
@@ -217,39 +222,40 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{center}
+\hspace{-1cm}
 \begin{tikzpicture}[x=0.5\textwidth]
     % Dummy nodes at edges for spacing
     % TODO - a better way?
-    \node at (+1, 0) {};    
-    \node at (-1, 0) {};
+    %\node at (+1, 0) {};    
+    %\node at (-1, 0) {};
     % Set the size of the badges
-    \def \badgeheight {0.08\textwidth}
+    \def \badgeheight {0.1\textwidth}
     % Title text
     \node[inner sep=0,text width=0.7\textwidth,text centered,font=\Huge] (Title) at (0,0) 
     {
-      {\sffamily \Huge \textbf{Structure Discovery in Nonparametric Regression through \\Compositional Kernel Search}}\\
-      {\huge\sffamily David Duvenaud\textsuperscript{1}, James Robert Lloyd\textsuperscript{1}, Roger Grosse\textsuperscript{2},}\\
-      \vspace{-0.1\baselineskip}
-      {\huge\sffamily Joshua B. Tenenbaum\textsuperscript{2}, Zoubin Ghahramani\textsuperscript{1}}\\
-      \vspace{-0.3\baselineskip}
-      {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
+      {\sffamily \Huge \textbf{Structure Discovery in Nonparametric Regression through \\ Compositional Kernel Search}}\\
+      {\huge\sffamily David Duvenaud, James Robert Lloyd, Roger Grosse,
+      }\\      \vspace{-0.1\baselineskip} {\huge\sffamily 
+      Joshua B. Tenenbaum, Zoubin Ghahramani}\\
+     % \vspace{-0.3\baselineskip}
+     % {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
     };
     % Cambridge badge
-    \node [mybox] (Cambridge Badge) at (+0.75, 0) {
+    \node [mybox] (Cambridge Badge) at (+0.85, 0) {
         \includegraphics[height=\badgeheight]{../badges/cam-crest-and-text.pdf}
     };
     % CBL badge
-    \node [mybox] (CBL Badge) at (+0.9, 0) {
-        \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
-    };
+    %\node [mybox] (CBL Badge) at (+0.9, 0) {
+    %    \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
+    %};
     % MIT badge
-    \node [mybox] (MIT Badge) at (-0.75, 0) {
+    \node [mybox] (MIT Badge) at (-0.85, 0) {
         \includegraphics[height=\badgeheight]{../badges/MIT2.jpg}
     };
     % QR code
-    \node [mybox] (QR code) at (-0.95, 0) {
-        \includegraphics[height=\badgeheight]{../badges/QR.png}
-    };
+    %\node [mybox] (QR code) at (-0.95, 0) {
+    %    \includegraphics[height=\badgeheight]{../badges/QR.png}
+    %};
 \end{tikzpicture}
 \end{center}
 
@@ -267,7 +273,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{multicols}{3}
+\begin{multicols}{2}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -277,13 +283,14 @@
 
 \large
 
-\mysection{Data often exhibits high level structure or patterns}
 
-\vspace{0\baselineskip}
+%\mysection{Data often exhibits high level structure or patterns}
 
-\begin{center}
-  \input{../figures/fig_motivation.tex}
-\end{center}
+%\vspace{0\baselineskip}
+
+%\begin{center}
+%  \input{../figures/fig_motivation.tex}
+%\end{center}
 
 %\vspace{0\baselineskip}
 
@@ -295,7 +302,7 @@
 
 %\vspace{0.5\baselineskip}
 
-\mysection{Identifying this structure is crucial for extrapolation}
+\mysection{Identifying structure is crucial for extrapolation}
 
 \vspace{0\baselineskip}
 
@@ -305,8 +312,10 @@
 
 \vspace{0\baselineskip}
 
+
+
 \begin{itemize}
-  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
+  \item Traditionally, a statistician proposes an appropriate model for the type of structures present
   \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
   \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
 \end{itemize}
@@ -330,7 +339,6 @@
 \vspace{1\baselineskip}
 \input{../figures/fig_example_structures_no_kern.tex}
 
-\newpage 
 
 \mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
 
@@ -357,7 +365,7 @@
   Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
   Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
   Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
-  Linear trend with deviations & $\Lin + \SE$ \\
+  Linear trend with local deviations & $\Lin + \SE$ \\
   Linearly growing amplitude & $\Lin \times \SE$
   \end{tabular}
 \end{center}
@@ -383,7 +391,6 @@
   \input{../figures/fig_mauna_growth.tex}
 \end{center}
 
-\newpage 
 
 \mysection{Example: Mauna Loa CO$_2$ concentration}
 
@@ -408,6 +415,10 @@
 \begin{center}
   \input{../figures/fig_airline.tex}
 \end{center}
+
+% QR code
+\def \badgeheight {0.08\textwidth}
+\includegraphics[height=\badgeheight]{../badges/QR.png}
 
 \end{multicols}
 
