@@ -33,7 +33,6 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
 \usepackage{multicol}
 \usepackage{color}
 %\usepackage{shadow}
@@ -286,129 +285,6 @@
 \large
 
 
-%\mysection{Data often exhibits high level structure or patterns}
-
-%\vspace{0\baselineskip}
-
-%\begin{center}
-%  \input{../figures/fig_motivation.tex}
-%\end{center}
-
-%\vspace{0\baselineskip}
-
-%\begin{itemize}
-%  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
-%  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
-%  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
-%\end{itemize}
-
-%\vspace{0.5\baselineskip}
-
-\mysection{Identifying structure is crucial for extrapolation}
-
-\vspace{0\baselineskip}
-
-\begin{center}
-  \input{../figures/fig_synth_extrap.tex}
-\end{center}
-
-\vspace{0\baselineskip}
-
-
-
-\begin{itemize}
-  \item Traditionally, a statistician proposes an appropriate model for the type of structures present
-  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
-  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
-\end{itemize}
-
-\vspace{0.5\baselineskip}
-
-\mysection{Gaussian processes model structure through kernels}
-
-\vspace{0.5\baselineskip}
-
-\begin{itemize}
-  \item The kernel specifies which structures are likely under the \gp{} prior, which in turn determines the generalization properties of the model.
-  \item Below we list standard base kernels, and draws from the corresponding \gp{} priors:
-\end{itemize}
-\vspace{1\baselineskip}
-\input{../figures/fig_simple_kernels_no_kern.tex}
-\vspace{0.5\baselineskip}
-
-\mysection{Kernels can be Composed
-% to create more complicated structural assumptions
-}
-
-\vspace{0.5\baselineskip}
-
-\begin{itemize}
-    \item Constructing appropriate composite kernels has previously been done by  experts
-\end{itemize}
-\vspace{1\baselineskip}
-\input{../figures/fig_example_structures_no_kern.tex}
-
-
-\mysection{\ldots defining an open-ended set of structures}
-
-\vspace{0.25\baselineskip}
-
-\begin{itemize}
-  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', including \eg
-  %\item These operations are interpretable\ldots
-  %\begin{itemize}
-  %  \item Addition of kernels corresponds to the addition of independent functions
-  %  \item Multiplication of kernels behaves like an `AND' operation, combining properties of the base kernels
-  %\end{itemize}
-  %\item \ldots and produce a rich space including many standard statistical models
-\end{itemize}
-
-\vspace{0.5\baselineskip}
-
-\begin{center}
-  \begin{tabular}{l|l}
-  Bayesian linear regression & $\Lin$ \\
-  %Bayesian quadratric regression & $\Lin \times \Lin$ \\
-  Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
-  Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
-  Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
-  Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
-  Linear trend with local deviations & $\Lin + \SE$ \\
-  Linearly growing amplitude & $\Lin \times \SE$
-  \end{tabular}
-\end{center}
-
-%\vspace{1\baselineskip}
-\newpage
-
-\mysection{\ldots by a greedy search%, \\ producing progressively better models
-}
-
-\vspace{0.25\baselineskip}
-
-\begin{itemize}
-  \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
-  \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
-\end{itemize}
-
-\begin{center}
-  \input{../figures/fig_search_tree.tex}
-\end{center}
-
-\vspace{12\baselineskip}
-
-\begin{center}
-  %\input{../figures/fig_mauna_growth.tex}
-  \begin{tabular}{cccc}
-  Depth 1 & Depth 2 & Depth 3 & Depth 4 \\
-          \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_0/03-mauna2003-s_all_small.pdf} &
-        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small.pdf} &
-        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small.pdf} &
-        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_3/03-mauna2003-s_all_small.pdf}
-\end{tabular}  
-\end{center}
-
-%\vspace{4\baselineskip}
 
 %\mysection{Example: Mauna Loa CO$_2$ concentration}
 \mysection{Compound Kernels are Interpretable}
@@ -416,88 +292,31 @@
 \vspace{0\baselineskip}
 
 \begin{itemize}
-  \item Compound kernels decompose functions into additive components% (additive components of the kernel correspond to independent additive functions)
+  \item Compound kernels decompose functions into additive components.
+%    \item Compound kernels decompose functions into additive components.% (additive components of the kernel correspond to independent additive functions)
 \end{itemize}
 
+%\vspace{3.5\baselineskip}
 
-%\input{../figures/fig_radio.tex}
-%\vspace{14\baselineskip}
+%\mysection{Example: International airline passengers}
 
-%\vspace{14\baselineskip}
-%\input{../figures/fig_airline2.tex}
+%\vspace{3\baselineskip}
 
-\begin{tabular}{cc}
-\begin{tabular}{c}
-\includegraphics[width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
-\end{tabular} &
-\begin{tabular}{cc}
-%Monthly airline traffic decomposes into a sum of:}\\
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_1.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_2.pdf} \\
-Long-term trend & Growing amplitude \\
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_3.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_resid.pdf} \\
-Short-term deviatinos & noise \\
-%Smooth long-term trend + \quad %
-%Linearly growing periodic + \quad &
-%Short-term deviations
-\end{tabular}
-\end{tabular}
-% QR code
-%\def \badgeheight {0.08\textwidth}
-%\includegraphics[height=\badgeheight]{../badges/QR.png}
-
-Another example:
-
-\begin{tabular}{cc}
-\begin{tabular}{c}
-\includegraphics[width=0.2\textwidth]{../figures/radio/monthly-critical-radio-frequenci_all.pdf}
-\end{tabular} &
-\begin{tabular}{cc}
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_3.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_4.pdf} \\
-Long-term smooth + \quad &
-Yearly priodic \\
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_2.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_5.pdf} \\
-Long-term amlpitude + \quad &
-Short-term noise \quad
-\end{tabular}
-\end{tabular}
-
-\end{multicols}
-
-\end{poster}
-
-\end{document}
-
-
-%\begin{tabular}{ccc}
-%\multicolumn{3}{c}{\includegraphics[width=0.3\textwidth]{../figures/01-airline-months_all.pdf}} \\
-%\multicolumn{3}{c}{Monthly airline traffic decomposes into a sum of:} \\ \\
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_1.pdf} &
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_2.pdf} &
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_3.pdf} \\
-%Smooth long-term trend + \quad &
-%Linearly growing periodic + \quad &
-%Short-term deviations
-%\end{tabular}
-
-\begin{tabular}{cc}
-\multirow{3}{*}{\includegraphics[width=0.1\textwidth]{../figures/01-airline-months_all.pdf}} &
-%Monthly airline traffic decomposes into a sum of:}\\
-\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_1.pdf} \\
-\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_2.pdf} \\
+\begin{tabular}{ccc}
+\multicolumn{3}{c}{\includegraphics[width=0.3\textwidth]{../figures/01-airline-months_all.pdf}} \\
+\multicolumn{3}{c}{Monthly airline traffic decomposes into a sum of:} \\ \\
+\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_1.pdf} &
+\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_2.pdf} &
 \includegraphics[width=0.16\textwidth]{../figures/01-airline-months_3.pdf} \\
-%Smooth long-term trend + \quad %
-%Linearly growing periodic + \quad &
-%Short-term deviations
+Smooth long-term trend + \quad &
+Linearly growing periodic + \quad &
+Short-term deviations
 \end{tabular}
 
 And radio:
 
 \begin{tabular}{cc}
-%\multicolumn{2}{c}{\includegraphics[width=0.3\textwidth]{../figures/radio/monthly-critical-radio-frequenci_all.pdf}} \\
+\multicolumn{2}{c}{\includegraphics[width=0.3\textwidth]{../figures/radio/monthly-critical-radio-frequenci_all.pdf}} \\
 \multicolumn{2}{c}{Radio traffic decomposes into a sum of:} \\ \\
 \includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_3.pdf} &
 \includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_4.pdf} \\
@@ -508,3 +327,20 @@ Yearly priodic \\
 Long-term changes in amlpitude + \quad &
 Short-term noise \quad
 \end{tabular}
+
+
+%\vspace{14\baselineskip}
+
+%\begin{center}
+%  \input{../figures/fig_radio.tex}
+%\end{center}
+
+\vspace{14\baselineskip}
+
+
+
+\end{multicols}
+
+\end{poster}
+
+\end{document}
