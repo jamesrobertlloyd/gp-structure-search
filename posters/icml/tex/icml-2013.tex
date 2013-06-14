@@ -348,13 +348,13 @@
 \vspace{1\baselineskip}
 \input{../figures/fig_example_structures_no_kern.tex}
 
-
-\mysection{\ldots defining an open-ended set of structures}
+\vspace{1\baselineskip}
+\mysection{\ldots defining an open-ended set of models}
 
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', including \eg
+  \item We consider all algebraic expressions composed a small number of base kernels and the operations `$+$' and `$\times$'
   %\item These operations are interpretable\ldots
   %\begin{itemize}
   %  \item Addition of kernels corresponds to the addition of independent functions
@@ -364,7 +364,7 @@
 \end{itemize}
 
 \vspace{0.5\baselineskip}
-
+\paragraph{\large Special cases of our model}
 \begin{center}
   \begin{tabular}{l|l}
   Bayesian linear regression & $\Lin$ \\
@@ -408,7 +408,7 @@
 \end{tabular}  
 \end{center}
 
-%\vspace{4\baselineskip}
+\vspace{1\baselineskip}
 
 %\mysection{Example: Mauna Loa CO$_2$ concentration}
 \mysection{Compound Kernels are Interpretable}
@@ -426,17 +426,25 @@
 %\vspace{14\baselineskip}
 %\input{../figures/fig_airline2.tex}
 
+%\hline
+
+\paragraph{\large Example: Airline passengers }
+
+\vspace{1\baselineskip}
+
+\newcommand{\postdw}{0.13\textwidth}  % Poster decomp width
+
 \begin{tabular}{cc}
 \begin{tabular}{c}
 \includegraphics[width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
 \end{tabular} &
 \begin{tabular}{cc}
 %Monthly airline traffic decomposes into a sum of:}\\
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_1.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_2.pdf} \\
+\includegraphics[width=\postdw]{../figures/01-airline-months_1.pdf} &
+\includegraphics[width=\postdw]{../figures/01-airline-months_2.pdf} \\
 Long-term trend & Growing amplitude \\
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_3.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/01-airline-months_resid.pdf} \\
+\includegraphics[width=\postdw]{../figures/01-airline-months_3.pdf} &
+\includegraphics[width=\postdw]{../figures/01-airline-months_resid.pdf} \\
 Short-term deviatinos & noise \\
 %Smooth long-term trend + \quad %
 %Linearly growing periodic + \quad &
@@ -447,23 +455,32 @@ Short-term deviatinos & noise \\
 %\def \badgeheight {0.08\textwidth}
 %\includegraphics[height=\badgeheight]{../badges/QR.png}
 
-Another example:
+%\hline
+
+\paragraph{\large Example:  Radio usage }
+
+\vspace{1\baselineskip}
 
 \begin{tabular}{cc}
 \begin{tabular}{c}
 \includegraphics[width=0.2\textwidth]{../figures/radio/monthly-critical-radio-frequenci_all.pdf}
 \end{tabular} &
 \begin{tabular}{cc}
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_3.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_4.pdf} \\
+\includegraphics[width=\postdw]{../figures/radio/monthly-critical-radio-frequenci_3.pdf} &
+\includegraphics[width=\postdw]{../figures/radio/monthly-critical-radio-frequenci_4.pdf} \\
 Long-term smooth + \quad &
 Yearly priodic \\
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_2.pdf} &
-\includegraphics[width=0.12\textwidth]{../figures/radio/monthly-critical-radio-frequenci_5.pdf} \\
+\includegraphics[width=\postdw]{../figures/radio/monthly-critical-radio-frequenci_2.pdf} &
+\includegraphics[width=\postdw]{../figures/radio/monthly-critical-radio-frequenci_5.pdf} \\
 Long-term amlpitude + \quad &
 Short-term noise \quad
 \end{tabular}
 \end{tabular}
+
+    % QR code
+    %\node [mybox] (QR code) at (-0.95, 0) {
+    \right
+        \includegraphics[height=6cm]{../badges/QR.png}
 
 \end{multicols}
 
@@ -471,40 +488,3 @@ Short-term noise \quad
 
 \end{document}
 
-
-%\begin{tabular}{ccc}
-%\multicolumn{3}{c}{\includegraphics[width=0.3\textwidth]{../figures/01-airline-months_all.pdf}} \\
-%\multicolumn{3}{c}{Monthly airline traffic decomposes into a sum of:} \\ \\
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_1.pdf} &
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_2.pdf} &
-%\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_3.pdf} \\
-%Smooth long-term trend + \quad &
-%Linearly growing periodic + \quad &
-%Short-term deviations
-%\end{tabular}
-
-\begin{tabular}{cc}
-\multirow{3}{*}{\includegraphics[width=0.1\textwidth]{../figures/01-airline-months_all.pdf}} &
-%Monthly airline traffic decomposes into a sum of:}\\
-\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_1.pdf} \\
-\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_2.pdf} \\
-\includegraphics[width=0.16\textwidth]{../figures/01-airline-months_3.pdf} \\
-%Smooth long-term trend + \quad %
-%Linearly growing periodic + \quad &
-%Short-term deviations
-\end{tabular}
-
-And radio:
-
-\begin{tabular}{cc}
-%\multicolumn{2}{c}{\includegraphics[width=0.3\textwidth]{../figures/radio/monthly-critical-radio-frequenci_all.pdf}} \\
-\multicolumn{2}{c}{Radio traffic decomposes into a sum of:} \\ \\
-\includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_3.pdf} &
-\includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_4.pdf} \\
-Long-term smooth + \quad &
-Yearly priodic \\
-\includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_2.pdf} &
-\includegraphics[width=0.26\textwidth]{../figures/radio/monthly-critical-radio-frequenci_5.pdf} \\
-Long-term changes in amlpitude + \quad &
-Short-term noise \quad
-\end{tabular}
