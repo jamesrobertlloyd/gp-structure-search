@@ -173,7 +173,7 @@
 
 \newenvironment{poster}{
   \begin{center}
-  \begin{minipage}[c]{0.95\textwidth}
+  \begin{minipage}[c]{0.96\textwidth}
 }{
   \end{minipage} 
   \end{center}
@@ -319,8 +319,8 @@
 
 \begin{itemize}
   \item Traditionally, a statistician proposes an appropriate model for the type of structures present
-  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
-  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
+  \item Existing automatic model selection methods typically choose from a restricted set of models
+  \item We define an open-ended grammar over models, and search it automatically.
 \end{itemize}
 
 \vspace{0.5\baselineskip}
@@ -330,8 +330,9 @@
 \vspace{0.5\baselineskip}
 
 \begin{itemize}
-  \item The kernel specifies which structures are likely under the \gp{} prior, which in turn determines the generalization properties of the model.
-  \item Below we list standard base kernels, and draws from the corresponding \gp{} priors:
+  \item The kernel determines which structures are likely under the \gp{} prior  
+  \item This prior determines the generalization properties of the model.
+  \item Typically, one of the following standard \gp{} priors are used:
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_simple_kernels_no_kern.tex}
@@ -344,10 +345,16 @@
 \vspace{0.5\baselineskip}
 
 \begin{itemize}
-    \item Constructing appropriate composite kernels has previously been done by  experts
+    \item Composite kernels can express many types of high-level structure
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_example_structures_no_kern.tex}
+
+\vspace{0.7\baselineskip}
+
+\begin{itemize}
+    \item Constructing composite kernels is typically only done by experts
+\end{itemize}
 
 \vspace{1\baselineskip}
 \mysection{\ldots defining a rich, open-ended set of models\ldots}
@@ -355,7 +362,11 @@
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item We consider all algebraic expressions composed of a small number of base kernels and the operations `$+$' and `$\times$'
+  \item We search over all algebraic expressions combining
+      \begin{itemize}
+          \item a set of base kernels \{ \kSE, \kPer, \kLin, \kRQ \}
+          \item the operators $+$ and $\times$
+      \end{itemize}
   %\item These operations are interpretable\ldots
   %\begin{itemize}
   %  \item Addition of kernels corresponds to the addition of independent functions
@@ -364,8 +375,8 @@
   %\item \ldots and produce a rich space including many standard statistical models
 \end{itemize}
 
-\vspace{0.5\baselineskip}
-\paragraph{\large Special cases in this set}
+\vspace{0.1\baselineskip}
+\paragraph{\large Special cases in the search space:}
 \begin{center}
   \begin{tabular}{lc|cl}
   \\
@@ -441,9 +452,11 @@
 \begin{tabular}{cc}
 \\
 \begin{tabular}{c}
+Data \& Complete Model \\
 \includegraphics[width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
 \end{tabular} &
 \begin{tabular}{cc}
+\multicolumn{2}{c}{Decomposition} \\
 %Monthly airline traffic decomposes into a sum of:}\\
 \includegraphics[width=\postdw]{../figures/01-airline-months_1.pdf} &
 \includegraphics[width=\postdw]{../figures/01-airline-months_2.pdf} \\
@@ -451,29 +464,24 @@ Long-term trend & Growing amplitude \\
 \includegraphics[width=\postdw]{../figures/01-airline-months_3.pdf} &
 \includegraphics[width=\postdw]{../figures/01-airline-months_resid.pdf} \\
 Short-term deviations & Noise \\
-%Smooth long-term trend + \quad %
-%Linearly growing periodic + \quad &
-%Short-term deviations
 \end{tabular}
 \end{tabular}
-% QR code
-%\def \badgeheight {0.08\textwidth}
-%\includegraphics[height=\badgeheight]{../badges/QR.png}
-
-%\hline
-
-%\vspace{-2\baselineskip}
 
 \paragraph{\large Example:  Radio critical frequency }
+
+% Monthly critical radio frequencies in Washington, D.C., May 1934 – April 1954. These frequencies reflect the highest radio frequency that can be used for broadcasting
 
 %\vspace{4\baselineskip}
 
 \begin{tabular}{cc}
 \\
 \begin{tabular}{c}
+Data \& Complete Model \\
 \includegraphics[width=0.2\textwidth]{../figures/radio/all.pdf}
-\end{tabular} &
+\end{tabular} 
+&
 \begin{tabular}{cc}
+\multicolumn{2}{c}{Decomposition} \\
 \includegraphics[width=\postdw]{../figures/radio/3.pdf} &
 \includegraphics[width=\postdw]{../figures/radio/4.pdf} \\
 Long-term trend  &
@@ -485,21 +493,25 @@ Short-term deviations
 \end{tabular}
 \end{tabular}
 
-    % QR code
-    %\node [mybox] (QR code) at (-0.95, 0) {
-
- %\vfill
-
+\vspace{2\baselineskip}
+\begin{tabular}{lr}
+{ \bf This method:} & \\
+\begin{minipage}[b]{0.4\textwidth}
+\begin{itemize}
+\item automates a search over a broader set of models than is usually considered.
+\item automates parts of data analysis, and enables human model-checking.
+\item also works on multi-dimensional data.
+\end{itemize}
  
-    
-    \vfill
-    
-\vspace{1\baselineskip}
-    
-    \hfill    \includegraphics[height=6cm]{../badges/QR.png}
- 
- Code available at \url{http://www.github.com/jamesrobertlloyd/gp-structure-search}
-
+Code available at \url{github.com/jamesrobertlloyd/gp-structure-search}
+\end{minipage}
+%\hfill
+% QR code
+&
+\begin{minipage}[b]{0.1\textwidth}
+\includegraphics[height=6cm]{../badges/QR.png}
+\end{minipage}
+\end{tabular}   
 \end{multicols}
 
 \end{poster}
