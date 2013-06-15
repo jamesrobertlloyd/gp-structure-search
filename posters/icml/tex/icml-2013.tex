@@ -367,15 +367,16 @@
 \vspace{0.5\baselineskip}
 \paragraph{\large Special cases of our model}
 \begin{center}
-  \begin{tabular}{l|l}
-  Bayesian linear regression & $\Lin$ \\
+  \begin{tabular}{lc|cl}
+  \\
+  Bayesian linear regression &&& $\Lin$ \\
   %Bayesian quadratric regression & $\Lin \times \Lin$ \\
-  Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
-  Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
-  Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
-  Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
-  Linear trend with local deviations & $\Lin + \SE$ \\
-  Linearly growing amplitude & $\Lin \times \SE$
+  Bayesian polynomial regression &&& $\Lin \times \Lin \times \ldots$\\
+  Generalized Fourier decomposition &&& $\Per + \Per + \ldots$ \\
+  Generalized additive models &&& $\sum_{d=1}^D \SE_d$ \\
+  Automatic relevance determination &&& $\prod_{d=1}^D \SE_d$ \\
+  Linear trend with local deviations &&& $\Lin + \SE$ \\
+  Linearly growing amplitude &&& $\Lin \times \SE$
   \end{tabular}
 \end{center}
 
@@ -429,13 +430,16 @@
 
 %\hline
 
+%\vspace{-2\baselineskip}
+
 \paragraph{\large Example: Airline passengers }
 
-\vspace{2\baselineskip}
+%\vspace{4\baselineskip}
 
 \newcommand{\postdw}{0.13\textwidth}  % Poster decomp width
 
 \begin{tabular}{cc}
+\\
 \begin{tabular}{c}
 \includegraphics[width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
 \end{tabular} &
@@ -446,7 +450,7 @@
 Long-term trend & Growing amplitude \\
 \includegraphics[width=\postdw]{../figures/01-airline-months_3.pdf} &
 \includegraphics[width=\postdw]{../figures/01-airline-months_resid.pdf} \\
-Short-term deviatinos & noise \\
+Short-term deviations & noise \\
 %Smooth long-term trend + \quad %
 %Linearly growing periodic + \quad &
 %Short-term deviations
@@ -458,34 +462,43 @@ Short-term deviatinos & noise \\
 
 %\hline
 
+%\vspace{-2\baselineskip}
+
 \paragraph{\large Example:  Radio critical frequency }
 
-\vspace{2\baselineskip}
+%\vspace{4\baselineskip}
 
 \begin{tabular}{cc}
+\\
 \begin{tabular}{c}
 \includegraphics[width=0.2\textwidth]{../figures/radio/all.pdf}
 \end{tabular} &
 \begin{tabular}{cc}
 \includegraphics[width=\postdw]{../figures/radio/3.pdf} &
 \includegraphics[width=\postdw]{../figures/radio/4.pdf} \\
-Long-term smooth + \quad &
-Yearly priodic \\
+Long-term trend  &
+Annual periodicity \\
 \includegraphics[width=\postdw]{../figures/radio/2.pdf} &
 \includegraphics[width=\postdw]{../figures/radio/5.pdf} \\
-Long-term amlpitude + \quad &
-Short-term noise \quad
+Amplitude modulation  &
+Short-term deviations 
 \end{tabular}
 \end{tabular}
 
     % QR code
     %\node [mybox] (QR code) at (-0.95, 0) {
 
- \vfill
+ %\vfill
+
  
- %Code available at \href{http://www.github.com/jamesrobertlloyd/gp-structure-search}
- 
+    
+    \vfill
+    
+\vspace{1\baselineskip}
+    
     \hfill    \includegraphics[height=6cm]{../badges/QR.png}
+ 
+ Code available at \url{http://www.github.com/jamesrobertlloyd/gp-structure-search}
 
 \end{multicols}
 
