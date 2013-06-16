@@ -142,7 +142,7 @@
 									text width=0.965\columnwidth,
 									text centered,
 									rounded corners=20pt,
-									minimum height=0.11\columnwidth]
+									minimum height=0.09\columnwidth]
 
 \newcommand{\mysection}[1]
 {
@@ -319,9 +319,10 @@
 
 
 \begin{itemize}
-  \item Traditionally, a statistician proposes an appropriate model for the type of structures present
-  \item Existing automatic model selection methods typically choose from a restricted set of models
-  \item We define an open-ended grammar over models, and search it automatically.
+  \item While simple structure (\eg smoothness) often suffices for interpolation, accurate extrapolation requires richer structure
+  \item Designing structured models can require statistical expertise and domain knowledge
+  \item Automatic model selection methods typically choose from a restricted set of models
+  \item We define an open-ended grammar over Gaussian process models, and search it automatically
 \end{itemize}
 
 \vspace{0.5\baselineskip}
@@ -331,9 +332,11 @@
 \vspace{0.5\baselineskip}
 
 \begin{itemize}
-  \item The kernel determines which structures are likely under the \gp{} prior  
-  \item This prior determines the generalization properties of the model.
-  \item Typically, one of the following standard \gp{} priors are used:
+  %\item The kernel determines which structures are likely under the \gp{} prior  
+  %\item This prior determines the generalization properties of the model.
+  %\item The kernel determines the pattern of generalization beyond the observed data
+  \item For Gaussian process models, the prior --- and hence, the pattern of generalisation --- is determined by a kernel function. Common examples include:
+  %\item Only a few simple kernels are commonly used \eg%the following standard kernels is used%\gp{} priors are used:
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_simple_kernels_no_kern.tex}
@@ -346,15 +349,16 @@
 \vspace{0.5\baselineskip}
 
 \begin{itemize}
-    \item Composite kernels can express many types of high-level structure
+    \item Composite kernels can express many types of structure%high-level structure
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_example_structures_no_kern.tex}
 
-\vspace{0.7\baselineskip}
+\vspace{0.5\baselineskip}
 
 \begin{itemize}
-    \item Constructing composite kernels is typically only done by experts
+    %\item Constructing composite kernels is typically only done by experts
+    \item Building composite kernels has often required much human ingenuity
 \end{itemize}
 
 \vspace{1\baselineskip}
@@ -363,9 +367,10 @@
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item We search over all algebraic expressions combining
+  %\item We search over all algebraic expressions combining
+  \item We consider the space of all kernels represented as algebraic expressions using
       \begin{itemize}
-          \item a set of base kernels \{ \kSE, \kPer, \kLin, \kRQ \}
+          \item a set of base kernels \{\kSE, \kPer, \kLin, \kRQ\}
           \item the operators $+$ and $\times$
       \end{itemize}
   %\item These operations are interpretable\ldots
@@ -377,7 +382,7 @@
 \end{itemize}
 
 \vspace{0.1\baselineskip}
-\paragraph{\large Special cases in the search space:}
+\paragraph{\large Example structures in the search space:}
 \begin{center}
   \begin{tabular}{lc|cl}
   \\
@@ -404,8 +409,11 @@
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
-  \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
+  \item We perform a greedy search over our grammar using marginal likelihood as the criterion
+  \item Each search operator adds a term to the current best kernel
+  \item The search stops when marginal likelihood no longer improves
+  %\item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
+  %\item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
 \end{itemize}
 
 \begin{center}
@@ -428,12 +436,14 @@
 \vspace{1\baselineskip}
 
 %\mysection{Example: Mauna Loa CO$_2$ concentration}
-\mysection{Compound kernels are interpretable}
+\mysection{Composite kernels reveal interpretable structure}
 
 \vspace{0\baselineskip}
 
 \begin{itemize}
-  \item Compound kernels decompose functions into additive components% (additive components of the kernel correspond to independent additive functions)
+  \item Sums of kernels correspond to sums of independent functions
+  \item Any kernel in our grammar can be decomposed into a sum of product kernels
+  \item Therefore, we can visualise the learned kernels be decomposing the posterior into a sum of interpretable component functions% (additive components of the kernel correspond to independent additive functions)
 \end{itemize}
 
 
@@ -445,7 +455,7 @@
 
 %\hline
 
-%\vspace{-2\baselineskip}
+\vspace{-1\baselineskip}
 
 \paragraph{\large Example: Airline passengers }
 
@@ -499,12 +509,14 @@ Short-term deviations
 
 \vspace{2\baselineskip}
 \begin{tabular}{lr}
-{ \bf This method:} & \\
+%{ \bf This method:} & \\
 \begin{minipage}[b]{0.4\textwidth}
 \begin{itemize}
-\item automates a search over a broader set of models than is usually considered.
-\item automates parts of data analysis, and enables human model-checking.
-\item also works on multi-dimensional data.
+\item While we highlighted time series examples here, our structure search procedure also performs well on high-dimensional problems
+\item Our proposed method searches over an open-ended space of models and automates a substantial part of the data analysis process
+%\item automates a search over a broader set of models than is usually considered
+%\item automates parts of data analysis, and enables human model-checking
+%\item also works on multi-dimensional data
 \end{itemize}
  
 Code available at \url{github.com/jamesrobertlloyd/gp-structure-search}
