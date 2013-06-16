@@ -61,6 +61,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes,calc}
 \tikzstyle{mybox} = [draw=white, rectangle]
+\definecolor{darkblue}{rgb}{0,0.08,0.45}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -387,7 +388,10 @@
   Generalized additive models &&& $\sum_{d=1}^D \SE_d$ \\
   Automatic relevance determination &&& $\prod_{d=1}^D \SE_d$ \\
   Linear trend with local deviations &&& $\Lin + \SE$ \\
-  Linearly growing amplitude &&& $\Lin \times \SE$
+  Linearly growing amplitude &&& $\Lin \times \SE$ \\
+  \color{darkblue}
+  (Wilson \& Adams 2013) &&& $\sum_{k=1}^K \SE \times \cos$ \\
+  Flexible Fourier decomposition &&& $\sum_{k=1}^K \SE \times \Per$
   \end{tabular}
 \end{center}
 
