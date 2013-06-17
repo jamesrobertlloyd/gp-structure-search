@@ -15,7 +15,11 @@ import os
 import psutil, subprocess, sys, time
 from utils.counter import Progress
 
-from config import *
+try:
+    from config import *
+except:
+    print '\n\nERROR : source/cblparallel/config.py not found\n\nPlease create it following example file as a guide\n\n'
+    raise Exception('No config')
 
 import zipfile, zlib
 
