@@ -22,6 +22,8 @@ Feel free to email us with any questions:
 
 You'll need Matlab and Python 2.7 with numpy.
 
+You'll also need to create source/cblparallel/config.py - follow the format of the example file in the same directory.
+
 To check whether the framework runs, go to the source directory and run `demo.py`.
 
 There are some example experiment scripts `source/examples/`.
