@@ -308,13 +308,21 @@
 
 \mysection{Identifying structure is crucial for extrapolation}
 
-\vspace{0\baselineskip}
+\vspace{-0.2\baselineskip}
 
 \begin{center}
-  \input{../figures/fig_synth_extrap.tex}
+\begin{tabular}{cc}
+{local smoothing} & {structured model }\\
+\hspace{-1.5cm}
+\includegraphics[trim=0 0 0 1.2cm, clip, width=0.26\textwidth]{../figures/synth_extrap_bad.pdf}
+&
+\hspace{-3cm}
+\includegraphics[trim=0 0 0 1.2cm, clip, width=0.26\textwidth]{../figures/synth_extrap_good.pdf}
+%  \input{../figures/fig_synth_extrap.tex}
+\end{tabular}
 \end{center}
 
-\vspace{0\baselineskip}
+\vspace{-0.5\baselineskip}
 
 
 
@@ -395,8 +403,8 @@
   Linear trend with local deviations &&& $\Lin + \SE$ \\
   Linearly growing amplitude &&& $\Lin \times \SE$ \\
   \color{darkblue}
-  (Wilson \& Adams 2013) &&& $\sum_{k=1}^K \SE \times \cos$ \\
-  Flexible Fourier decomposition &&& $\sum_{k=1}^K \SE \times \Per$
+  (Wilson \& Adams 2013) &&& $\sum_{k=1}^K \SE \times \cos$
+%  Flexible Fourier decomposition &&& $\sum_{k=1}^K \SE \times \Per$
   \end{tabular}
 \end{center}
 
@@ -443,7 +451,7 @@
 \begin{itemize}
   \item Sums of kernels correspond to sums of independent functions
   \item Any kernel in our grammar can be decomposed into a sum of product kernels
-  \item Therefore, we can visualise the learned kernels be decomposing the posterior into a sum of interpretable component functions% (additive components of the kernel correspond to independent additive functions)
+  \item Therefore, we can visualise the learned kernels by decomposing the posterior into a sum of interpretable component functions% (additive components of the kernel correspond to independent additive functions)
 \end{itemize}
 
 
@@ -467,16 +475,19 @@
 \\
 \begin{tabular}{c}
 Data \& Complete Model \\
-\includegraphics[width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
+{\small $\SE \times ( \Lin + \Lin \times ( \Per + \RQ))$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
 \end{tabular} &
 \begin{tabular}{cc}
 \multicolumn{2}{c}{Decomposition} \\
 %Monthly airline traffic decomposes into a sum of:}\\
-\includegraphics[width=\postdw]{../figures/01-airline-months_1.pdf} &
-\includegraphics[width=\postdw]{../figures/01-airline-months_2.pdf} \\
+{\small $\SE \times \Lin$ } & {\small $\SE \times \Lin \times \Per$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_1.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_2.pdf} \\
 Long-term trend & Growing amplitude \\
-\includegraphics[width=\postdw]{../figures/01-airline-months_3.pdf} &
-\includegraphics[width=\postdw]{../figures/01-airline-months_resid.pdf} \\
+{\small $\SE \times \Lin \times \RQ$ } & {\small Residuals } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_3.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_resid.pdf} \\
 Short-term deviations & Noise \\
 \end{tabular}
 \end{tabular}
@@ -491,17 +502,21 @@ Short-term deviations & Noise \\
 \\
 \begin{tabular}{c}
 Data \& Complete Model \\
-\includegraphics[width=0.2\textwidth]{../figures/radio/all.pdf}
+{\small $\CS + ( \SE + \RQ ) \times ( \Per + \CS)$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=0.2\textwidth]{../figures/radio/all.pdf}
 \end{tabular} 
 &
 \begin{tabular}{cc}
 \multicolumn{2}{c}{Decomposition} \\
-\includegraphics[width=\postdw]{../figures/radio/3.pdf} &
-\includegraphics[width=\postdw]{../figures/radio/4.pdf} \\
-Long-term trend  &
+{\small $\SE$ } & {\small $\Per \times \RQ$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/3.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/4.pdf} \\
+11-Year solar cycle &
 Annual periodicity \\
-\includegraphics[width=\postdw]{../figures/radio/2.pdf} &
-\includegraphics[width=\postdw]{../figures/radio/5.pdf} \\
+{\small $\Per \times \SE$ } & {\small $
+\RQ$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/2.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/5.pdf} \\
 Amplitude modulation  &
 Short-term deviations 
 \end{tabular}
