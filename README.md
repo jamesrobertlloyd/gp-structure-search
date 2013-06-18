@@ -34,3 +34,10 @@ Many helper functions to summarize results are in `postprocessing.py`.  For exam
 If you have any questions about getting this running on your machine or cluster, please let us know.
 
 If describe your problem to us, we'll also happy to give advice about running the method.
+
+### Known issues:
+
+Windows users will need to make two changes
+
+* All strings in config files are not sanitized, therefore backslashes and other special characters should be delimited e.g. `C:\\ProgramFiles\\Matlab`
+* Line 531 of `source/cblparallel/__init__.py` should be changed from `processes[i] = subprocess.Popen(['sh',...` to `processes[i] = subprocess.Popen(['cmd',...`
