@@ -137,11 +137,17 @@ class SqExpKernel(BaseKernel):
     def default_params_replaced(self, sd=1, data_shape=None):
         result = self.param_vector()
         if result[0] == 0:
-            # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            # Set lengthscale with input scale or neutrally
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -168,6 +174,9 @@ class SqExpKernel(BaseKernel):
     
     def depth(self):
         return 0
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
 
 
 class SqExpPeriodicKernelFamily(BaseKernelFamily):
@@ -234,20 +243,35 @@ class SqExpPeriodicKernel(BaseKernel):
             # Min period represents a minimum sensible scale - use it for lengthscale as well
             # Scale with data_scale though
             if data_shape['min_period'] is None:
-                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+                if np.random.rand() < 0.5:
+                    result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+                else:
+                    result[0] = np.random.normal(loc=0, scale=sd)
             else:
-                result[0] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale'], scale=sd, min_value=data_shape['min_period'])
+                if np.random.rand() < 0.5:
+                    result[0] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale'], scale=sd, min_value=data_shape['min_period'])
+                else:
+                    result[0] = utils.misc.sample_truncated_normal(loc=0, scale=sd, min_value=data_shape['min_period'])
         if result[1] == -2:
             #### FIXME - Caution, magic numbers
             # Min period represents a minimum sensible scale
             # Scale with data_scale
             if data_shape['min_period'] is None:
-                result[1] = np.random.normal(loc=data_shape['input_scale']-2, scale=sd)
+                if np.random.rand() < 0.5:
+                    result[1] = np.random.normal(loc=data_shape['input_scale']-2, scale=sd)
+                else:
+                    result[1] = np.random.normal(loc=-2, scale=sd)
             else:
-                result[1] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale']-2, scale=sd, min_value=data_shape['min_period'])
+                if np.random.rand() < 0.5:
+                    result[1] = utils.misc.sample_truncated_normal(loc=data_shape['input_scale']-2, scale=sd, min_value=data_shape['min_period'])
+                else:
+                    result[1] = utils.misc.sample_truncated_normal(loc=-2, scale=sd, min_value=data_shape['min_period'])
         if result[2] == 0:
             # Set scale factor with output scale
-            result[2] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[2] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[2] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -282,7 +306,7 @@ class SqExpPeriodicKernel(BaseKernel):
         return 0
             
     def out_of_bounds(self, constraints):
-        return self.period < constraints['min_period']
+        return (self.period < constraints['min_period']) or (self.lengthscale < constraints['min_lengthscale'])
     
 
 class RQKernelFamily(BaseKernelFamily):
@@ -346,10 +370,16 @@ class RQKernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         if result[2] == 0:
             # Set alpha indepedently of data shape
             result[2] = np.random.normal(loc=0, scale=sd)
@@ -385,6 +415,9 @@ class RQKernel(BaseKernel):
         
     def depth(self):
         return 0   
+            
+    def out_of_bounds(self, constraints):
+        return (self.lengthscale < constraints['min_lengthscale']) or (self.alpha < constraints['min_alpha'])
     
 class ConstKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -545,7 +578,10 @@ class LinKernel(BaseKernel):
             result[0] = np.random.normal(loc=-10, scale=sd)
         if result[1] == 0:
             # Lengthscale scales with ratio of y std and x std (gradient = delta y / delta x)
-            result[1] = np.random.normal(loc=data_shape['output_scale'] - data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'] - data_shape['input_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         if result[2] == 0:
             # Location moves with input location, and variance scales in input variance
             result[2] = np.random.normal(loc=data_shape['input_location'], scale=sd*np.exp(data_shape['input_scale']))
@@ -816,10 +852,16 @@ class PP0Kernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -849,6 +891,9 @@ class PP0Kernel(BaseKernel):
     
     def depth(self):
         return 0 
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
       
 
 class PP1KernelFamily(BaseKernelFamily):
@@ -910,10 +955,16 @@ class PP1Kernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -943,6 +994,9 @@ class PP1Kernel(BaseKernel):
     
     def depth(self):
         return 0 
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
         
 
 class PP2KernelFamily(BaseKernelFamily):
@@ -1004,10 +1058,16 @@ class PP2Kernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -1037,6 +1097,9 @@ class PP2Kernel(BaseKernel):
     
     def depth(self):
         return 0
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
 
 
 class PP3KernelFamily(BaseKernelFamily):
@@ -1098,10 +1161,16 @@ class PP3Kernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -1131,6 +1200,9 @@ class PP3Kernel(BaseKernel):
     
     def depth(self):
         return 0 
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
 
 class MaternKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):
@@ -1191,10 +1263,16 @@ class MaternKernel(BaseKernel):
         result = self.param_vector()
         if result[0] == 0:
             # Set lengthscale with input scale
-            result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[0] = np.random.normal(loc=data_shape['input_scale'], scale=sd)
+            else:
+                result[0] = np.random.normal(loc=0, scale=sd)
         if result[1] == 0:
             # Set scale factor with output scale
-            result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            if np.random.rand() < 0.5:
+                result[1] = np.random.normal(loc=data_shape['output_scale'], scale=sd)
+            else:
+                result[1] = np.random.normal(loc=0, scale=sd)
         return result
 
     def copy(self):
@@ -1224,6 +1302,9 @@ class MaternKernel(BaseKernel):
     
     def depth(self):
         return 0 
+            
+    def out_of_bounds(self, constraints):
+        return self.lengthscale < constraints['min_lengthscale']
     
 class ChangeKernelFamily(BaseKernelFamily):
     def from_param_vector(self, params):

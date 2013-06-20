@@ -85,6 +85,13 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         data_shape['min_period'] = np.log([max(exp.period_heuristic * utils.misc.min_abs_diff(X[:,i]), exp.period_heuristic * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
     else:
         data_shape['min_period'] = None
+    #### TODO - make the below and above more elegant
+    if exp.use_constraints:
+        data_shape['min_alpha'] = exp.alpha_heuristic
+        data_shape['min_lengthscale'] = exp.lengthscale_heuristic + data_shape['input_scale']
+    else:
+        data_shape['min_alpha'] = None
+        data_shape['min_lengthscale'] = None
     
     all_results = []
     results_sequence = []     # List of lists of results, indexed by level of expansion.
@@ -194,7 +201,7 @@ def gen_all_datasets(dir):
 
 # Defines a class that keeps track of all the options for an experiment.
 # Maybe more natural as a dictionary to handle defaults - but named tuple looks nicer with . notation
-class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic')):
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic, use_constraints, alpha_heuristic, lengthscale_heuristic')):
     def __new__(cls, 
                 data_dir,                  # Where to find the datasets.
                 results_dir,               # Where to write the results.
@@ -215,9 +222,12 @@ class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, ran
                 zero_mean=True,            # If false, use a constant mean function - cannot be used with the Const kernel
                 verbose_results=False,     # Whether or not to record all kernels tested
                 random_seed=0,
-		use_min_period=True,       # Whether to not let the period in a periodic kernel be smaller than the minimum period.
-                period_heuristic=10):      # Minimum period in periodic kernels = period_heuristic * smallest distance in input data     
-        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic)
+		            use_min_period=True,       # Whether to not let the period in a periodic kernel be smaller than the minimum period.
+                period_heuristic=10,
+		            use_constraints=False,      # Place hard constraints on some parameter values? #### TODO - should be replaced with a prior / more Bayesian analysis
+                alpha_heuristic=-2,         # Minimum alpha value for RQ kernel
+                lengthscale_heuristic=-4.5):      # Minimum lengthscale     
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic, use_constraints, alpha_heuristic, lengthscale_heuristic)
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"
