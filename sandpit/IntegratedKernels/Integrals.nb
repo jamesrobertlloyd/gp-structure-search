@@ -1,0 +1,319 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      9200,        310]
+NotebookOptionsPosition[      8176,        269]
+NotebookOutlinePosition[      8529,        285]
+CellTagsIndexPosition[      8486,        282]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[StyleBox["Integral of brownian motion with rate r",
+ FontSize->16,
+ FontWeight->"Bold"]], "Text",
+ CellChangeTimes->{{3.580788326556098*^9, 3.580788334851204*^9}},
+ TextAlignment->Center],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"2", "*", " ", 
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"r", "*", "x"}], ")"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"y", ",", " ", "x", ",", " ", "a"}], "}"}]}], "]"}]}], " ", 
+   "+", " ", 
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"r", "*", "x"}], ")"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", " ", "a", ",", " ", "b"}], "}"}]}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.580787223790009*^9, 3.58078733797305*^9}, {
+  3.580787389923642*^9, 3.580787393385104*^9}, {3.580787474125656*^9, 
+  3.5807874924770412`*^9}, {3.580787592127132*^9, 3.5807875994941998`*^9}, {
+  3.580787808017564*^9, 3.580787811977084*^9}, {3.580788093168874*^9, 
+  3.580788104521617*^9}, {3.580788269710149*^9, 3.580788273288816*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", 
+   FractionBox["1", "6"]}], " ", 
+  SuperscriptBox["a", "2"], " ", 
+  RowBox[{"(", 
+   RowBox[{"a", "-", 
+    RowBox[{"3", " ", "b"}]}], ")"}], " ", "r"}]], "Output",
+ CellChangeTimes->{{3.580787315031259*^9, 3.5807873394120407`*^9}, {
+   3.5807873914672203`*^9, 3.5807873977463284`*^9}, 3.5807875125529327`*^9, 
+   3.5807876001533737`*^9, 3.580787813467794*^9, {3.580788089480969*^9, 
+   3.580788105423202*^9}, 3.580788273801993*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"-", 
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"Out", "[", "17", "]"}], ",", "a"}], "]"}]}], "-", 
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"Out", "[", "17", "]"}], ",", "b"}], "]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.5807881242596827`*^9, 3.580788172394423*^9}, {
+  3.5807883062629337`*^9, 3.580788312467779*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", "a"}], " ", "b", " ", "r"}]], "Output",
+ CellChangeTimes->{{3.5807881630940733`*^9, 3.580788172819516*^9}, 
+   3.580788313103014*^9}]
+}, Open  ]],
+
+Cell["\<\
+Zero correlation between positive and negative halves due to special zero \
+point\
+\>", "Text",
+ CellChangeTimes->{{3.580791142715426*^9, 3.580791163662982*^9}}],
+
+Cell[TextData[StyleBox["Integral of integral of brownian motion with rate r",
+ FontSize->16,
+ FontWeight->"Bold"]], "Text",
+ CellChangeTimes->{3.5807915114334908`*^9},
+ TextAlignment->Center],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"2", "*", " ", 
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"-", 
+        RowBox[{"(", 
+         RowBox[{"1", "/", "6"}], ")"}]}], "*", 
+       RowBox[{"x", "^", "2"}], "*", 
+       RowBox[{"(", 
+        RowBox[{"x", "-", 
+         RowBox[{"3", "*", "y"}]}], ")"}], "*", "r"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"y", ",", " ", "x", ",", " ", "a"}], "}"}]}], "]"}]}], " ", 
+   "+", " ", 
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"-", 
+       RowBox[{"(", 
+        RowBox[{"1", "/", "6"}], ")"}]}], "*", 
+      RowBox[{"x", "^", "2"}], "*", 
+      RowBox[{"(", 
+       RowBox[{"x", "-", 
+        RowBox[{"3", "*", "y"}]}], ")"}], "*", "r"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", " ", "a", ",", " ", "b"}], "}"}]}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.580791491527082*^9, 3.5807915299213963`*^9}, {
+  3.5807915696822357`*^9, 3.580791596941251*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  FractionBox["1", "120"], " ", 
+  SuperscriptBox["a", "3"], " ", 
+  RowBox[{"(", 
+   RowBox[{
+    SuperscriptBox["a", "2"], "-", 
+    RowBox[{"5", " ", "a", " ", "b"}], "+", 
+    RowBox[{"10", " ", 
+     SuperscriptBox["b", "2"]}]}], ")"}], " ", "r"}]], "Output",
+ CellChangeTimes->{3.58079159933179*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"-", 
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"Out", "[", "22", "]"}], ",", "a"}], "]"}]}], "-", 
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"Out", "[", "22", "]"}], ",", "b"}], "]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.5807917897623243`*^9, 3.580791792808391*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", 
+   FractionBox["1", "4"]}], " ", 
+  SuperscriptBox["a", "2"], " ", 
+  SuperscriptBox["b", "2"], " ", "r"}]], "Output",
+ CellChangeTimes->{3.580791793543912*^9}]
+}, Open  ]],
+
+Cell[TextData[StyleBox["Integral of integral of integral of brownian motion \
+with rate r",
+ FontSize->16,
+ FontWeight->"Bold"]], "Text",
+ CellChangeTimes->{
+  3.5807918237938623`*^9, {3.580791981360268*^9, 3.580791989023978*^9}},
+ TextAlignment->Center],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"2", "*", " ", 
+    RowBox[{"Integrate", "[", 
+     RowBox[{
+      RowBox[{
+       RowBox[{"(", 
+        RowBox[{"1", "/", "120"}], ")"}], "*", 
+       RowBox[{"x", "^", "3"}], "*", 
+       RowBox[{"(", 
+        RowBox[{
+         RowBox[{"x", "^", "2"}], "-", 
+         RowBox[{"5", "*", "x", "*", "y"}], "+", 
+         RowBox[{"10", "*", 
+          RowBox[{"y", "^", "2"}]}]}], ")"}], "*", "r"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+      RowBox[{"{", 
+       RowBox[{"y", ",", " ", "x", ",", " ", "a"}], "}"}]}], "]"}]}], " ", 
+   "+", " ", 
+   RowBox[{"Integrate", "[", 
+    RowBox[{
+     RowBox[{
+      RowBox[{"(", 
+       RowBox[{"1", "/", "120"}], ")"}], "*", 
+      RowBox[{"x", "^", "3"}], "*", 
+      RowBox[{"(", 
+       RowBox[{
+        RowBox[{"x", "^", "2"}], "-", 
+        RowBox[{"5", "*", "x", "*", "y"}], "+", 
+        RowBox[{"10", "*", 
+         RowBox[{"y", "^", "2"}]}]}], ")"}], "*", "r"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"x", ",", " ", "0", ",", " ", "a"}], "}"}], ",", " ", 
+     RowBox[{"{", 
+      RowBox[{"y", ",", " ", "a", ",", " ", "b"}], "}"}]}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.580791841640051*^9, 3.5807919015326433`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"-", 
+  FractionBox[
+   RowBox[{
+    SuperscriptBox["a", "4"], " ", 
+    RowBox[{"(", 
+     RowBox[{
+      SuperscriptBox["a", "3"], "-", 
+      RowBox[{"7", " ", 
+       SuperscriptBox["a", "2"], " ", "b"}], "+", 
+      RowBox[{"21", " ", "a", " ", 
+       SuperscriptBox["b", "2"]}], "-", 
+      RowBox[{"35", " ", 
+       SuperscriptBox["b", "3"]}]}], ")"}], " ", "r"}], "5040"]}]], "Output",
+ CellChangeTimes->{{3.580791878929318*^9, 3.5807919029010553`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"FullSimplify", "[", 
+  RowBox[{
+   RowBox[{"-", 
+    RowBox[{"D", "[", 
+     RowBox[{
+      RowBox[{"Out", "[", "25", "]"}], ",", "a"}], "]"}]}], "-", 
+   RowBox[{"D", "[", 
+    RowBox[{
+     RowBox[{"Out", "[", "25", "]"}], ",", "b"}], "]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.58079195587647*^9, 3.5807919582014837`*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"-", 
+   FractionBox["1", "36"]}], " ", 
+  SuperscriptBox["a", "3"], " ", 
+  SuperscriptBox["b", "3"], " ", "r"}]], "Output",
+ CellChangeTimes->{3.58079195887805*^9}]
+}, Open  ]]
+},
+WindowSize->{740, 709},
+WindowMargins->{{4, Automatic}, {Automatic, 4}},
+FrontEndVersion->"8.0 for Mac OS X x86 (32-bit, 64-bit Kernel) (October 5, \
+2011)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 201, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[783, 28, 1061, 26, 43, "Input"],
+Cell[1847, 56, 474, 11, 47, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2358, 72, 405, 11, 27, "Input"],
+Cell[2766, 85, 172, 4, 27, "Output"]
+}, Open  ]],
+Cell[2953, 92, 171, 4, 26, "Text"],
+Cell[3127, 98, 191, 4, 30, "Text"],
+Cell[CellGroupData[{
+Cell[3343, 106, 1195, 35, 43, "Input"],
+Cell[4541, 143, 329, 10, 47, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4907, 158, 354, 10, 27, "Input"],
+Cell[5264, 170, 200, 6, 46, "Output"]
+}, Open  ]],
+Cell[5479, 179, 254, 6, 30, "Text"],
+Cell[CellGroupData[{
+Cell[5758, 189, 1320, 38, 58, "Input"],
+Cell[7081, 229, 486, 14, 52, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7604, 248, 353, 10, 27, "Input"],
+Cell[7960, 260, 200, 6, 47, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
