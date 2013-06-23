@@ -208,3 +208,60 @@ hold off;
 %plot(xrange, +2.*sqrt(noise_var).*ones(size(xrange)), 'g');
 %%plot(xrange, -2.*sqrt(noise_var).*ones(size(xrange)), 'g');
 hold off;
+
+%% Be more Bayesian
+
+load 'fur-sales-mink-h-b-co-18481911.mat'  % Load the data, it should contain X and y.
+X = double(X);
+y = double(y);
+
+addpath(genpath('../../source/gpml/'));
+addpath(genpath('/Users/JamesLloyd/Documents/Cambridge/MachineLearning/Research/GPs/gp-structure-search/source/matlab'));
+
+complete_covfunc = {@covProd, {@covRQiso, @covPeriodic}};
+
+complete_hypers = [ +5.4, 7, -5, 0.94, 2.26, 0 ];
+hyp.cov = complete_hypers;
+
+mean_func = @meanZero;
+hyp.mean = [];
+
+lik_func = @likGauss;
+hyp.lik = 5;
+log_noise = hyp.lik;
+
+hyp_opt = minimize(hyp, @gp, -1000, @infExact, ...
+                   mean_func, complete_covfunc, lik_func, X, y);
+[nlZ, dnlZ] = gp(hyp_opt, @infExact, mean_func, complete_covfunc, lik_func, X, y);
+nlZ
+
+complete_hypers = hyp_opt.cov;
+log_noise = hyp_opt.lik;
+
+left_extend = 0.4;  % What proportion to extend beyond the data range.
+right_extend = 0.4;
+
+num_interpolation_points = 2000;
+
+x_left = min(X) - (max(X) - min(X))*left_extend;
+x_right = max(X) + (max(X) - min(X))*right_extend;
+xrange = linspace(x_left, x_right, num_interpolation_points)';
+
+noise_var = exp(2*log_noise);
+complete_sigma = feval(complete_covfunc{:}, complete_hypers, X, X) + eye(length(y)).*noise_var;
+complete_sigmastar = feval(complete_covfunc{:}, complete_hypers, X, xrange);
+complete_sigmastarstart = feval(complete_covfunc{:}, complete_hypers, xrange, xrange);
+
+% First, plot the original, combined kernel
+%complete_mean = complete_sigmastar' / complete_sigma * y;
+complete_mean = complete_sigmastar' * (complete_sigma \ y); % The same?
+%complete_var = diag(complete_sigmastarstart - complete_sigmastar' / complete_sigma * complete_sigmastar);
+complete_var = diag(complete_sigmastarstart - complete_sigmastar' * (complete_sigma \ complete_sigmastar)); % The same?
+    
+figure(1); clf; hold on;
+plot(X, y, 'ko');
+plot(xrange, complete_mean, 'b', 'LineWidth', 2);
+%plot(xrange, complete_mean + 2.*sqrt(complete_var), 'g');
+%plot(xrange, complete_mean - 2.*sqrt(complete_var), 'g');
+hold off;
+title(['alpha ', num2str(hyp_opt.cov(3)), ' nlZ ', num2str(nlZ)]);
