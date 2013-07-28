@@ -573,7 +573,7 @@ quit()
                 # print '%d jobs running' % n_running
                 # print '%d jobs queued' % n_queued
                 print 'Sleeping for %d seconds' % job_check_sleep
-                time.sleep(job_check_sleep)
+            time.sleep(job_check_sleep)
 
     #### TODO - return job output and error files as applicable (e.g. there may be multiple error files associated with one script)
     return output_files
