@@ -101,16 +101,20 @@ hyp.lik = %(noise)s
 best_nll = nlls(end)
 
 %% Compute Hessian numerically for laplace approx
-num_hypers = length(hyp.cov);
-hessian = NaN(num_hypers, num_hypers);
+num_hypers = length(hyp_opt.cov);
+hessian = NaN(num_hypers+1, num_hypers+1);
 delta = 1e-6;
 a='Get original gradients';
-[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-for d = 1:num_hypers
+[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, mean_func, complete_covfunc, lik_func, X, y);
+for d = 1:(num_hypers+1)
     dhyp_opt = hyp_opt;
-    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
-    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+    if d <= num_hypers
+        dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    else
+        dhyp_opt.lik = dhyp_opt.lik + delta;
+    end
+    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, mean_func, complete_covfunc, lik_func, X, y);
+    hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
 
@@ -148,16 +152,20 @@ hyp.lik = %(noise)s
 best_nll = nlls(end)
 
 %% Compute Hessian numerically for laplace approx
-num_hypers = length(hyp.cov);
-hessian = NaN(num_hypers, num_hypers);
+num_hypers = length(hyp_opt.cov);
+hessian = NaN(num_hypers+1, num_hypers+1);
 delta = 1e-6;
 a='Get original gradients';
-[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-for d = 1:num_hypers
+[nll_orig, dnll_orig] = gp(hyp_opt, @infExact, mean_func, complete_covfunc, lik_func, X, y);
+for d = 1:(num_hypers+1)
     dhyp_opt = hyp_opt;
-    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
-    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+    if d <= num_hypers
+        dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    else
+        dhyp_opt.lik = dhyp_opt.lik + delta;
+    end
+    [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, mean_func, complete_covfunc, lik_func, X, y);
+    hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
 
