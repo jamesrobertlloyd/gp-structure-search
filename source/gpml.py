@@ -117,6 +117,7 @@ for d = 1:(num_hypers+1)
     hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
+hessian = hessian + 1e-6*max(max(hessian))*eye(size(hessian));
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 %% exit();
@@ -168,6 +169,7 @@ for d = 1:(num_hypers+1)
     hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
+hessian = hessian + 1e-6*max(max(hessian))*eye(size(hessian));
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 %% exit();
