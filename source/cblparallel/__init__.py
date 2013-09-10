@@ -532,7 +532,10 @@ quit()
                         print 'Submitting job %d of %d' % (i + 1, len(scripts))
                     stdout_file_handles[i] = open(stdout_files[i], 'w')
                     files_open = files_open + 1
-                    processes[i] = subprocess.Popen(['sh', shell_files[i]], stdout = stdout_file_handles[i]);
+                    #processes[i] = subprocess.Popen(['sh', shell_files[i]], stdout = stdout_file_handles[i]);
+                    with open(shell_files[i], 'r') as shell_file:
+                        lines = [line.rstrip() for line in shell_file.readlines()]
+                        processes[i] = subprocess.Popen(' '.join(lines), shell=True, stdout = stdout_file_handles[i]);
                     # Sleep for a bit so the process can kick in (prevents 100s of jobs being sent to processor)
                     time.sleep(submit_sleep)
             elif (not job_finished[i]) and (not processes[i] is None):
