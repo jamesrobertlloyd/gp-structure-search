@@ -14,7 +14,6 @@ import os
 import random
 import scipy.io
 
-import config
 import experiment as exp
 import flexiblekernel as fk
 import gpml
