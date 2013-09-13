@@ -12,8 +12,11 @@ nax = np.newaxis
 import scipy.io
 import tempfile, os
 import subprocess
-
-import config
+try:
+    import config
+except:
+    print '\n\nERROR : source/config.py not found\n\nPlease create it following example file as a guide\n\n'
+    raise Exception('No config')
 import flexiblekernel as fk
 
 
