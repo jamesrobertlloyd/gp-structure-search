@@ -37,7 +37,6 @@ If describe your problem to us, we'll also happy to give advice about running th
 
 ### Known issues:
 
-Windows users will need to make two changes
+Windows users will need to make a change
 
 * All strings in config files are not sanitized, therefore backslashes and other special characters should be delimited e.g. `C:\\ProgramFiles\\Matlab`
-* Line 531 of `source/cblparallel/__init__.py` should be changed from `processes[i] = subprocess.Popen(['sh',...` to `processes[i] = subprocess.Popen(['cmd',...`
