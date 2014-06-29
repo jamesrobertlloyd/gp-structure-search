@@ -1,7 +1,7 @@
 Gaussian Process Structure Search
 ===================
 
-<img src="https://raw.githubusercontent.com/jamesrobertlloyd/gp-structure-search/master/logo.png" width="500">
+<img src="https://raw.githubusercontent.com/jamesrobertlloyd/gp-structure-search/master/logo.png" width="700">
 
 Code for automatically searching through compositions of covariance functions for Gaussian process regression, described in 
 
