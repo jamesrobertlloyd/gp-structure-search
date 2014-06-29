@@ -15,7 +15,11 @@ import os
 import psutil, subprocess, sys, time
 from utils.counter import Progress
 
-from config import *
+try:
+    from config import *
+except:
+    print '\n\nERROR : source/cblparallel/config.py not found\n\nPlease create it following example file as a guide\n\n'
+    raise Exception('No config')
 
 import zipfile, zlib
 
@@ -528,7 +532,10 @@ quit()
                         print 'Submitting job %d of %d' % (i + 1, len(scripts))
                     stdout_file_handles[i] = open(stdout_files[i], 'w')
                     files_open = files_open + 1
-                    processes[i] = subprocess.Popen(['sh', shell_files[i]], stdout = stdout_file_handles[i]);
+                    #processes[i] = subprocess.Popen(['sh', shell_files[i]], stdout = stdout_file_handles[i]);
+                    with open(shell_files[i], 'r') as shell_file:
+                        lines = [line.rstrip() for line in shell_file.readlines()]
+                        processes[i] = subprocess.Popen(' '.join(lines), shell=True, stdout = stdout_file_handles[i]);
                     # Sleep for a bit so the process can kick in (prevents 100s of jobs being sent to processor)
                     time.sleep(submit_sleep)
             elif (not job_finished[i]) and (not processes[i] is None):
@@ -569,7 +576,7 @@ quit()
                 # print '%d jobs running' % n_running
                 # print '%d jobs queued' % n_queued
                 print 'Sleeping for %d seconds' % job_check_sleep
-                time.sleep(job_check_sleep)
+            time.sleep(job_check_sleep)
 
     #### TODO - return job output and error files as applicable (e.g. there may be multiple error files associated with one script)
     return output_files

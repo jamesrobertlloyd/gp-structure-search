@@ -1,0 +1,370 @@
+
+\input{include/header_beamer}
+
+\usecolortheme{default}
+\xdefinecolor{Black}{rgb}{0,0,0}
+\xdefinecolor{White}{rgb}{1,1,1}
+\xdefinecolor{DarkBlue}{rgb}{0,0,.7}
+\xdefinecolor{DarkRed}{rgb}{.7,0,0}
+\xdefinecolor{Red}{rgb}{.85,0,0}
+\xdefinecolor{DarkGreen}{rgb}{0,.7,0}
+\xdefinecolor{DarkMagenta}{rgb}{.6,0,.6}
+\def\Black{\textcolor{Black}}
+\def\White{\textcolor{White}}
+\def\Blue{\textcolor{DarkBlue}}
+\def\Magenta{\textcolor{DarkMagenta}}
+\def\Red{\textcolor{Red}}
+\def\Green{\textcolor{DarkGreen}}
+\definecolor{camlightblue}{rgb}{0.601 , 0.8, 1}
+
+\input{include/commenting.tex}
+
+%% For submission, make all render blank.
+%\renewcommand{\LATER}[1]{}
+%\renewcommand{\fLATER}[1]{}
+%\renewcommand{\TBD}[1]{}
+%\renewcommand{\fTBD}[1]{}
+%\renewcommand{\PROBLEM}[1]{}
+%\renewcommand{\fPROBLEM}[1]{}
+%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+
+\usepackage{alltt}
+\usepackage{psfrag}
+\usepackage{pstool}
+\usepackage{multicol}
+
+\def\newarrow{\mbox{egin{tikzpicture}
+             \useasboundingbox{(-3pt,-4.5pt) rectangle (19pt,1pt)};
+             \draw[->] (0,-0.07)--(17pt,-0.07);\end{tikzpicture}}}
+
+\usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes}
+ \makeatletter
+ \tikzset{join/.code=\tikzset{after node path={%
+       \ifx\tikzchainprevious\pgfutil@empty\else(\tikzchainprevious)%
+       edge[every join]#1(\tikzchaincurrent)\fi}}
+ }
+ \tikzset{>=stealth',every on chain/.append style={join},
+   every join/.style={->}
+ }
+
+\tikzstyle{mybox} = [draw=white, rectangle]
+\usepackage{ifthen}
+\usepackage{booktabs}
+
+\begin{document}               
+    
+\begin{frame}{01-airline}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/01-airline/01-airline_all}
+\end{frame}      
+
+\begin{frame}{internet-traffic-data-in-bits-fr}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/internet-traffic-data-in-bits-fr/internet-traffic-data-in-bits-fr_all}
+\end{frame}  
+
+\begin{frame}{weekday-bus-ridership-iowa-city-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/weekday-bus-ridership-iowa-city-/weekday-bus-ridership-iowa-city-_all}
+\end{frame}  
+
+\begin{frame}{03-mauna2003}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/03-mauna2003/03-mauna2003_all}
+\end{frame} 
+
+\begin{frame}{the-total-generation-of-electric}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/the-total-generation-of-electric/the-total-generation-of-electric_all}
+\end{frame}  
+
+\begin{frame}{accidental-deaths-in-usa-monthly}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/accidental-deaths-in-usa-monthly/accidental-deaths-in-usa-monthly_all}
+\end{frame}
+
+\begin{frame}{monthly-production-of-portland-c}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-portland-c/monthly-production-of-portland-c_all}
+\end{frame}  
+
+\begin{frame}{residential-water-consumption-ja}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/residential-water-consumption-ja/residential-water-consumption-ja_all}
+\end{frame} 
+
+\begin{frame}{monthly-new-york-city-births-unk}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-new-york-city-births-unk/monthly-new-york-city-births-unk_all}
+\end{frame}   
+
+\begin{frame}{monthly-canadian-total-unemploym}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-canadian-total-unemploym/monthly-canadian-total-unemploym_all}
+\end{frame}  
+
+\begin{frame}{monthly-sales-of-us-houses-thous}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-sales-of-us-houses-thous/monthly-sales-of-us-houses-thous_all}
+\end{frame}
+
+\begin{frame}{annual-number-of-lynx-trapped-ma}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/annual-number-of-lynx-trapped-ma/annual-number-of-lynx-trapped-ma_all}
+\end{frame}
+
+\begin{frame}{wolfs-sunspot-numbers-1700-1988}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/wolfs-sunspot-numbers-1700-1988/wolfs-sunspot-numbers-1700-1988_all}
+\end{frame}  
+
+\begin{frame}{monthly-average-daily-calls-to-d}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-average-daily-calls-to-d/monthly-average-daily-calls-to-d_all}
+\end{frame}  
+
+\begin{frame}{daily-minimum-temperatures-in-me}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/daily-minimum-temperatures-in-me/daily-minimum-temperatures-in-me_all}
+\end{frame}
+
+\begin{frame}{monthly-mean-thickness-dobson-un}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-mean-thickness-dobson-un/monthly-mean-thickness-dobson-un_all}
+\end{frame}  
+
+\begin{frame}{ozone-concentration-azusa-195619}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/ozone-concentration-azusa-195619/ozone-concentration-azusa-195619_all}
+\end{frame}  
+
+\begin{frame}{mean-monthly-air-temperature-deg}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/mean-monthly-air-temperature-deg/mean-monthly-air-temperature-deg_all}
+\end{frame}
+
+\begin{frame}{monthly-production-of-chocolate-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-chocolate-/monthly-production-of-chocolate-_all}
+\end{frame}
+
+\begin{frame}{number-of-deaths-and-serious-inj}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/number-of-deaths-and-serious-inj/number-of-deaths-and-serious-inj_all}
+\end{frame}  
+
+\begin{frame}{monthly-traffic-fatalities-in-on}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-traffic-fatalities-in-on/monthly-traffic-fatalities-in-on_all}
+\end{frame}  
+
+\begin{frame}{monthly-production-of-gas-in-aus}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-gas-in-aus/monthly-production-of-gas-in-aus_all}
+\end{frame}  
+    
+\begin{frame}{james-river-at-buchanan-va-1911-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/james-river-at-buchanan-va-1911-/james-river-at-buchanan-va-1911-_all}
+\end{frame}  
+    
+\begin{frame}{mckenzie-river-at-mckenzie-bridg}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/mckenzie-river-at-mckenzie-bridg/mckenzie-river-at-mckenzie-bridg_all}
+\end{frame}  
+
+\begin{frame}{monthly-us-air-passenger-miles-j}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-us-air-passenger-miles-j/monthly-us-air-passenger-miles-j_all}
+\end{frame}  
+
+\begin{frame}{04-sea-level-mothly}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/04-sea-level-mothly/04-sea-level-mothly_all}
+\end{frame} 
+
+\begin{frame}{monthly-critical-radio-frequenci}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-critical-radio-frequenci/monthly-critical-radio-frequenci_all}
+\end{frame}
+
+\begin{frame}{monthly-reported-number-of-cases-mumps}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-reported-number-of-cases-mumps/monthly-reported-number-of-cases-mumps_all}
+\end{frame}  
+    
+\begin{frame}{monthly-reported-number-of-chick}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-reported-number-of-chick/monthly-reported-number-of-chick_all}
+\end{frame}  
+
+\begin{frame}{uk-deaths-from-bronchitis-emphys}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/uk-deaths-from-bronchitis-emphys/uk-deaths-from-bronchitis-emphys_all}
+\end{frame}  
+
+\begin{frame}{internet-traffic-data-in-bits-fr-2}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/internet-traffic-data-in-bits-fr-2/internet-traffic-data-in-bits-fr-2_all}
+\end{frame}   
+
+\begin{frame}{06-methane-750-thin}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/06-methane-750-thin/06-methane-750-thin_all}
+\end{frame}  
+    
+\begin{frame}{02-solar}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/02-solar/02-solar_all}
+\end{frame}  
+
+\begin{frame}{real-daily-wages-in-pounds-engla}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/real-daily-wages-in-pounds-engla/real-daily-wages-in-pounds-engla_all}
+\end{frame}  
+    
+\begin{frame}{annual-swedish-fertility-rates-1}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/annual-swedish-fertility-rates-1/annual-swedish-fertility-rates-1_all}
+\end{frame}  
+
+\begin{frame}{ibm-common-stock-closing-prices-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/ibm-common-stock-closing-prices-/ibm-common-stock-closing-prices-_all}
+\end{frame}  
+
+\begin{frame}{annual-velocity-of-money-1869-to}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/annual-velocity-of-money-1869-to/annual-velocity-of-money-1869-to_all}
+\end{frame}
+
+\begin{frame}{daily-total-female-births-in-cal}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/daily-total-female-births-in-cal/daily-total-female-births-in-cal_all}
+\end{frame} 
+
+\begin{frame}{monthly-gasoline-demand-ontario-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-gasoline-demand-ontario-/monthly-gasoline-demand-ontario-_all}
+\end{frame}
+
+\begin{frame}{monthly-unemployment-figures-in-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-unemployment-figures-in-/monthly-unemployment-figures-in-_all}
+\end{frame}  
+
+\begin{frame}{us-monthly-sales-of-petroleum-an}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/us-monthly-sales-of-petroleum-an/us-monthly-sales-of-petroleum-an_all}
+\end{frame}    
+
+\begin{frame}{monthly-beer-production-in-austr}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-beer-production-in-austr/monthly-beer-production-in-austr_all}
+\end{frame}
+
+\begin{frame}{monthly-us-auto-registration-tho}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-us-auto-registration-tho/monthly-us-auto-registration-tho_all}
+\end{frame}  
+
+\begin{frame}{monthly-sutter-county-workforce-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-sutter-county-workforce-/monthly-sutter-county-workforce-_all}
+\end{frame}  
+
+\begin{frame}{monthly-us-female-20-years-and-o}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-us-female-20-years-and-o/monthly-us-female-20-years-and-o_all}
+\end{frame}  
+    
+\begin{frame}{monthly-us-male-1619-years-unemp}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-us-male-1619-years-unemp/monthly-us-male-1619-years-unemp_all}
+\end{frame}  
+
+\begin{frame}{monthly-electricity-production-i}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-electricity-production-i/monthly-electricity-production-i_all}
+\end{frame}  
+
+\begin{frame}{fur-sales-mink-h-b-co-18481911}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/fur-sales-mink-h-b-co-18481911/fur-sales-mink-h-b-co-18481911_all}
+\end{frame}  
+    
+\begin{frame}{beveridge-wheat-price-index-1500}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/beveridge-wheat-price-index-1500/beveridge-wheat-price-index-1500_all}
+\end{frame}
+    
+\begin{frame}{monthly-production-of-blooms-and}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-blooms-and/monthly-production-of-blooms-and_all}
+\end{frame}  
+    
+\begin{frame}{monthly-production-of-clay-brick}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-clay-brick/monthly-production-of-clay-brick_all}
+\end{frame} 
+    
+\begin{frame}{monthly-production-of-sulphuric-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-sulphuric-/monthly-production-of-sulphuric-_all}
+\end{frame}  
+    
+\begin{frame}{monthly-production-of-woollen-ya}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-production-of-woollen-ya/monthly-production-of-woollen-ya_all}
+\end{frame}  
+    
+\begin{frame}{monthly-reported-number-of-cases-measles}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-reported-number-of-cases-measles/monthly-reported-number-of-cases-measles_all}
+\end{frame}  
+    
+\begin{frame}{monthly-riverflow-in-cms-columbi}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-riverflow-in-cms-columbi/monthly-riverflow-in-cms-columbi_all}
+\end{frame}  
+    
+\begin{frame}{monthly-southern-oscillation-ind}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-southern-oscillation-ind/monthly-southern-oscillation-ind_all}
+\end{frame}
+    
+\begin{frame}{monthly-water-usage-mlday-london}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/monthly-water-usage-mlday-london/monthly-water-usage-mlday-london_all}
+\end{frame}  
+
+
+    
+\begin{frame}{number-of-daily-births-in-quebec}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/number-of-daily-births-in-quebec/number-of-daily-births-in-quebec_all}
+\end{frame}  
+    
+\begin{frame}{numbers-on-unemployment-benefits}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/numbers-on-unemployment-benefits/numbers-on-unemployment-benefits_all}
+\end{frame}  
+    
+\begin{frame}{proportion-of-church-of-england-}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/proportion-of-church-of-england-/proportion-of-church-of-england-_all}
+\end{frame}  
+    
+\begin{frame}{tree-san-pedro-martir-low-baja-m}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/tree-san-pedro-martir-low-baja-m/tree-san-pedro-martir-low-baja-m_all}
+\end{frame}  
+    
+\begin{frame}{wheat-prices-12641996-in-constan}
+  \center
+  \includegraphics[width=1.0\textwidth]{figures/wheat-prices-12641996-in-constan/wheat-prices-12641996-in-constan_all}
+\end{frame}  
+
+
+
+\end{document}    

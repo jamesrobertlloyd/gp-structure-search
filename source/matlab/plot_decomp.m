@@ -7,6 +7,7 @@ function plot_decomp(X, y, complete_covfunc, complete_hypers, decomp_list, ...
 % Convert to double in case python saved as integers
 X = double(X);
 y = double(y);
+%%%% FIXME - this is an assumption that may no longer be valid
 y = y - mean(y);
 
 left_extend = 0.05;  % What proportion to extend beyond the data range.

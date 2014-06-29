@@ -61,7 +61,7 @@ posters/jl-tea/tex/*.pdf
 
 temp/
 sexy_results/
-sandpit/
+sandpit/RQ-weird/*.pdf
 saved_results/
 scratch/
 source/temp.m
@@ -79,3 +79,7 @@ examples/*.txt
 examples/*/*
 analyses/time-series/gpss.pdf
 posters/jl-tea/tex/lloyd-tea-2013.pdf
+posters/icml/tex/icml-2013.pdf
+posters/icml/tex/icml-2013_small.pdf
+
+source/config.py

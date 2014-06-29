@@ -12,8 +12,11 @@ nax = np.newaxis
 import scipy.io
 import tempfile, os
 import subprocess
-
-import config
+try:
+    import config
+except:
+    print '\n\nERROR : source/config.py not found\n\nPlease create it following example file as a guide\n\n'
+    raise Exception('No config')
 import flexiblekernel as fk
 
 
@@ -101,18 +104,23 @@ hyp.lik = %(noise)s
 best_nll = nlls(end)
 
 %% Compute Hessian numerically for laplace approx
-num_hypers = length(hyp.cov);
-hessian = NaN(num_hypers, num_hypers);
+num_hypers = length(hyp_opt.cov);
+hessian = NaN(num_hypers+1, num_hypers+1);
 delta = 1e-6;
 a='Get original gradients';
 [nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-for d = 1:num_hypers
+for d = 1:(num_hypers+1)
     dhyp_opt = hyp_opt;
-    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    if d <= num_hypers
+        dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    else
+        dhyp_opt.lik = dhyp_opt.lik + delta;
+    end
     [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+    hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
+hessian = hessian + 1e-6*max(max(hessian))*eye(size(hessian));
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 %% exit();
@@ -148,18 +156,23 @@ hyp.lik = %(noise)s
 best_nll = nlls(end)
 
 %% Compute Hessian numerically for laplace approx
-num_hypers = length(hyp.cov);
-hessian = NaN(num_hypers, num_hypers);
+num_hypers = length(hyp_opt.cov);
+hessian = NaN(num_hypers+1, num_hypers+1);
 delta = 1e-6;
 a='Get original gradients';
 [nll_orig, dnll_orig] = gp(hyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-for d = 1:num_hypers
+for d = 1:(num_hypers+1)
     dhyp_opt = hyp_opt;
-    dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    if d <= num_hypers
+        dhyp_opt.cov(d) = dhyp_opt.cov(d) + delta;
+    else
+        dhyp_opt.lik = dhyp_opt.lik + delta;
+    end
     [nll_delta, dnll_delta] = gp(dhyp_opt, @infExact, meanfunc, covfunc, likfunc, X, y);
-    hessian(d, :) = (dnll_delta.cov - dnll_orig.cov) ./ delta;
+    hessian(d, :) = ([dnll_delta.cov, dnll_delta.lik] - [dnll_orig.cov, dnll_orig.lik]) ./ delta;
 end
 hessian = 0.5 * (hessian + hessian');
+hessian = hessian + 1e-6*max(max(hessian))*eye(size(hessian));
 
 save( '%(writefile)s', 'hyp_opt', 'best_nll', 'nlls', 'hessian' );
 %% exit();
@@ -684,7 +697,7 @@ def plot_decomposition(kernel, X, y, figname, noise=None, X_mean=0, X_scale=1, y
     run_matlab_code(code, verbose=True, jvm=True)
     os.close(fd1)
     #os.remove(temp_data_file)
-
+    return code
 
 def load_mat(data_file, y_dim=1):
     '''

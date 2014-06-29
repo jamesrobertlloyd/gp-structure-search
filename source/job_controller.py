@@ -14,7 +14,11 @@ import grammar
 import gpml
 import utils.latex
 import utils.fear
-from config import *
+try:
+    from config import *
+except:
+    print '\n\nERROR : source/config.py not found\n\nPlease create it following example file as a guide\n\n'
+    raise Exception('No config')
 from utils import gaussians, psd_matrices
 
 import numpy as np

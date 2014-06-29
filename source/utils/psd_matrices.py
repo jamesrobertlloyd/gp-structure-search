@@ -670,6 +670,20 @@ def laplace_approx(nll, opt_hyper, hessian, prior_var=100):
     # multiply the two Gaussians and integrate the result
     return -(evidence + prior).integral()
 
+def laplace_approx_no_prior(nll, opt_hyper, hessian, prior_var=100000):
+    #### FIXME - Believed to have a bug
+    ####       - Might be MATLAB though - test this code on some known integrals
+    d = opt_hyper.size
+    
+    if not np.allclose(hessian, proj_psd(hessian)):
+        # Hessian not PSD - cannot use in Laplace approx
+        #### TODO - Any job controller should attempt to re-try optimisation
+        return np.nan
+
+    evidence = gaussians.Potential(np.zeros(d), FullMatrix(hessian), -nll)
+
+    return -evidence.integral()
+
 
 def laplace_approx_stable(nll, opt_hyper, hessian, prior_var=100):
     H_eig, Q = scipy.linalg.eigh(hessian)

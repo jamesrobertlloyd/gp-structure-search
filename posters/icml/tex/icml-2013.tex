@@ -16,8 +16,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
-%\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+%\documentclass[landscape,a0b,final,a4resizeable]{a0poster}
+\documentclass[portrait,a0b,final,a4resizeable]{a0poster}
+%\documentclass{article}
+%\usepackage[portrait,a0paper,margin=1in]{geometry}
+
+\addtolength{\oddsidemargin}{-1.2in}
+%	\addtolength{\evensidemargin}{-.875in}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -28,18 +33,21 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 \usepackage{multicol}
 \usepackage{color}
-\usepackage{shadow}
+%\usepackage{shadow}
 \usepackage{morefloats}
-\usepackage{cite}
+%\usepackage{cite}
 \usepackage[pdftex]{graphicx}
 \usepackage{rotating}
 \usepackage{amsmath, amsthm, amssymb, bm}
 \usepackage{array}
-\usepackage{nth}
-\usepackage[square,numbers]{natbib}
+%\usepackage{nth}
+%\usepackage[square,numbers]{natbib}
 \usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -53,6 +61,7 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes,calc}
 \tikzstyle{mybox} = [draw=white, rectangle]
+\definecolor{darkblue}{rgb}{0,0.08,0.45}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -133,7 +142,7 @@
 									text width=0.965\columnwidth,
 									text centered,
 									rounded corners=20pt,
-									minimum height=0.11\columnwidth]
+									minimum height=0.09\columnwidth]
 
 \newcommand{\mysection}[1]
 {
@@ -217,39 +226,40 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{center}
+\hspace{-1cm}
 \begin{tikzpicture}[x=0.5\textwidth]
     % Dummy nodes at edges for spacing
     % TODO - a better way?
-    \node at (+1, 0) {};    
-    \node at (-1, 0) {};
+    %\node at (+1, 0) {};    
+    %\node at (-1, 0) {};
     % Set the size of the badges
-    \def \badgeheight {0.08\textwidth}
+    \def \badgeheight {0.1\textwidth}
     % Title text
     \node[inner sep=0,text width=0.7\textwidth,text centered,font=\Huge] (Title) at (0,0) 
     {
-      {\sffamily \Huge \textbf{Structure Discovery in Nonparametric Regression through \\Compositional Kernel Search}}\\
-      {\huge\sffamily David Duvenaud\textsuperscript{1}, James Robert Lloyd\textsuperscript{1}, Roger Grosse\textsuperscript{2},}\\
-      \vspace{-0.1\baselineskip}
-      {\huge\sffamily Joshua B. Tenenbaum\textsuperscript{2}, Zoubin Ghahramani\textsuperscript{1}}\\
-      \vspace{-0.3\baselineskip}
-      {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
+      {\sffamily \Huge \textbf{Structure Discovery in Nonparametric Regression through \\ Compositional Kernel Search}}\\
+      {\huge\sffamily David Duvenaud, James Robert Lloyd, Roger Grosse,
+      }\\      \vspace{-0.1\baselineskip} {\huge\sffamily 
+      Joshua B. Tenenbaum, Zoubin Ghahramani}\\
+     % \vspace{-0.3\baselineskip}
+     % {\large\sffamily 1: Department of Engineering, University of Cambridge, UK 2: Massachusetts Institute of Technology, USA}
     };
     % Cambridge badge
-    \node [mybox] (Cambridge Badge) at (+0.75, 0) {
+    \node [mybox] (Cambridge Badge) at (+0.85, 0) {
         \includegraphics[height=\badgeheight]{../badges/cam-crest-and-text.pdf}
     };
     % CBL badge
-    \node [mybox] (CBL Badge) at (+0.9, 0) {
-        \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
-    };
+    %\node [mybox] (CBL Badge) at (+0.9, 0) {
+    %    \includegraphics[height=\badgeheight]{../badges/cbl-badge-cropped.png}
+    %};
     % MIT badge
-    \node [mybox] (MIT Badge) at (-0.75, 0) {
+    \node [mybox] (MIT Badge) at (-0.85, 0) {
         \includegraphics[height=\badgeheight]{../badges/MIT2.jpg}
     };
     % QR code
-    \node [mybox] (QR code) at (-0.95, 0) {
-        \includegraphics[height=\badgeheight]{../badges/QR.png}
-    };
+    %\node [mybox] (QR code) at (-0.95, 0) {
+    %    \includegraphics[height=\badgeheight]{../badges/QR.png}
+    %};
 \end{tikzpicture}
 \end{center}
 
@@ -267,7 +277,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{multicols}{3}
+\begin{multicols}{2}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -277,13 +287,14 @@
 
 \large
 
-\mysection{Data often exhibits high level structure or patterns}
 
-\vspace{0\baselineskip}
+%\mysection{Data often exhibits high level structure or patterns}
 
-\begin{center}
-  \input{../figures/fig_motivation.tex}
-\end{center}
+%\vspace{0\baselineskip}
+
+%\begin{center}
+%  \input{../figures/fig_motivation.tex}
+%\end{center}
 
 %\vspace{0\baselineskip}
 
@@ -295,50 +306,81 @@
 
 %\vspace{0.5\baselineskip}
 
-\mysection{Identifying this structure is crucial for extrapolation}
+\mysection{Identifying structure is crucial for extrapolation}
 
-\vspace{0\baselineskip}
+\vspace{-0.2\baselineskip}
 
 \begin{center}
-  \input{../figures/fig_synth_extrap.tex}
+\begin{tabular}{cc}
+{local smoothing} & {structured model }\\
+\hspace{-1.5cm}
+\includegraphics[trim=0 0 0 1.2cm, clip, width=0.26\textwidth]{../figures/synth_extrap_bad.pdf}
+&
+\hspace{-3cm}
+\includegraphics[trim=0 0 0 1.2cm, clip, width=0.26\textwidth]{../figures/synth_extrap_good.pdf}
+%  \input{../figures/fig_synth_extrap.tex}
+\end{tabular}
 \end{center}
 
-\vspace{0\baselineskip}
+\vspace{-0.5\baselineskip}
+
+
 
 \begin{itemize}
-  \item Traditionally, a researcher / scientist / statistician would select an appropriate model for the type of structures present
-  \item Automatic model selection techniques already exist, typically choosing between a finite or restricted set of models
-  \item Instead, we automate statistical model \emph{construction}%, which allows for a very large set of models to be considered
+  \item While simple structure (\eg smoothness) often suffices for interpolation, accurate extrapolation requires richer structure
+  \item Designing structured models can require statistical expertise and domain knowledge
+  \item Automatic model selection methods typically choose from a restricted set of models
+  \item We define an open-ended grammar over Gaussian process models, and search it automatically
 \end{itemize}
 
 \vspace{0.5\baselineskip}
 
-\mysection{Gaussian process regression can model many structures with an appropriately chosen kernel}
+\mysection{Gaussian processes model structure through kernels}
 
 \vspace{0.5\baselineskip}
 
 \begin{itemize}
-  \item The kernel encodes the inductive bias of the model \ie the types of functions the model `believes in'
-  \item Below we list standard base kernels, and examples of functions the model believes in (samples from the prior)
+  %\item The kernel determines which structures are likely under the \gp{} prior  
+  %\item This prior determines the generalization properties of the model.
+  %\item The kernel determines the pattern of generalization beyond the observed data
+  \item For Gaussian process models, the prior --- and hence, the pattern of generalisation --- is determined by a kernel function. Common examples include:
+  %\item Only a few simple kernels are commonly used \eg%the following standard kernels is used%\gp{} priors are used:
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_simple_kernels_no_kern.tex}
 \vspace{0.5\baselineskip}
+
+\mysection{Kernels can be composed\ldots
+% to create more complicated structural assumptions
+}
+
+\vspace{0.5\baselineskip}
+
 \begin{itemize}
-  \item Base kernels can be combined to create more complicated structural assumptions
+    \item Composite kernels can express many types of structure%high-level structure
 \end{itemize}
 \vspace{1\baselineskip}
 \input{../figures/fig_example_structures_no_kern.tex}
 
-\newpage 
+\vspace{0.5\baselineskip}
 
-\mysection{We consider all kernel expressions\\derived from a generative grammar\ldots}
+\begin{itemize}
+    %\item Constructing composite kernels is typically only done by experts
+    \item Building composite kernels has often required much human ingenuity
+\end{itemize}
+
+\vspace{1\baselineskip}
+\mysection{\ldots defining a rich, open-ended set of models\ldots}
 
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item Constructing appropriate composite kernels has previously been the domain of Gaussian process experts
-  \item We consider all algebraic expressions involving a small number of base kernels and the operations `$+$' and `$\times$', including \eg
+  %\item We search over all algebraic expressions combining
+  \item We consider the space of all kernels represented as algebraic expressions using
+      \begin{itemize}
+          \item a set of base kernels \{\kSE, \kPer, \kLin, \kRQ\}
+          \item the operators $+$ and $\times$
+      \end{itemize}
   %\item These operations are interpretable\ldots
   %\begin{itemize}
   %  \item Addition of kernels corresponds to the addition of independent functions
@@ -347,70 +389,163 @@
   %\item \ldots and produce a rich space including many standard statistical models
 \end{itemize}
 
-\vspace{0.5\baselineskip}
-
+\vspace{0.1\baselineskip}
+\paragraph{\large Example structures in the search space:}
 \begin{center}
-  \begin{tabular}{l|l}
-  Bayesian linear regression & $\Lin$ \\
+  \begin{tabular}{lc|cl}
+  \\
+  Bayesian linear regression &&& $\Lin$ \\
   %Bayesian quadratric regression & $\Lin \times \Lin$ \\
-  Bayesian polynomial regression & $\Lin \times \Lin \times \ldots$\\
-  Generalized Fourier decomposition & $\Per + \Per + \ldots$ \\
-  Generalized additive models & $\sum_{d=1}^D \SE_d$ \\
-  Automatic relevance determination & $\prod_{d=1}^D \SE_d$ \\
-  Linear trend with deviations & $\Lin + \SE$ \\
-  Linearly growing amplitude & $\Lin \times \SE$
+  Bayesian polynomial regression &&& $\Lin \times \Lin \times \ldots$\\
+  Generalized Fourier decomposition &&& $\Per + \Per + \ldots$ \\
+  Generalized additive models &&& $\sum_{d=1}^D \SE_d$ \\
+  Automatic relevance determination &&& $\prod_{d=1}^D \SE_d$ \\
+  Linear trend with local deviations &&& $\Lin + \SE$ \\
+  Linearly growing amplitude &&& $\Lin \times \SE$ \\
+  \color{darkblue}
+  (Wilson \& Adams 2013) &&& $\sum_{k=1}^K \SE \times \cos$
+%  Flexible Fourier decomposition &&& $\sum_{k=1}^K \SE \times \Per$
   \end{tabular}
 \end{center}
 
-\vspace{1\baselineskip}
+%\vspace{1\baselineskip}
+\newpage
 
-\mysection{\ldots which we search greedily, producing progressively better statistical models}
+\mysection{\ldots which we search through greedily%, \\ producing progressively better models
+}
 
 \vspace{0.25\baselineskip}
 
 \begin{itemize}
-  \item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
-  \item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
+  \item We perform a greedy search over our grammar using marginal likelihood as the criterion
+  \item Each search operator adds a term to the current best kernel
+  \item The search stops when marginal likelihood no longer improves
+  %\item We try all base kernels, selecting the one with the highest (approximate) marginal likelihood which balances data fit and model complexity
+  %\item The search continues by adding an extra term to the current best kernel, stopping when marginal likelihood no longer improves
 \end{itemize}
 
 \begin{center}
   \input{../figures/fig_search_tree.tex}
 \end{center}
 
-\vspace{13\baselineskip}
+\vspace{12\baselineskip}
 
 \begin{center}
-  \input{../figures/fig_mauna_growth.tex}
+  %\input{../figures/fig_mauna_growth.tex}
+  \begin{tabular}{cccc}
+  Depth 1 & Depth 2 & Depth 3 & Depth 4 \\
+          \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_0/03-mauna2003-s_all_small.pdf} &
+        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_1/03-mauna2003-s_all_small.pdf} &
+        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_2/03-mauna2003-s_all_small.pdf} &
+        \includegraphics[width=0.11\textwidth]{../figures/11-Feb-v4-03-mauna2003-s_max_level_3/03-mauna2003-s_all_small.pdf}
+\end{tabular}  
 \end{center}
 
-\newpage 
+\vspace{1\baselineskip}
 
-\mysection{Example: Mauna Loa CO$_2$ concentration}
+%\mysection{Example: Mauna Loa CO$_2$ concentration}
+\mysection{Composite kernels reveal interpretable structure}
 
 \vspace{0\baselineskip}
 
 \begin{itemize}
-  \item By automatically inferring an appropriate kernel, we can also automatically decompose functions into additive components (additive components of the kernel correspond to independent additive functions)
+  \item Sums of kernels correspond to sums of independent functions
+  \item Any kernel in our grammar can be decomposed into a sum of product kernels
+  \item Therefore, we can visualise the learned kernels by decomposing the posterior into a sum of interpretable component functions% (additive components of the kernel correspond to independent additive functions)
 \end{itemize}
 
-\vspace{3.5\baselineskip}
 
-\begin{center}
-  \input{../figures/fig_mauna.tex}
-\end{center}
+%\input{../figures/fig_radio.tex}
+%\vspace{14\baselineskip}
 
-\vspace{17.5\baselineskip}
+%\vspace{14\baselineskip}
+%\input{../figures/fig_airline2.tex}
 
-\mysection{Example: International airline passengers}
+%\hline
 
-\vspace{3\baselineskip}
+\vspace{-1\baselineskip}
 
-\begin{center}
-  \input{../figures/fig_airline.tex}
-\end{center}
+\paragraph{\large Example: Airline passengers }
 
+%\vspace{4\baselineskip}
+
+\newcommand{\postdw}{0.13\textwidth}  % Poster decomp width
+
+\begin{tabular}{cc}
+\\
+\begin{tabular}{c}
+Data \& Complete Model \\
+{\small $\SE \times ( \Lin + \Lin \times ( \Per + \RQ))$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=0.2\textwidth]{../figures/01-airline-months_all.pdf}
+\end{tabular} &
+\begin{tabular}{cc}
+\multicolumn{2}{c}{Decomposition} \\
+%Monthly airline traffic decomposes into a sum of:}\\
+{\small $\SE \times \Lin$ } & {\small $\SE \times \Lin \times \Per$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_1.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_2.pdf} \\
+Long-term trend & Growing amplitude \\
+{\small $\SE \times \Lin \times \RQ$ } & {\small Residuals } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_3.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/01-airline-months_resid.pdf} \\
+Short-term deviations & Noise \\
+\end{tabular}
+\end{tabular}
+
+\paragraph{\large Example:  Radio critical frequency }
+
+% Monthly critical radio frequencies in Washington, D.C., May 1934 – April 1954. These frequencies reflect the highest radio frequency that can be used for broadcasting
+
+%\vspace{4\baselineskip}
+
+\begin{tabular}{cc}
+\\
+\begin{tabular}{c}
+Data \& Complete Model \\
+{\small $\CS + ( \SE + \RQ ) \times ( \Per + \CS)$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=0.2\textwidth]{../figures/radio/all.pdf}
+\end{tabular} 
+&
+\begin{tabular}{cc}
+\multicolumn{2}{c}{Decomposition} \\
+{\small $\SE$ } & {\small $\Per \times \RQ$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/3.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/4.pdf} \\
+11-Year solar cycle &
+Annual periodicity \\
+{\small $\Per \times \SE$ } & {\small $
+\RQ$ } \\
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/2.pdf} &
+\includegraphics[trim=0 0 0 1cm, clip, width=\postdw]{../figures/radio/5.pdf} \\
+Amplitude modulation  &
+Short-term deviations 
+\end{tabular}
+\end{tabular}
+
+\vspace{2\baselineskip}
+\begin{tabular}{lr}
+%{ \bf This method:} & \\
+\begin{minipage}[b]{0.4\textwidth}
+\begin{itemize}
+\item While we highlighted time series examples here, our structure search procedure also performs well on high-dimensional problems
+\item Our proposed method searches over an open-ended space of models and automates a substantial part of the data analysis process
+%\item automates a search over a broader set of models than is usually considered
+%\item automates parts of data analysis, and enables human model-checking
+%\item also works on multi-dimensional data
+\end{itemize}
+ 
+Code available at \url{github.com/jamesrobertlloyd/gp-structure-search}
+\end{minipage}
+%\hfill
+% QR code
+&
+\begin{minipage}[b]{0.1\textwidth}
+\includegraphics[height=6cm]{../badges/QR.png}
+\end{minipage}
+\end{tabular}   
 \end{multicols}
 
 \end{poster}
 
 \end{document}
+

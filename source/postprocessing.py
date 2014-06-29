@@ -14,7 +14,6 @@ import os
 import random
 import scipy.io
 
-import config
 import experiment as exp
 import flexiblekernel as fk
 import gpml
@@ -121,7 +120,7 @@ def compare_1d_decompositions():
     for folder in folders:
         make_all_1d_figures(folder=folder, save_folder='../temp_figures/' + folder.split('/')[-1])
         
-def collate_decompositions(top_folder, tex):
+def collate_decompositions(top_folder, tex, tex_beamer):
     '''Produces a LaTeX document with all decompositions displayed'''
     latex_header = '''
 \documentclass[twoside]{article}
@@ -206,7 +205,68 @@ def collate_decompositions(top_folder, tex):
 ]
 '''
 
+    beamer_header = '''
+\input{include/header_beamer}
+
+\usecolortheme{default}
+\\xdefinecolor{Black}{rgb}{0,0,0}
+\\xdefinecolor{White}{rgb}{1,1,1}
+\\xdefinecolor{DarkBlue}{rgb}{0,0,.7}
+\\xdefinecolor{DarkRed}{rgb}{.7,0,0}
+\\xdefinecolor{Red}{rgb}{.85,0,0}
+\\xdefinecolor{DarkGreen}{rgb}{0,.7,0}
+\\xdefinecolor{DarkMagenta}{rgb}{.6,0,.6}
+\def\Black{\\textcolor{Black}}
+\def\White{\\textcolor{White}}
+\def\Blue{\\textcolor{DarkBlue}}
+\def\Magenta{\\textcolor{DarkMagenta}}
+\def\Red{\\textcolor{Red}}
+\def\Green{\\textcolor{DarkGreen}}
+\definecolor{camlightblue}{rgb}{0.601 , 0.8, 1}
+
+\input{include/commenting.tex}
+
+%% For submission, make all render blank.
+%\\renewcommand{\LATER}[1]{}
+%\\renewcommand{\\fLATER}[1]{}
+%\\renewcommand{\TBD}[1]{}
+%\\renewcommand{\\fTBD}[1]{}
+%\\renewcommand{\PROBLEM}[1]{}
+%\\renewcommand{\\fPROBLEM}[1]{}
+%\\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+
+\usepackage{alltt}
+\usepackage{psfrag}
+\usepackage{pstool}
+\usepackage{multicol}
+
+\def\\newarrow{\mbox{\begin{tikzpicture}
+             \useasboundingbox{(-3pt,-4.5pt) rectangle (19pt,1pt)};
+             \draw[->] (0,-0.07)--(17pt,-0.07);\end{tikzpicture}}}
+
+\usetikzlibrary{shapes.geometric,arrows,chains,matrix,positioning,scopes}
+ \makeatletter
+ \\tikzset{join/.code=\\tikzset{after node path={%
+       \ifx\\tikzchainprevious\pgfutil@empty\else(\\tikzchainprevious)%
+       edge[every join]#1(\\tikzchaincurrent)\\fi}}
+ }
+ \\tikzset{>=stealth',every on chain/.append style={join},
+   every join/.style={->}
+ }
+
+\\tikzstyle{mybox} = [draw=white, rectangle]
+\usepackage{ifthen}
+\usepackage{booktabs}
+
+\\begin{document}             
+'''
+
     latex_footer = '''
+
+\end{document}    
+'''
+
+    beamer_footer = '''
 
 \end{document}    
 '''
@@ -215,6 +275,15 @@ def collate_decompositions(top_folder, tex):
 \section{%(folder)s}
 
 \input{figures/%(folder)s/decomp.tex}    
+'''    
+
+    beamer_body = '''
+    
+\\begin{frame}{%(folder)s}
+  \center
+  \includegraphics[width=1.0\\textwidth]{figures/%(folder)s/%(folder)s_all}
+\end{frame}  
+
 '''
 
     decomp_header = '''
@@ -238,6 +307,7 @@ def collate_decompositions(top_folder, tex):
 '''
     
     latex = latex_header
+    beamer = beamer_header
     for folder in [adir for adir in sorted(os.listdir(top_folder)) if os.path.isdir(os.path.join(top_folder, adir))]:
         decomp_text = decomp_header % {'folder' : folder}
         i = 1
@@ -250,10 +320,14 @@ def collate_decompositions(top_folder, tex):
             decomp_file.write(decomp_text)
         
         latex = latex + latex_body % {'folder' : folder}
+        beamer = beamer + beamer_body % {'folder' : folder}
     latex = latex + latex_footer
+    beamer = beamer + beamer_footer
     
     with open(tex, 'w') as latex_file:
         latex_file.write(latex)
+    with open(tex_beamer, 'w') as beamer_file:
+        beamer_file.write(beamer)
     
                 
 def make_kernel_description_table():

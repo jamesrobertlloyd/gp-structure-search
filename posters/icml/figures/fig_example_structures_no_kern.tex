@@ -3,9 +3,13 @@
 %\begin{tabular}{m{\fwbig}m{0.01\textwidth}m{\fwbig}m{0.01\textwidth}m{\fwbig}m{\fwbig}m{\fwbig}}
 %\begin{tabular}{C{\fwbig}C{\fwbig}C{\fwbig}C{\fwbig}}%{m{\fwbig}m{\fwbig}m{\fwbig}}
 \begin{tabularx}{0.8\columnwidth}{XXXX}
+  { $\kLin \times \kLin$} & { $\kSE \times \kPer$} & { $\kLin + \kPer$} & { $\kSE + \kPer$ } \\
   \kernpic{lin_times_lin_draws} & \kernpic{se_times_per_draws_s7} & \kernpic{lin_plus_per_draws} & \kernpic{se_plus_per_draws_s7} \\
-  {\small $\kLin \times \kLin$} & {\small $\kSE \times \kPer$} & {\small $\kLin + \kPer$} & {\small $\kSE + \kPer$ } \\
-  {\small quadratic functions} & {\small locally periodic} & {\small periodic with trend} & {\small periodic with noise} \\
+  { quadratic \newline functions} & { locally \newline periodic} & { periodic \newline with trend} & { periodic \newline with noise} \\
+  \\
+  { $\kSE \times \kLin$} & { $\kLin \times \kPer$} & { $\kSE_1 + \kSE_2$} & { $\kSE_1 \times \kSE_2$ } \\
+  \kernpic{se_times_lin_draws_s2} & \kernpic{lin_times_per_draws_s2} & \kernpic{additive_kernel_draw_sum} & \kernpic{sqexp_draw} \\
+  { increasing \newline variation} & { growing \newline amplitude} & {  $f_1(x_1)$ $+ f_2(x_2)$ } & { $f(x_1, x_2)$} \\  
 \end{tabularx}
 
 

@@ -22,6 +22,8 @@ Feel free to email us with any questions:
 
 You'll need Matlab and Python 2.7 with numpy.
 
+You'll also need to create `source/cblparallel/config.py` - follow the format of the example file in the same directory.
+
 To check whether the framework runs, go to the source directory and run `demo.py`.
 
 There are some example experiment scripts `source/examples/`.
@@ -32,3 +34,9 @@ Many helper functions to summarize results are in `postprocessing.py`.  For exam
 If you have any questions about getting this running on your machine or cluster, please let us know.
 
 If describe your problem to us, we'll also happy to give advice about running the method.
+
+### Known issues:
+
+Windows users will need to make a change
+
+* All strings in config files are not sanitized, therefore backslashes and other special characters should be delimited e.g. `C:\\ProgramFiles\\Matlab`

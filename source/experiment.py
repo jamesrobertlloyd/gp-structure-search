@@ -27,8 +27,6 @@ from cblparallel.util import mkstemp_safe
 import job_controller as jc
 import utils.misc
 
-
-#PERIOD_HEURISTIC = 10;   # How many multiples of the smallest interval between points to initialize periods to.
 FROBENIUS_CUTOFF = 0.01; # How different two matrices have to be to be considered different.
 
 def remove_duplicates(kernels, X, n_eval=250, local_computation=True, verbose=True):
@@ -85,6 +83,13 @@ def perform_kernel_search(X, y, D, experiment_data_file_name, results_filename, 
         data_shape['min_period'] = np.log([max(exp.period_heuristic * utils.misc.min_abs_diff(X[:,i]), exp.period_heuristic * np.ptp(X[:,i]) / X.shape[0]) for i in range(X.shape[1])])
     else:
         data_shape['min_period'] = None
+    #### TODO - make the below and above more elegant
+    if exp.use_constraints:
+        data_shape['min_alpha'] = exp.alpha_heuristic
+        data_shape['min_lengthscale'] = exp.lengthscale_heuristic + data_shape['input_scale']
+    else:
+        data_shape['min_alpha'] = None
+        data_shape['min_lengthscale'] = None
     
     all_results = []
     results_sequence = []     # List of lists of results, indexed by level of expansion.
@@ -194,30 +199,33 @@ def gen_all_datasets(dir):
 
 # Defines a class that keeps track of all the options for an experiment.
 # Maybe more natural as a dictionary to handle defaults - but named tuple looks nicer with . notation
-class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic')):
+class Experiment(namedtuple("Experiment", 'description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic, use_constraints, alpha_heuristic, lengthscale_heuristic')):
     def __new__(cls, 
-                data_dir,                  # Where to find the datasets.
-                results_dir,               # Where to write the results.
+                data_dir,                     # Where to find the datasets.
+                results_dir,                  # Where to write the results.
                 description = 'no description',
-                max_depth = 10,            # How deep to run the search.
-                random_order = False,      # Randomize the order of the datasets?
-                k = 1,                     # Keep the k best kernels at every iteration.  1 => greedy search.
+                max_depth = 10,               # How deep to run the search.
+                random_order = False,         # Randomize the order of the datasets?
+                k = 1,                        # Keep the k best kernels at every iteration.  1 => greedy search.
                 debug = False,
-                local_computation = True,  # Run experiments locally, or on the cloud.
-                n_rand = 2,                # Number of random restarts.
-                sd = 4,                    # Standard deviation of random restarts.
-                max_jobs=500,              # Maximum number of jobs to run at once on cluster.
+                local_computation = True,     # Run experiments locally, or on the cloud.
+                n_rand = 2,                   # Number of random restarts.
+                sd = 4,                       # Standard deviation of random restarts.
+                max_jobs=500,                 # Maximum number of jobs to run at once on cluster.
                 verbose=False,
-                make_predictions=False,    # Whether or not to forecast on a test set.
-                skip_complete=True,        # Whether to re-run already completed experiments.
-                iters=100,                 # How long to optimize hyperparameters for.
+                make_predictions=False,       # Whether or not to forecast on a test set.
+                skip_complete=True,           # Whether to re-run already completed experiments.
+                iters=100,                    # How long to optimize hyperparameters for.
                 base_kernels='SE,RQ,Per,Lin,Const',
-                zero_mean=True,            # If false, use a constant mean function - cannot be used with the Const kernel
-                verbose_results=False,     # Whether or not to record all kernels tested
+                zero_mean=True,               # If false, use a constant mean function - cannot be used with the Const kernel
+                verbose_results=False,        # Whether or not to record all kernels tested
                 random_seed=0,
-		use_min_period=True,       # Whether to not let the period in a periodic kernel be smaller than the minimum period.
-                period_heuristic=10):      # Minimum period in periodic kernels = period_heuristic * smallest distance in input data     
-        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic)
+		        use_min_period=True,          # Whether to not let the period in a periodic kernel be smaller than the minimum period.
+                period_heuristic=10,
+		        use_constraints=False,        # Place hard constraints on some parameter values? #### TODO - should be replaced with a prior / more Bayesian analysis
+                alpha_heuristic=-2,           # Minimum alpha value for RQ kernel
+                lengthscale_heuristic=-4.5):  # Minimum lengthscale     
+        return super(Experiment, cls).__new__(cls, description, data_dir, max_depth, random_order, k, debug, local_computation, n_rand, sd, max_jobs, verbose, make_predictions, skip_complete, results_dir, iters, base_kernels, zero_mean, verbose_results, random_seed, use_min_period, period_heuristic, use_constraints, alpha_heuristic, lengthscale_heuristic)
 
 def experiment_fields_to_str(exp):
     str = "Running experiment:\n"

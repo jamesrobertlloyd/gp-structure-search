@@ -1,0 +1,332 @@
+
+\documentclass[twoside]{article}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{amssymb,amsmath,amsthm}
+\usepackage{graphicx}
+\usepackage{preamble}
+\usepackage{natbib}
+%%%% REMEMBER ME!
+%\usepackage[draft]{hyperref}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{wasysym}
+\usepackage{subfigure}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{bm}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+\definecolor{mydarkblue}{rgb}{0,0.08,0.45}
+\hypersetup{ %
+    pdftitle={},
+    pdfauthor={},
+    pdfsubject={},
+    pdfkeywords={},
+    pdfborder=0 0 0,
+    pdfpagemode=UseNone,
+    colorlinks=true,
+    linkcolor=mydarkblue,
+    citecolor=mydarkblue,
+    filecolor=mydarkblue,
+    urlcolor=mydarkblue,
+    pdfview=FitH}
+
+\newcolumntype{x}[1]{>{\centering\arraybackslash\hspace{0pt}}m{#1}}
+\newcommand{\tabbox}[1]{#1}
+
+\setlength{\marginparwidth}{0.6in}
+\input{include/commenting.tex}
+
+\newif\ifarXiv
+%\arXivtrue
+
+\ifarXiv
+	\usepackage[arxiv]{format/icml2013}
+\else
+	\usepackage[accepted]{format/icml2013}
+\fi
+%\usepackage[left=1.00in,right=1.00in,bottom=0.25in,top=0.25in]{geometry} %In case we want larger margins for commenting purposes
+
+%% For submission, make all render blank.
+%\renewcommand{\LATER}[1]{}
+%\renewcommand{\fLATER}[1]{}
+%\renewcommand{\TBD}[1]{}
+%\renewcommand{\fTBD}[1]{}
+%\renewcommand{\PROBLEM}[1]{}
+%\renewcommand{\fPROBLEM}[1]{}
+%\renewcommand{\NA}[1]{#1}  %% Note, NA's pass through!
+
+    
+\begin{document}
+
+%\renewcommand{\baselinestretch}{0.99}
+
+\twocolumn[
+\icmltitle{Structure Discovery in Nonparametric Regression through Compositional Kernel Search - Automatic Decompositions}
+
+\icmlauthor{David Duvenaud$^{\dagger}$}{dkd23@cam.ac.uk}
+%\icmladdress{University of Cambridge}
+\icmlauthor{James Robert Lloyd$^{\dagger}$}{jrl44@cam.ac.uk}
+%\icmladdress{University of Cambridge}
+\icmlauthor{Roger Grosse}{rgrosse@mit.edu}
+%\icmladdress{Massachussets Institute of Technology}
+\icmlauthor{Joshua B. Tenenbaum}{jbt@mit.edu}
+%\icmladdress{Massachussets Institute of Technology}
+\icmlauthor{Zoubin Ghahramani}{zoubin@eng.cam.ac.uk}
+%\icmladdress{University of Cambridge}
+%\icmladdress{Brain and Cognitive Sciences, Massachusetts Institute of Technology}    
+            
+\icmlkeywords{nonparametrics, gaussian process, machine learning, ICML, structure learning, extrapolation, regression, kernel learning, equation learning, supervised learning, time series}
+\vskip 0.3in
+]
+
+\section{01-airline}
+
+\input{figures/01-airline/decomp.tex}    
+
+\section{02-solar}
+
+\input{figures/02-solar/decomp.tex}    
+
+\section{03-mauna2003}
+
+\input{figures/03-mauna2003/decomp.tex}    
+
+\section{04-sea-level-mothly}
+
+\input{figures/04-sea-level-mothly/decomp.tex}    
+
+\section{06-methane-750-thin}
+
+\input{figures/06-methane-750-thin/decomp.tex}    
+
+\section{accidental-deaths-in-usa-monthly}
+
+\input{figures/accidental-deaths-in-usa-monthly/decomp.tex}    
+
+\section{annual-number-of-lynx-trapped-ma}
+
+\input{figures/annual-number-of-lynx-trapped-ma/decomp.tex}    
+
+\section{annual-swedish-fertility-rates-1}
+
+\input{figures/annual-swedish-fertility-rates-1/decomp.tex}    
+
+\section{annual-velocity-of-money-1869-to}
+
+\input{figures/annual-velocity-of-money-1869-to/decomp.tex}    
+
+\section{beveridge-wheat-price-index-1500}
+
+\input{figures/beveridge-wheat-price-index-1500/decomp.tex}    
+
+\section{daily-minimum-temperatures-in-me}
+
+\input{figures/daily-minimum-temperatures-in-me/decomp.tex}    
+
+\section{daily-total-female-births-in-cal}
+
+\input{figures/daily-total-female-births-in-cal/decomp.tex}    
+
+\section{fur-sales-mink-h-b-co-18481911}
+
+\input{figures/fur-sales-mink-h-b-co-18481911/decomp.tex}    
+
+\section{ibm-common-stock-closing-prices-}
+
+\input{figures/ibm-common-stock-closing-prices-/decomp.tex}    
+
+\section{internet-traffic-data-in-bits-fr}
+
+\input{figures/internet-traffic-data-in-bits-fr/decomp.tex}    
+
+\section{internet-traffic-data-in-bits-fr-2}
+
+\input{figures/internet-traffic-data-in-bits-fr-2/decomp.tex}    
+
+\section{james-river-at-buchanan-va-1911-}
+
+\input{figures/james-river-at-buchanan-va-1911-/decomp.tex}    
+
+\section{mckenzie-river-at-mckenzie-bridg}
+
+\input{figures/mckenzie-river-at-mckenzie-bridg/decomp.tex}    
+
+\section{mean-monthly-air-temperature-deg}
+
+\input{figures/mean-monthly-air-temperature-deg/decomp.tex}    
+
+\section{monthly-average-daily-calls-to-d}
+
+\input{figures/monthly-average-daily-calls-to-d/decomp.tex}    
+
+\section{monthly-beer-production-in-austr}
+
+\input{figures/monthly-beer-production-in-austr/decomp.tex}    
+
+\section{monthly-canadian-total-unemploym}
+
+\input{figures/monthly-canadian-total-unemploym/decomp.tex}    
+
+\section{monthly-critical-radio-frequenci}
+
+\input{figures/monthly-critical-radio-frequenci/decomp.tex}    
+
+\section{monthly-electricity-production-i}
+
+\input{figures/monthly-electricity-production-i/decomp.tex}    
+
+\section{monthly-gasoline-demand-ontario-}
+
+\input{figures/monthly-gasoline-demand-ontario-/decomp.tex}    
+
+\section{monthly-mean-thickness-dobson-un}
+
+\input{figures/monthly-mean-thickness-dobson-un/decomp.tex}    
+
+\section{monthly-new-york-city-births-unk}
+
+\input{figures/monthly-new-york-city-births-unk/decomp.tex}    
+
+\section{monthly-production-of-blooms-and}
+
+\input{figures/monthly-production-of-blooms-and/decomp.tex}    
+
+\section{monthly-production-of-chocolate-}
+
+\input{figures/monthly-production-of-chocolate-/decomp.tex}    
+
+\section{monthly-production-of-clay-brick}
+
+\input{figures/monthly-production-of-clay-brick/decomp.tex}    
+
+\section{monthly-production-of-gas-in-aus}
+
+\input{figures/monthly-production-of-gas-in-aus/decomp.tex}    
+
+\section{monthly-production-of-portland-c}
+
+\input{figures/monthly-production-of-portland-c/decomp.tex}    
+
+\section{monthly-production-of-sulphuric-}
+
+\input{figures/monthly-production-of-sulphuric-/decomp.tex}    
+
+\section{monthly-production-of-woollen-ya}
+
+\input{figures/monthly-production-of-woollen-ya/decomp.tex}    
+
+\section{monthly-reported-number-of-cases-measles}
+
+\input{figures/monthly-reported-number-of-cases-measles/decomp.tex}    
+
+\section{monthly-reported-number-of-cases-mumps}
+
+\input{figures/monthly-reported-number-of-cases-mumps/decomp.tex}    
+
+\section{monthly-reported-number-of-chick}
+
+\input{figures/monthly-reported-number-of-chick/decomp.tex}    
+
+\section{monthly-riverflow-in-cms-columbi}
+
+\input{figures/monthly-riverflow-in-cms-columbi/decomp.tex}    
+
+\section{monthly-sales-of-us-houses-thous}
+
+\input{figures/monthly-sales-of-us-houses-thous/decomp.tex}    
+
+\section{monthly-southern-oscillation-ind}
+
+\input{figures/monthly-southern-oscillation-ind/decomp.tex}    
+
+\section{monthly-sutter-county-workforce-}
+
+\input{figures/monthly-sutter-county-workforce-/decomp.tex}    
+
+\section{monthly-traffic-fatalities-in-on}
+
+\input{figures/monthly-traffic-fatalities-in-on/decomp.tex}    
+
+\section{monthly-unemployment-figures-in-}
+
+\input{figures/monthly-unemployment-figures-in-/decomp.tex}    
+
+\section{monthly-us-air-passenger-miles-j}
+
+\input{figures/monthly-us-air-passenger-miles-j/decomp.tex}    
+
+\section{monthly-us-auto-registration-tho}
+
+\input{figures/monthly-us-auto-registration-tho/decomp.tex}    
+
+\section{monthly-us-female-20-years-and-o}
+
+\input{figures/monthly-us-female-20-years-and-o/decomp.tex}    
+
+\section{monthly-us-male-1619-years-unemp}
+
+\input{figures/monthly-us-male-1619-years-unemp/decomp.tex}    
+
+\section{monthly-water-usage-mlday-london}
+
+\input{figures/monthly-water-usage-mlday-london/decomp.tex}    
+
+\section{number-of-daily-births-in-quebec}
+
+\input{figures/number-of-daily-births-in-quebec/decomp.tex}    
+
+\section{number-of-deaths-and-serious-inj}
+
+\input{figures/number-of-deaths-and-serious-inj/decomp.tex}    
+
+\section{numbers-on-unemployment-benefits}
+
+\input{figures/numbers-on-unemployment-benefits/decomp.tex}    
+
+\section{ozone-concentration-azusa-195619}
+
+\input{figures/ozone-concentration-azusa-195619/decomp.tex}    
+
+\section{proportion-of-church-of-england-}
+
+\input{figures/proportion-of-church-of-england-/decomp.tex}    
+
+\section{real-daily-wages-in-pounds-engla}
+
+\input{figures/real-daily-wages-in-pounds-engla/decomp.tex}    
+
+\section{residential-water-consumption-ja}
+
+\input{figures/residential-water-consumption-ja/decomp.tex}    
+
+\section{the-total-generation-of-electric}
+
+\input{figures/the-total-generation-of-electric/decomp.tex}    
+
+\section{tree-san-pedro-martir-low-baja-m}
+
+\input{figures/tree-san-pedro-martir-low-baja-m/decomp.tex}    
+
+\section{uk-deaths-from-bronchitis-emphys}
+
+\input{figures/uk-deaths-from-bronchitis-emphys/decomp.tex}    
+
+\section{us-monthly-sales-of-petroleum-an}
+
+\input{figures/us-monthly-sales-of-petroleum-an/decomp.tex}    
+
+\section{weekday-bus-ridership-iowa-city-}
+
+\input{figures/weekday-bus-ridership-iowa-city-/decomp.tex}    
+
+\section{wheat-prices-12641996-in-constan}
+
+\input{figures/wheat-prices-12641996-in-constan/decomp.tex}    
+
+\section{wolfs-sunspot-numbers-1700-1988}
+
+\input{figures/wolfs-sunspot-numbers-1700-1988/decomp.tex}    
+
+
+\end{document}    
