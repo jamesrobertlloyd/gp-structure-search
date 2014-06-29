@@ -1,6 +1,8 @@
 Gaussian Process Structure Search
 ===================
 
+<img src="https://raw.githubusercontent.com/jamesrobertlloyd/gp-structure-search/master/logo.png" width="500">
+
 Code for automatically searching through compositions of covariance functions for Gaussian process regression, described in 
 
 [Structure Discovery in Nonparametric Regression through Compositional Kernel Search](http://arxiv.org/abs/1302.4922)
@@ -41,7 +43,8 @@ Windows users will need to make a change
 * All strings in config files are not sanitized, therefore backslashes and other special characters should be delimited e.g. `C:\\ProgramFiles\\Matlab`
 
 
-### Updated Repository and Paper:
+Updated Repository and Paper:
+-------------------------------------------
 
 Development on this project has now moved to [github.com/jamesrobertlloyd/gpss-research/](www.github.com/jamesrobertlloyd/gpss-research/).
 
