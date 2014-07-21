@@ -1,3 +1,6 @@
+This is part of the [automatic statistician](http://www.automaticstatistician.com/) project
+========
+
 Gaussian Process Structure Search
 ===================
 
