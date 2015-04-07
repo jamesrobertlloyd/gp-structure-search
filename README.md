@@ -16,8 +16,8 @@ Despite its importance, choosing the structural form of the kernel in nonparamet
 
 Feel free to email us with any questions:  
 [James Lloyd](http://mlg.eng.cam.ac.uk/Lloyd/) (jrl44@cam.ac.uk)  
-[David Duvenaud](http://mlg.eng.cam.ac.uk/duvenaud/) (dkd23@cam.ac.uk)  
-[Roger Grosse](http://people.csail.mit.edu/rgrosse/) (rgrosse@mit.edu)  
+[David Duvenaud](http://people.seas.harvard.edu/~dduvenaud/) (dduvenaud@seas.harvard.edu)  
+[Roger Grosse](http://www.cs.toronto.edu/~rgrosse/) (rgrosse@cs.toronto.edu)  
 
 We welcome pull requests and feature suggestions!
 
