@@ -49,7 +49,7 @@ Windows users will need to make a change
 Updated Repository and Paper:
 -------------------------------------------
 
-Development on this project has now moved to [https://github.com/jamesrobertlloyd/gpss-research/](www.github.com/jamesrobertlloyd/gpss-research/).
+Development on this project has now moved to [https://github.com/jamesrobertlloyd/gpss-research/](https://github.com/jamesrobertlloyd/gpss-research/).
 
 Further developments are described in the paper:
 [Automatic Construction and Natural-Language Description of Nonparametric Regression Models](http://arxiv.org/pdf/1402.4304.pdf)
